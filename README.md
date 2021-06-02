@@ -19,7 +19,7 @@ import {
   Get,
   Post,
   UseGuards,
-} from "https://deno.land/x/oak-nest/mod.ts";
+} from "https://deno.land/x/oak_nest/mod.ts";
 import { Context } from "https://deno.land/x/oak/mod.ts";
 import mockjs from "https://deno.land/x/deno_mock@v2.0.0/mod.ts";
 import { delay } from "https://deno.land/std/async/mod.ts";
@@ -78,7 +78,7 @@ export class UserController {
 
 ``` ts
 import { UserController } from "./user.controller.ts";
-import { Router } from "https://deno.land/x/oak-nest/mod.ts";
+import { Router } from "https://deno.land/x/oak_nest/mod.ts";
 
 const router = new Router();
 router.add(UserController);
