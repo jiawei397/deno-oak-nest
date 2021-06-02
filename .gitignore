@@ -1,0 +1,7 @@
+.idea
+.vscode
+.DS_Store
+index.js
+*.txt
+.deno_plugins
+/public/svg

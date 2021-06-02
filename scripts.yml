@@ -1,0 +1,17 @@
+# 使用denon dev启动服务
+scripts:
+  dev:
+    cmd: "deno run example/main.ts"
+    desc: "run example main.ts file"
+    allow:
+      - net
+      - env
+      - write
+    unstable: false
+    lock: example/lock.json
+    log: info
+    env:
+      PORT: "2000"
+  build:
+    cmd: "deno bundle example/main.ts example/main.js"
+    watch: false
