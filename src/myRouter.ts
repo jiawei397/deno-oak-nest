@@ -10,6 +10,7 @@ import {
   yellow,
 } from "../deps.ts";
 import { HttpException, UnauthorizedException } from "./exception.ts";
+import { CanActivate } from "./interface.ts";
 
 const META_MAP_KEY = "__META_MAP__";
 const META_PATH_KEY = "__META_PATH__";
@@ -21,10 +22,6 @@ export function Controller(path: string): ClassDecorator {
     target[META_PATH_KEY] = path || "/";
     return target;
   };
-}
-
-export interface CanActivate {
-  canActivate(context: Context): boolean | Promise<boolean>;
 }
 
 const overrideFnByGuard = function (

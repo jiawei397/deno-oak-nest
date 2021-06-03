@@ -1,8 +1,14 @@
 # 依赖oak，模拟nestjs部分注解功能
 
 ## 运行样例
+
 ```
 deno run --allow-net  --allow-env  example/main.ts
+```
+
+或者使用denon：
+```
+denon dev
 ```
 
 ## Demo
@@ -11,15 +17,15 @@ deno run --allow-net  --allow-env  example/main.ts
 
 可使用注解`Controller`、`UseGuards`、`Get`、`Post`：
 
-``` ts
+```ts
 import {
-  CanActivate,
   Controller,
   ForbiddenException,
   Get,
   Post,
   UseGuards,
 } from "https://deno.land/x/oak_nest/mod.ts";
+import type { CanActivate } from "https://deno.land/x/oak_nest/mod.ts";
 import { Context } from "https://deno.land/x/oak/mod.ts";
 import mockjs from "https://deno.land/x/deno_mock@v2.0.0/mod.ts";
 import { delay } from "https://deno.land/std/async/mod.ts";
@@ -71,12 +77,11 @@ export class UserController {
     console.log("---test---");
   }
 }
-
 ```
 
 ### router注册Controller
 
-``` ts
+```ts
 import { UserController } from "./user.controller.ts";
 import { Router } from "https://deno.land/x/oak_nest/mod.ts";
 
@@ -87,8 +92,13 @@ router.setGlobalPrefix("api");
 
 ### 在app中使用router
 
-``` ts
-import { Application, isHttpError, send, Status } from "https://deno.land/x/oak/mod.ts";
+```ts
+import {
+  Application,
+  isHttpError,
+  send,
+  Status,
+} from "https://deno.land/x/oak/mod.ts";
 import router from "./router/index.ts";
 
 const app = new Application();
@@ -109,4 +119,3 @@ await app.listen({ port });
 ```
 
 这时，你可以访问`http://localhost:1000/api/user/info`,`http://localhost:1000/api/user/list`。
-
