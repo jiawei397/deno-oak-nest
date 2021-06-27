@@ -14,6 +14,7 @@ class AuthGuard implements CanActivate {
     await delay(100);
     // throw new ForbiddenException('这是AuthGuard错误信息');
     return true;
+    // return false;
   }
 }
 
@@ -48,11 +49,13 @@ export class UserController {
     });
   }
 
+  // @UseGuards(AuthGuard2, AuthGuard3)
   @Get("list")
   list(context: Context) {
-    console.log("---list----");
     this.testInnerCall();
-    context.response.body = "list";
+    context.response.body = mockjs.mock({
+      "citys|100": [{ name: "@city", "value|1-100": 50, "type|0-2": 1 }],
+    });
   }
 
   testInnerCall() {

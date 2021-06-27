@@ -8,26 +8,27 @@ import {
   Router,
   Status,
   yellow,
+  Reflect,
 } from "../deps.ts";
-import { HttpException, UnauthorizedException } from "./exception.ts";
-import { CanActivate } from "./interface.ts";
+import {HttpException, UnauthorizedException} from "./exception.ts";
+import {CanActivate} from "./interface.ts";
 
-const META_MAP_KEY = "__META_MAP__";
-const META_PATH_KEY = "__META_PATH__";
-const META_GUARD_KEY = "__META_GUARD__";
-const META_SCOPE_KEY = "__META_SCOPE__";
+type Constructor = new (...args: any[]) => any;
 
-export function Controller(path: string): ClassDecorator {
-  return function (target: any) {
-    target[META_PATH_KEY] = path || "/";
-    return target;
-  };
+const META_METHOD_KEY = "meta:method";
+const META_PATH_KEY = "meta:path";
+const META_GUARD_KEY = "meta:guard";
+
+export const Controller = (path: string): ClassDecorator => {
+  return target => {
+    Reflect.defineMetadata(META_PATH_KEY, path, target);
+  }
 }
 
 const overrideFnByGuard = function (
-  guards: CanActivate[],
-  target: any,
-  fn: Function,
+    guards: CanActivate[],
+    target: any,
+    fn: Function,
 ) {
   return async function (context: Context, ...args: any) {
     if (!guards || guards.length === 0) {
@@ -66,15 +67,14 @@ const overrideFnByGuard = function (
 
 export function UseGuards(...guards: (CanActivate | Function)[]) {
   return function (
-    target: any,
-    property?: string,
-    descriptor?: TypedPropertyDescriptor<any>,
+      target: any,
+      property?: string,
+      descriptor?: TypedPropertyDescriptor<any>,
   ) {
-    // console.log(target, property, descriptor);
     if (property && descriptor?.value) {
-      descriptor.value[META_GUARD_KEY] = guards;
+      Reflect.defineMetadata(META_GUARD_KEY, guards, descriptor.value);
     } else {
-      target[META_GUARD_KEY] = guards;
+      Reflect.defineMetadata(META_GUARD_KEY, guards, target.prototype);
     }
     return target;
   };
@@ -85,42 +85,58 @@ enum Methods {
   POST = "post",
   PUT = "put",
   DELETE = "delete",
+  HEAD = 'head'
 }
 
-function allDecorator(path: string, method: Methods) {
-  return (target: any, property: string, descriptor: any) => {
-    const fn = descriptor.value || descriptor[property];
-    // console.log('fn', fn, target, property);
-    fn[META_SCOPE_KEY] = target;
-    if (!target.constructor[META_MAP_KEY]) {
-      target.constructor[META_MAP_KEY] = new Map();
-    }
-    const map = target.constructor[META_MAP_KEY];
-    let getMap = map.get(method);
-    if (!getMap) {
-      getMap = new Map();
-      map.set(method, getMap);
-    }
-    getMap.set(path, fn);
-    return descriptor;
-  };
+const createMappingDecorator = (method: Methods) => (path: string): MethodDecorator => {
+  return (target, property, descriptor) => {
+    Reflect.defineMetadata(META_PATH_KEY, path, descriptor.value);
+    Reflect.defineMetadata(META_METHOD_KEY, method, descriptor.value);
+  }
 }
 
-export function Get(path: string) {
-  return allDecorator(path, Methods.GET);
+export const Get = createMappingDecorator(Methods.GET);
+export const Post = createMappingDecorator(Methods.POST);
+export const Delete = createMappingDecorator(Methods.DELETE);
+export const Put = createMappingDecorator(Methods.PUT);
+export const Head = createMappingDecorator(Methods.HEAD);
+
+export interface RouteMap {
+  route: string;
+  method: string;
+  fn: Function;
+  methodName: string;
+  instance: object;
+  cls: Constructor;
 }
 
-export function Post(path: string) {
-  return allDecorator(path, Methods.POST);
-}
-
-export function Delete(path: string) {
-  return allDecorator(path, Methods.DELETE);
-}
-
-export function Put(path: string) {
-  return allDecorator(path, Methods.PUT);
-}
+function mapRoute(cls: Constructor) {
+  const instance = new cls();
+  const prototype = Object.getPrototypeOf(instance);
+  return Object.getOwnPropertyNames(prototype)
+      .map(item => {
+        if (item === 'constructor') {
+          return;
+        }
+        if (typeof prototype[item] !== 'function') {
+          return;
+        }
+        const fn = prototype[item];
+        const route = Reflect.getMetadata(META_PATH_KEY, fn);
+        if (!route) {
+          return;
+        }
+        const method = Reflect.getMetadata(META_METHOD_KEY, fn);
+        return {
+          route,
+          method,
+          fn,
+          item,
+          instance,
+          cls
+        }
+      }).filter(Boolean);
+};
 
 // export function PathParam(paramName: string) {
 //   return function (target: any, methodName: string, paramIndex: number) {
@@ -137,58 +153,62 @@ class MyRouter extends Router {
     this.apiPrefix = apiPrefix;
   }
 
-  add(model: any) {
-    const key = join("/", model[META_PATH_KEY]);
-    this.routerMap.set(key, model);
+  add(Cls: Constructor) {
+    const arr = mapRoute(Cls);
+    const path = Reflect.getMetadata(META_PATH_KEY, Cls);
+    const key = join("/", path);
+    this.routerMap.set(key, arr);
   }
 
   private log(...message: string[]) {
     console.log(
-      yellow("[router]"),
-      green(format(new Date(), "yyyy-MM-dd HH:mm:ss")),
-      ...message,
+        yellow("[router]"),
+        green(format(new Date(), "yyyy-MM-dd HH:mm:ss")),
+        ...message,
     );
   }
 
   routes() {
     const routeStart = Date.now();
     const result = super.routes();
-    for (let [controllerPath, model] of this.routerMap) {
+    for (let [controllerPath, routeArr] of this.routerMap) {
       const modelPath = join("/", this.apiPrefix, controllerPath);
       const startTime = Date.now();
-      for (let [method, map] of model[META_MAP_KEY]) {
-        for (let [key, func] of map) {
-          const methodKey = join(modelPath, "/", key);
-          const funcStart = Date.now();
-          // console.log(dir, func);
-          const guards = (model[META_GUARD_KEY] || []).concat(
-            func[META_GUARD_KEY] || [],
-          );
-          const newFunc = overrideFnByGuard(guards, func[META_SCOPE_KEY], func);
-          // @ts-ignore
-          this[method](methodKey, newFunc);
-          const funcEnd = Date.now();
-          this.log(
+      let lastCls;
+      routeArr.forEach((routeMap: RouteMap) => {
+        const {route, method, fn, methodName, instance, cls} = routeMap;
+        lastCls = cls;
+        const methodKey = join(modelPath, "/", route);
+        const funcStart = Date.now();
+        const classGuards = Reflect.getMetadata(META_GUARD_KEY, instance) || []
+        const fnGuards = Reflect.getMetadata(META_GUARD_KEY, fn) || [];
+
+        const newFunc = overrideFnByGuard(classGuards.concat(fnGuards), instance, fn);
+        // @ts-ignore
+        this[method.toLowerCase()](methodKey, newFunc);
+        const funcEnd = Date.now();
+        this.log(
             yellow("[RouterExplorer]"),
             green(
-              `Mapped {${methodKey}, ${method.toUpperCase()}} route ${funcEnd -
+                `Mapped {${methodKey}, ${method.toUpperCase()}} route ${funcEnd -
                 funcStart}ms`,
             ),
-          );
-        }
-      }
+        );
+      });
+
       const endTime = Date.now();
+      const name = lastCls?.['name'];
       this.log(
-        red("[RoutesResolver]"),
-        blue(`${model.name} {${modelPath}} ${endTime - startTime}ms`),
+          red("[RoutesResolver]"),
+          blue(`${name} {${modelPath}} ${endTime - startTime}ms`),
       );
     }
     this.log(
-      yellow("[Routes application]"),
-      green(`successfully started ${Date.now() - routeStart}ms`),
+        yellow("[Routes application]"),
+        green(`successfully started ${Date.now() - routeStart}ms`),
     );
     return result;
   }
 }
 
-export { MyRouter as Router };
+export {MyRouter as Router};

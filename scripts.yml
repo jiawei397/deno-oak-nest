@@ -8,10 +8,10 @@ scripts:
       - env
       - write
     unstable: false
-    lock: example/lock.json
+#    lock: example/lock.json
     log: info
     env:
-      PORT: "2000"
+      PORT: "1000"
   build:
     cmd: "deno bundle example/main.ts example/main.js"
     watch: false
