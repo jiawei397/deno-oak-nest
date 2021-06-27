@@ -2,6 +2,8 @@ export * from "./src/myRouter.ts";
 
 export * from "./src/exception.ts";
 
-import type { CanActivate } from "./src/interface.ts";
+export * from "./src/utils.ts";
 
-export type { CanActivate };
+import type { CanActivate, Constructor } from "./src/interface.ts";
+
+export type { CanActivate, Constructor };
