@@ -1,12 +1,13 @@
 import { Context, Reflect, Status, yellow } from "../deps.ts";
 import { HttpException, UnauthorizedException } from "./exception.ts";
 import { CanActivate, Constructor, ControllerMethod } from "./interface.ts";
+import { transferParam } from "./params.ts";
 
 export const META_METHOD_KEY = Symbol("meta:method");
 export const META_PATH_KEY = Symbol("meta:path");
 export const META_GUARD_KEY = Symbol("meta:guard");
 
-const paramMetadataKey = Symbol('meta:param');
+
 
 
 export const Controller = (path: string): ClassDecorator => {
@@ -15,30 +16,6 @@ export const Controller = (path: string): ClassDecorator => {
   };
 };
 
-export const createParamDecorator = (callback: ControllerMethod) => {
-  return (target: any, propertyKey: string | symbol, parameterIndex: number) => {
-    Reflect.defineMetadata(
-      paramMetadataKey,
-      {
-        parameterIndex,
-        callback
-      },
-      target.constructor,
-      propertyKey,
-    );
-  };
-}
-
-async function transferParam(target: any, methodName: string, ctx: Context, args: any[]) {
-  const addedParameters = Reflect.getOwnMetadata(
-    paramMetadataKey,
-    target.constructor,
-    methodName,
-  );
-  if (addedParameters) {
-    args[addedParameters.parameterIndex - 1] = await addedParameters.callback(ctx);
-  }
-}
 
 export function overrideFnByGuard(
   guards: CanActivate[],
