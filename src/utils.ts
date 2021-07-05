@@ -7,9 +7,6 @@ export const META_METHOD_KEY = Symbol("meta:method");
 export const META_PATH_KEY = Symbol("meta:path");
 export const META_GUARD_KEY = Symbol("meta:guard");
 
-
-
-
 export const Controller = (path: string): ClassDecorator => {
   return (target) => {
     Reflect.defineMetadata(META_PATH_KEY, path, target);

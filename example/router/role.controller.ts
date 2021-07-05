@@ -1,4 +1,4 @@
-import { Controller, createParamDecorator, Get, Post } from "../../mod.ts";
+import { Body, Controller, createParamDecorator, Get, Post } from "../../mod.ts";
 import { Context } from "../deps.ts";
 
 function add() {
@@ -21,8 +21,8 @@ export class RoleController {
   }
 
   @Post("/info")
-  info(context: Context, @add() name: string) {
-    console.log('ctx', context);
+  info(context: Context, @add() name: string, @Body() params: any) {
+    console.log('ctx', name, params);
     context.response.body = "role info " + name;
   }
 }
