@@ -41,9 +41,10 @@ export class RoleController {
     @add() name: string,
     @Body() params: any,
     @Headers() headers: any,
+    @Headers('host') host: any,
     @Res() res: Response,
   ) {
-    console.log("ctx", name, params, headers);
+    console.log("ctx", name, params, headers, host);
     res.body = "role info " + name;
   }
 }
