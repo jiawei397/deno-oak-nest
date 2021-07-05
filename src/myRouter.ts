@@ -1,17 +1,14 @@
 import {
   blue,
-  Context,
   format,
   green,
   join,
   red,
   Reflect,
   Router,
-  Status,
   yellow,
 } from "../deps.ts";
-import { HttpException, UnauthorizedException } from "./exception.ts";
-import { CanActivate, Constructor, RouteMap } from "./interface.ts";
+import { Constructor, RouteMap } from "./interface.ts";
 import {
   mapRoute,
   META_GUARD_KEY,
@@ -20,7 +17,7 @@ import {
 } from "./utils.ts";
 
 class MyRouter extends Router {
-  private apiPrefix: string = "";
+  private apiPrefix = "";
   private routerMap = new Map();
 
   setGlobalPrefix(apiPrefix: string) {
@@ -45,7 +42,7 @@ class MyRouter extends Router {
   routes() {
     const routeStart = Date.now();
     const result = super.routes();
-    for (let [controllerPath, routeArr] of this.routerMap) {
+    for (const [controllerPath, routeArr] of this.routerMap) {
       const modelPath = join("/", this.apiPrefix, controllerPath);
       const startTime = Date.now();
       let lastCls;
@@ -61,6 +58,7 @@ class MyRouter extends Router {
           classGuards.concat(fnGuards),
           instance,
           fn,
+          methodName
         );
         // @ts-ignore
         this[method.toLowerCase()](methodKey, newFunc);
@@ -69,7 +67,7 @@ class MyRouter extends Router {
           yellow("[RouterExplorer]"),
           green(
             `Mapped {${methodKey}, ${method.toUpperCase()}} route ${funcEnd -
-              funcStart}ms`,
+            funcStart}ms`,
           ),
         );
       });

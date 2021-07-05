@@ -1,10 +1,28 @@
-import { Controller, Get } from "../../mod.ts";
+import { Controller, createParamDecorator, Get, Post } from "../../mod.ts";
 import { Context } from "../deps.ts";
+
+function add() {
+  return createParamDecorator(async (ctx: any) => {
+    const result = ctx.request.body(); // content type automatically detected
+    if (result.type === "json") {
+      const value = await result.value; // an object of parsed JSON
+      // console.log('value', value);
+      return value.userId;
+    }
+    return ctx.params.id;
+  })
+}
 
 @Controller("/role")
 export class RoleController {
-  @Get("/info")
-  test(context: Context) {
-    context.response.body = "role info";
+  @Get("/info/:id")
+  test(context: Context, @add() name: string) {
+    context.response.body = "role info " + name;
+  }
+
+  @Post("/info")
+  info(context: Context, @add() name: string) {
+    console.log('ctx', context);
+    context.response.body = "role info " + name;
   }
 }

@@ -1,10 +1,13 @@
 import { Context, Reflect, Status, yellow } from "../deps.ts";
 import { HttpException, UnauthorizedException } from "./exception.ts";
-import { CanActivate, Constructor } from "./interface.ts";
+import { CanActivate, Constructor, ControllerMethod } from "./interface.ts";
 
-export const META_METHOD_KEY = "meta:method";
-export const META_PATH_KEY = "meta:path";
-export const META_GUARD_KEY = "meta:guard";
+export const META_METHOD_KEY = Symbol("meta:method");
+export const META_PATH_KEY = Symbol("meta:path");
+export const META_GUARD_KEY = Symbol("meta:guard");
+
+const paramMetadataKey = Symbol('meta:param');
+
 
 export const Controller = (path: string): ClassDecorator => {
   return (target) => {
@@ -12,13 +15,40 @@ export const Controller = (path: string): ClassDecorator => {
   };
 };
 
+export const createParamDecorator = (callback: ControllerMethod) => {
+  return (target: any, propertyKey: string | symbol, parameterIndex: number) => {
+    Reflect.defineMetadata(
+      paramMetadataKey,
+      {
+        parameterIndex,
+        callback
+      },
+      target.constructor,
+      propertyKey,
+    );
+  };
+}
+
+async function transferParam(target: any, methodName: string, ctx: Context, args: any[]) {
+  const addedParameters = Reflect.getOwnMetadata(
+    paramMetadataKey,
+    target.constructor,
+    methodName,
+  );
+  if (addedParameters) {
+    args[addedParameters.parameterIndex - 1] = await addedParameters.callback(ctx);
+  }
+}
+
 export function overrideFnByGuard(
   guards: CanActivate[],
   target: any,
-  fn: Function,
+  fn: ControllerMethod,
+  methodName: string
 ) {
-  return async function (context: Context, ...args: any) {
+  return async function (context: Context, ...args: any[]) {
     if (!guards || guards.length === 0) {
+      await transferParam(target, methodName, context, args);
       return fn.call(target, context, ...args);
     }
     const unauthorizedStatus: number = Status.Unauthorized;
@@ -38,6 +68,7 @@ export function overrideFnByGuard(
           return;
         }
       }
+      await transferParam(target, methodName, context, args);
       return fn.call(target, context, ...args);
     } catch (e) {
       console.warn(yellow(e.message));
@@ -113,6 +144,7 @@ export function mapRoute(Cls: Constructor) {
         item,
         instance,
         cls: Cls,
+        methodName: item
       };
     }).filter(Boolean);
 }

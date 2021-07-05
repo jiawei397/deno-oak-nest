@@ -6,10 +6,12 @@ export interface CanActivate {
 
 export type Constructor = new (...args: any[]) => any;
 
+export type ControllerMethod = (context: Context, ...args: any[]) => any;
+
 export interface RouteMap {
   route: string;
   method: string;
-  fn: Function;
+  fn: ControllerMethod;
   methodName: string;
   instance: object;
   cls: Constructor;
