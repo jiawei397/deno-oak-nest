@@ -42,9 +42,15 @@ export function Body() {
         const result = ctx.request.body(); // content type automatically detected
         if (result.type === "json") {
             const value = await result.value; // an object of parsed JSON
-            console.log('value', value);
+            // console.log('value', value);
             return value;
         }
         return (ctx as any).params;
+    });
+}
+
+export function Headers() {
+    return createParamDecorator((ctx: Context) => {
+        return ctx.request.headers;
     });
 }
