@@ -25,9 +25,15 @@ function add() {
 @Controller("/role")
 export class RoleController {
   @Get("/info/:id")
-  test(context: Context, @add() name: string, @Query() params: any) {
-    console.log(params);
-    context.response.body = "role info " + name;
+  test(
+    context: Context,
+    @add() name: string,
+    @Query() params: any,
+    @Query("age") age: string,
+  ) {
+    console.log(params, age);
+    context.response.body = "role info " + name + " - " +
+      JSON.stringify(params);
   }
 
   @Get("/info")
@@ -41,7 +47,7 @@ export class RoleController {
     @add() name: string,
     @Body() params: any,
     @Headers() headers: any,
-    @Headers('host') host: any,
+    @Headers("host") host: any,
     @Res() res: Response,
   ) {
     console.log("ctx", name, params, headers, host);
