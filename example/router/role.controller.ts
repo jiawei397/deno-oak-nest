@@ -1,4 +1,4 @@
-import { Body, Controller, createParamDecorator, Get, Post, Headers } from "../../mod.ts";
+import { Body, Controller, createParamDecorator, Get, Post, Headers, Query } from "../../mod.ts";
 import { Context } from "../deps.ts";
 
 function add() {
@@ -16,13 +16,14 @@ function add() {
 @Controller("/role")
 export class RoleController {
   @Get("/info/:id")
-  test(context: Context, @add() name: string) {
+  test(context: Context, @add() name: string, @Query() params: any) {
+    console.log(params);
     context.response.body = "role info " + name;
   }
 
   @Post("/info")
   info(context: Context, @add() name: string, @Body() params: any, @Headers() headers: any) {
-    console.log('ctx', name, params, headers);
+    console.log('ctx', context, name, params, headers);
     context.response.body = "role info " + name;
   }
 }

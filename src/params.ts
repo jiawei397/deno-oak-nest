@@ -45,6 +45,14 @@ export function Body() {
             // console.log('value', value);
             return value;
         }
+    });
+}
+
+/**
+ * 只对GET请求生效
+ */
+export function Query() {
+    return createParamDecorator((ctx: Context) => {
         return (ctx as any).params;
     });
 }
