@@ -10,7 +10,7 @@ import {
 } from "../../mod.ts";
 import { Context, Response } from "../deps.ts";
 
-function add() {
+function Add() {
   return createParamDecorator(async (ctx: any) => {
     const result = ctx.request.body(); // content type automatically detected
     if (result.type === "json") {
@@ -44,7 +44,7 @@ export class RoleController {
 
   @Post("/info")
   info(
-    @add() name: string,
+    @Add() name: string,
     @Body() params: any,
     @Headers() headers: any,
     @Headers("host") host: any,

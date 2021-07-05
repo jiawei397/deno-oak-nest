@@ -16,7 +16,7 @@ denon dev
 
 ### Controller
 
-可使用注解`Controller`、`UseGuards`、`Get`、`Post`：
+可使用注解`Controller`、`UseGuards`、`Get`、`Post`、`Body`、`Headers`、`Query`、`Res`、`Req`：
 
 ```ts
 import {
@@ -25,6 +25,11 @@ import {
   Get,
   Post,
   UseGuards,
+  Body,
+  createParamDecorator,
+  Headers,
+  Query,
+  Res,
 } from "https://deno.land/x/oak_nest/mod.ts";
 import type { CanActivate } from "https://deno.land/x/oak_nest/mod.ts";
 import { Context } from "https://deno.land/x/oak/mod.ts";
@@ -58,13 +63,22 @@ class AuthGuard3 implements CanActivate {
 @Controller("/user")
 export class UserController {
   @UseGuards(AuthGuard2, AuthGuard3)
+  @Get("/info/:id")
+  test(
+    context: Context,
+    @add() name: string,
+    @Query() params: any,
+    @Query("age") age: string,
+  ) {
+    console.log(params, age);
+    context.response.body = "role info " + name + " - " +
+      JSON.stringify(params);
+  }
+
   @Get("/info")
-  info(context: Context) {
-    context.response.body = mockjs.mock({
-      name: "@name",
-      "age|1-100": 50,
-      "val|0-2": 1,
-    });
+  getInfo(@Res() res: Response, @Query() params: any) {
+    console.log(params);
+    res.body = "role get info " + JSON.stringify(params);
   }
 
   @Get("list")
@@ -77,6 +91,34 @@ export class UserController {
   testInnerCall() {
     console.log("---test---");
   }
+}
+```
+
+可以自定义注解：
+```ts
+function Add() {
+  return createParamDecorator(async (ctx: any) => {
+    const result = ctx.request.body(); // content type automatically detected
+    if (result.type === "json") {
+      const value = await result.value; // an object of parsed JSON
+      // console.log('value', value);
+      return value.userId;
+    }
+  });
+}
+```
+然后使用：
+```ts
+@Post("/info")
+info(
+  @Add() name: string,
+  @Body() params: any,
+  @Headers() headers: any,
+  @Headers("host") host: any,
+  @Res() res: Response,
+) {
+  console.log("ctx", name, params, headers, host);
+  res.body = "role info " + name;
 }
 ```
 
