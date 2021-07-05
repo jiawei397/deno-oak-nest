@@ -4,7 +4,7 @@ export * from "./src/exception.ts";
 
 export * from "./src/utils.ts";
 
-export * from './src/params.ts';
+export * from "./src/params.ts";
 
 import type { CanActivate, Constructor } from "./src/interface.ts";
 

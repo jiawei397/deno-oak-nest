@@ -1,5 +1,14 @@
-import { Body, Controller, createParamDecorator, Get, Post, Headers, Query } from "../../mod.ts";
-import { Context } from "../deps.ts";
+import {
+  Body,
+  Controller,
+  createParamDecorator,
+  Get,
+  Headers,
+  Post,
+  Query,
+  Res,
+} from "../../mod.ts";
+import { Context, Response } from "../deps.ts";
 
 function add() {
   return createParamDecorator(async (ctx: any) => {
@@ -10,7 +19,7 @@ function add() {
       return value.userId;
     }
     return ctx.params.id;
-  })
+  });
 }
 
 @Controller("/role")
@@ -21,9 +30,20 @@ export class RoleController {
     context.response.body = "role info " + name;
   }
 
+  @Get("/info")
+  getInfo(@Res() res: Response, @Query() params: any) {
+    console.log(params);
+    res.body = "role get info " + JSON.stringify(params);
+  }
+
   @Post("/info")
-  info(context: Context, @add() name: string, @Body() params: any, @Headers() headers: any) {
-    console.log('ctx', context, name, params, headers);
-    context.response.body = "role info " + name;
+  info(
+    @add() name: string,
+    @Body() params: any,
+    @Headers() headers: any,
+    @Res() res: Response,
+  ) {
+    console.log("ctx", name, params, headers);
+    res.body = "role info " + name;
   }
 }

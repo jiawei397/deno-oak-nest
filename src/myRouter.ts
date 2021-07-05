@@ -58,7 +58,7 @@ class MyRouter extends Router {
           classGuards.concat(fnGuards),
           instance,
           fn,
-          methodName
+          methodName,
         );
         // @ts-ignore
         this[method.toLowerCase()](methodKey, newFunc);
@@ -67,7 +67,7 @@ class MyRouter extends Router {
           yellow("[RouterExplorer]"),
           green(
             `Mapped {${methodKey}, ${method.toUpperCase()}} route ${funcEnd -
-            funcStart}ms`,
+              funcStart}ms`,
           ),
         );
       });

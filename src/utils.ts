@@ -13,17 +13,17 @@ export const Controller = (path: string): ClassDecorator => {
   };
 };
 
-
 export function overrideFnByGuard(
   guards: CanActivate[],
   target: any,
   fn: ControllerMethod,
-  methodName: string
+  methodName: string,
 ) {
-  return async function (context: Context, ...args: any[]) {
+  return async function (...args: any[]) {
+    const context: Context = args[0];
     if (!guards || guards.length === 0) {
-      await transferParam(target, methodName, context, args);
-      return fn.call(target, context, ...args);
+      await transferParam(target, methodName, args);
+      return fn.apply(target, args);
     }
     const unauthorizedStatus: number = Status.Unauthorized;
     try {
@@ -42,8 +42,8 @@ export function overrideFnByGuard(
           return;
         }
       }
-      await transferParam(target, methodName, context, args);
-      return fn.call(target, context, ...args);
+      await transferParam(target, methodName, args);
+      return fn.call(target, ...args);
     } catch (e) {
       console.warn(yellow(e.message));
       console.debug(e);
@@ -118,7 +118,7 @@ export function mapRoute(Cls: Constructor) {
         item,
         instance,
         cls: Cls,
-        methodName: item
+        methodName: item,
       };
     }).filter(Boolean);
 }
