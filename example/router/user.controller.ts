@@ -1,18 +1,21 @@
 import {
+  Body,
   CanActivate,
   Controller,
   ForbiddenException,
   Get,
   Post,
+  Query,
+  Res,
   UseGuards,
 } from "../../mod.ts";
-import { Context, delay, mockjs } from "../deps.ts";
+import { Context, delay, mockjs, Response } from "../deps.ts";
 
 class AuthGuard implements CanActivate {
   async canActivate(context: Context): Promise<boolean> {
     console.log("--AuthGuard---");
     await delay(100);
-    // throw new ForbiddenException('这是AuthGuard错误信息');
+    // throw new ForbiddenException('this is AuthGuard error message');
     return true;
     // return false;
   }
@@ -21,17 +24,16 @@ class AuthGuard implements CanActivate {
 class AuthGuard2 implements CanActivate {
   async canActivate(context: Context): Promise<boolean> {
     console.log("--AuthGuard2---");
-    // throw new ForbiddenException('这是AuthGuard2错误信息');
+    // throw new ForbiddenException('this is AuthGuard2 error message');
     return true;
   }
 }
 
 class AuthGuard3 implements CanActivate {
   async canActivate(context: Context): Promise<boolean> {
-    // console.log(context.request.headers);
-    // throw new Error('这是我抛出的错误测试');
-    throw new ForbiddenException("这是AuthGuard3错误信息");
-    // return true;
+    console.log("--AuthGuard3---");
+    // throw new ForbiddenException("this is AuthGuard3 error message");
+    return true;
     // return false;
   }
 }
@@ -49,6 +51,17 @@ export class UserController {
     });
   }
 
+  @UseGuards(AuthGuard2, AuthGuard3)
+  @Get("/info2")
+  getInfo(@Res() res: Response, @Query() params: any) {
+    res.body = mockjs.mock({
+      name: "@name",
+      "age|1-100": 50,
+      "val|0-2": 1,
+      params,
+    });
+  }
+
   // @UseGuards(AuthGuard2, AuthGuard3)
   @Get("list")
   list(context: Context) {
@@ -63,12 +76,12 @@ export class UserController {
   }
 
   @Post("citys")
-  getCitys(ctx: Context) {
-    console.log("----citys---");
+  getCitys(ctx: Context, @Body() params: any) {
+    console.log("----citys---", params);
     const result = mockjs.mock({
       "citys|100": [{ name: "@city", "value|1-100": 50, "type|0-2": 1 }],
     });
-    console.log(result);
+    // console.log(result);
     ctx.response.body = result;
   }
 
