@@ -1,12 +1,14 @@
-# 依赖oak，模拟nestjs部分注解功能
+# oak_nest
 
-## 运行样例
+Rely on [oak](https://deno.land/x/oak) to simulate some annotation functions of [nestjs](https://docs.nestjs.com/) which is a frame for nodejs
+
+## examples
 
 ```
-deno run --allow-net  --allow-env  example/main.ts
+deno run --allow-net --allow-env --allow-write example/main.ts
 ```
 
-或者使用denon：
+or you can use [denon](https://deno.land/x/denon)：
 
 ```
 denon dev
@@ -16,7 +18,7 @@ denon dev
 
 ### Controller
 
-可使用注解`Controller`、`UseGuards`、`Get`、`Post`、`Body`、`Headers`、`Query`、`Res`、`Req`：
+Decorators `Controller`、`UseGuards`、`Get`、`Post`、`Body`、`Headers`、`Query`、`Res`、`Req` now are available：
 
 ```ts
 import {
@@ -40,7 +42,7 @@ class AuthGuard implements CanActivate {
   async canActivate(context: Context): Promise<boolean> {
     console.log("--AuthGuard---");
     await delay(100);
-    // throw new ForbiddenException('这是AuthGuard错误信息');
+    // throw new ForbiddenException('this is AuthGuard error');
     return true;
   }
 }
@@ -54,7 +56,7 @@ class AuthGuard2 implements CanActivate {
 
 class AuthGuard3 implements CanActivate {
   async canActivate(context: Context): Promise<boolean> {
-    throw new ForbiddenException("这是AuthGuard3错误信息");
+    throw new ForbiddenException("this is AuthGuard3 error");
     return false;
   }
 }
@@ -94,7 +96,7 @@ export class UserController {
 }
 ```
 
-可以自定义注解：
+You can customize the decorator by `createParamDecorator`: 
 ```ts
 function Add() {
   return createParamDecorator(async (ctx: any) => {
@@ -107,7 +109,7 @@ function Add() {
   });
 }
 ```
-然后使用：
+then use like this:
 ```ts
 @Post("/info")
 info(
@@ -122,7 +124,7 @@ info(
 }
 ```
 
-也可以添加类型校验：
+or you can use class validator like this:
 ```ts
 class Dto {
   @Max(2)
@@ -146,11 +148,11 @@ info(
   return "role info " + name;
 }
 ```
-使用[deno_class_validator](https://deno.land/x/deno_class_validator@v0.0.1)进行校验，如果失败了，会抛出异常。
+it is use [deno_class_validator](https://deno.land/x/deno_class_validator@v0.0.1) for validator, if it fails, then will throw an Error.
 
-暂时没有做到nestjs那样直接拿到Dto的类型，所以现在不得不在Body多传一个参数，如果大家有好的方法，请给个建议。
+I cannot get the type of dto directly like nestjs did, so now you have to pass one more parameter in the body. If you have a good idea, please give me a suggestion, then I will thanks much.
 
-### router注册Controller
+### router add Controller
 
 ```ts
 import { UserController } from "./user.controller.ts";
@@ -161,7 +163,7 @@ router.add(UserController);
 router.setGlobalPrefix("api");
 ```
 
-### 在app中使用router
+### use router in app
 
 ```ts
 import {
@@ -189,4 +191,4 @@ console.log(`app will start with: http://localhost:${port}`);
 await app.listen({ port });
 ```
 
-这时，你可以访问`http://localhost:1000/api/user/info`,`http://localhost:1000/api/user/list`。
+now you can visit `http://localhost:1000/api/user/info`,`http://localhost:1000/api/user/list`.
