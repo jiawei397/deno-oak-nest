@@ -122,6 +122,34 @@ info(
 }
 ```
 
+也可以添加类型校验：
+```ts
+class Dto {
+  @Max(2)
+  @Min(1)
+  pageNum!: number;
+
+  @Max(5)
+  @Min(1)
+  pageCount!: number;
+}
+
+@Post("/info")
+info(
+  @Add() name: string,
+  @Body(Dto) params: Dto,
+  @Headers() headers: any,
+  @Headers("host") host: any,
+  @Res() res: Response,
+) {
+  console.log("ctx", name, params, headers, host);
+  return "role info " + name;
+}
+```
+使用[deno_class_validator](https://deno.land/x/deno_class_validator@v0.0.1)进行校验，如果失败了，会抛出异常。
+
+暂时没有做到nestjs那样直接拿到Dto的类型，所以现在不得不在Body多传一个参数，如果大家有好的方法，请给个建议。
+
 ### router注册Controller
 
 ```ts

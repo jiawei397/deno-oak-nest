@@ -35,4 +35,4 @@ export {
   Min,
   validateOrReject,
   ValidationError,
-} from "http://localhost:1001/mod.ts";
+} from "https://deno.land/x/deno_class_validator@v0.0.1/mod.ts";
