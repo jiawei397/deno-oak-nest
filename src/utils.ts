@@ -13,6 +13,12 @@ export const Controller = (path: string): ClassDecorator => {
   };
 };
 
+function transResponseResult(context: Context, result: any) {
+  if (context.response.body === undefined && result !== undefined) {
+    context.response.body = result;
+  }
+}
+
 export function overrideFnByGuard(
   guards: CanActivate[],
   target: any,
@@ -23,7 +29,9 @@ export function overrideFnByGuard(
     const context: Context = args[0];
     if (!guards || guards.length === 0) {
       await transferParam(target, methodName, args);
-      return fn.apply(target, args);
+      const result = await fn.apply(target, args);
+      transResponseResult(context, result);
+      return result;
     }
     const unauthorizedStatus: number = Status.Unauthorized;
     try {
@@ -43,7 +51,9 @@ export function overrideFnByGuard(
         }
       }
       await transferParam(target, methodName, args);
-      return fn.call(target, ...args);
+      const result = await fn.call(target, ...args);
+      transResponseResult(context, result);
+      return result;
     } catch (e) {
       console.warn(yellow(e.message));
       console.debug(e);
