@@ -29,3 +29,5 @@ import mockjs from "https://deno.land/x/deno_mock@v2.0.0/mod.ts";
 export { mockjs };
 
 export { delay } from "https://deno.land/std/async/mod.ts";
+
+export { Max, Min, validateOrReject } from "http://localhost:1001/mod.ts";

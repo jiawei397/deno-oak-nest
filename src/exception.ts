@@ -67,3 +67,29 @@ export class ForbiddenException extends HttpException {
     );
   }
 }
+
+export class BadRequestException extends HttpException {
+  constructor(objectOrError: any, description = "Bad Request") {
+    super(
+      HttpException.createBody(
+        objectOrError,
+        description,
+        Status.BadRequest,
+      ),
+      Status.BadRequest,
+    );
+  }
+}
+
+export class BodyParamValidationException extends HttpException {
+  constructor(objectOrError: any, description = "params not valid") {
+    super(
+      HttpException.createBody(
+        objectOrError,
+        description,
+        Status.BadRequest,
+      ),
+      Status.BadRequest,
+    );
+  }
+}

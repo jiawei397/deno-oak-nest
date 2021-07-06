@@ -8,7 +8,7 @@ import {
   Query,
   Res,
 } from "../../mod.ts";
-import { Context, Response } from "../deps.ts";
+import { Context, Max, Min, Response } from "../deps.ts";
 
 function Add() {
   return createParamDecorator(async (ctx: any) => {
@@ -22,12 +22,22 @@ function Add() {
   });
 }
 
+export class Dto {
+  @Max(2)
+  @Min(1)
+  pageNum!: number;
+
+  @Max(5)
+  @Min(1)
+  pageCount!: number;
+}
+
 @Controller("/role")
 export class RoleController {
   @Get("/info/:id")
   test(
     context: Context,
-    @add() name: string,
+    @Add() name: string,
     @Query() params: any,
     @Query("age") age: string,
   ) {
@@ -45,12 +55,13 @@ export class RoleController {
   @Post("/info")
   info(
     @Add() name: string,
-    @Body() params: any,
+    @Body(Dto) params: Dto,
     @Headers() headers: any,
     @Headers("host") host: any,
     @Res() res: Response,
   ) {
     console.log("ctx", name, params, headers, host);
-    res.body = "role info " + name;
+    // res.body = "role info old " + name;
+    return "role info " + name;
   }
 }

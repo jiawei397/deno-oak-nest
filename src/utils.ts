@@ -27,14 +27,12 @@ export function overrideFnByGuard(
 ) {
   return async function (...args: any[]) {
     const context: Context = args[0];
-    if (!guards || guards.length === 0) {
-      await transferParam(target, methodName, args);
-      const result = await fn.apply(target, args);
-      transResponseResult(context, result);
-      return result;
-    }
-    const unauthorizedStatus: number = Status.Unauthorized;
+    const response = context.response;
+    const unauthorizedStatus = Status.Unauthorized;
     try {
+      if (!guards) {
+        guards = [];
+      }
       for (const guard of guards) {
         let canActivate;
         if (typeof guard === "function") {
@@ -45,8 +43,8 @@ export function overrideFnByGuard(
 
         const result = await canActivate.call(guard, context);
         if (!result) {
-          context.response.status = unauthorizedStatus;
-          context.response.body = UnauthorizedException.name;
+          response.status = unauthorizedStatus;
+          response.body = UnauthorizedException.name;
           return;
         }
       }
@@ -55,14 +53,17 @@ export function overrideFnByGuard(
       transResponseResult(context, result);
       return result;
     } catch (e) {
-      console.warn(yellow(e.message));
+      console.warn(
+        "An error occurred in overrideFnByGuard: ",
+        yellow(e.message),
+      );
       console.debug(e);
       if (e instanceof HttpException) {
-        context.response.status = e.status;
+        response.status = e.status;
       } else {
-        context.response.status = unauthorizedStatus;
+        response.status = unauthorizedStatus;
       }
-      context.response.body = e.message;
+      response.body = e.message;
     }
   };
 }

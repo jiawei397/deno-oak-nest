@@ -1,5 +1,13 @@
-import { Context, parse, Reflect } from "../deps.ts";
-import { ControllerMethod } from "./interface.ts";
+import {
+  assert,
+  Context,
+  parse,
+  Reflect,
+  validateOrReject,
+  ValidationError,
+} from "../deps.ts";
+import { BodyParamValidationException } from "./exception.ts";
+import { Constructor, ControllerMethod } from "./interface.ts";
 
 const paramMetadataKey = Symbol("meta:param");
 const ctxMetadataKey = Symbol("meta:ctx");
@@ -57,17 +65,50 @@ export async function transferParam(
           );
         }
         args[index] = await callback(ctx);
+        // if (index == 1) {
+        //   console.log(
+        //     "params",
+        //     index,
+        //     args[index],
+        //     args[index].constructor.name,
+        //   );
+        // }
       }),
     );
   }
 }
 
-export function Body() {
+export function Body(Cls?: Constructor) {
   return createParamDecorator(async (ctx: Context) => {
     const result = ctx.request.body(); // content type automatically detected
     if (result.type === "json") {
       const value = await result.value; // an object of parsed JSON
       // console.log('value', value);
+      if (Cls) {
+        const post = new Cls();
+        Object.assign(post, value);
+        try {
+          await validateOrReject(post);
+        } catch (errors) {
+          // console.debug(errors);
+          const msgs: string[] = [];
+          errors.forEach((err: ValidationError) => {
+            if (err.constraints) {
+              Object.values(err.constraints).forEach((element) => {
+                msgs.push(element);
+              });
+            }
+          });
+          assert(
+            msgs.length > 0,
+            `the msgs must be not empty and the validationErrors are ${
+              JSON.stringify(errors)
+            }`,
+          );
+          throw new BodyParamValidationException(msgs.join(","));
+        }
+      }
+
       return value;
     }
   });
@@ -122,3 +163,8 @@ export function Res() {
     return ctx.response;
   });
 }
+// export function Session() {
+//   return createParamDecorator((ctx: Context) => {
+//     return ctx.request.session;
+//   });
+// }
