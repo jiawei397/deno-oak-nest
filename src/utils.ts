@@ -30,22 +30,21 @@ export function overrideFnByGuard(
     const response = context.response;
     const unauthorizedStatus = Status.Unauthorized;
     try {
-      if (!guards) {
-        guards = [];
-      }
-      for (const guard of guards) {
-        let canActivate;
-        if (typeof guard === "function") {
-          canActivate = new (guard as any)().canActivate;
-        } else {
-          canActivate = guard.canActivate;
-        }
+      if (guards) {
+        for (const guard of guards) {
+          let canActivate;
+          if (typeof guard === "function") {
+            canActivate = new (guard as any)().canActivate;
+          } else {
+            canActivate = guard.canActivate;
+          }
 
-        const result = await canActivate.call(guard, context);
-        if (!result) {
-          response.status = unauthorizedStatus;
-          response.body = UnauthorizedException.name;
-          return;
+          const result = await canActivate.call(guard, context);
+          if (!result) {
+            response.status = unauthorizedStatus;
+            response.body = UnauthorizedException.name;
+            return;
+          }
         }
       }
       await transferParam(target, methodName, args);
