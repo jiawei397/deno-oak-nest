@@ -163,6 +163,15 @@ export function Res() {
     return ctx.response;
   });
 }
+
+export function Cookies(key?: string) {
+  return createParamDecorator((ctx: Context) => {
+    if (key) {
+      return ctx.cookies.get(key);
+    }
+    return ctx.cookies;
+  });
+}
 // export function Session() {
 //   return createParamDecorator((ctx: Context) => {
 //     return ctx.request.session;
