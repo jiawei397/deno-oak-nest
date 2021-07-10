@@ -32,14 +32,11 @@ export function overrideFnByGuard(
     try {
       if (guards) {
         for (const guard of guards) {
-          let canActivate;
+          let _guard = guard;
           if (typeof guard === "function") {
-            canActivate = new (guard as any)().canActivate;
-          } else {
-            canActivate = guard.canActivate;
+            _guard = new (guard as any)();
           }
-
-          const result = await canActivate.call(guard, context);
+          const result = await _guard.canActivate(context);
           if (!result) {
             response.status = unauthorizedStatus;
             response.body = UnauthorizedException.name;
