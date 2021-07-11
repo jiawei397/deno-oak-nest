@@ -1,8 +1,9 @@
 # oak_nest
 
-Rely on [oak](https://deno.land/x/oak) to simulate some annotation functions of [nestjs](https://docs.nestjs.com/) which is a frame for nodejs
+Rely on [oak](https://deno.land/x/oak) to simulate some annotation functions of
+[nestjs](https://docs.nestjs.com/) which is a frame for nodejs
 
-## examples
+## run
 
 ```
 deno run --allow-net --allow-env --allow-write example/main.ts
@@ -18,20 +19,23 @@ denon dev
 
 ### Controller
 
-Decorators `Controller`、`UseGuards`、`Get`、`Post`、`Body`、`Headers`、`Query`、`Res`、`Req` now are available：
+Decorators
+`Controller`、`UseGuards`、`Get`、`Post`、`Body`、`Headers`、`Query`、`Res`、`Req` now
+are available：
 
 ```ts
 import {
+  Body,
   Controller,
+  createParamDecorator,
+  createParamDecoratorWithLowLevel,
   ForbiddenException,
   Get,
-  Post,
-  UseGuards,
-  Body,
-  createParamDecorator,
   Headers,
+  Post,
   Query,
   Res,
+  UseGuards,
 } from "https://deno.land/x/oak_nest/mod.ts";
 import type { CanActivate } from "https://deno.land/x/oak_nest/mod.ts";
 import { Context } from "https://deno.land/x/oak/mod.ts";
@@ -96,35 +100,45 @@ export class UserController {
 }
 ```
 
-You can customize the decorator by `createParamDecorator`: 
+You can customize the decorator by `createParamDecorator` or
+`createParamDecoratorWithLowLevel`:
+
 ```ts
-function Add() {
-  return createParamDecorator(async (ctx: any) => {
-    const result = ctx.request.body(); // content type automatically detected
-    if (result.type === "json") {
-      const value = await result.value; // an object of parsed JSON
-      // console.log('value', value);
-      return value.userId;
-    }
+const Add = createParamDecorator(async (ctx: any) => {
+  const result = ctx.request.body(); // content type automatically detected
+  if (result.type === "json") {
+    const value = await result.value; // an object of parsed JSON
+    // console.log('value', value);
+    return value.userId;
+  }
+});
+
+function Add2(params: any) {
+  return createParamDecoratorWithLowLevel(async (ctx: any) => {
+    return params;
   });
 }
 ```
+
 then use like this:
+
 ```ts
 @Post("/info")
 info(
   @Add() name: string,
+  @Add2("name") name2: string,
   @Body() params: any,
   @Headers() headers: any,
   @Headers("host") host: any,
   @Res() res: Response,
 ) {
-  console.log("ctx", name, params, headers, host);
-  res.body = "role info " + name;
+  console.log("ctx", name, name2, params, headers, host);
+  res.body = "role info " + name + name2;
 }
 ```
 
 or you can use class validator like this:
+
 ```ts
 class Dto {
   @Max(2)
@@ -148,9 +162,15 @@ info(
   return "role info " + name;
 }
 ```
-it is use [deno_class_validator](https://deno.land/x/deno_class_validator@v0.0.1) for validator, if it fails, then will throw an Error.
 
-I cannot get the type of dto directly like nestjs did, so now you have to pass one more parameter in the body. If you have a good idea, please give me a suggestion, then I will thanks much.
+it is using
+[deno_class_validator](https://deno.land/x/deno_class_validator@v0.0.1) for
+validator, which is forked from class-validator which is using in nodejs, if it
+fails, then will throw an Error.
+
+I cannot get the type of dto directly like nestjs did, so now you have to pass
+one more parameter in the body as `@Body(Dto) params: Dto`. If you have a good
+idea, please give me a suggestion, then thanks much.
 
 ### router add Controller
 
@@ -191,4 +211,5 @@ console.log(`app will start with: http://localhost:${port}`);
 await app.listen({ port });
 ```
 
-now you can visit `http://localhost:1000/api/user/info`,`http://localhost:1000/api/user/list`.
+now you can visit
+`http://localhost:1000/api/user/info`,`http://localhost:1000/api/user/list`.
