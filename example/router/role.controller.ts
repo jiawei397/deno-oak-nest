@@ -10,17 +10,15 @@ import {
 } from "../../mod.ts";
 import { Context, Max, Min, Response } from "../deps.ts";
 
-function Add() {
-  return createParamDecorator(async (ctx: any) => {
-    const result = ctx.request.body(); // content type automatically detected
-    if (result.type === "json") {
-      const value = await result.value; // an object of parsed JSON
-      // console.log('value', value);
-      return value.userId;
-    }
-    return ctx.params.id;
-  });
-}
+const Add = createParamDecorator(async (ctx: any) => {
+  const result = ctx.request.body(); // content type automatically detected
+  if (result.type === "json") {
+    const value = await result.value; // an object of parsed JSON
+    // console.log('value', value);
+    return value.userId;
+  }
+  return ctx.params.id;
+});
 
 export class Dto {
   @Max(2)

@@ -12,29 +12,44 @@ import { Constructor, ControllerMethod } from "./interface.ts";
 const paramMetadataKey = Symbol("meta:param");
 const ctxMetadataKey = Symbol("meta:ctx");
 
+/**
+ * this is a high function which will return a param decorator.
+ * @example const Body = createParamDecorator((ctx: Context) => {});
+ */
 export const createParamDecorator = (callback: ControllerMethod) => {
-  return (
-    target: any,
-    propertyKey: string | symbol,
-    parameterIndex: number,
-  ) => {
-    let addedParameters = Reflect.getOwnMetadata(
-      paramMetadataKey,
-      target.constructor,
-      propertyKey,
-    );
-    if (!addedParameters) {
-      addedParameters = [];
-    }
-    addedParameters[parameterIndex] = callback;
+  return () =>
+    (
+      target: any,
+      propertyKey: string | symbol,
+      parameterIndex: number,
+    ) => {
+      let addedParameters = Reflect.getOwnMetadata(
+        paramMetadataKey,
+        target.constructor,
+        propertyKey,
+      );
+      if (!addedParameters) {
+        addedParameters = [];
+      }
+      addedParameters[parameterIndex] = callback;
 
-    Reflect.defineMetadata(
-      paramMetadataKey,
-      addedParameters,
-      target.constructor,
-      propertyKey,
-    );
-  };
+      Reflect.defineMetadata(
+        paramMetadataKey,
+        addedParameters,
+        target.constructor,
+        propertyKey,
+      );
+    };
+};
+
+/**
+ * this is a lower function which compared with createParamDecorator, it remove one player.
+ * @example const Headers = (params: any) => createParamDecoratorWithLowLevel((ctx: Context) => {});
+ */
+export const createParamDecoratorWithLowLevel = (
+  callback: ControllerMethod,
+) => {
+  return createParamDecorator(callback)();
 };
 
 export async function transferParam(
@@ -79,7 +94,7 @@ export async function transferParam(
 }
 
 export function Body(Cls?: Constructor) {
-  return createParamDecorator(async (ctx: Context) => {
+  return createParamDecoratorWithLowLevel(async (ctx: Context) => {
     const result = ctx.request.body(); // content type automatically detected
     if (result.type === "json") {
       const value = await result.value; // an object of parsed JSON
@@ -118,7 +133,7 @@ export function Body(Cls?: Constructor) {
  * url后面拼接的参数获取
  */
 export function Query(key?: string) {
-  return createParamDecorator((ctx: Context) => {
+  return createParamDecoratorWithLowLevel((ctx: Context) => {
     const { search } = ctx.request.url;
     if (search.startsWith("?")) {
       const map = parse(search.substr(1));
@@ -135,14 +150,14 @@ export function Query(key?: string) {
  * 获取路由动态参数，比如http://localhost:1000/api/role/info/114，拿到114
  */
 export function Params(key?: string) {
-  return createParamDecorator((ctx: Context) => {
+  return createParamDecoratorWithLowLevel((ctx: Context) => {
     const { params } = ctx as any;
     return key ? params[key] : params;
   });
 }
 
 export function Headers(key?: string) {
-  return createParamDecorator((ctx: Context) => {
+  return createParamDecoratorWithLowLevel((ctx: Context) => {
     if (key) {
       return ctx.request.headers.get(key);
     }
@@ -152,20 +167,16 @@ export function Headers(key?: string) {
 
 export const Header = Headers;
 
-export function Req() {
-  return createParamDecorator((ctx: Context) => {
-    return ctx.request;
-  });
-}
+export const Req = createParamDecorator((ctx: Context) => {
+  return ctx.request;
+});
 
-export function Res() {
-  return createParamDecorator((ctx: Context) => {
-    return ctx.response;
-  });
-}
+export const Res = createParamDecorator((ctx: Context) => {
+  return ctx.response;
+});
 
 export function Cookies(key?: string) {
-  return createParamDecorator((ctx: Context) => {
+  return createParamDecoratorWithLowLevel((ctx: Context) => {
     if (key) {
       return ctx.cookies.get(key);
     }
@@ -173,7 +184,7 @@ export function Cookies(key?: string) {
   });
 }
 // export function Session() {
-//   return createParamDecorator((ctx: Context) => {
+//   return createParamDecoratorWithLowLevel((ctx: Context) => {
 //     return ctx.request.session;
 //   });
 // }
