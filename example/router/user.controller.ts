@@ -14,7 +14,7 @@ import { Context, delay, mockjs, Response } from "../deps.ts";
 class AuthGuard implements CanActivate {
   async canActivate(context: Context): Promise<boolean> {
     console.log("--AuthGuard---");
-    await delay(100);
+    // await delay(100);
     // throw new ForbiddenException('this is AuthGuard error message');
     return true;
     // return false;
@@ -32,16 +32,21 @@ class AuthGuard2 implements CanActivate {
 class AuthGuard3 implements CanActivate {
   async canActivate(context: Context): Promise<boolean> {
     console.log("--AuthGuard3---");
+    this.test();
     // throw new ForbiddenException("this is AuthGuard3 error message");
     return true;
     // return false;
   }
+
+  test() {
+    console.log("---test");
+  }
 }
 
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 @Controller("/user")
 export class UserController {
-  // @UseGuards(AuthGuard2, AuthGuard3)
+  @UseGuards(AuthGuard2, AuthGuard3)
   @Get("/info")
   info(context: Context) {
     context.response.body = mockjs.mock({
@@ -51,9 +56,9 @@ export class UserController {
     });
   }
 
-  @UseGuards(AuthGuard2, AuthGuard3)
   @Get("/info2")
-  getInfo(@Res() res: Response, @Query() params: any) {
+  @UseGuards(AuthGuard2, AuthGuard3)
+  info2(@Res() res: Response, @Query() params: any) {
     res.body = mockjs.mock({
       name: "@name",
       "age|1-100": 50,

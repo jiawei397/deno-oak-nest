@@ -75,7 +75,6 @@ export function UseGuards(...guards: (CanActivate | Function)[]) {
     } else {
       Reflect.defineMetadata(META_GUARD_KEY, guards, target.prototype);
     }
-    return target;
   };
 }
 
