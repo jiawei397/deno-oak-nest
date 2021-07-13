@@ -67,6 +67,11 @@ export class UserController {
     });
   }
 
+  @Get("/test")
+  testResultIsUndefined() {
+    return;
+  }
+
   // @UseGuards(AuthGuard2, AuthGuard3)
   @Get("list")
   list(context: Context) {

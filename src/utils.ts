@@ -14,7 +14,7 @@ export const Controller = (path: string): ClassDecorator => {
 };
 
 function transResponseResult(context: Context, result: any) {
-  if (context.response.body === undefined && result !== undefined) {
+  if (context.response.body === undefined) {
     context.response.body = result;
   }
 }
