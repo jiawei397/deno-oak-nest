@@ -53,7 +53,9 @@ export function overrideFnByGuard(
         "An error occurred in overrideFnByGuard: ",
         yellow(e.message),
       );
-      console.debug(e);
+      if (Deno.env.get("DEBUG") === "true") {
+        console.debug(e);
+      }
       if (e instanceof HttpException) {
         response.status = e.status;
       } else {
