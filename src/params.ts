@@ -142,7 +142,7 @@ export function Query(key?: string) {
       }
       return map;
     }
-    return {};
+    return key ? undefined : {};
   });
 }
 
