@@ -175,6 +175,18 @@ export const Res = createParamDecorator((ctx: Context) => {
   return ctx.response;
 });
 
+export const Ip = createParamDecorator((ctx: Context) => {
+  return ctx.request.ip;
+});
+
+export const Ips = createParamDecorator((ctx: Context) => {
+  return ctx.request.ips;
+});
+
+export const HostParam = createParamDecorator((ctx: Context) => {
+  return ctx.request.headers.get("host");
+});
+
 export function Cookies(key?: string) {
   return createParamDecoratorWithLowLevel((ctx: Context) => {
     if (key) {
@@ -183,6 +195,8 @@ export function Cookies(key?: string) {
     return ctx.cookies;
   });
 }
+
+export const Cookie = Cookies;
 // export function Session() {
 //   return createParamDecoratorWithLowLevel((ctx: Context) => {
 //     return ctx.request.session;

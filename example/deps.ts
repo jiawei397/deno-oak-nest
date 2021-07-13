@@ -5,7 +5,12 @@ export {
   Status,
 } from "https://deno.land/x/oak/mod.ts";
 
-export { Context, Response, Router } from "https://deno.land/x/oak/mod.ts";
+export {
+  Context,
+  Request,
+  Response,
+  Router,
+} from "https://deno.land/x/oak/mod.ts";
 export { join } from "https://deno.land/std@0.97.0/path/mod.ts";
 
 export {

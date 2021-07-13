@@ -4,12 +4,14 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Ip,
   Post,
   Query,
+  Req,
   Res,
   UseGuards,
 } from "../../mod.ts";
-import { Context, delay, mockjs, Response } from "../deps.ts";
+import { Context, delay, mockjs, Request, Response } from "../deps.ts";
 
 class AuthGuard implements CanActivate {
   async canActivate(context: Context): Promise<boolean> {
@@ -68,7 +70,8 @@ export class UserController {
   }
 
   @Get("/test")
-  testResultIsUndefined() {
+  testResultIsUndefined(@Req() req: Request, @Ip() ip: string) {
+    console.log(ip, req);
     return;
   }
 
