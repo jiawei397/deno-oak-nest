@@ -49,18 +49,14 @@ export function overrideFnByGuard(
       transResponseResult(context, result);
       return result;
     } catch (e) {
-      console.warn(
-        "An error occurred in overrideFnByGuard: ",
-        yellow(e.message),
-      );
       if (Deno.env.get("DEBUG") === "true") {
+        console.warn(
+          "An error occurred in overrideFnByGuard: ",
+          yellow(e.message),
+        );
         console.debug(e);
       }
-      if (e instanceof HttpException) {
-        response.status = e.status;
-      } else {
-        response.status = unauthorizedStatus;
-      }
+      response.status = e.status || unauthorizedStatus;
       response.body = e.message;
     }
   };
