@@ -2,10 +2,13 @@ export {
   Application,
   isHttpError,
   send,
+  Context,
+  Router as OriginRouter,
   Status,
-} from "https://deno.land/x/oak/mod.ts";
+  Response,
+  Request
+} from "https://deno.land/x/oak@v9.0.0/mod.ts";
 
-export { Context, Router } from "https://deno.land/x/oak/mod.ts";
 export { join } from "https://deno.land/std@0.97.0/path/mod.ts";
 
 export { parse } from "https://deno.land/std@0.100.0/node/querystring.ts";

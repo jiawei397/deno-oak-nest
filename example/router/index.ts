@@ -1,13 +1,14 @@
 import { UserController } from "./user.controller.ts";
 import { RoleController } from "./role.controller.ts";
+import { User2Controller } from "./user2.controller.ts";
 
-import { Context } from "../deps.ts";
-import { Router } from "../../mod.ts";
+import { Context, Router } from "../../mod.ts";
 
 const router = new Router();
 router.add(UserController);
 router.setGlobalPrefix("api");
 router.add(RoleController);
+router.add(User2Controller);
 
 const sleep = (time: number) => {
   return new Promise(

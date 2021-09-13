@@ -1,17 +1,17 @@
-export {
-  Application,
-  isHttpError,
-  send,
-  Status,
-} from "https://deno.land/x/oak/mod.ts";
+// export {
+//   Application,
+//   isHttpError,
+//   send,
+//   Status,
+// } from "https://deno.land/x/oak/mod.ts";
 
-export {
-  Context,
-  Request,
-  Response,
-  Router,
-} from "https://deno.land/x/oak/mod.ts";
-export { join } from "https://deno.land/std@0.97.0/path/mod.ts";
+// export {
+//   Context,
+//   Request,
+//   Response,
+//   Router,
+// } from "https://deno.land/x/oak/mod.ts";
+// export { join } from "https://deno.land/std@0.97.0/path/mod.ts";
 
 export {
   bgBlue,
@@ -35,4 +35,8 @@ export { mockjs };
 
 export { delay } from "https://deno.land/std/async/mod.ts";
 
-export { Max, Min, validateOrReject } from "http://localhost:1001/mod.ts";
+export {
+  Max,
+  Min,
+  validateOrReject,
+} from "https://deno.land/x/deno_class_validator@v0.0.1/mod.ts";

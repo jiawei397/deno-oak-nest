@@ -1,6 +1,7 @@
 import {
   Body,
   CanActivate,
+  Context,
   Controller,
   ForbiddenException,
   Get,
@@ -8,10 +9,12 @@ import {
   Post,
   Query,
   Req,
+  Request,
   Res,
+  Response,
   UseGuards,
 } from "../../mod.ts";
-import { Context, delay, mockjs, Request, Response } from "../deps.ts";
+import { delay, mockjs } from "../deps.ts";
 
 class AuthGuard implements CanActivate {
   async canActivate(context: Context): Promise<boolean> {

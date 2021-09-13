@@ -1,5 +1,6 @@
 import {
   Body,
+  Context,
   Controller,
   createParamDecorator,
   Get,
@@ -7,8 +8,9 @@ import {
   Post,
   Query,
   Res,
+  Response,
 } from "../../mod.ts";
-import { Context, Max, Min, Response } from "../deps.ts";
+import { Max, Min } from "../deps.ts";
 
 const Add = createParamDecorator(async (ctx: any) => {
   const result = ctx.request.body(); // content type automatically detected

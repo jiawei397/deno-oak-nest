@@ -10,4 +10,6 @@ import type { CanActivate, Constructor } from "./src/interface.ts";
 
 export type { CanActivate, Constructor };
 
+export * from "./deps.ts";
+
 export const version = "0.0.16";

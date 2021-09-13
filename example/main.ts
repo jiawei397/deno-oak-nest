@@ -1,4 +1,4 @@
-import { Application, isHttpError, Status } from "./deps.ts";
+import { Application, isHttpError, Status } from "../mod.ts";
 import router from "./router/index.ts";
 
 const app = new Application();
