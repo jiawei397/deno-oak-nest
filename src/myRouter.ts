@@ -6,7 +6,7 @@ import {
   Reflect,
   OriginRouter,
   yellow,
-  resolve,
+  join,
 } from "../deps.ts";
 import { Constructor, RouteMap } from "./interface.ts";
 import {
@@ -27,7 +27,7 @@ class Router extends OriginRouter {
   add(Cls: Constructor) {
     const arr = mapRoute(Cls);
     const path = Reflect.getMetadata(META_PATH_KEY, Cls);
-    const key = resolve('/', path);
+    const key = join('/', path);
     const oldArr = this.routerMap.get(key);
     if (oldArr) {
       oldArr.push(...arr);
@@ -48,13 +48,13 @@ class Router extends OriginRouter {
     const routeStart = Date.now();
     const result = super.routes();
     for (const [controllerPath, routeArr] of this.routerMap) {
-      const modelPath = resolve(this.apiPrefix, controllerPath);
+      const modelPath = join('/', this.apiPrefix, controllerPath);
       const startTime = Date.now();
       let lastCls;
       routeArr.forEach((routeMap: RouteMap) => {
         const { route, method, fn, methodName, instance, cls } = routeMap;
         lastCls = cls;
-        const methodKey = resolve(modelPath, route);
+        const methodKey = join(modelPath, route);
         const funcStart = Date.now();
         const classGuards = Reflect.getMetadata(META_GUARD_KEY, instance) || [];
         const fnGuards = Reflect.getMetadata(META_GUARD_KEY, fn) || [];

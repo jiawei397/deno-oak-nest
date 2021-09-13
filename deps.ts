@@ -9,7 +9,9 @@ export {
   Request
 } from "https://deno.land/x/oak@v9.0.0/mod.ts";
 
-export { resolve } from "https://deno.land/std@0.106.0/path/mod.ts";
+import { posix } from "https://deno.land/std@0.106.0/path/mod.ts";
+
+export const join = posix.join;
 
 export { parse } from "https://deno.land/std@0.100.0/node/querystring.ts";
 
