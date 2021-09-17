@@ -39,4 +39,4 @@ export {
   Max,
   Min,
   validateOrReject,
-} from "https://deno.land/x/deno_class_validator@v0.0.1/mod.ts";
+} from "../deps.ts";

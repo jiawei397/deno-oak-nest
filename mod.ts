@@ -12,4 +12,4 @@ export type { CanActivate, Constructor };
 
 export * from "./deps.ts";
 
-export const version = "0.0.19";
+export const version = "0.0.20";
