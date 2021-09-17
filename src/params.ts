@@ -80,14 +80,6 @@ export async function transferParam(
           );
         }
         args[index] = await callback(ctx);
-        // if (index == 1) {
-        //   console.log(
-        //     "params",
-        //     index,
-        //     args[index],
-        //     args[index].constructor.name,
-        //   );
-        // }
       }),
     );
   }
@@ -116,8 +108,7 @@ export function Body(Cls?: Constructor) {
           });
           assert(
             msgs.length > 0,
-            `the msgs must be not empty and the validationErrors are ${
-              JSON.stringify(errors)
+            `the msgs must be not empty and the validationErrors are ${JSON.stringify(errors)
             }`,
           );
           throw new BodyParamValidationException(msgs.join(","));
