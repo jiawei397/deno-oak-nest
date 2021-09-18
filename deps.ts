@@ -34,7 +34,7 @@ export { assert } from "https://deno.land/std@0.96.0/testing/asserts.ts";
 
 export { format } from "https://deno.land/std@0.97.0/datetime/mod.ts";
 
-export { Reflect } from "https://deno.land/x/reflect_metadata@v0.1.12/mod.ts";
+export { Reflect } from "https://deno.land/x/reflect_metadata@v0.1.12-2/mod.ts";
 
 export {
   Max,
