@@ -41,5 +41,4 @@ export {
   Min,
   validateOrReject,
   ValidationError,
-// } from "https://deno.land/x/deno_class_validator@v0.0.1/mod.ts";
-} from "https://raw.githubusercontent.com/jiawei397/class-validator/v0.0.2/mod.ts";
+} from "https://deno.land/x/deno_class_validator@v0.0.2/mod.ts";
