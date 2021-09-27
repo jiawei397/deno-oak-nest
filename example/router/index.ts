@@ -7,8 +7,7 @@ import { Context, Router } from "../../mod.ts";
 const router = new Router();
 router.add(UserController);
 router.setGlobalPrefix("api");
-router.add(RoleController);
-router.add(User2Controller);
+router.add(RoleController, User2Controller);
 
 const sleep = (time: number) => {
   return new Promise(
@@ -21,9 +20,8 @@ const sleep = (time: number) => {
 };
 
 router.get("/", (context: Context) => {
-  // context.response.status = 404;
+  // context.response.status = 304;
   context.response.body = "haha";
-  // return context.response.status(404).send('not find');
 });
 
 router.get("/hello", (context: any) => {

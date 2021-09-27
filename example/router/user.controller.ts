@@ -48,7 +48,7 @@ class AuthGuard3 implements CanActivate {
   }
 }
 
-// @UseGuards(AuthGuard)
+@UseGuards(AuthGuard)
 @Controller("/user")
 export class UserController {
   @UseGuards(AuthGuard2, AuthGuard3)

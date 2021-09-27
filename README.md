@@ -1,7 +1,12 @@
 # oak_nest
 
-Rely on [oak](https://deno.land/x/oak) to simulate some annotation functions of
-[nestjs](https://docs.nestjs.com/) which is a frame for nodejs
+[![deno version](https://img.shields.io/badge/deno-^1.13.2-blue?logo=deno)](https://github.com/denoland/deno)
+
+Rely on [oak@v9.0.0](https://deno.land/x/oak@v9.0.0/mod.ts) to simulate some
+annotation functions of [nestjs](https://docs.nestjs.com/) which is a frame for
+nodejs.
+
+I will update the oak version if need.
 
 ## run
 
@@ -26,6 +31,7 @@ are available：
 ```ts
 import {
   Body,
+  Context,
   Controller,
   createParamDecorator,
   createParamDecoratorWithLowLevel,
@@ -38,7 +44,6 @@ import {
   UseGuards,
 } from "https://deno.land/x/oak_nest/mod.ts";
 import type { CanActivate } from "https://deno.land/x/oak_nest/mod.ts";
-import { Context } from "https://deno.land/x/oak/mod.ts";
 import mockjs from "https://deno.land/x/deno_mock@v2.0.0/mod.ts";
 import { delay } from "https://deno.land/std/async/mod.ts";
 
@@ -176,11 +181,14 @@ idea, please give me a suggestion, then thanks much.
 
 ```ts
 import { UserController } from "./user.controller.ts";
+import { User2Controller } from "./user2.controller.ts";
+import { RoleController } from "./role.controller.ts";
 import { Router } from "https://deno.land/x/oak_nest/mod.ts";
 
 const router = new Router();
 router.add(UserController);
 router.setGlobalPrefix("api");
+router.add(RoleController, User2Controller);
 ```
 
 ### use router in app
@@ -191,7 +199,7 @@ import {
   isHttpError,
   send,
   Status,
-} from "https://deno.land/x/oak/mod.ts";
+} from "https://deno.land/x/oak_nest/mod.ts";
 import router from "./router/index.ts";
 
 const app = new Application();
@@ -213,3 +221,5 @@ await app.listen({ port });
 
 now you can visit
 `http://localhost:1000/api/user/info`,`http://localhost:1000/api/user/list`.
+
+You can see more in the example dirs.

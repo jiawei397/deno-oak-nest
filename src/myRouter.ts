@@ -2,11 +2,11 @@ import {
   blue,
   format,
   green,
+  join,
+  OriginRouter,
   red,
   Reflect,
-  OriginRouter,
   yellow,
-  join,
 } from "../deps.ts";
 import { Constructor, RouteMap } from "./interface.ts";
 import {
@@ -20,20 +20,22 @@ class Router extends OriginRouter {
   private apiPrefix = "";
   private routerArr: {
     controllerPath: string;
-    arr: any[]
+    arr: any[];
   }[] = [];
 
   setGlobalPrefix(apiPrefix: string) {
     this.apiPrefix = apiPrefix;
   }
 
-  add(Cls: Constructor) {
-    const arr = mapRoute(Cls);
-    const path = Reflect.getMetadata(META_PATH_KEY, Cls);
-    const controllerPath = join('/', path);
-    this.routerArr.push({
-      controllerPath,
-      arr
+  add(...clsArr: Constructor[]) {
+    clsArr.forEach((Cls) => {
+      const arr = mapRoute(Cls);
+      const path = Reflect.getMetadata(META_PATH_KEY, Cls);
+      const controllerPath = join("/", path);
+      this.routerArr.push({
+        controllerPath,
+        arr,
+      });
     });
   }
 
@@ -49,7 +51,7 @@ class Router extends OriginRouter {
     const routeStart = Date.now();
     const result = super.routes();
     this.routerArr.forEach(({ controllerPath, arr }) => {
-      const modelPath = join('/', this.apiPrefix, controllerPath);
+      const modelPath = join("/", this.apiPrefix, controllerPath);
       const startTime = Date.now();
       let lastCls;
       arr.forEach((routeMap: RouteMap) => {
@@ -73,7 +75,7 @@ class Router extends OriginRouter {
           yellow("[RouterExplorer]"),
           green(
             `Mapped {${methodKey}, ${method.toUpperCase()}} route ${funcEnd -
-            funcStart}ms`,
+              funcStart}ms`,
           ),
         );
       });

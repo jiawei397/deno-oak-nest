@@ -35,8 +35,4 @@ export { mockjs };
 
 export { delay } from "https://deno.land/std/async/mod.ts";
 
-export {
-  Max,
-  Min,
-  validateOrReject,
-} from "../deps.ts";
+export { Max, Min, validateOrReject } from "../deps.ts";
