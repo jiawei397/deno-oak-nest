@@ -45,7 +45,7 @@ export function overrideFnByGuard(
         }
       }
       await transferParam(target, methodName, args);
-      const result = await fn.call(target, ...args);
+      const result = await fn.apply(target, args);
       transResponseResult(context, result);
       return result;
     } catch (e) {
