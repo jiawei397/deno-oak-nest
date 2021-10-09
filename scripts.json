@@ -1,0 +1,45 @@
+{
+  "version": "0.0.23",
+  "scripts": {
+    "dev": {
+      "cmd": "deno run example/main.ts",
+      "desc": "run my main.ts file",
+      "allow": [
+        "net",
+        "env",
+        "write",
+        "read"
+      ],
+      "unstable": false,
+      "tsconfig": "tsconfig.json",
+      "env": {
+        "PORT": "1000"
+      }
+    },
+    "build": {
+      "cmd": "deno bundle example/main.ts example/main.js",
+      "watch": false,
+      "unstable": false,
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "dist": {
+      "cmd": "deno run example/main.js",
+      "desc": "run dist server",
+      "allow": [
+        "net",
+        "env",
+        "write",
+        "read"
+      ],
+      "unstable": false,
+      "watch": false,
+      "tsconfig": "tsconfig.json",
+      "env": {
+        "NODE_ENV": "production",
+        "PORT": "2000"
+      }
+    }
+  }
+}
