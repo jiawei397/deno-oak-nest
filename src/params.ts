@@ -108,8 +108,7 @@ export function Body(Cls?: Constructor) {
           });
           assert(
             msgs.length > 0,
-            `the msgs must be not empty and the validationErrors are ${
-              JSON.stringify(errors)
+            `the msgs must be not empty and the validationErrors are ${JSON.stringify(errors)
             }`,
           );
           throw new BodyParamValidationException(msgs.join(","));
@@ -168,14 +167,11 @@ export const Res = createParamDecorator((ctx: Context) => {
 });
 
 export const Ip = createParamDecorator((ctx: Context) => {
-  return ctx.request.ip;
+  const headers = ctx.request.headers;
+  return headers.get('x-real-ip') || headers.get('x-forwarded-for');
 });
 
-export const Ips = createParamDecorator((ctx: Context) => {
-  return ctx.request.ips;
-});
-
-export const HostParam = createParamDecorator((ctx: Context) => {
+export const Host = createParamDecorator((ctx: Context) => {
   return ctx.request.headers.get("host");
 });
 
