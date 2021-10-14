@@ -45,8 +45,8 @@ import {
   Query,
   Res,
   UseGuards,
-} from "https://deno.land/x/oak_nest@v0.1.3/mod.ts";
-import type { CanActivate } from "https://deno.land/x/oak_nest@v0.1.3/mod.ts";
+} from "https://deno.land/x/oak_nest@v0.1.4/mod.ts";
+import type { CanActivate } from "https://deno.land/x/oak_nest@v0.1.4/mod.ts";
 import mockjs from "https://deno.land/x/deno_mock@v2.0.0/mod.ts";
 import { delay } from "https://deno.land/std/async/mod.ts";
 
@@ -186,7 +186,7 @@ idea, please give me a suggestion, then thanks much.
 import { UserController } from "./user.controller.ts";
 import { User2Controller } from "./user2.controller.ts";
 import { RoleController } from "./role.controller.ts";
-import { Router } from "https://deno.land/x/oak_nest@v0.1.3/mod.ts";
+import { Router } from "https://deno.land/x/oak_nest@v0.1.4/mod.ts";
 
 const router = new Router();
 router.add(UserController);
@@ -202,7 +202,7 @@ import {
   isHttpError,
   send,
   Status,
-} from "https://deno.land/x/oak_nest@v0.1.3/mod.ts";
+} from "https://deno.land/x/oak_nest@v0.1.4/mod.ts";
 import router from "./router/index.ts";
 
 const app = new Application();
