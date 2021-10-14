@@ -18,12 +18,10 @@ app.use(async (ctx, next) => {
   ctx.response.headers.set("X-Response-Time", `${ms}ms`);
 });
 
-app.use(router.routes());
-
+// if you want to catch the error, you must set it before the routers.
 app.use(async (ctx, next) => {
   try {
     await next();
-    // 在这里可以很方便地拦截处理响应给前台的数据
     if (ctx.response.body === undefined && ctx.response.status === 404) {
       ctx.response.body = "not found";
     }
@@ -32,7 +30,7 @@ app.use(async (ctx, next) => {
     //   data: ctx.response.body
     // }
   } catch (err) {
-    console.error(err);
+    console.error("middleware", err);
     if (isHttpError(err)) {
       switch (err.status) {
         case Status.NotFound:
@@ -44,11 +42,14 @@ app.use(async (ctx, next) => {
       }
     } else {
       // rethrow if you can't handle the error
-      throw err;
-      // ctx.response.body = err.message;
+      // throw err;
+      ctx.response.status = err.status || 500;
+      ctx.response.body = err.message || err;
     }
   }
 });
+
+app.use(router.routes());
 
 const port = Number(Deno.env.get("PORT") || 1000);
 console.log(`app will start with: http://localhost:${port}`);

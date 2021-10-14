@@ -1,5 +1,5 @@
-import { Context, Reflect, Status, yellow } from "../deps.ts";
-import { HttpException, UnauthorizedException } from "./exception.ts";
+import { Context, Reflect } from "../deps.ts";
+import { UnauthorizedException } from "./exception.ts";
 import { CanActivate, Constructor, ControllerMethod } from "./interface.ts";
 import { transferParam } from "./params.ts";
 
@@ -21,44 +21,29 @@ function transResponseResult(context: Context, result: any) {
 
 export function overrideFnByGuard(
   guards: CanActivate[],
-  target: any,
+  target: unknown,
   fn: ControllerMethod,
   methodName: string,
 ) {
   return async function (...args: any[]) {
     const context: Context = args[0];
-    const response = context.response;
-    const unauthorizedStatus = Status.Unauthorized;
-    try {
-      if (guards) {
-        for (const guard of guards) {
-          let _guard = guard;
-          if (typeof guard === "function") {
-            _guard = new (guard as any)();
-          }
-          const result = await _guard.canActivate(context);
-          if (!result) {
-            response.status = unauthorizedStatus;
-            response.body = UnauthorizedException.name;
-            return;
-          }
+    // I removed the origin error catch, because it should be deal by middleware.
+    if (guards) {
+      for (const guard of guards) {
+        let _guard = guard;
+        if (typeof guard === "function") {
+          _guard = new (guard as any)();
+        }
+        const result = await _guard.canActivate(context);
+        if (!result) {
+          throw new UnauthorizedException(UnauthorizedException.name);
         }
       }
-      await transferParam(target, methodName, args);
-      const result = await fn.apply(target, args);
-      transResponseResult(context, result);
-      return result;
-    } catch (e) {
-      if (Deno.env.get("DEBUG") === "true") {
-        console.warn(
-          "An error occurred in overrideFnByGuard: ",
-          yellow(e.message),
-        );
-        console.debug(e);
-      }
-      response.status = e.status || unauthorizedStatus;
-      response.body = e.message;
     }
+    await transferParam(target, methodName, args);
+    const result = await fn.apply(target, args);
+    transResponseResult(context, result);
+    return result;
   };
 }
 

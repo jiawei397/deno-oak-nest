@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   CanActivate,
   Context,
@@ -20,7 +21,7 @@ class AuthGuard implements CanActivate {
   async canActivate(context: Context): Promise<boolean> {
     console.log("--AuthGuard---");
     // await delay(100);
-    // throw new ForbiddenException('this is AuthGuard error message');
+    // throw new ForbiddenException("this is AuthGuard error message");
     return true;
     // return false;
   }
@@ -76,6 +77,11 @@ export class UserController {
   testResultIsUndefined(@Req() req: Request, @Ip() ip: string) {
     console.log(ip, req);
     return;
+  }
+
+  @Get("/err")
+  err() {
+    throw new BadRequestException("bad request");
   }
 
   // @UseGuards(AuthGuard2, AuthGuard3)
