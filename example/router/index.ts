@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { UserController } from "./user.controller.ts";
 import { RoleController } from "./role.controller.ts";
 import { User2Controller } from "./user2.controller.ts";

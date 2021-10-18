@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { Context, Reflect } from "../deps.ts";
 import { UnauthorizedException } from "./exception.ts";
 import { CanActivate, Constructor, ControllerMethod } from "./interface.ts";
@@ -47,6 +48,7 @@ export function overrideFnByGuard(
   };
 }
 
+// deno-lint-ignore ban-types
 export function UseGuards(...guards: (CanActivate | Function)[]) {
   return function (
     target: any,
@@ -71,7 +73,7 @@ export enum Methods {
 
 const createMappingDecorator = (method: Methods) =>
   (path: string): MethodDecorator => {
-    return (target, property, descriptor) => {
+    return (_target, _property, descriptor) => {
       Reflect.defineMetadata(META_PATH_KEY, path, descriptor.value);
       Reflect.defineMetadata(META_METHOD_KEY, method, descriptor.value);
     };

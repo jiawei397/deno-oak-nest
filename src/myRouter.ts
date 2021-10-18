@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import {
   blue,
   format,
@@ -68,6 +69,7 @@ class Router extends OriginRouter {
           fn,
           methodName,
         );
+        // deno-lint-ignore ban-ts-comment
         // @ts-ignore
         this[method.toLowerCase()](methodKey, newFunc);
         const funcEnd = Date.now();

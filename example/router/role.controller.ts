@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import {
   Body,
   Context,
@@ -58,7 +59,6 @@ export class RoleController {
     @Body(Dto) params: Dto,
     @Headers() headers: any,
     @Headers("host") host: any,
-    @Res() res: Response,
   ) {
     console.log("ctx", name, params, headers, host);
     // res.body = "role info old " + name;

@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any require-await no-unused-vars
 import {
   BadRequestException,
   Body,
@@ -18,7 +19,7 @@ import {
 import { delay, mockjs } from "../deps.ts";
 
 class AuthGuard implements CanActivate {
-  async canActivate(context: Context): Promise<boolean> {
+  async canActivate(_context: Context): Promise<boolean> {
     console.log("--AuthGuard---");
     // await delay(100);
     // throw new ForbiddenException("this is AuthGuard error message");
@@ -28,7 +29,7 @@ class AuthGuard implements CanActivate {
 }
 
 class AuthGuard2 implements CanActivate {
-  async canActivate(context: Context): Promise<boolean> {
+  async canActivate(_context: Context): Promise<boolean> {
     console.log("--AuthGuard2---");
     // throw new ForbiddenException('this is AuthGuard2 error message');
     return true;
@@ -36,7 +37,7 @@ class AuthGuard2 implements CanActivate {
 }
 
 class AuthGuard3 implements CanActivate {
-  async canActivate(context: Context): Promise<boolean> {
+  async canActivate(_context: Context): Promise<boolean> {
     console.log("--AuthGuard3---");
     this.test();
     // throw new ForbiddenException("this is AuthGuard3 error message");

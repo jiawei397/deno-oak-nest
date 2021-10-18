@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { Status } from "../deps.ts";
 
 const isString = (fn: any) => typeof fn === "string";
@@ -22,6 +23,7 @@ export class HttpException extends Error {
     ) {
       this.message = this.response.message;
     } else if (this.constructor) {
+      // deno-lint-ignore ban-ts-comment
       // @ts-ignore
       this.message = this.constructor.name
         .match(/[A-Z][a-z]+|[0-9]+/g)

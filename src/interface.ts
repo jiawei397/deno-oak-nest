@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { Context } from "../deps.ts";
 
 export interface CanActivate {
@@ -13,6 +14,6 @@ export interface RouteMap {
   method: string;
   fn: ControllerMethod;
   methodName: string;
-  instance: object;
+  instance: Record<string, unknown>;
   cls: Constructor;
 }
