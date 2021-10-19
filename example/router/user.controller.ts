@@ -5,9 +5,10 @@ import {
   CanActivate,
   Context,
   Controller,
-  ForbiddenException,
+  ControllerName,
   Get,
   Ip,
+  MethodName,
   Post,
   Query,
   Req,
@@ -55,7 +56,12 @@ class AuthGuard3 implements CanActivate {
 export class UserController {
   @UseGuards(AuthGuard2, AuthGuard3)
   @Get("/info")
-  info(context: Context) {
+  info(
+    context: Context,
+    @MethodName() methodName: string,
+    @ControllerName() controllerName: string,
+  ) {
+    console.log("methodName", methodName, "controllerName", controllerName);
     context.response.body = mockjs.mock({
       name: "@name",
       "age|1-100": 50,
@@ -121,3 +127,6 @@ export class UserController {
     ctx.response.body = "test ok";
   }
 }
+
+// deno-lint-ignore no-empty-interface
+// export interface UserController extends WithLoggerClassDecorator {}

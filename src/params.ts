@@ -187,8 +187,21 @@ export function Cookies(key?: string) {
 }
 
 export const Cookie = Cookies;
+
 // export function Session() {
 //   return createParamDecoratorWithLowLevel((ctx: Context) => {
 //     return ctx.request.session;
 //   });
 // }
+
+export const MethodName = createParamDecorator(
+  (_ctx: Context, _target: any, methodName: string) => {
+    return methodName;
+  },
+);
+
+export const ControllerName = createParamDecorator(
+  (_ctx: Context, target: any) => {
+    return target.constructor.name;
+  },
+);
