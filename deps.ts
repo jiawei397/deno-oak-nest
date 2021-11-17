@@ -8,12 +8,12 @@ export {
   Router as OriginRouter,
   send,
   Status,
-} from "https://deno.land/x/jw_oak@v9.0.4/mod.ts";
+} from "https://deno.land/x/oak@v10.0.0/mod.ts";
 
 export type {
   Middleware,
   RouterMiddleware,
-} from "https://deno.land/x/jw_oak@v9.0.4/mod.ts";
+} from "https://deno.land/x/oak@v10.0.0/mod.ts";
 
 import { posix } from "https://deno.land/std@0.106.0/path/mod.ts";
 
