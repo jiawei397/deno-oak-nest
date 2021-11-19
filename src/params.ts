@@ -80,7 +80,7 @@ export async function transferParam(
             ctx,
           );
         }
-        args[index] = await callback(ctx);
+        args[index] = await callback(ctx, target, methodName);
       }),
     );
   }

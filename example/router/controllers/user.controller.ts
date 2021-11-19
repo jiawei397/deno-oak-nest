@@ -16,8 +16,8 @@ import {
   Res,
   Response,
   UseGuards,
-} from "../../mod.ts";
-import { delay, mockjs } from "../deps.ts";
+} from "../../../mod.ts";
+import { delay, mockjs } from "../../deps.ts";
 
 class AuthGuard implements CanActivate {
   async canActivate(_context: Context): Promise<boolean> {

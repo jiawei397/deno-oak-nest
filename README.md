@@ -14,7 +14,7 @@ I will update the oak version if need.
 ## run
 
 ```
-deno run --allow-net --allow-env --allow-write example/main.ts
+deno run --allow-net --allow-env --allow-write --unstable --config tsconfig.json example/main.ts
 ```
 
 or you can use [denon](https://deno.land/x/denon)：
@@ -179,6 +179,59 @@ fails, then will throw an Error.
 I cannot get the type of dto directly like nestjs did, so now you have to pass
 one more parameter in the body as `@Body(Dto) params: Dto`. If you have a good
 idea, please give me a suggestion, then thanks much.
+
+### Controller use Service
+
+You can use `Injectable` to flag the service can be injectable, and it can be
+used by your Controller or other Service.
+
+```ts
+import { Injectable } from "https://deno.land/x/oak_nest@v0.2.0/mod.ts";
+
+@Injectable()
+export class RoleService {
+  info() {
+    return "info from RoleService";
+  }
+}
+
+@Injectable()
+export class UserService {
+  constructor(
+    private readonly roleService: RoleService,
+  ) {}
+  info() {
+    return mockjs.mock({
+      name: "@name",
+      "age|1-100": 50,
+      "val|0-2": 1,
+      role: this.roleService.info(),
+      user2: this.userService2.info(),
+    });
+  }
+}
+
+@Controller("user")
+export class User2Controller {
+  constructor(
+    private readonly userService: UserService,
+    private readonly roleService: RoleService,
+  ) {
+  }
+  @Get("/user2")
+  info(context: Context) {
+    context.response.body = this.userService.info() + this.roleService.info();
+  }
+}
+```
+
+If you like to use the `Service` alone in anywhere, you can with `Factory` like
+this:
+
+```ts
+import { Factory } from "https://deno.land/x/oak_nest@v0.2.0/mod.ts";
+Factory(UserService).info();
+```
 
 ### router add Controller
 

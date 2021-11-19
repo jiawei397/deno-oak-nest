@@ -85,8 +85,27 @@ export const Delete = createMappingDecorator(Methods.DELETE);
 export const Put = createMappingDecorator(Methods.PUT);
 export const Head = createMappingDecorator(Methods.HEAD);
 
+export const Injectable = (): ClassDecorator => (_target) => {};
+
+export const factory = new Map();
+
+export const Factory = <T>(target: Constructor<T>): T => {
+  const providers = Reflect.getMetadata("design:paramtypes", target); // [OtherService]
+  let args = [];
+  if (providers?.length) {
+    args = providers.map((provider: Constructor) => Factory(provider));
+  }
+  if (factory.has(target)) {
+    // console.log("factory.has cache", target);
+    return factory.get(target);
+  }
+  const instance = new target(...args);
+  factory.set(target, instance);
+  return instance;
+};
+
 export function mapRoute(Cls: Constructor) {
-  const instance = new Cls();
+  const instance = Factory(Cls);
   const prototype = Object.getPrototypeOf(instance);
   return Object.getOwnPropertyNames(prototype)
     .map((item) => {
@@ -113,10 +132,3 @@ export function mapRoute(Cls: Constructor) {
       };
     }).filter(Boolean);
 }
-
-// export function PathParam(paramName: string) {
-//   return function (target: any, methodName: string, paramIndex: number) {
-//     !target.$Meta && (target.$Meta = {});
-//     target.$Meta[paramIndex] = paramName;
-//   };
-// }

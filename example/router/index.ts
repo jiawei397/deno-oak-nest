@@ -1,7 +1,6 @@
-// deno-lint-ignore-file no-explicit-any
-import { UserController } from "./user.controller.ts";
-import { RoleController } from "./role.controller.ts";
-import { User2Controller } from "./user2.controller.ts";
+import { UserController } from "./controllers/user.controller.ts";
+import { RoleController } from "./controllers/role.controller.ts";
+import { User2Controller } from "./controllers/user2.controller.ts";
 
 import { Context, Router } from "../../mod.ts";
 
@@ -12,11 +11,11 @@ router.add(RoleController, User2Controller);
 
 const sleep = (time: number) => {
   return new Promise(
-    ((resolve) => {
+    (resolve) => {
       setTimeout(() => {
         resolve("app");
       }, time);
-    }),
+    },
   );
 };
 

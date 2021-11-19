@@ -10,8 +10,9 @@ import {
   Query,
   Res,
   Response,
-} from "../../mod.ts";
-import { Max, Min } from "../deps.ts";
+} from "../../../mod.ts";
+import { Max, Min } from "../../deps.ts";
+import { RoleService } from "../services/role.service.ts";
 
 const Add = createParamDecorator(async (ctx: any) => {
   const result = ctx.request.body(); // content type automatically detected
@@ -35,6 +36,8 @@ export class Dto {
 
 @Controller("/role")
 export class RoleController {
+  constructor(private readonly roleService: RoleService) {
+  }
   @Get("/info/:id")
   test(
     context: Context,
@@ -50,7 +53,8 @@ export class RoleController {
   @Get("/info")
   getInfo(@Res() res: Response, @Query() params: any) {
     console.log(params);
-    res.body = "role get info " + JSON.stringify(params);
+    res.body = "role get info " + JSON.stringify(params) + " - " +
+      this.roleService.info();
   }
 
   @Post("/info")

@@ -9,7 +9,7 @@ scripts:
       - env
       - write
       - read
-    unstable: false
+    unstable: true
     tsconfig: tsconfig.json
     env:
       PORT: '1000'
