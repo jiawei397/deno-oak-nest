@@ -6,6 +6,6 @@ export * from "./src/utils.ts";
 
 export * from "./src/params.ts";
 
-export type { CanActivate, Constructor, Context } from "./src/interface.ts";
+export type { CanActivate, Constructor } from "./src/interface.ts";
 
 export * from "./deps.ts";

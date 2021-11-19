@@ -1,12 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
-import { Reflect } from "../deps.ts";
+import { Context, Reflect } from "../deps.ts";
 import { UnauthorizedException } from "./exception.ts";
-import {
-  CanActivate,
-  Constructor,
-  Context,
-  ControllerMethod,
-} from "./interface.ts";
+import { CanActivate, Constructor, ControllerMethod } from "./interface.ts";
 import { transferParam } from "./params.ts";
 
 export const META_METHOD_KEY = Symbol("meta:method");
