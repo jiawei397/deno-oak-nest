@@ -127,6 +127,3 @@ export class UserController {
     ctx.response.body = "test ok";
   }
 }
-
-// deno-lint-ignore no-empty-interface
-// export interface UserController extends WithLoggerClassDecorator {}
