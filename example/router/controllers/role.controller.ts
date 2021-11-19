@@ -1,7 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import {
   Body,
-  Context,
   Controller,
   createParamDecorator,
   Get,
@@ -11,6 +10,7 @@ import {
   Res,
   Response,
 } from "../../../mod.ts";
+import type { Context } from "../../../mod.ts";
 import { Max, Min } from "../../deps.ts";
 import { RoleService } from "../services/role.service.ts";
 

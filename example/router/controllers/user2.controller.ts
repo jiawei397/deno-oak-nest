@@ -1,4 +1,4 @@
-import { Context, Controller, factory, Get } from "../../../mod.ts";
+import { Context, Controller, Get } from "../../../mod.ts";
 import { UserService } from "../services/user.service.ts";
 
 @Controller("user")

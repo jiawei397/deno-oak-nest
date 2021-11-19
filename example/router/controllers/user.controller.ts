@@ -3,7 +3,7 @@ import {
   BadRequestException,
   Body,
   CanActivate,
-  Context,
+  // Context,
   Controller,
   ControllerName,
   Get,
@@ -17,6 +17,7 @@ import {
   Response,
   UseGuards,
 } from "../../../mod.ts";
+import type { Context } from "../../../mod.ts";
 import { delay, mockjs } from "../../deps.ts";
 
 class AuthGuard implements CanActivate {

@@ -1,6 +1,5 @@
 export {
   Application,
-  Context,
   Cookies as OakCookie,
   isHttpError,
   Request,
