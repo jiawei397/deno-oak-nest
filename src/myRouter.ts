@@ -76,8 +76,10 @@ class Router extends OriginRouter {
         this.log(
           yellow("[RouterExplorer]"),
           green(
-            `Mapped {${methodKey}, ${method.toUpperCase()}} route ${funcEnd -
-              funcStart}ms`,
+            `Mapped {${methodKey}, ${method.toUpperCase()}} route ${
+              funcEnd -
+              funcStart
+            }ms`,
           ),
         );
       });
