@@ -1,6 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Context, Reflect } from "../deps.ts";
-import { UnauthorizedException } from "./exception.ts";
+import { Context, Reflect, UnauthorizedException } from "../deps.ts";
 import { CanActivate, Constructor, ControllerMethod } from "./interface.ts";
 import { transferParam } from "./params.ts";
 

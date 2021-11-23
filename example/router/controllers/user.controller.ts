@@ -1,6 +1,5 @@
 // deno-lint-ignore-file no-explicit-any require-await no-unused-vars
 import {
-  BadRequestException,
   Body,
   CanActivate,
   // Context,
@@ -18,7 +17,7 @@ import {
   UseGuards,
 } from "../../../mod.ts";
 import type { Context } from "../../../mod.ts";
-import { delay, mockjs } from "../../deps.ts";
+import { BadRequestException, delay, mockjs } from "../../deps.ts";
 
 class AuthGuard implements CanActivate {
   async canActivate(_context: Context): Promise<boolean> {

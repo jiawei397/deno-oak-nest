@@ -1,13 +1,13 @@
 // deno-lint-ignore-file no-explicit-any
 import {
   assert,
+  BodyParamValidationException,
   parse,
   Reflect,
   validateOrReject,
   ValidationError,
 } from "../deps.ts";
 import type { Context } from "../deps.ts";
-import { BodyParamValidationException } from "./exception.ts";
 import { ControllerMethod } from "./interface.ts";
 
 const paramMetadataKey = Symbol("meta:param");

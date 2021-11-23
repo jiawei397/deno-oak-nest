@@ -1,18 +1,3 @@
-// export {
-//   Application,
-//   isHttpError,
-//   send,
-//   Status,
-// } from "https://deno.land/x/oak/mod.ts";
-
-// export {
-//   Context,
-//   Request,
-//   Response,
-//   Router,
-// } from "https://deno.land/x/oak/mod.ts";
-// export { join } from "https://deno.land/std@0.97.0/path/mod.ts";
-
 export {
   bgBlue,
   bgRgb24,
@@ -33,6 +18,12 @@ import mockjs from "https://deno.land/x/deno_mock@v2.0.0/mod.ts";
 
 export { mockjs };
 
-export { delay } from "https://deno.land/std/async/mod.ts";
+export { delay } from "https://deno.land/std@0.97.0/async/mod.ts";
 
 export { Max, Min, validateOrReject } from "../deps.ts";
+
+export {
+  BadRequestException,
+  BodyParamValidationException,
+  UnauthorizedException,
+} from "https://deno.land/x/oak_exception@v0.0.6/mod.ts";
