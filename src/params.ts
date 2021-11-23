@@ -1,14 +1,14 @@
 // deno-lint-ignore-file no-explicit-any
 import {
   assert,
-  Context,
   parse,
   Reflect,
   validateOrReject,
   ValidationError,
 } from "../deps.ts";
+import type { Context } from "../deps.ts";
 import { BodyParamValidationException } from "./exception.ts";
-import { Constructor, ControllerMethod } from "./interface.ts";
+import { ControllerMethod } from "./interface.ts";
 
 const paramMetadataKey = Symbol("meta:param");
 const ctxMetadataKey = Symbol("meta:ctx");
@@ -80,20 +80,27 @@ export async function transferParam(
             ctx,
           );
         }
-        args[index] = await callback(ctx, target, methodName);
+        args[index] = await callback(ctx, target, methodName, index);
       }),
     );
   }
 }
 
-export function Body(Cls?: Constructor) {
-  return createParamDecoratorWithLowLevel(async (ctx: Context) => {
+export const Body = createParamDecorator(
+  async (ctx: Context, target: any, methodName: string, index: number) => {
     const result = ctx.request.body(); // content type automatically detected
     if (result.type === "json") {
       const value = await result.value; // an object of parsed JSON
       // console.log('value', value);
-      if (Cls) {
-        const post = new Cls();
+      const providers = Reflect.getMetadata( // get the params providers
+        "design:paramtypes",
+        target,
+        methodName,
+      );
+      // console.log("providers", providers);
+      if (providers?.length) {
+        const post = new providers[index]();
+        console.log("post", post);
         Object.assign(post, value);
         try {
           await validateOrReject(post);
@@ -116,11 +123,10 @@ export function Body(Cls?: Constructor) {
           throw new BodyParamValidationException(msgs.join(","));
         }
       }
-
       return value;
     }
-  });
-}
+  },
+);
 
 /**
  * url后面拼接的参数获取

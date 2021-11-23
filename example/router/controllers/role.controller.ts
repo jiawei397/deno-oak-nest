@@ -60,7 +60,7 @@ export class RoleController {
   @Post("/info")
   info(
     @Add() name: string,
-    @Body(Dto) params: Dto,
+    @Body() params: Dto,
     @Headers() headers: any,
     @Headers("host") host: any,
   ) {

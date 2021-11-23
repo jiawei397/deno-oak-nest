@@ -128,7 +128,7 @@ function Add2(params: any) {
 }
 ```
 
-then use like this:
+Then use like this:
 
 ```ts
 @Post("/info")
@@ -145,7 +145,7 @@ info(
 }
 ```
 
-or you can use class validator like this:
+Or you can use class validator like this:
 
 ```ts
 class Dto {
@@ -160,25 +160,17 @@ class Dto {
 
 @Post("/info")
 info(
-  @Add() name: string,
-  @Body(Dto) params: Dto,
-  @Headers() headers: any,
-  @Headers("host") host: any,
-  @Res() res: Response,
+  @Body() params: Dto
 ) {
-  console.log("ctx", name, params, headers, host);
+  console.log("ctx", params);
   return "role info " + name;
 }
 ```
 
-it is using
+The `Body` decorator is using
 [deno_class_validator](https://deno.land/x/deno_class_validator@v0.0.1) for
-validator, which is forked from class-validator which is using in nodejs, if it
-fails, then will throw an Error.
-
-I cannot get the type of dto directly like nestjs did, so now you have to pass
-one more parameter in the body as `@Body(Dto) params: Dto`. If you have a good
-idea, please give me a suggestion, then thanks much.
+validator, which is forked from `class-validator` which is using in nodejs, if
+it fails, then will throw an `400` Error.
 
 ### Controller use Service
 
