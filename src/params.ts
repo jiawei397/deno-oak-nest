@@ -91,16 +91,13 @@ export const Body = createParamDecorator(
     const result = ctx.request.body(); // content type automatically detected
     if (result.type === "json") {
       const value = await result.value; // an object of parsed JSON
-      // console.log('value', value);
       const providers = Reflect.getMetadata( // get the params providers
         "design:paramtypes",
         target,
         methodName,
       );
-      // console.log("providers", providers);
       if (providers?.length) {
         const post = new providers[index]();
-        console.log("post", post);
         Object.assign(post, value);
         try {
           await validateOrReject(post);
