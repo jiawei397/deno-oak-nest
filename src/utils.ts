@@ -88,11 +88,19 @@ export const Injectable = (): ClassDecorator => (_target) => {};
 
 export const factory = new Map();
 
-export const Factory = <T>(target: Constructor<T>): T => {
-  const providers = Reflect.getMetadata("design:paramtypes", target); // [OtherService]
-  let args = [];
+export const Factory = async <T>(target: Constructor<T>): Promise<T> => {
+  const providers = Reflect.getMetadata("design:paramtypes", target);
+  let args: any[] = [];
   if (providers?.length) {
-    args = providers.map((provider: Constructor) => Factory(provider));
+    args = await Promise.all(
+      providers.map((provider: Constructor, index: number) => {
+        const injectedData = Reflect.getMetadata(index + "", target);
+        if (typeof injectedData?.fn === "function") {
+          return injectedData.fn.apply(null, injectedData.params);
+        }
+        return Factory(provider);
+      }),
+    );
   }
   if (factory.has(target)) {
     // console.log("factory.has cache", target);
@@ -103,8 +111,8 @@ export const Factory = <T>(target: Constructor<T>): T => {
   return instance;
 };
 
-export function mapRoute(Cls: Constructor) {
-  const instance = Factory(Cls);
+export async function mapRoute(Cls: Constructor) {
+  const instance = await Factory(Cls);
   const prototype = Object.getPrototypeOf(instance);
   return Object.getOwnPropertyNames(prototype)
     .map((item) => {

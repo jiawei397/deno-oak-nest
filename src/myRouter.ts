@@ -29,15 +29,15 @@ class Router extends OriginRouter {
   }
 
   add(...clsArr: Constructor[]) {
-    clsArr.forEach((Cls) => {
-      const arr = mapRoute(Cls);
+    return Promise.all(clsArr.map(async (Cls) => {
+      const arr = await mapRoute(Cls);
       const path = Reflect.getMetadata(META_PATH_KEY, Cls);
       const controllerPath = join("/", path);
       this.routerArr.push({
         controllerPath,
         arr,
       });
-    });
+    }));
   }
 
   private log(...message: string[]) {

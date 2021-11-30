@@ -5,9 +5,9 @@ import { User2Controller } from "./controllers/user2.controller.ts";
 import { Context, Router } from "../../mod.ts";
 
 const router = new Router();
-router.add(UserController);
+await router.add(UserController);
 router.setGlobalPrefix("api");
-router.add(RoleController, User2Controller);
+await router.add(RoleController, User2Controller);
 
 const sleep = (time: number) => {
   return new Promise(
