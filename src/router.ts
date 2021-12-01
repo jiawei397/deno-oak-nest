@@ -3,7 +3,6 @@ import {
   blue,
   format,
   green,
-  join,
   OriginRouter,
   red,
   Reflect,
@@ -28,11 +27,26 @@ class Router extends OriginRouter {
     this.apiPrefix = apiPrefix;
   }
 
+  join(...paths: string[]) {
+    if (paths.length === 0) {
+      return "";
+    }
+    const str = paths.join("/").replaceAll("///", "/").replaceAll("//", "/");
+    let last = str;
+    if (!last.startsWith("/")) {
+      last = "/" + last;
+    }
+    if (last.endsWith("/")) {
+      last = last.substr(0, last.length - 1);
+    }
+    return last;
+  }
+
   add(...clsArr: Constructor[]) {
     return Promise.all(clsArr.map(async (Cls) => {
       const arr = await mapRoute(Cls);
       const path = Reflect.getMetadata(META_PATH_KEY, Cls);
-      const controllerPath = join("/", path);
+      const controllerPath = this.join(path);
       this.routerArr.push({
         controllerPath,
         arr,
@@ -52,13 +66,13 @@ class Router extends OriginRouter {
     const routeStart = Date.now();
     const result = super.routes();
     this.routerArr.forEach(({ controllerPath, arr }) => {
-      const modelPath = join("/", this.apiPrefix, controllerPath);
+      const modelPath = this.join(this.apiPrefix, controllerPath);
       const startTime = Date.now();
       let lastCls;
       arr.forEach((routeMap: RouteMap) => {
         const { route, method, fn, methodName, instance, cls } = routeMap;
         lastCls = cls;
-        const methodKey = join(modelPath, route);
+        const methodKey = this.join(modelPath, route);
         const funcStart = Date.now();
         const classGuards = Reflect.getMetadata(META_GUARD_KEY, instance) || [];
         const fnGuards = Reflect.getMetadata(META_GUARD_KEY, fn) || [];

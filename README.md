@@ -28,8 +28,8 @@ denon dev
 ### Controller
 
 Decorators
-`Controller`、`UseGuards`、`Get`、`Post`、`Body`、`Headers`、`Query`、`Res`、`Req` now
-are available：
+`Module`、`Controller`、`Injectable`、`UseGuards`、`Get`、`Post`、`Body`、`Headers`、`Query`、`Res`、`Req`
+now are available：
 
 ```ts
 import {
@@ -145,7 +145,7 @@ info(
 }
 ```
 
-Or you can use class validator like this:
+You can also use `class validator` like this:
 
 ```ts
 class Dto {
@@ -234,10 +234,13 @@ import { RoleController } from "./role.controller.ts";
 import { Router } from "https://deno.land/x/oak_nest@v0.4.2/mod.ts";
 
 const router = new Router();
-router.add(UserController);
+await router.add(UserController);
 router.setGlobalPrefix("api");
-router.add(RoleController, User2Controller);
+await router.add(RoleController, User2Controller);
 ```
+
+> It should be noted that `router.add` has been modified to asynchronous by me.
+> Of course, I now recommend the following way `use Module`.
 
 ### use router in app
 
@@ -270,4 +273,134 @@ await app.listen({ port });
 now you can visit
 `http://localhost:1000/api/user/info`,`http://localhost:1000/api/user/list`.
 
-You can see more in the example dirs.
+## use Module
+
+First is the AppModule:
+
+```ts
+import { Module } from "https://deno.land/x/oak_nest@v0.4.2/mod.ts";
+import { AppController } from "./app.controller.ts";
+import { UserModule } from "./user/user.module.ts";
+
+@Module({
+  imports: [
+    UserModule,
+  ],
+  controllers: [AppController],
+})
+export class AppModule {}
+```
+
+Then this is `UserModule`:
+
+```ts
+import { Module } from "https://deno.land/x/oak_nest@v0.4.2/mod.ts";
+import { RoleController } from "./controllers/role.controller.ts";
+import { UserController } from "./controllers/user.controller.ts";
+import { User2Controller } from "./controllers/user2.controller.ts";
+
+@Module({
+  imports: [],
+  controllers: [
+    UserController,
+    RoleController,
+    User2Controller,
+  ],
+})
+export class UserModule {
+}
+```
+
+Then this is your main.ts:
+
+```ts
+import { Context, isHttpError, NestFactory, Status } from "../mod.ts";
+import { AppModule } from "./app.module.ts";
+
+const app = await NestFactory.create(AppModule);
+app.setGlobalPrefix("api");
+
+// Timing
+app.use(async (ctx: Context, next) => {
+  const start = Date.now();
+  await next();
+  const ms = Date.now() - start;
+  ctx.response.headers.set("X-Response-Time", `${ms}ms`);
+});
+
+app.get("/hello", (ctx: Context) => {
+  ctx.response.body = "hello";
+});
+
+app.use(app.routes());
+
+const port = Number(Deno.env.get("PORT") || 1000);
+console.log(`app will start with: http://localhost:${port}`);
+await app.listen({ port });
+```
+
+If you want to register a Model such as Mongodb, you can do like this:
+
+```ts
+import { Module } from "https://deno.land/x/oak_nest@v0.4.2/mod.ts";
+import { AppController } from "./app.controller.ts";
+import { UserModule } from "./user/user.module.ts";
+
+@Module({
+  imports: [
+    MongoFactory.forRoot(globals.db),
+    UserModule,
+  ],
+  controllers: [AppController],
+})
+export class AppModule {}
+```
+
+And you maybe register your Model:
+
+```ts
+export const InjectModel = (Cls: Constructor) =>
+  (target: Constructor, _property: any, index: number) => {
+    Reflect.defineMetadata(index + "", {
+      params: [Cls],
+      fn: getModel,
+    }, target);
+  };
+```
+
+The function `getModel` can return a new Model which will be used in `Service`.
+It maybe like this:
+
+```ts
+async function getModel<T>(
+  cls: SchemaCls,
+): Promise<Model<T>> {
+  // do some else
+  return new cls();
+}
+```
+
+> To support it, I changed the `router.add` method to asynchronous. It was not a
+> pleasant decision.
+
+Here is a Service example:
+
+```ts
+@Injectable()
+export class UserService {
+  constructor(@InjectModel(User) private readonly model: Model<User>) {
+  }
+  async save(createUserDto: AddUserDto): Promise<string> {
+    console.log(this.model);
+    const id = await this.model.insertOne(createUserDto);
+    console.log(id);
+    return id.toString();
+  }
+}
+```
+
+In the above code, `this.model` is the `getModel` result.
+
+---
+
+> You can see more in the example dirs.

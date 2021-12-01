@@ -17,3 +17,20 @@ export interface RouteMap {
   instance: Record<string, unknown>;
   cls: Constructor;
 }
+
+export interface Type<T = any> extends Function {
+  new (...args: any[]): T;
+}
+
+export interface ModuleMetadata {
+  /**
+   * Optional list of imported modules that export the providers which are
+   * required in this module.
+   */
+  imports: any[];
+  /**
+   * Optional list of controllers defined in this module which have to be
+   * instantiated.
+   */
+  controllers: Type<any>[];
+}

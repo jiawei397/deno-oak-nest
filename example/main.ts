@@ -1,17 +1,18 @@
-import { Application, isHttpError, Status } from "../mod.ts";
-import router from "./router/index.ts";
+import { Context, isHttpError, NestFactory, Status } from "../mod.ts";
+import { AppModule } from "./app.module.ts";
 
-const app = new Application();
+const app = await NestFactory.create(AppModule);
+app.setGlobalPrefix("/api");
 
 // Logger
-app.use(async (ctx, next) => {
+app.use(async (ctx: Context, next) => {
   await next();
   const rt = ctx.response.headers.get("X-Response-Time");
   console.log(`${ctx.request.method} ${ctx.request.url} - ${rt}`);
 });
 
 // Timing
-app.use(async (ctx, next) => {
+app.use(async (ctx: Context, next) => {
   const start = Date.now();
   await next();
   const ms = Date.now() - start;
@@ -19,7 +20,7 @@ app.use(async (ctx, next) => {
 });
 
 // if you want to catch the error, you must set it before the routers.
-app.use(async (ctx, next) => {
+app.use(async (ctx: Context, next) => {
   try {
     await next();
     if (ctx.response.body === undefined && ctx.response.status === 404) {
@@ -49,7 +50,11 @@ app.use(async (ctx, next) => {
   }
 });
 
-app.use(router.routes());
+app.get("/hello", (ctx: Context) => {
+  ctx.response.body = "hello";
+});
+
+app.use(app.routes());
 
 const port = Number(Deno.env.get("PORT") || 1000);
 console.log(`app will start with: http://localhost:${port}`);

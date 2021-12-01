@@ -1,8 +1,12 @@
-export * from "./src/myRouter.ts";
+export * from "./src/router.ts";
 
 export * from "./src/utils.ts";
 
 export * from "./src/params.ts";
+
+export * from "./src/factory.ts";
+
+export * from "./src/module.decrator.ts";
 
 export type { CanActivate, Constructor } from "./src/interface.ts";
 
