@@ -7,6 +7,8 @@ export const META_METHOD_KEY = Symbol("meta:method");
 export const META_PATH_KEY = Symbol("meta:path");
 export const META_GUARD_KEY = Symbol("meta:guard");
 
+const classCaches = new Map<Constructor, any>();
+
 export const Controller = (path: string): ClassDecorator => {
   return (target) => {
     Reflect.defineMetadata(META_PATH_KEY, path, target);
@@ -32,7 +34,11 @@ export function overrideFnByGuard(
       for (const guard of guards) {
         let _guard = guard;
         if (typeof guard === "function") {
-          _guard = new (guard as any)();
+          _guard = classCaches.get(guard);
+          if (!_guard) {
+            _guard = new (guard as any)();
+            classCaches.set(guard, _guard);
+          }
         }
         const result = await _guard.canActivate(context);
         if (!result) {
