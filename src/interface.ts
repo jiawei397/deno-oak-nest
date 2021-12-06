@@ -34,3 +34,9 @@ export interface ModuleMetadata {
    */
   controllers: Type<any>[];
 }
+
+export interface InjectedData {
+  // deno-lint-ignore ban-types
+  fn: Function;
+  params: any[];
+}

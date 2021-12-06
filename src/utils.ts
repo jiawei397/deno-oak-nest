@@ -1,6 +1,11 @@
 // deno-lint-ignore-file no-explicit-any
 import { Context, Reflect, UnauthorizedException } from "../deps.ts";
-import { CanActivate, Constructor, ControllerMethod } from "./interface.ts";
+import {
+  CanActivate,
+  Constructor,
+  ControllerMethod,
+  InjectedData,
+} from "./interface.ts";
 import { transferParam } from "./params.ts";
 
 export const META_METHOD_KEY = Symbol("meta:method");
@@ -100,7 +105,10 @@ export const Factory = async <T>(target: Constructor<T>): Promise<T> => {
   if (providers?.length) {
     args = await Promise.all(
       providers.map((provider: Constructor, index: number) => {
-        const injectedData = Reflect.getMetadata(index + "", target);
+        const injectedData = Reflect.getMetadata(
+          "design:inject" + index,
+          target,
+        ) as InjectedData;
         if (typeof injectedData?.fn === "function") {
           return injectedData.fn.apply(null, injectedData.params);
         }

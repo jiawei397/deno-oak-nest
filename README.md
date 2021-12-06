@@ -361,7 +361,7 @@ And you maybe register your Model:
 ```ts
 export const InjectModel = (Cls: Constructor) =>
   (target: Constructor, _property: any, index: number) => {
-    Reflect.defineMetadata(index + "", {
+    Reflect.defineMetadata("design:inject" + index, {
       params: [Cls],
       fn: getModel,
     }, target);
