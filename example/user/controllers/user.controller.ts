@@ -65,7 +65,19 @@ export const Roles = (...roles: RoleAction[]) => SetMetadata("roles", roles);
 
 export const LogTime = () => {
   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    console.log("----logTime--");
+    const originalMethod = descriptor.value;
+    descriptor.value = async function (...args: any[]) {
+      const start = Date.now();
+      const result = await originalMethod.apply(this, args);
+      console.info(
+        target.constructor.name,
+        `${propertyKey}, take up time: ${
+          (Date.now() - start) /
+          1000
+        } s`,
+      );
+      return result;
+    };
     return descriptor;
   };
 };
@@ -125,8 +137,8 @@ export class UserController {
   }
 
   @Post("citys")
-  @LogTime()
   @Roles(RoleAction.read, RoleAction.write)
+  @LogTime()
   getCitys(ctx: Context, @Body() params: any) {
     console.log("----citys---", params);
     const result = mockjs.mock({

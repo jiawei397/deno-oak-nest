@@ -4,6 +4,8 @@ export * from "./src/utils.ts";
 
 export * from "./src/params.ts";
 
+export * from "./src/guard.ts";
+
 export * from "./src/factory.ts";
 
 export * from "./src/module.decrator.ts";

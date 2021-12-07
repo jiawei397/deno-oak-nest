@@ -8,13 +8,9 @@ import {
   Reflect,
   yellow,
 } from "../deps.ts";
+import { overrideFnByGuard } from "./guard.ts";
 import { Constructor, RouteMap } from "./interface.ts";
-import {
-  mapRoute,
-  META_GUARD_KEY,
-  META_PATH_KEY,
-  overrideFnByGuard,
-} from "./utils.ts";
+import { mapRoute, META_PATH_KEY } from "./utils.ts";
 
 class Router extends OriginRouter {
   private apiPrefix = "";
@@ -74,11 +70,7 @@ class Router extends OriginRouter {
         lastCls = cls;
         const methodKey = this.join(modelPath, route);
         const funcStart = Date.now();
-        const classGuards = Reflect.getMetadata(META_GUARD_KEY, instance) || [];
-        const fnGuards = Reflect.getMetadata(META_GUARD_KEY, fn) || [];
-
         const newFunc = overrideFnByGuard(
-          classGuards.concat(fnGuards),
           instance,
           fn,
           methodName,
