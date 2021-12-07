@@ -96,7 +96,9 @@ export const Body = createParamDecorator(
         target,
         methodName,
       );
-      if (providers?.length && providers[index].name !== "Object") { // if no class validation, we can skip this
+      if (
+        providers?.length && providers[index] && providers[index] !== Object
+      ) { // if no class validation, we can skip this
         const post = new providers[index]();
         Object.assign(post, value);
         try {
