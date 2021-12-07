@@ -1,9 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 import { Context, Reflect, UnauthorizedException } from "../deps.ts";
-import { CanActivate, Constructor, ControllerMethod } from "./interface.ts";
+import { CanActivate, ControllerMethod } from "./interface.ts";
 import { transferParam } from "./params.ts";
-
-const classCaches = new Map<Constructor, any>();
+import { Factory } from "./utils.ts";
 
 export const META_FUNCTION_KEY = Symbol("meta:fn");
 export const META_GUARD_KEY = Symbol("meta:guard");
@@ -50,11 +49,7 @@ export function overrideFnByGuard(
       for (const guard of guards) {
         let _guard = guard;
         if (typeof guard === "function") {
-          _guard = classCaches.get(guard);
-          if (!_guard) {
-            _guard = new (guard as any)();
-            classCaches.set(guard, _guard);
-          }
+          _guard = await Factory(guard);
         }
         Reflect.defineMetadata(META_FUNCTION_KEY, fn, context); // record the function to context
         const result = await _guard.canActivate(context);

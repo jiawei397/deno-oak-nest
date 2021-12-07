@@ -20,67 +20,11 @@ import {
 } from "../../../mod.ts";
 import type { Context } from "../../../mod.ts";
 import { BadRequestException, delay, mockjs } from "../../deps.ts";
-
-class AuthGuard implements CanActivate {
-  async canActivate(context: Context): Promise<boolean> {
-    console.log("--AuthGuard---");
-    console.log("roles", getMetadataForGuard("roles", context));
-    // await delay(100);
-    // throw new ForbiddenException("this is AuthGuard error message");
-    return true;
-    // return false;
-  }
-}
-
-class AuthGuard2 implements CanActivate {
-  async canActivate(_context: Context): Promise<boolean> {
-    console.log("--AuthGuard2---");
-    // throw new ForbiddenException('this is AuthGuard2 error message');
-    return true;
-  }
-}
-
-class AuthGuard3 implements CanActivate {
-  async canActivate(_context: Context): Promise<boolean> {
-    console.log("--AuthGuard3---");
-    this.test();
-    // throw new ForbiddenException("this is AuthGuard3 error message");
-    return true;
-    // return false;
-  }
-
-  test() {
-    console.log("---test");
-  }
-}
-
-export enum RoleAction {
-  read = 1,
-  write = 1 << 1,
-  delete = 1 << 2,
-  export = 1 << 3,
-}
-
-export const Roles = (...roles: RoleAction[]) => SetMetadata("roles", roles);
-
-export const LogTime = () => {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    const originalMethod = descriptor.value;
-    descriptor.value = async function (...args: any[]) {
-      const start = Date.now();
-      const result = await originalMethod.apply(this, args);
-      console.info(
-        target.constructor.name,
-        `${propertyKey}, take up time: ${
-          (Date.now() - start) /
-          1000
-        } s`,
-      );
-      return result;
-    };
-    return descriptor;
-  };
-};
+import { AuthGuard } from "../../guards/auth.guard.ts";
+import { AuthGuard2 } from "../../guards/auth2.guard.ts";
+import { AuthGuard3 } from "../../guards/auth3.guard.ts";
+import { RoleAction, Roles } from "../../decrators/roles.ts";
+import { LogTime } from "../../decrators/time.ts";
 
 @UseGuards(AuthGuard)
 @Controller("/user")
