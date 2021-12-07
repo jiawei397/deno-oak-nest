@@ -11,6 +11,7 @@ import { transferParam } from "./params.ts";
 export const META_METHOD_KEY = Symbol("meta:method");
 export const META_PATH_KEY = Symbol("meta:path");
 export const META_GUARD_KEY = Symbol("meta:guard");
+export const META_FUNCTION_KEY = Symbol("meta:fn");
 
 const classCaches = new Map<Constructor, any>();
 
@@ -23,6 +24,33 @@ export const Controller = (path: string): ClassDecorator => {
 function transResponseResult(context: Context, result: any) {
   if (context.response.body === undefined) {
     context.response.body = result;
+  }
+}
+
+export function SetMetadata<K = string, V = any>(
+  metadataKey: K,
+  metadataValue: V,
+) {
+  const decoratorFactory = (
+    target: any,
+    _propertyKey: string | symbol,
+    descriptor: PropertyDescriptor,
+  ) => {
+    if (descriptor) {
+      Reflect.defineMetadata(metadataKey, metadataValue, descriptor.value);
+      return descriptor;
+    }
+    Reflect.defineMetadata(metadataKey, metadataValue, target);
+    return target;
+  };
+  decoratorFactory.KEY = metadataKey;
+  return decoratorFactory;
+}
+
+export function getMetadataForGuard(metadataKey: string, context: Context) {
+  const fn = Reflect.getMetadata(META_FUNCTION_KEY, context);
+  if (fn) {
+    return Reflect.getMetadata(metadataKey, fn);
   }
 }
 
@@ -45,6 +73,7 @@ export function overrideFnByGuard(
             classCaches.set(guard, _guard);
           }
         }
+        Reflect.defineMetadata(META_FUNCTION_KEY, fn, context); // record the function to context
         const result = await _guard.canActivate(context);
         if (!result) {
           throw new UnauthorizedException(UnauthorizedException.name);

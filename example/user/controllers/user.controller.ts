@@ -6,6 +6,7 @@ import {
   Controller,
   ControllerName,
   Get,
+  getMetadataForGuard,
   Ip,
   MethodName,
   Post,
@@ -14,14 +15,16 @@ import {
   Request,
   Res,
   Response,
+  SetMetadata,
   UseGuards,
 } from "../../../mod.ts";
 import type { Context } from "../../../mod.ts";
 import { BadRequestException, delay, mockjs } from "../../deps.ts";
 
 class AuthGuard implements CanActivate {
-  async canActivate(_context: Context): Promise<boolean> {
+  async canActivate(context: Context): Promise<boolean> {
     console.log("--AuthGuard---");
+    console.log("roles", getMetadataForGuard("roles", context));
     // await delay(100);
     // throw new ForbiddenException("this is AuthGuard error message");
     return true;
@@ -50,6 +53,22 @@ class AuthGuard3 implements CanActivate {
     console.log("---test");
   }
 }
+
+export enum RoleAction {
+  read = 1,
+  write = 1 << 1,
+  delete = 1 << 2,
+  export = 1 << 3,
+}
+
+export const Roles = (...roles: RoleAction[]) => SetMetadata("roles", roles);
+
+export const LogTime = () => {
+  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    console.log("----logTime--");
+    return descriptor;
+  };
+};
 
 @UseGuards(AuthGuard)
 @Controller("/user")
@@ -91,8 +110,9 @@ export class UserController {
     throw new BadRequestException("bad request");
   }
 
-  // @UseGuards(AuthGuard2, AuthGuard3)
+  @UseGuards(AuthGuard2, AuthGuard3)
   @Get("list")
+  @Roles(RoleAction.read)
   list(context: Context) {
     this.testInnerCall();
     context.response.body = mockjs.mock({
@@ -101,10 +121,12 @@ export class UserController {
   }
 
   testInnerCall() {
-    console.log("---test---");
+    console.log("---testInnerCall---");
   }
 
   @Post("citys")
+  @LogTime()
+  @Roles(RoleAction.read, RoleAction.write)
   getCitys(ctx: Context, @Body() params: any) {
     console.log("----citys---", params);
     const result = mockjs.mock({
