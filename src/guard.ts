@@ -27,7 +27,10 @@ export function SetMetadata<K = string, V = any>(
   return decoratorFactory;
 }
 
-export function getMetadataForGuard(metadataKey: string, context: Context) {
+export function getMetadataForGuard<T>(
+  metadataKey: string,
+  context: Context,
+): T | undefined {
   const fn = Reflect.getMetadata(META_FUNCTION_KEY, context);
   if (fn) {
     return Reflect.getMetadata(metadataKey, fn);
@@ -83,5 +86,31 @@ export function UseGuards(...guards: (CanActivate | Function)[]) {
 function transResponseResult(context: Context, result: any) {
   if (context.response.body === undefined) {
     context.response.body = result;
+  }
+}
+
+export class Reflector {
+  /**
+   * Retrieve metadata for a specified key for a specified target.
+   *
+   * @example
+   * `const roles = this.reflector.get<string[]>('roles', context);`
+   *
+   * @param metadataKey lookup key for metadata to retrieve
+   * @param context context (decorated object) to retrieve metadata from
+   */
+  get<T>(metadataKey: string, context: Context) {
+    return getMetadataForGuard<T>(metadataKey, context);
+  }
+  /**
+   * Retrieve metadata for a specified key for a specified set of targets.
+   *
+   * @param metadataKey lookup key for metadata to retrieve
+   * @param targets context (decorated objects) to retrieve metadata from
+   */
+  getAll(metadataKey: string, targets: any[]) {
+    return (targets || []).map((target) =>
+      Reflect.getMetadata(metadataKey, target)
+    );
   }
 }
