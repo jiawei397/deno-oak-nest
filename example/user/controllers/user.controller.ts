@@ -1,12 +1,9 @@
-// deno-lint-ignore-file no-explicit-any require-await no-unused-vars
+// deno-lint-ignore-file no-explicit-any
 import {
   Body,
-  CanActivate,
-  // Context,
   Controller,
   ControllerName,
   Get,
-  getMetadataForGuard,
   Ip,
   MethodName,
   Post,
@@ -15,11 +12,10 @@ import {
   Request,
   Res,
   Response,
-  SetMetadata,
   UseGuards,
 } from "../../../mod.ts";
 import type { Context } from "../../../mod.ts";
-import { BadRequestException, delay, mockjs } from "../../deps.ts";
+import { BadRequestException, mockjs } from "../../deps.ts";
 import { AuthGuard } from "../../guards/auth.guard.ts";
 import { AuthGuard2 } from "../../guards/auth2.guard.ts";
 import { AuthGuard3 } from "../../guards/auth3.guard.ts";
