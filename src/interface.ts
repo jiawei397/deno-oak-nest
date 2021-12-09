@@ -33,7 +33,16 @@ export interface ModuleMetadata {
    * instantiated.
    */
   controllers: Type<any>[];
+
+  /**
+   * Optional list of services defined in this module which have to be
+   * instantiated.
+   */
+  providers?: Type<any>[];
 }
+
+export type ModuleMetadataKey = keyof ModuleMetadata;
+export type ModuleMetadataKeys = ModuleMetadataKey[];
 
 export interface InjectedData {
   // deno-lint-ignore ban-types

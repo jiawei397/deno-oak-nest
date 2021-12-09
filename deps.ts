@@ -43,3 +43,5 @@ export {
   BodyParamValidationException,
   UnauthorizedException,
 } from "https://deno.land/x/oak_exception@v0.0.6/mod.ts";
+
+export { cron } from "https://deno.land/x/deno_cron@v1.0.0/cron.ts";

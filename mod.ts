@@ -8,7 +8,7 @@ export * from "./src/guard.ts";
 
 export * from "./src/factory.ts";
 
-export * from "./src/module.decrator.ts";
+export * from "./src/decorators/mod.ts";
 
 export type { CanActivate, Constructor } from "./src/interface.ts";
 

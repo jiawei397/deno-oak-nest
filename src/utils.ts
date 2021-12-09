@@ -55,7 +55,7 @@ export const Factory = async <T>(target: Constructor<T>): Promise<T> => {
     );
   }
   if (factory.has(target)) {
-    // console.log("factory.has cache", target);
+    // console.debug("factory.has cache", target);
     return factory.get(target);
   }
   const instance = new target(...args);

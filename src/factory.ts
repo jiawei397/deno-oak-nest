@@ -1,7 +1,9 @@
 // deno-lint-ignore-file no-explicit-any
-import { Application, Reflect } from "../deps.ts";
-import { Type } from "./interface.ts";
+import { Application } from "../deps.ts";
+import { getModuleMetadata, isModule } from "../mod.ts";
+import { ModuleMetadata, Type } from "./interface.ts";
 import { Router } from "./router.ts";
+import { Factory } from "./utils.ts";
 
 export type ApplicationEx = Application & {
   setGlobalPrefix: typeof Router.prototype.setGlobalPrefix;
@@ -11,31 +13,47 @@ export type ApplicationEx = Application & {
 };
 
 export class NestFactory {
-  static #findControllers(module: Type<any>, arr: Type<any>[] = []) {
-    const imports = Reflect.getMetadata("imports", module);
-    const controllers = Reflect.getMetadata("controllers", module) || [];
+  static #findControllers(
+    module: Type<any>,
+    controllerArr: Type<any>[] = [],
+    providerArr: Type<any>[] = [],
+  ) {
+    const imports = getModuleMetadata("imports", module);
+    const controllers = getModuleMetadata("controllers", module) || [];
+    const providers = getModuleMetadata("providers", module) || [];
+    controllerArr.push(...controllers);
+    providerArr.push(...providers);
     imports.forEach((item: any) => {
       if (!item) {
         return;
       }
-      const isModule = Reflect.getMetadata("isModule", item);
-      if (!isModule) {
-        return;
+      const _isModule = isModule(item);
+      if (_isModule) {
+        this.#findControllers(item, controllerArr, providerArr);
+      } else {
+        const itemModule = item as ModuleMetadata;
+        if (itemModule.providers?.length) {
+          providerArr.push(...itemModule.providers);
+        }
+        if (itemModule.controllers?.length) {
+          controllerArr.push(...itemModule.controllers);
+        }
       }
-      this.#findControllers(item, arr);
     });
-    arr.push(...controllers);
-    return arr;
   }
+
   static async create(module: Type<any>) {
     const app = new Application() as ApplicationEx;
     const router = new Router();
-    // console.log(Reflect.getMetadata("controllers", module));
-    // console.log(Reflect.getMetadata("imports", module));
-    // console.log(Reflect.getMetadata("isModule", module));
-    const controllers = this.#findControllers(module);
-    // console.log("---controllers---", controllers);
-    await router.add(...controllers);
+    const controllers: Type<any>[] = [];
+    const providers: Type<any>[] = [];
+    this.#findControllers(module, controllers, providers);
+    if (providers.length) {
+      await Promise.all(providers.map((item) => Factory(item)));
+    }
+    if (controllers.length) {
+      await router.add(...controllers);
+    }
     app.setGlobalPrefix = router.setGlobalPrefix.bind(router);
     app.get = router.get.bind(router);
     app.routes = router.routes.bind(router);
