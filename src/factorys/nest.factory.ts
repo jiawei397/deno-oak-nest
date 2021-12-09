@@ -84,14 +84,14 @@ export async function initProvider(item: Provider) {
       return itemProvider.useValue;
     } else if ("useClass" in item) {
       const itemProvider = item as ClassProvider;
-      return Factory(itemProvider.useClass);
-    } else if ("useFactory" in item) { // TODO deal scope
+      return Factory(itemProvider.useClass, itemProvider.scope);
+    } else if ("useFactory" in item) {
       const itemProvider = item as FactoryProvider;
       if (itemProvider.inject?.length) {
         const args = await Promise.all(
           itemProvider.inject.map((item: any) => {
             if (item instanceof Function) {
-              return Factory(item);
+              return Factory(item, itemProvider.scope);
             }
             return item;
           }),
