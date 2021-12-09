@@ -10,6 +10,6 @@ export * from "./src/factory.ts";
 
 export * from "./src/decorators/mod.ts";
 
-export type { CanActivate, Constructor } from "./src/interface.ts";
+export type { CanActivate, Constructor } from "./src/interfaces/mod.ts";
 
 export * from "./deps.ts";

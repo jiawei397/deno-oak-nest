@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Reflect } from "../deps.ts";
-import { Constructor, InjectedData } from "./interface.ts";
+import { InjectedData, Type } from "./interfaces/mod.ts";
 
 export const META_METHOD_KEY = Symbol("meta:method");
 export const META_PATH_KEY = Symbol("meta:path");
@@ -37,12 +37,12 @@ export const Injectable = (): ClassDecorator => (_target) => {};
 
 export const factory = new Map();
 
-export const Factory = async <T>(target: Constructor<T>): Promise<T> => {
+export const Factory = async <T>(target: Type<T>): Promise<T> => {
   const providers = Reflect.getMetadata("design:paramtypes", target);
   let args: any[] = [];
   if (providers?.length) {
     args = await Promise.all(
-      providers.map((provider: Constructor, index: number) => {
+      providers.map((provider: Type, index: number) => {
         const injectedData = Reflect.getMetadata(
           "design:inject" + index,
           target,
@@ -63,7 +63,7 @@ export const Factory = async <T>(target: Constructor<T>): Promise<T> => {
   return instance;
 };
 
-export async function mapRoute(Cls: Constructor) {
+export async function mapRoute(Cls: Type) {
   const instance = await Factory(Cls);
   const prototype = Object.getPrototypeOf(instance);
   return Object.getOwnPropertyNames(prototype)

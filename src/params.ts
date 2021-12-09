@@ -8,7 +8,7 @@ import {
   ValidationError,
 } from "../deps.ts";
 import type { Context } from "../deps.ts";
-import { ControllerMethod } from "./interface.ts";
+import { ControllerMethod } from "./interfaces/mod.ts";
 
 const paramMetadataKey = Symbol("meta:param");
 const ctxMetadataKey = Symbol("meta:ctx");

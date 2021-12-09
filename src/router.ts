@@ -9,7 +9,7 @@ import {
   yellow,
 } from "../deps.ts";
 import { overrideFnByGuard } from "./guard.ts";
-import { Constructor, RouteMap } from "./interface.ts";
+import { RouteMap, Type } from "./interfaces/mod.ts";
 import { mapRoute, META_PATH_KEY } from "./utils.ts";
 
 class Router extends OriginRouter {
@@ -38,7 +38,7 @@ class Router extends OriginRouter {
     return last;
   }
 
-  add(...clsArr: Constructor[]) {
+  add(...clsArr: Type[]) {
     return Promise.all(clsArr.map(async (Cls) => {
       const arr = await mapRoute(Cls);
       const path = Reflect.getMetadata(META_PATH_KEY, Cls);

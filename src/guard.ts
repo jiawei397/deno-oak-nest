@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Context, Reflect, UnauthorizedException } from "../deps.ts";
-import { CanActivate, ControllerMethod } from "./interface.ts";
+import { CanActivate, ControllerMethod } from "./interfaces/mod.ts";
 import { transferParam } from "./params.ts";
 import { Factory } from "./utils.ts";
 

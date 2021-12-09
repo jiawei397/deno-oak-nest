@@ -1,8 +1,11 @@
 // deno-lint-ignore-file no-explicit-any
 import { Reflect } from "../../deps.ts";
-import { ModuleMetadata, ModuleMetadataKey } from "../interface.ts";
+import {
+  ModuleMetadata,
+  ModuleMetadataKey,
+} from "../interfaces/module.interface.ts";
 
-const MODULE_KEY = "module:isModule";
+const MODULE_KEY = Symbol("module:isModule");
 
 export function Module(metadata: ModuleMetadata) {
   return (target: any) => {
