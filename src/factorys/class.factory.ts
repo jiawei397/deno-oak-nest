@@ -29,7 +29,7 @@ export const Factory = async <T>(
   }
   if (scope === Scope.DEFAULT) { // singleton
     if (factoryCaches.has(target)) {
-      console.debug("factory.has cache", target);
+      //   console.debug("factory.has cache", target);
       return factoryCaches.get(target);
     }
     const instance = new target(...args);
