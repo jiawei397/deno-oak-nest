@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import { Application } from "../deps.ts";
-import { getModuleMetadata, isModule } from "./decorators/module.ts";
+import { Application } from "../../deps.ts";
+import { getModuleMetadata, isModule } from "../decorators/module.ts";
 import {
   ClassProvider,
   ExistingProvider,
@@ -9,9 +9,9 @@ import {
   Provider,
   Type,
   ValueProvider,
-} from "./interfaces/mod.ts";
-import { Router } from "./router.ts";
-import { Factory } from "./utils.ts";
+} from "../interfaces/mod.ts";
+import { Router } from "../router.ts";
+import { Factory } from "./class.factory.ts";
 
 export type ApplicationEx = Application & {
   setGlobalPrefix: typeof Router.prototype.setGlobalPrefix;

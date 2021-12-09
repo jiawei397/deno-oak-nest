@@ -6,7 +6,8 @@ export * from "./src/params.ts";
 
 export * from "./src/guard.ts";
 
-export * from "./src/factory.ts";
+export * from "./src/factorys/class.factory.ts";
+export * from "./src/factorys/nest.factory.ts";
 
 export * from "./src/decorators/mod.ts";
 
