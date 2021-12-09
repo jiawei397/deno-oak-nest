@@ -19,8 +19,8 @@ import { BadRequestException, mockjs } from "../../deps.ts";
 import { AuthGuard } from "../../guards/auth.guard.ts";
 import { AuthGuard2 } from "../../guards/auth2.guard.ts";
 import { AuthGuard3 } from "../../guards/auth3.guard.ts";
-import { RoleAction, Roles } from "../../decrators/roles.ts";
-import { LogTime } from "../../decrators/time.ts";
+import { RoleAction, Roles } from "../../decorators/roles.ts";
+import { LogTime } from "../../decorators/time.ts";
 
 @UseGuards(AuthGuard)
 @Controller("/user")
