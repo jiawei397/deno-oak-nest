@@ -291,13 +291,15 @@ import { UserModule } from "./user/user.module.ts";
 export class AppModule {}
 ```
 
-Then this is `UserModule`:
+Then is `UserModule`, and the `providers` can contain the services which are not
+used by controllers.
 
 ```ts
 import { Module } from "https://deno.land/x/oak_nest@v0.5.5/mod.ts";
 import { RoleController } from "./controllers/role.controller.ts";
 import { UserController } from "./controllers/user.controller.ts";
 import { User2Controller } from "./controllers/user2.controller.ts";
+import { ScheduleService } from "./services/schedule.service.ts";
 
 @Module({
   imports: [],
@@ -305,6 +307,9 @@ import { User2Controller } from "./controllers/user2.controller.ts";
     UserController,
     RoleController,
     User2Controller,
+  ],
+  providers: [
+    ScheduleService,
   ],
 })
 export class UserModule {
