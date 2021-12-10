@@ -9,7 +9,7 @@ Rely on [oak@v10.0.0](https://deno.land/x/oak@v10.0.0/mod.ts) to simulate some
 annotation functions of [nestjs](https://docs.nestjs.com/) which is a frame for
 nodejs.
 
-I will update the oak version if need.
+I will update the `oak` version if need.
 
 ## run
 

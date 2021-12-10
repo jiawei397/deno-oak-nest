@@ -20,7 +20,11 @@ export { mockjs };
 
 export { delay } from "https://deno.land/std@0.97.0/async/mod.ts";
 
-export { Max, Min, validateOrReject } from "../deps.ts";
+export {
+  Max,
+  Min,
+  validateOrReject,
+} from "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts";
 
 export {
   BadRequestException,
