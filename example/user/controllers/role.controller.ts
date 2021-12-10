@@ -2,7 +2,6 @@
 import {
   Body,
   Controller,
-  createParamDecorator,
   Get,
   Headers,
   Post,
@@ -11,33 +10,17 @@ import {
   Response,
 } from "../../../mod.ts";
 import type { Context } from "../../../mod.ts";
-import { Max, Min } from "../../deps.ts";
 import { RoleService } from "../services/role.service.ts";
-
-const Add = createParamDecorator(async (ctx: any) => {
-  const result = ctx.request.body(); // content type automatically detected
-  if (result.type === "json") {
-    const value = await result.value; // an object of parsed JSON
-    // console.log('value', value);
-    return value.userId;
-  }
-  return ctx.params.id;
-});
-
-export class Dto {
-  @Max(2)
-  @Min(1)
-  pageNum!: number;
-
-  @Max(5)
-  @Min(1)
-  pageCount!: number;
-}
+import { Add } from "../../decorators/add.ts";
+import { RoleInfoDto } from "../dtos/role.dto.ts";
 
 @Controller("/role")
 export class RoleController {
-  constructor(private readonly roleService: RoleService) {
+  constructor(
+    private readonly roleService: RoleService,
+  ) {
   }
+
   @Get("/info/:id")
   test(
     context: Context,
@@ -60,7 +43,7 @@ export class RoleController {
   @Post("/info")
   info(
     @Add() name: string,
-    @Body() params: Dto,
+    @Body() params: RoleInfoDto,
     @Headers() headers: any,
     @Headers("host") host: any,
   ) {

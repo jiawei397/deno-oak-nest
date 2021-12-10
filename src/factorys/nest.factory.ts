@@ -1,17 +1,9 @@
 // deno-lint-ignore-file no-explicit-any
 import { Application } from "../../deps.ts";
 import { getModuleMetadata, isModule } from "../decorators/module.ts";
-import {
-  ClassProvider,
-  ExistingProvider,
-  FactoryProvider,
-  ModuleMetadata,
-  Provider,
-  Type,
-  ValueProvider,
-} from "../interfaces/mod.ts";
+import { ModuleMetadata, Provider, Type } from "../interfaces/mod.ts";
 import { Router } from "../router.ts";
-import { Factory } from "./class.factory.ts";
+import { initProvider } from "./class.factory.ts";
 
 export type ApplicationEx = Application & {
   setGlobalPrefix: typeof Router.prototype.setGlobalPrefix;
@@ -65,41 +57,5 @@ export class NestFactory {
     app.get = router.get.bind(router);
     app.routes = router.routes.bind(router);
     return app;
-  }
-}
-
-export async function initProvider(item: Provider) {
-  if (!item) {
-    return;
-  }
-  if (item instanceof Function) {
-    return Factory(item);
-  }
-  if (item.provide) {
-    if ("useExisting" in item) { // TODO not get how to use it
-      const itemProvider = item as ExistingProvider;
-      return itemProvider.useExisting;
-    } else if ("useValue" in item) {
-      const itemProvider = item as ValueProvider;
-      return itemProvider.useValue;
-    } else if ("useClass" in item) {
-      const itemProvider = item as ClassProvider;
-      return Factory(itemProvider.useClass, itemProvider.scope);
-    } else if ("useFactory" in item) {
-      const itemProvider = item as FactoryProvider;
-      if (itemProvider.inject?.length) {
-        const args = await Promise.all(
-          itemProvider.inject.map((item: any) => {
-            if (item instanceof Function) {
-              return Factory(item, itemProvider.scope);
-            }
-            return item;
-          }),
-        );
-        return itemProvider.useFactory(...args);
-      } else {
-        return itemProvider.useFactory();
-      }
-    }
   }
 }

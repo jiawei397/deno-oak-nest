@@ -13,6 +13,10 @@ import { ScheduleService } from "./services/schedule.service.ts";
   ],
   providers: [
     ScheduleService,
+    {
+      provide: "CONNECTION",
+      useValue: "connected",
+    },
   ],
 })
 export class UserModule {

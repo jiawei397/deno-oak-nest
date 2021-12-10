@@ -385,6 +385,13 @@ async function getModel<T>(
 }
 ```
 
+You can also use the `Inject` decorator to help you:
+
+```ts
+import { Inject } from "https://deno.land/x/oak_nest@v0.6.1/mod.ts";
+export const InjectModel = (Cls: Constructor) => Inject(() => getModel(Cls));
+```
+
 > To support it, I changed the `router.add` method to asynchronous. It was not a
 > pleasant decision.
 
