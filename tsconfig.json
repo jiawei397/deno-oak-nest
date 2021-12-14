@@ -3,7 +3,6 @@
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "strictPropertyInitialization": false,
-    "incremental": false
+    "strictPropertyInitialization": false
   }
 }
