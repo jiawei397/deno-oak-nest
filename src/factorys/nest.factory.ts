@@ -14,31 +14,33 @@ export type ApplicationEx = Application & {
 
 export class NestFactory {
   static #findControllers(
-    module: Type<any>,
+    module: Type<any> | ModuleMetadata,
     controllerArr: Type<any>[] = [],
     providerArr: Provider[] = [],
   ) {
+    if (!module) {
+      return;
+    }
     const imports = getModuleMetadata("imports", module);
-    const controllers = getModuleMetadata("controllers", module) || [];
-    const providers = getModuleMetadata("providers", module) || [];
-    controllerArr.push(...controllers);
-    providerArr.push(...providers);
-    imports.forEach((item: any) => {
-      if (!item) {
-        return;
+    if (isModule(module)) {
+      const controllers = getModuleMetadata("controllers", module) || [];
+      const providers = getModuleMetadata("providers", module) || [];
+      controllerArr.push(...controllers);
+      providerArr.push(...providers);
+    } else {
+      const metaModule = module as ModuleMetadata;
+      if (metaModule.providers?.length) {
+        providerArr.push(...metaModule.providers);
       }
-      if (isModule(item)) {
+      if (metaModule.controllers?.length) {
+        controllerArr.push(...metaModule.controllers);
+      }
+    }
+    if (imports) {
+      imports.forEach((item: any) => {
         this.#findControllers(item, controllerArr, providerArr);
-      } else {
-        const itemModule = item as ModuleMetadata;
-        if (itemModule.providers?.length) {
-          providerArr.push(...itemModule.providers);
-        }
-        if (itemModule.controllers?.length) {
-          controllerArr.push(...itemModule.controllers);
-        }
-      }
-    });
+      });
+    }
   }
 
   static async create(module: Type<any>) {
