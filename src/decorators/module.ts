@@ -18,10 +18,10 @@ export function Module(metadata: ModuleMetadata) {
 }
 
 export function isModule(module: any) {
-  if (!module) {
+  if (!module || (typeof module !== "function" && typeof module !== "object")) {
     return false;
   }
-  return Reflect.getMetadata(MODULE_KEY, module);
+  return "imports" in module || Reflect.getMetadata(MODULE_KEY, module);
 }
 
 export function getModuleMetadata(key: ModuleMetadataKey, module: any) {

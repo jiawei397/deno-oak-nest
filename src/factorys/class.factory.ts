@@ -11,21 +11,22 @@ import {
   ValueProvider,
 } from "../interfaces/mod.ts";
 
-export const factoryCaches = new Map();
+export const globalFactoryCaches = new Map();
 
 export const setFactoryCaches = (key: any, value: any) => {
-  factoryCaches.set(key, value);
+  globalFactoryCaches.set(key, value);
 };
 
 export const Factory = async <T>(
   target: Type<T>,
   scope: Scope = Scope.DEFAULT,
+  factoryCaches = globalFactoryCaches,
 ): Promise<T> => {
-  const providers = Reflect.getMetadata("design:paramtypes", target);
+  const paramtypes = Reflect.getMetadata("design:paramtypes", target);
   let args: any[] = [];
-  if (providers?.length) {
+  if (paramtypes?.length) {
     args = await Promise.all(
-      providers.map((provider: Type, index: number) => {
+      paramtypes.map((paramtype: Type, index: number) => {
         const injectedData = getInjectData(target, index);
         if (injectedData) {
           if (
@@ -44,9 +45,9 @@ export const Factory = async <T>(
           }
         }
         if (scope === Scope.REQUEST) { // TODO I don't quite understand the difference between REQUEST and TRANSIENT, so it maybe error.
-          return Factory(provider, Scope.DEFAULT);
+          return Factory(paramtype, Scope.DEFAULT);
         } else {
-          return Factory(provider, scope);
+          return Factory(paramtype, scope);
         }
       }),
     );
@@ -64,48 +65,55 @@ export const Factory = async <T>(
   }
 };
 
-export async function initProvider(item: Provider, scope?: Scope) {
+export async function initProvider(
+  item: Provider,
+  scope: Scope,
+  cache = globalFactoryCaches,
+) {
   if (!item) {
     return;
   }
 
   if (item instanceof Function) {
-    return Factory(item, scope);
+    return Factory(item, scope, cache);
   }
 
   if (item.provide) {
     if ("useExisting" in item) { // TODO not get how to use it
       const itemProvider = item as ExistingProvider;
-      const existingInstance = Factory(itemProvider.useExisting);
+      const existingInstance = Factory(itemProvider.useExisting, scope, cache);
       if (!existingInstance) {
         throw new Error(
           `ExistingProvider: ${itemProvider.useExisting} not found`,
         );
       }
-      setFactoryCaches(itemProvider.provide, existingInstance);
+      cache.set(itemProvider.provide, existingInstance);
       return itemProvider.useExisting;
     } else if ("useValue" in item) {
       const itemProvider = item as ValueProvider;
-      setFactoryCaches(itemProvider.provide, itemProvider.useValue);
+      cache.set(itemProvider.provide, itemProvider.useValue);
       return itemProvider.useValue;
     } else if ("useClass" in item) {
       const itemProvider = item as ClassProvider;
-      return Factory(itemProvider.useClass, itemProvider.scope);
+      return Factory(itemProvider.useClass, itemProvider.scope, cache);
     } else if ("useFactory" in item) {
       const itemProvider = item as FactoryProvider;
+      let result;
       if (itemProvider.inject?.length) {
         const args = await Promise.all(
           itemProvider.inject.map((item: any) => {
             if (item instanceof Function) {
-              return Factory(item, itemProvider.scope);
+              return Factory(item, itemProvider.scope, cache);
             }
             return item;
           }),
         );
-        return itemProvider.useFactory(...args);
+        result = await itemProvider.useFactory(...args);
       } else {
-        return itemProvider.useFactory();
+        result = await itemProvider.useFactory();
       }
+      cache.set(itemProvider.provide, result);
+      return result;
     }
   }
 }

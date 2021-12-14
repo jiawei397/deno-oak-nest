@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { Application } from "../../deps.ts";
 import { getModuleMetadata, isModule } from "../decorators/module.ts";
-import { ModuleMetadata, Provider, Type } from "../interfaces/mod.ts";
+import { ModuleType, Provider, Scope, Type } from "../interfaces/mod.ts";
 import { Router } from "../router.ts";
 import { initProvider } from "./class.factory.ts";
 
@@ -13,45 +13,58 @@ export type ApplicationEx = Application & {
 };
 
 export class NestFactory {
-  static #findControllers(
-    module: Type<any> | ModuleMetadata,
-    controllerArr: Type<any>[] = [],
-    providerArr: Provider[] = [],
+  static async #findControllers(
+    module: ModuleType,
+    controllerArr: Type<any>[],
+    providerArr: Provider[],
   ) {
-    if (!module) {
+    if (!isModule(module)) {
       return;
     }
-    const imports = getModuleMetadata("imports", module);
-    if (isModule(module)) {
-      const controllers = getModuleMetadata("controllers", module) || [];
-      const providers = getModuleMetadata("providers", module) || [];
+    const isDynamicModule = "imports" in module;
+    const imports = isDynamicModule
+      ? module.imports
+      : getModuleMetadata("imports", module);
+    const controllers = isDynamicModule
+      ? module.controllers
+      : getModuleMetadata("controllers", module);
+    const providers = isDynamicModule
+      ? module.providers
+      : getModuleMetadata("providers", module);
+    // const exports = isDynamicModule
+    //   ? module.exports
+    //   : getModuleMetadata("exports", module); // TODO donnot think how to use exports
+    if (controllers) {
       controllerArr.push(...controllers);
-      providerArr.push(...providers);
-    } else {
-      const metaModule = module as ModuleMetadata;
-      if (metaModule.providers?.length) {
-        providerArr.push(...metaModule.providers);
-      }
-      if (metaModule.controllers?.length) {
-        controllerArr.push(...metaModule.controllers);
-      }
     }
-    if (imports) {
-      imports.forEach((item: any) => {
-        this.#findControllers(item, controllerArr, providerArr);
-      });
+    if (providers) {
+      providerArr.push(...providers);
+    }
+    if (imports && imports.length > 0) {
+      await Promise.all(imports.map(async (item: any) => {
+        if (!item) {
+          return;
+        }
+        const module = await item;
+        return this.#findControllers(module, controllerArr, providerArr);
+      }));
     }
   }
 
-  static async create(module: Type<any>) {
+  static async #initProvidersInModule(providers: Provider[]) {
+    for (const provider of providers) {
+      await initProvider(provider, Scope.DEFAULT);
+    }
+  }
+
+  static async create(module: ModuleType) {
     const app = new Application() as ApplicationEx;
     const router = new Router();
     const controllers: Type<any>[] = [];
-    const providers: Provider[] = [];
-    this.#findControllers(module, controllers, providers);
-    if (providers.length) {
-      await Promise.all(providers.map(initProvider));
-    }
+    const providers: Provider<any>[] = [];
+    await this.#findControllers(module, controllers, providers);
+    await this.#initProvidersInModule(providers);
+
     if (controllers.length) {
       await router.add(...controllers);
     }
