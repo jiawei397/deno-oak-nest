@@ -45,8 +45,8 @@ import {
   Query,
   Res,
   UseGuards,
-} from "https://deno.land/x/oak_nest@v0.6.3/mod.ts";
-import type { CanActivate } from "https://deno.land/x/oak_nest@v0.6.3/mod.ts";
+} from "https://deno.land/x/oak_nest@v0.6.4/mod.ts";
+import type { CanActivate } from "https://deno.land/x/oak_nest@v0.6.4/mod.ts";
 import mockjs from "https://deno.land/x/deno_mock@v2.0.0/mod.ts";
 import { delay } from "https://deno.land/std/async/mod.ts";
 
@@ -178,7 +178,7 @@ You can use `Injectable` to flag the service can be injectable, and it can be
 used by your Controller or other Service.
 
 ```ts
-import { Injectable } from "https://deno.land/x/oak_nest@v0.6.3/mod.ts";
+import { Injectable } from "https://deno.land/x/oak_nest@v0.6.4/mod.ts";
 
 @Injectable()
 export class RoleService {
@@ -221,7 +221,7 @@ If you like to use the `Service` alone in anywhere, you can with `Factory` like
 this:
 
 ```ts
-import { Factory } from "https://deno.land/x/oak_nest@v0.6.3/mod.ts";
+import { Factory } from "https://deno.land/x/oak_nest@v0.6.4/mod.ts";
 Factory(UserService).info();
 ```
 
@@ -231,7 +231,7 @@ Factory(UserService).info();
 import { UserController } from "./user.controller.ts";
 import { User2Controller } from "./user2.controller.ts";
 import { RoleController } from "./role.controller.ts";
-import { Router } from "https://deno.land/x/oak_nest@v0.6.3/mod.ts";
+import { Router } from "https://deno.land/x/oak_nest@v0.6.4/mod.ts";
 
 const router = new Router();
 await router.add(UserController);
@@ -250,7 +250,7 @@ import {
   isHttpError,
   send,
   Status,
-} from "https://deno.land/x/oak_nest@v0.6.3/mod.ts";
+} from "https://deno.land/x/oak_nest@v0.6.4/mod.ts";
 import router from "./router/index.ts";
 
 const app = new Application();
@@ -278,7 +278,7 @@ now you can visit
 First is the AppModule:
 
 ```ts
-import { Module } from "https://deno.land/x/oak_nest@v0.6.3/mod.ts";
+import { Module } from "https://deno.land/x/oak_nest@v0.6.4/mod.ts";
 import { AppController } from "./app.controller.ts";
 import { UserModule } from "./user/user.module.ts";
 
@@ -295,7 +295,7 @@ Then is `UserModule`, and the `providers` can contain the services which are not
 used by controllers.
 
 ```ts
-import { Module } from "https://deno.land/x/oak_nest@v0.6.3/mod.ts";
+import { Module } from "https://deno.land/x/oak_nest@v0.6.4/mod.ts";
 import { RoleController } from "./controllers/role.controller.ts";
 import { UserController } from "./controllers/user.controller.ts";
 import { User2Controller } from "./controllers/user2.controller.ts";
@@ -349,7 +349,7 @@ await app.listen({ port });
 If you want to connect db such as Mongodb, you can do like this:
 
 ```ts
-import { Module } from "https://deno.land/x/oak_nest@v0.6.3/mod.ts";
+import { Module } from "https://deno.land/x/oak_nest@v0.6.4/mod.ts";
 import { AppController } from "./app.controller.ts";
 import { UserModule } from "./user/user.module.ts";
 
@@ -390,7 +390,7 @@ async function getModel<T>(
 You can also use the `Inject` decorator to help you:
 
 ```ts
-import { Inject } from "https://deno.land/x/oak_nest@v0.6.3/mod.ts";
+import { Inject } from "https://deno.land/x/oak_nest@v0.6.4/mod.ts";
 export const InjectModel = (Cls: Constructor) => Inject(() => getModel(Cls));
 ```
 
