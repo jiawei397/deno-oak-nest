@@ -344,7 +344,9 @@ console.log(`app will start with: http://localhost:${port}`);
 await app.listen({ port });
 ```
 
-If you want to register a Model such as Mongodb, you can do like this:
+### connect db
+
+If you want to connect db such as Mongodb, you can do like this:
 
 ```ts
 import { Module } from "https://deno.land/x/oak_nest@v0.6.3/mod.ts";
@@ -353,7 +355,7 @@ import { UserModule } from "./user/user.module.ts";
 
 @Module({
   imports: [
-    MongoFactory.forRoot(globals.db),
+    MongoFactory.forRoot(globals.db), // it can return a Promise
     UserModule,
   ],
   controllers: [AppController],
@@ -361,7 +363,7 @@ import { UserModule } from "./user/user.module.ts";
 export class AppModule {}
 ```
 
-And you maybe register your Model:
+And you may provide a method to inject your Model:
 
 ```ts
 export const InjectModel = (Cls: Constructor) =>
@@ -412,6 +414,74 @@ export class UserService {
 ```
 
 In the above code, `this.model` is the `getModel` result.
+
+### register Dynamic Module
+
+You can also register a Dynamic Module like this:
+
+```ts
+import { DynamicModule } from "../../src/interfaces/mod.ts";
+import { ASYNC_KEY } from "./async.constant.ts";
+import { AsyncService } from "./async.service.ts";
+
+export class AsyncModule {
+  static register(db: string): DynamicModule {
+    return {
+      module: AsyncModule,
+      providers: [{
+        provide: ASYNC_KEY,
+        useFactory: () => { // can be async
+          console.log("AsyncModule.register: ", db);
+          return Promise.resolve(true);
+        },
+      }, AsyncService],
+    };
+  }
+}
+```
+
+And the `AsyncService` like this:
+
+```ts
+import { Inject, Injectable } from "../../mod.ts";
+import { ASYNC_KEY } from "./async.constant.ts";
+
+@Injectable()
+export class AsyncService {
+  constructor(@Inject(ASYNC_KEY) private readonly connection: string) {
+    console.log(
+      "injected CONNECTION_ASYNC maybe true: ",
+      this.connection,
+      "----",
+      connection,
+    );
+  }
+
+  info() {
+    return "info from AsyncService and the conecction is: " + this.connection;
+  }
+}
+```
+
+The `ASYNC_KEY` recommended use symbol like this:
+
+```ts
+export const ASYNC_KEY = Symbol("CONNECTION_ASYNC");
+```
+
+Then the `AsyncModule` can be use by other modules and the service can be
+injected to other service.
+
+```ts
+@Module({
+  imports: [
+    UserModule,
+    AsyncModule.register("localhost:4878"),
+  ],
+  controllers: [AppController],
+})
+export class AppModule {}
+```
 
 ---
 
