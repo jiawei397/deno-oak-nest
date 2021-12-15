@@ -33,8 +33,6 @@ export const Delete = createMappingDecorator(Methods.DELETE);
 export const Put = createMappingDecorator(Methods.PUT);
 export const Head = createMappingDecorator(Methods.HEAD);
 
-export const Injectable = (): ClassDecorator => (_target) => {};
-
 export async function mapRoute(Cls: Type) {
   const instance = await Factory(Cls);
   const prototype = Object.getPrototypeOf(instance);

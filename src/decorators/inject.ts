@@ -24,3 +24,5 @@ export function getInjectData(
 ): InjectParams {
   return Reflect.getMetadata(INJECT_META_KEY + parameterIndex, target);
 }
+
+export const Injectable = (): ClassDecorator => (_target) => {};
