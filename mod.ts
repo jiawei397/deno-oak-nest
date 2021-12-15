@@ -1,7 +1,5 @@
 export * from "./src/router.ts";
 
-export * from "./src/utils.ts";
-
 export * from "./src/params.ts";
 
 export * from "./src/guard.ts";

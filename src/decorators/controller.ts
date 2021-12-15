@@ -1,6 +1,4 @@
-import { Reflect } from "../deps.ts";
-import { Factory } from "./factorys/class.factory.ts";
-import { Type } from "./interfaces/mod.ts";
+import { Reflect } from "../../deps.ts";
 
 export const META_METHOD_KEY = Symbol("meta:method");
 export const META_PATH_KEY = Symbol("meta:path");
@@ -17,6 +15,8 @@ export enum Methods {
   PUT = "put",
   DELETE = "delete",
   HEAD = "head",
+  PATCH = "patch",
+  OPTIONS = "options",
 }
 
 const createMappingDecorator = (method: Methods) =>
@@ -32,32 +32,5 @@ export const Post = createMappingDecorator(Methods.POST);
 export const Delete = createMappingDecorator(Methods.DELETE);
 export const Put = createMappingDecorator(Methods.PUT);
 export const Head = createMappingDecorator(Methods.HEAD);
-
-export async function mapRoute(Cls: Type) {
-  const instance = await Factory(Cls);
-  const prototype = Object.getPrototypeOf(instance);
-  return Object.getOwnPropertyNames(prototype)
-    .map((item) => {
-      if (item === "constructor") {
-        return;
-      }
-      if (typeof prototype[item] !== "function") {
-        return;
-      }
-      const fn = prototype[item];
-      const route = Reflect.getMetadata(META_PATH_KEY, fn);
-      if (!route) {
-        return;
-      }
-      const method = Reflect.getMetadata(META_METHOD_KEY, fn);
-      return {
-        route,
-        method,
-        fn,
-        item,
-        instance,
-        cls: Cls,
-        methodName: item,
-      };
-    }).filter(Boolean);
-}
+export const Options = createMappingDecorator(Methods.OPTIONS);
+export const Patch = createMappingDecorator(Methods.PATCH);

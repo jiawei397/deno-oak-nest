@@ -10,7 +10,8 @@ import {
 } from "../deps.ts";
 import { overrideFnByGuard } from "./guard.ts";
 import { RouteMap, Type } from "./interfaces/mod.ts";
-import { mapRoute, META_PATH_KEY } from "./utils.ts";
+import { META_METHOD_KEY, META_PATH_KEY } from "./decorators/controller.ts";
+import { Factory } from "./factorys/class.factory.ts";
 
 class Router extends OriginRouter {
   private apiPrefix = "";
@@ -23,7 +24,7 @@ class Router extends OriginRouter {
     this.apiPrefix = apiPrefix;
   }
 
-  join(...paths: string[]) {
+  private join(...paths: string[]) {
     if (paths.length === 0) {
       return "";
     }
@@ -38,9 +39,38 @@ class Router extends OriginRouter {
     return last;
   }
 
+  private async mapRoute(Cls: Type) {
+    const instance = await Factory(Cls);
+    const prototype = Object.getPrototypeOf(instance);
+    return Object.getOwnPropertyNames(prototype)
+      .map((item) => {
+        if (item === "constructor") {
+          return;
+        }
+        if (typeof prototype[item] !== "function") {
+          return;
+        }
+        const fn = prototype[item];
+        const route = Reflect.getMetadata(META_PATH_KEY, fn);
+        if (!route) {
+          return;
+        }
+        const method = Reflect.getMetadata(META_METHOD_KEY, fn);
+        return {
+          route,
+          method,
+          fn,
+          item,
+          instance,
+          cls: Cls,
+          methodName: item,
+        };
+      }).filter(Boolean);
+  }
+
   add(...clsArr: Type[]) {
     return Promise.all(clsArr.map(async (Cls) => {
-      const arr = await mapRoute(Cls);
+      const arr = await this.mapRoute(Cls);
       const path = Reflect.getMetadata(META_PATH_KEY, Cls);
       const controllerPath = this.join(path);
       this.routerArr.push({
