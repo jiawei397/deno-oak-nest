@@ -483,10 +483,10 @@ injected to other service.
 export class AppModule {}
 ```
 
----
-
-> You can see more in the example dirs.
-
 ## TODO
 
 - [ ] unit test
+
+---
+
+> You can see more in the example dirs.
