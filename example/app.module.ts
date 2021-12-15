@@ -6,7 +6,7 @@ import { UserModule } from "./user/user.module.ts";
 @Module({
   imports: [
     UserModule,
-    AsyncModule,
+    AsyncModule.register("localhost:4878"),
   ],
   controllers: [AppController],
 })

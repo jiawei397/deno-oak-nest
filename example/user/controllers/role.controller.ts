@@ -13,11 +13,13 @@ import type { Context } from "../../../mod.ts";
 import { RoleService } from "../services/role.service.ts";
 import { Add } from "../../decorators/add.ts";
 import { RoleInfoDto } from "../dtos/role.dto.ts";
+import { AsyncService } from "../../asyncModule/async.service.ts";
 
 @Controller("/role")
 export class RoleController {
   constructor(
     private readonly roleService: RoleService,
+    private readonly asyncService: AsyncService,
   ) {
   }
 
@@ -37,7 +39,7 @@ export class RoleController {
   getInfo(@Res() res: Response, @Query() params: any) {
     console.log(params);
     res.body = "role get info " + JSON.stringify(params) + " - " +
-      this.roleService.info();
+      this.roleService.info() + "-\n" + this.asyncService.info();
   }
 
   @Post("/info")

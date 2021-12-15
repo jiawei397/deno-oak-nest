@@ -21,7 +21,7 @@ export function isModule(module: any) {
   if (!module || (typeof module !== "function" && typeof module !== "object")) {
     return false;
   }
-  return "imports" in module || Reflect.getMetadata(MODULE_KEY, module);
+  return "module" in module || Reflect.getMetadata(MODULE_KEY, module);
 }
 
 export function getModuleMetadata(key: ModuleMetadataKey, module: any) {

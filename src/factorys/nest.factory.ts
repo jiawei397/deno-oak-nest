@@ -21,7 +21,7 @@ export class NestFactory {
     if (!isModule(module)) {
       return;
     }
-    const isDynamicModule = "imports" in module;
+    const isDynamicModule = "module" in module;
     const imports = isDynamicModule
       ? module.imports
       : getModuleMetadata("imports", module);
