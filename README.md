@@ -319,7 +319,12 @@ export class UserModule {
 Then this is your main.ts:
 
 ```ts
-import { Context, isHttpError, NestFactory, Status } from "../mod.ts";
+import {
+  Context,
+  isHttpError,
+  NestFactory,
+  Status,
+} from "https://deno.land/x/oak_nest@v0.6.5/mod.ts";
 import { AppModule } from "./app.module.ts";
 
 const app = await NestFactory.create(AppModule);
@@ -482,6 +487,9 @@ injected to other service.
 })
 export class AppModule {}
 ```
+
+You can also see the `RedisModule` example
+[this way](https://deno.land/x/oak_nest_redis_module).
 
 ## TODO
 
