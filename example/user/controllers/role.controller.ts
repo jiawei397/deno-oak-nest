@@ -36,10 +36,10 @@ export class RoleController {
   }
 
   @Get("/info")
-  getInfo(@Res() res: Response, @Query() params: any) {
-    console.log(params);
+  async getInfo(@Res() res: Response, @Query() params: any) {
+    console.log("params is ", params);
     res.body = "role get info " + JSON.stringify(params) + " - " +
-      this.roleService.info() + "-\n" + this.asyncService.info();
+      await this.roleService.info() + "-\n" + this.asyncService.info();
   }
 
   @Post("/info")

@@ -110,10 +110,9 @@ class Router extends OriginRouter {
         const funcStart = Date.now();
         // deno-lint-ignore ban-ts-comment
         // @ts-ignore
-        this[method.toLowerCase()](methodKey, async (...args: any[]) => {
-          const context = args[0];
+        this[method.toLowerCase()](methodKey, async (context: Context) => {
           await checkByGuard(instance, fn, context);
-          await transferParam(instance, methodName, args);
+          const args = await transferParam(instance, methodName, context);
           const result = await fn.apply(instance, args);
           this.transResponseResult(context, result);
           return result;

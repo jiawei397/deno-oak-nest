@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Reflect } from "../deps.ts";
+import { Context, Reflect } from "../deps.ts";
 import { ControllerMethod } from "./interfaces/mod.ts";
 
 const paramMetadataKey = Symbol("meta:param");
@@ -45,35 +45,22 @@ export const createParamDecoratorWithLowLevel = (
   return createParamDecorator(callback)();
 };
 
-export async function transferParam(
+export function transferParam(
   target: any,
   methodName: string,
-  args: any[],
-) {
+  ctx: Context,
+): Promise<any[]> {
   const addedParameters = Reflect.getOwnMetadata(
     paramMetadataKey,
     target.constructor,
     methodName,
   );
-  let ctx = Reflect.getOwnMetadata(
-    paramMetadataKey,
-    target.constructor,
-    ctxMetadataKey,
-  );
   if (addedParameters) {
-    await Promise.all(
-      addedParameters.map(async (callback: ControllerMethod, index: number) => {
-        if (!ctx) {
-          ctx = args[0]; // first time, we must get the origin ctx
-          Reflect.defineMetadata(
-            paramMetadataKey,
-            addedParameters,
-            target.constructor,
-            ctx,
-          );
-        }
-        args[index] = await callback(ctx, target, methodName, index);
-      }),
+    return Promise.all(
+      addedParameters.map((callback: ControllerMethod, index: number) =>
+        callback(ctx, target, methodName, index)
+      ),
     );
   }
+  return Promise.resolve([ctx]);
 }
