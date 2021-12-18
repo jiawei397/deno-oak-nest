@@ -52,8 +52,8 @@ export class UserController {
   }
 
   @Get("/test")
-  testResultIsUndefined(@Req() req: Request, @Ip() ip: string) {
-    console.log(ip, req);
+  testResultIsUndefined(@Ip() ip: string) {
+    console.log(ip);
     return;
   }
 

@@ -1,8 +1,11 @@
 // deno-lint-ignore-file no-explicit-any
 import { Context, Reflect, UnauthorizedException } from "../deps.ts";
 import { Factory } from "./factorys/class.factory.ts";
-import { CanActivate, ControllerMethod } from "./interfaces/mod.ts";
-import { transferParam } from "./params.ts";
+import {
+  CanActivate,
+  Constructor,
+  ControllerMethod,
+} from "./interfaces/mod.ts";
 
 export const META_FUNCTION_KEY = Symbol("meta:fn");
 export const META_GUARD_KEY = Symbol("meta:guard");
@@ -37,35 +40,28 @@ export function getMetadataForGuard<T>(
   }
 }
 
-export function overrideFnByGuard(
-  target: any,
+export async function checkByGuard(
+  target: InstanceType<Constructor>,
   fn: ControllerMethod,
-  methodName: string,
+  context: Context,
 ) {
-  return async function (...args: any[]) {
-    const context: Context = args[0];
-    const classGuards = Reflect.getMetadata(META_GUARD_KEY, target) || [];
-    const fnGuards = Reflect.getMetadata(META_GUARD_KEY, fn) || [];
-    const guards = [...classGuards, ...fnGuards];
-    // I removed the origin error catch, because it should be deal by middleware.
-    if (guards.length > 0) {
-      for (const guard of guards) {
-        let _guard = guard;
-        if (typeof guard === "function") {
-          _guard = await Factory(guard);
-        }
-        Reflect.defineMetadata(META_FUNCTION_KEY, fn, context); // record the function to context
-        const result = await _guard.canActivate(context);
-        if (!result) {
-          throw new UnauthorizedException(UnauthorizedException.name);
-        }
+  const classGuards = Reflect.getMetadata(META_GUARD_KEY, target) || [];
+  const fnGuards = Reflect.getMetadata(META_GUARD_KEY, fn) || [];
+  const guards = [...classGuards, ...fnGuards];
+  // I removed the origin error catch, because it should be deal by middleware.
+  if (guards.length > 0) {
+    for (const guard of guards) {
+      let _guard = guard;
+      if (typeof guard === "function") {
+        _guard = await Factory(guard);
+      }
+      Reflect.defineMetadata(META_FUNCTION_KEY, fn, context); // record the function to context
+      const result = await _guard.canActivate(context);
+      if (!result) {
+        throw new UnauthorizedException(UnauthorizedException.name);
       }
     }
-    await transferParam(target, methodName, args);
-    const result = await fn.apply(target, args);
-    transResponseResult(context, result);
-    return result;
-  };
+  }
 }
 
 // deno-lint-ignore ban-types
@@ -81,12 +77,6 @@ export function UseGuards(...guards: (CanActivate | Function)[]) {
       Reflect.defineMetadata(META_GUARD_KEY, guards, target.prototype);
     }
   };
-}
-
-function transResponseResult(context: Context, result: any) {
-  if (context.response.body === undefined) {
-    context.response.body = result;
-  }
 }
 
 export class Reflector {

@@ -8,10 +8,12 @@ import {
   Reflect,
   yellow,
 } from "../deps.ts";
-import { overrideFnByGuard } from "./guard.ts";
+import { checkByGuard } from "./guard.ts";
 import { RouteMap, Type } from "./interfaces/mod.ts";
 import { META_METHOD_KEY, META_PATH_KEY } from "./decorators/controller.ts";
 import { Factory } from "./factorys/class.factory.ts";
+import { transferParam } from "./params.ts";
+import { Context } from "../deps.ts";
 
 class Router extends OriginRouter {
   private apiPrefix = "";
@@ -88,6 +90,12 @@ class Router extends OriginRouter {
     );
   }
 
+  private transResponseResult(context: Context, result: any) {
+    if (context.response.body === undefined) {
+      context.response.body = result;
+    }
+  }
+
   routes() {
     const routeStart = Date.now();
     const result = super.routes();
@@ -100,14 +108,16 @@ class Router extends OriginRouter {
         lastCls = cls;
         const methodKey = this.join(modelPath, route);
         const funcStart = Date.now();
-        const newFunc = overrideFnByGuard(
-          instance,
-          fn,
-          methodName,
-        );
         // deno-lint-ignore ban-ts-comment
         // @ts-ignore
-        this[method.toLowerCase()](methodKey, newFunc);
+        this[method.toLowerCase()](methodKey, async (...args: any[]) => {
+          const context = args[0];
+          await checkByGuard(instance, fn, context);
+          await transferParam(instance, methodName, args);
+          const result = await fn.apply(instance, args);
+          this.transResponseResult(context, result);
+          return result;
+        });
         const funcEnd = Date.now();
         this.log(
           yellow("[RouterExplorer]"),
