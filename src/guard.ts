@@ -10,6 +10,45 @@ import {
 export const META_FUNCTION_KEY = Symbol("meta:fn");
 export const META_GUARD_KEY = Symbol("meta:guard");
 
+// deno-lint-ignore ban-types
+export function UseGuards(...guards: (CanActivate | Function)[]) {
+  return function (
+    target: any,
+    _property?: string,
+    descriptor?: TypedPropertyDescriptor<any>,
+  ) {
+    Reflect.defineMetadata(
+      META_GUARD_KEY,
+      guards,
+      descriptor ? descriptor.value : target.prototype,
+    );
+  };
+}
+
+export async function checkByGuard(
+  target: InstanceType<Constructor>,
+  fn: ControllerMethod,
+  context: Context,
+) {
+  const classGuards = Reflect.getMetadata(META_GUARD_KEY, target) || [];
+  const fnGuards = Reflect.getMetadata(META_GUARD_KEY, fn) || [];
+  const guards = [...classGuards, ...fnGuards];
+  // I removed the origin error catch, because it should be deal by middleware.
+  if (guards.length > 0) {
+    for (const guard of guards) {
+      let _guard = guard;
+      if (typeof guard === "function") {
+        _guard = await Factory(guard);
+      }
+      Reflect.defineMetadata(META_FUNCTION_KEY, fn, context); // record the function to context
+      const result = await _guard.canActivate(context);
+      if (!result) {
+        throw new UnauthorizedException(UnauthorizedException.name);
+      }
+    }
+  }
+}
+
 export function SetMetadata<K = string, V = any>(
   metadataKey: K,
   metadataValue: V,
@@ -38,45 +77,6 @@ export function getMetadataForGuard<T>(
   if (fn) {
     return Reflect.getMetadata(metadataKey, fn);
   }
-}
-
-export async function checkByGuard(
-  target: InstanceType<Constructor>,
-  fn: ControllerMethod,
-  context: Context,
-) {
-  const classGuards = Reflect.getMetadata(META_GUARD_KEY, target) || [];
-  const fnGuards = Reflect.getMetadata(META_GUARD_KEY, fn) || [];
-  const guards = [...classGuards, ...fnGuards];
-  // I removed the origin error catch, because it should be deal by middleware.
-  if (guards.length > 0) {
-    for (const guard of guards) {
-      let _guard = guard;
-      if (typeof guard === "function") {
-        _guard = await Factory(guard);
-      }
-      Reflect.defineMetadata(META_FUNCTION_KEY, fn, context); // record the function to context
-      const result = await _guard.canActivate(context);
-      if (!result) {
-        throw new UnauthorizedException(UnauthorizedException.name);
-      }
-    }
-  }
-}
-
-// deno-lint-ignore ban-types
-export function UseGuards(...guards: (CanActivate | Function)[]) {
-  return function (
-    target: any,
-    property?: string,
-    descriptor?: TypedPropertyDescriptor<any>,
-  ) {
-    if (property && descriptor?.value) {
-      Reflect.defineMetadata(META_GUARD_KEY, guards, descriptor.value);
-    } else {
-      Reflect.defineMetadata(META_GUARD_KEY, guards, target.prototype);
-    }
-  };
 }
 
 export class Reflector {

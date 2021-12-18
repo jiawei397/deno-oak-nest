@@ -43,22 +43,31 @@ export const createParamDecoratorWithLowLevel = (
   return createParamDecorator(callback)();
 };
 
-export function transferParam(
+export async function transferParam(
   target: any,
   methodName: string,
   ctx: Context,
 ): Promise<any[]> {
+  const paramtypes = Reflect.getMetadata(
+    "design:paramtypes",
+    target,
+    methodName,
+  );
+  if (!paramtypes || paramtypes.length === 0) {
+    return [ctx];
+  }
+  const args = new Array(paramtypes.length).fill(ctx);
   const addedParameters = Reflect.getOwnMetadata(
     paramMetadataKey,
     target.constructor,
     methodName,
   );
   if (addedParameters) {
-    return Promise.all(
+    await Promise.all(
       addedParameters.map((callback: ControllerMethod, index: number) =>
-        callback(ctx, target, methodName, index)
+        args[index] = callback(ctx, target, methodName, index)
       ),
     );
   }
-  return Promise.resolve([ctx]);
+  return args;
 }

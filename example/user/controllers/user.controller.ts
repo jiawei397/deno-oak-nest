@@ -26,9 +26,9 @@ export class UserController {
   @UseGuards(AuthGuard2, AuthGuard3)
   @Get("/info")
   info(
-    context: Context,
     @MethodName() methodName: string,
     @ControllerName() controllerName: string,
+    context: Context,
   ) {
     console.log("methodName", methodName, "controllerName", controllerName);
     context.response.body = mockjs.mock({
