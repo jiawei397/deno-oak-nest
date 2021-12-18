@@ -5,3 +5,4 @@ export * from "./provider.interface.ts";
 export * from "./route.interface.ts";
 export * from "./scope-options.interface.ts";
 export * from "./type.interface.ts";
+export * from "./interceptor.interface.ts";
