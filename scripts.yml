@@ -13,6 +13,7 @@ scripts:
     tsconfig: tsconfig.json
     env:
       PORT: '1000'
+      # DEBUG: 'true'
   build:
     cmd: deno bundle example/main.ts example/main.js
     watch: false

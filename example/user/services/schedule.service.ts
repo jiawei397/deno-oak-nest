@@ -12,9 +12,9 @@ export class ScheduleService {
   }
 
   @Interval(5000)
-  intervalJob() {
+  async intervalJob() {
     assert(this.roleService, "roleService is not defined");
-    console.log("-----interval---");
+    console.log("-----interval---", await this.roleService.info());
   }
 
   @Cron("0 */1 * * * *")

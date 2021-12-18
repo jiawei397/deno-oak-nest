@@ -1,4 +1,4 @@
-import { assert, Inject, Injectable } from "../../../mod.ts";
+import { assert, Cache, Inject, Injectable } from "../../../mod.ts";
 
 @Injectable()
 export class RoleService {
@@ -7,7 +7,8 @@ export class RoleService {
     assert(connection === "connected", 'connection is not "connected"');
   }
 
+  @Cache(10000)
   info() {
-    return "info from RoleService";
+    return Promise.resolve("info from RoleService");
   }
 }

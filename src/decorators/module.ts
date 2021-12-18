@@ -7,7 +7,7 @@ import {
 
 const MODULE_KEY = Symbol("module:isModule");
 
-export function Module(metadata: ModuleMetadata) {
+export function Module(metadata: ModuleMetadata): ClassDecorator {
   return (target: any) => {
     Object.keys(metadata).forEach((key) => {
       Reflect.defineMetadata(key, (metadata as any)[key], target);
