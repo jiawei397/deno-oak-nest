@@ -8,8 +8,6 @@ import {
   MethodName,
   Post,
   Query,
-  Req,
-  Request,
   Res,
   Response,
   UseGuards,
@@ -88,9 +86,6 @@ export class UserController {
     ctx.response.body = result;
   }
 
-  /**
-   * 上传文件
-   */
   @Post("upload")
   async upload(ctx: Context) {
     const data = ctx.request.body({
