@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Application } from "../../deps.ts";
+import { Application, Reflect } from "../../deps.ts";
 import { getModuleMetadata, isModule } from "../decorators/module.ts";
 import { ModuleType, Provider, Scope, Type } from "../interfaces/mod.ts";
 import { Router } from "../router.ts";
@@ -51,10 +51,27 @@ export class NestFactory {
     }
   }
 
-  static async #initProvidersInModule(providers: Provider[]) {
+  static async #initProviders(providers: Provider[]) {
+    const onModuleInitedKey = Symbol("onModuleInited");
+    const arr = [];
     for (const provider of providers) {
-      await initProvider(provider, Scope.DEFAULT);
+      const instance = await initProvider(provider, Scope.DEFAULT);
+      if (instance) {
+        arr.push({
+          instance,
+          provider,
+        });
+      }
     }
+    return Promise.all(arr.map(({ instance, provider }) => {
+      if (typeof instance.onModuleInit === "function") {
+        if (Reflect.hasMetadata(onModuleInitedKey, provider)) {
+          return;
+        }
+        Reflect.defineMetadata(onModuleInitedKey, true, provider);
+        return instance.onModuleInit();
+      }
+    }));
   }
 
   static async create(module: ModuleType) {
@@ -63,7 +80,7 @@ export class NestFactory {
     const controllers: Type<any>[] = [];
     const providers: Provider<any>[] = [];
     await this.#findControllers(module, controllers, providers);
-    await this.#initProvidersInModule(providers);
+    await this.#initProviders(providers);
 
     if (controllers.length) {
       await router.add(...controllers);

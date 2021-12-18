@@ -1,4 +1,4 @@
-import { Cron, Injectable, Interval, Timeout } from "../../../mod.ts";
+import { assert, Cron, Injectable, Interval, Timeout } from "../../../mod.ts";
 import { RoleService } from "./role.service.ts";
 
 @Injectable()
@@ -7,19 +7,21 @@ export class ScheduleService {
 
   @Timeout(2000)
   onceJob() {
+    assert(this.roleService, "roleService is not defined");
     console.log("-----once---", this.roleService.info());
   }
 
   @Interval(5000)
   intervalJob() {
-    console.log("-----interval---", this.roleService.info());
+    assert(this.roleService, "roleService is not defined");
+    console.log("-----interval---");
   }
 
   @Cron("0 */1 * * * *")
   intervalOneMinuteJob() {
+    assert(this.roleService, "roleService is not defined");
     console.info(
       `【${ScheduleService.name}】one minute interval job!`,
-      this.roleService.info(),
     );
   }
 
