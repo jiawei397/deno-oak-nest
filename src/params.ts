@@ -3,7 +3,6 @@ import { Context, Reflect } from "../deps.ts";
 import { ControllerMethod } from "./interfaces/mod.ts";
 
 const paramMetadataKey = Symbol("meta:param");
-const ctxMetadataKey = Symbol("meta:ctx");
 
 /**
  * this is a high function which will return a param decorator.
@@ -23,15 +22,14 @@ export const createParamDecorator = (callback: ControllerMethod) => {
       );
       if (!addedParameters) {
         addedParameters = [];
+        Reflect.defineMetadata(
+          paramMetadataKey,
+          addedParameters,
+          target.constructor,
+          propertyKey,
+        );
       }
       addedParameters[parameterIndex] = callback;
-
-      Reflect.defineMetadata(
-        paramMetadataKey,
-        addedParameters,
-        target.constructor,
-        propertyKey,
-      );
     };
 };
 
