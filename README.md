@@ -489,7 +489,8 @@ export class AppModule {}
 ```
 
 You can also see the `RedisModule` example
-[this way](https://deno.land/x/oak_nest_redis_module).
+[this way](https://deno.land/x/oak_nest_redis_module) or use the modules such as
+`cache` and `scheduler` in the `modules` dir.
 
 ## TODO
 

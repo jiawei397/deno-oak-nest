@@ -1,2 +1,2 @@
-export * from "./scheduler.decorator.ts";
-export * from "./scheduler.module.ts";
+export * from "./src/scheduler.decorator.ts";
+export * from "./src/scheduler.module.ts";

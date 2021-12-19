@@ -1,5 +1,5 @@
-import { cron } from "../../deps.ts";
-import { Factory } from "../factorys/class.factory.ts";
+import { cron } from "../deps.ts";
+import { Factory } from "../../../src/factorys/class.factory.ts";
 import { CronJob, schedulerRegistry, TimeJob } from "./scheduler.registry.ts";
 
 export class ScheduleExplorer {

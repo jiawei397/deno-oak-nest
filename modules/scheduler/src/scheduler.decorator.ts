@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Constructor } from "../interfaces/type.interface.ts";
+import { Constructor } from "../../../src/interfaces/type.interface.ts";
 import { schedulerRegistry } from "./scheduler.registry.ts";
 
 export function Cron(cronTime: string): MethodDecorator {

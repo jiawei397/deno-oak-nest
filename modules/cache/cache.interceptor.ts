@@ -20,7 +20,6 @@ export class CacheInterceptor implements NestInterceptor {
   ) {
     this.ttl = cacheModuleOptions.ttl || 5;
     this.max = cacheModuleOptions.max || 100;
-    console.log(this.ttl, "---ttl");
   }
 
   private caches = new Map<string, any>();

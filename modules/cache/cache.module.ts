@@ -1,4 +1,4 @@
-import { DynamicModule } from "../interfaces/module.interface.ts";
+import { DynamicModule } from "../../src/interfaces/module.interface.ts";
 import { optionKey } from "./cache.constant.ts";
 import { CacheInterceptor } from "./cache.interceptor.ts";
 import { CacheModuleOptions } from "./cache.interface.ts";
