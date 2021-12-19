@@ -17,6 +17,7 @@ import { RoleInfoDto } from "../dtos/role.dto.ts";
 import { AsyncService } from "../../asyncModule/async.service.ts";
 import { LoggingInterceptor } from "../../interceptor/log.interceptor.ts";
 import { TransformInterceptor } from "../../interceptor/transform.interceptor.ts";
+import { ErrorsInterceptor } from "../../interceptor/errors.interceptor.ts";
 
 @Controller("/role")
 @UseInterceptors(LoggingInterceptor)
@@ -51,6 +52,12 @@ export class RoleController {
   testInterceptor(@Query() params: any) {
     console.log("params is ", params);
     return "role testInterceptor " + JSON.stringify(params);
+  }
+
+  @Get("/testErrorInterceptor")
+  @UseInterceptors(ErrorsInterceptor)
+  testErrorInterceptor() {
+    throw new Error("testErrorInterceptor");
   }
 
   @Post("/info")
