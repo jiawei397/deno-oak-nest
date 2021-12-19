@@ -6,8 +6,8 @@ import {
   NestInterceptor,
   NestInterceptorOptions,
   Next,
-} from "../../mod.ts";
-import { isDebug } from "../../src/utils.ts";
+} from "../../../mod.ts";
+import { isDebug } from "../../../src/utils.ts";
 import { optionKey } from "./cache.constant.ts";
 import { CacheModuleOptions } from "./cache.interface.ts";
 

@@ -41,7 +41,7 @@ export class AppController {
 }
 ```
 
-More can see the outer example dir.
+More can see the example dir.
 
 ## TODO
 
