@@ -1,16 +1,14 @@
-import { Context, Injectable } from "../../mod.ts";
-import {
-  NestInterceptor,
-  Next,
-} from "../../src/interfaces/interceptor.interface.ts";
+import { Context, Injectable, NestInterceptor, Next } from "../../mod.ts";
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  async intercept(_context: Context, next: Next) {
-    console.log("LoggingInterceptor", "Before...");
-    const now = Date.now();
+  async intercept(ctx: Context, next: Next) {
+    // console.log("LoggingInterceptor", "Before...");
+    const start = Date.now();
     const result = await next();
-    console.log("LoggingInterceptor", `After... ${Date.now() - now}ms`);
+    // console.log("LoggingInterceptor", `After...`);
+    const ms = Date.now() - start;
+    ctx.response.headers.set("X-Response-Time", `${ms}ms`);
     return result; // must return result
   }
 }

@@ -9,7 +9,7 @@ import {
   yellow,
 } from "../deps.ts";
 import { checkByGuard } from "./guard.ts";
-import { RouteMap, Type } from "./interfaces/mod.ts";
+import { NestUseInterceptors, RouteMap, Type } from "./interfaces/mod.ts";
 import { META_METHOD_KEY, META_PATH_KEY } from "./decorators/controller.ts";
 import { Factory } from "./factorys/class.factory.ts";
 import { transferParam } from "./params.ts";
@@ -17,14 +17,21 @@ import { Context } from "../deps.ts";
 import { checkByInterceptors } from "./interceptor.ts";
 
 class Router extends OriginRouter {
+  [x: string]: any
   private apiPrefix = "";
   private routerArr: {
     controllerPath: string;
     arr: any[];
   }[] = [];
 
+  private globalInterceptors: NestUseInterceptors = [];
+
   setGlobalPrefix(apiPrefix: string) {
     this.apiPrefix = apiPrefix;
+  }
+
+  useGlobalInterceptors(...interceptors: NestUseInterceptors) {
+    this.globalInterceptors.push(...interceptors);
   }
 
   private join(...paths: string[]) {
@@ -118,6 +125,7 @@ class Router extends OriginRouter {
             instance,
             fn,
             context,
+            this.globalInterceptors,
             () => fn.apply(instance, args),
           );
           this.transResponseResult(context, result);

@@ -5,7 +5,7 @@ import { UserModule } from "./user/user.module.ts";
 
 @Module({
   imports: [
-    ScheduleModule.forRoot(),
+    // ScheduleModule.forRoot(),
     UserModule,
     AsyncModule.register("localhost:4878"),
   ],

@@ -10,6 +10,7 @@ export type ApplicationEx = Application & {
   routes: typeof Router.prototype.routes;
   get: typeof Router.prototype.get;
   use: typeof Router.prototype.use;
+  useGlobalInterceptors: typeof Router.prototype.useGlobalInterceptors;
 };
 
 export class NestFactory {
@@ -88,6 +89,7 @@ export class NestFactory {
     app.setGlobalPrefix = router.setGlobalPrefix.bind(router);
     app.get = router.get.bind(router);
     app.routes = router.routes.bind(router);
+    app.useGlobalInterceptors = router.useGlobalInterceptors.bind(router);
     return app;
   }
 }

@@ -30,5 +30,11 @@ export {
   BadGatewayException,
   BadRequestException,
   BodyParamValidationException,
+  IternalServerException,
   UnauthorizedException,
 } from "https://deno.land/x/oak_exception@v0.0.7/mod.ts";
+
+export {
+  Status,
+  STATUS_TEXT,
+} from "https://deno.land/std@0.115.1/http/http_status.ts";

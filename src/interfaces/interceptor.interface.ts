@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Context } from "../../deps.ts";
+import { Constructor } from "./type.interface.ts";
 
 export type Next = () => Promise<unknown>;
 
@@ -9,3 +10,6 @@ export type Next = () => Promise<unknown>;
 export interface NestInterceptor {
   intercept(context: Context, next: Next): Promise<any>;
 }
+
+export type NestUseInterceptors =
+  (NestInterceptor | Constructor<NestInterceptor>)[];

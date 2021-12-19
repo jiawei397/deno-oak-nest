@@ -15,12 +15,12 @@ import { RoleService } from "../services/role.service.ts";
 import { Add } from "../../decorators/add.ts";
 import { RoleInfoDto } from "../dtos/role.dto.ts";
 import { AsyncService } from "../../asyncModule/async.service.ts";
-import { LoggingInterceptor } from "../../interceptor/log.interceptor.ts";
+// import { LoggingInterceptor } from "../../interceptor/log.interceptor.ts";
 import { TransformInterceptor } from "../../interceptor/transform.interceptor.ts";
 import { ErrorsInterceptor } from "../../interceptor/errors.interceptor.ts";
 
 @Controller("/role")
-@UseInterceptors(LoggingInterceptor)
+// @UseInterceptors(LoggingInterceptor)
 export class RoleController {
   constructor(
     private readonly roleService: RoleService,

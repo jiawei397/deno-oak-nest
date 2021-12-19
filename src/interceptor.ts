@@ -2,13 +2,15 @@
 import { Context, Reflect } from "../deps.ts";
 import { Factory } from "./factorys/class.factory.ts";
 import { ControllerMethod } from "./interfaces/guard.interface.ts";
-import { NestInterceptor, Next } from "./interfaces/interceptor.interface.ts";
+import {
+  NestInterceptor,
+  NestUseInterceptors,
+  Next,
+} from "./interfaces/interceptor.interface.ts";
 import { Constructor } from "./interfaces/type.interface.ts";
 export const META_INTERCEPTOR_KEY = Symbol("meta:interceptor");
 
-export function UseInterceptors(
-  ...interceptors: NestInterceptor[] | Constructor<NestInterceptor>[]
-) {
+export function UseInterceptors(...interceptors: NestUseInterceptors) {
   return function (
     target: any,
     _property?: string | symbol,
@@ -25,11 +27,16 @@ export function UseInterceptors(
 function getInterceptors(
   target: InstanceType<Constructor>,
   fn: ControllerMethod,
+  globalInterceptors: NestUseInterceptors,
 ): Promise<NestInterceptor[]> {
   const classInterceptors = Reflect.getMetadata(META_INTERCEPTOR_KEY, target) ||
     [];
   const fnInterceptors = Reflect.getMetadata(META_INTERCEPTOR_KEY, fn) || [];
-  const interceptors = [...classInterceptors, ...fnInterceptors];
+  const interceptors = [
+    ...globalInterceptors,
+    ...classInterceptors,
+    ...fnInterceptors,
+  ];
   return Promise.all(interceptors.map(async (interceptor) => {
     let _interceptor = interceptor;
     if (typeof interceptor === "function") {
@@ -43,9 +50,10 @@ export async function checkByInterceptors(
   target: InstanceType<Constructor>,
   fn: ControllerMethod,
   context: Context,
+  globalInterceptors: NestUseInterceptors,
   next: Next,
 ) {
-  const interceptors = await getInterceptors(target, fn);
+  const interceptors = await getInterceptors(target, fn, globalInterceptors);
   if (interceptors.length > 0) {
     return compose(interceptors)(context, next);
   } else {

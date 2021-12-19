@@ -1,8 +1,10 @@
 import { Context, isHttpError, NestFactory, Status } from "../mod.ts";
 import { AppModule } from "./app.module.ts";
+import { LoggingInterceptor } from "./interceptor/log.interceptor.ts";
 
 const app = await NestFactory.create(AppModule);
 app.setGlobalPrefix("/api");
+app.useGlobalInterceptors(new LoggingInterceptor());
 
 // Logger
 app.use(async (ctx: Context, next) => {
@@ -11,13 +13,13 @@ app.use(async (ctx: Context, next) => {
   console.log(`${ctx.request.method} ${ctx.request.url} - ${rt}`);
 });
 
-// Timing
-app.use(async (ctx: Context, next) => {
-  const start = Date.now();
-  await next();
-  const ms = Date.now() - start;
-  ctx.response.headers.set("X-Response-Time", `${ms}ms`);
-});
+// // Timing moved to LoggingInterceptor
+// app.use(async (ctx: Context, next) => {
+//   const start = Date.now();
+//   await next();
+//   const ms = Date.now() - start;
+//   ctx.response.headers.set("X-Response-Time", `${ms}ms`);
+// });
 
 // if you want to catch the error, you must set it before the routers.
 app.use(async (ctx: Context, next) => {
