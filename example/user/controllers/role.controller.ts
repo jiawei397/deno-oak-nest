@@ -8,14 +8,17 @@ import {
   Query,
   Res,
   Response,
+  UseInterceptors,
 } from "../../../mod.ts";
 import type { Context } from "../../../mod.ts";
 import { RoleService } from "../services/role.service.ts";
 import { Add } from "../../decorators/add.ts";
 import { RoleInfoDto } from "../dtos/role.dto.ts";
 import { AsyncService } from "../../asyncModule/async.service.ts";
+import { LoggingInterceptor } from "../../interceptor/log.interceptor.ts";
 
 @Controller("/role")
+@UseInterceptors(LoggingInterceptor)
 export class RoleController {
   constructor(
     private readonly roleService: RoleService,
@@ -36,6 +39,7 @@ export class RoleController {
   }
 
   @Get("/info")
+  // @UseInterceptors(LoggingInterceptor)
   async getInfo(@Res() res: Response, @Query() params: any) {
     console.log("params is ", params);
     res.body = "role get info " + JSON.stringify(params) + " - " +

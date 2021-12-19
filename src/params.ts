@@ -64,8 +64,8 @@ export async function transferParam(
   );
   if (addedParameters) {
     await Promise.all(
-      addedParameters.map((callback: ControllerMethod, index: number) =>
-        args[index] = callback(ctx, target, methodName, index)
+      addedParameters.map(async (callback: ControllerMethod, index: number) =>
+        args[index] = await callback(ctx, target, methodName, index)
       ),
     );
   }

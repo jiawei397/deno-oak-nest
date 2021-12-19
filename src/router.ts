@@ -14,10 +14,7 @@ import { META_METHOD_KEY, META_PATH_KEY } from "./decorators/controller.ts";
 import { Factory } from "./factorys/class.factory.ts";
 import { transferParam } from "./params.ts";
 import { Context } from "../deps.ts";
-import {
-  checkPostByInterceptors,
-  checkPreByInterceptors,
-} from "./interceptor.ts";
+import { checkByInterceptors } from "./interceptor.ts";
 
 class Router extends OriginRouter {
   private apiPrefix = "";
@@ -117,18 +114,12 @@ class Router extends OriginRouter {
         this[method.toLowerCase()](methodKey, async (context: Context) => {
           await checkByGuard(instance, fn, context);
           const args = await transferParam(instance, methodName, context);
-          let result = await checkPreByInterceptors(instance, fn, context);
-          if (result === undefined) {
-            result = await fn.apply(instance, args);
-            const postResult = await checkPostByInterceptors(
-              instance,
-              fn,
-              context,
-            );
-            if (postResult !== undefined) {
-              result = postResult;
-            }
-          }
+          const result = await checkByInterceptors(
+            instance,
+            fn,
+            context,
+            () => fn.apply(instance, args),
+          );
           this.transResponseResult(context, result);
           return result;
         });
