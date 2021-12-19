@@ -1,6 +1,4 @@
 // deno-lint-ignore-file no-explicit-any
-// CacheInterceptor
-
 import {
   Context,
   Inject,
