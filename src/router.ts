@@ -65,10 +65,10 @@ class Router extends OriginRouter {
         if (!route) {
           return;
         }
-        const method = Reflect.getMetadata(META_METHOD_KEY, fn);
+        const methodType = Reflect.getMetadata(META_METHOD_KEY, fn);
         return {
           route,
-          method,
+          methodType,
           fn,
           item,
           instance,
@@ -112,21 +112,24 @@ class Router extends OriginRouter {
       const startTime = Date.now();
       let lastCls;
       arr.forEach((routeMap: RouteMap) => {
-        const { route, method, fn, methodName, instance, cls } = routeMap;
+        const { route, methodType, fn, methodName, instance, cls } = routeMap;
         lastCls = cls;
         const methodKey = this.join(modelPath, route);
         const funcStart = Date.now();
-        // deno-lint-ignore ban-ts-comment
-        // @ts-ignore
-        this[method.toLowerCase()](methodKey, async (context: Context) => {
+        this[methodType.toLowerCase()](methodKey, async (context: Context) => {
           await checkByGuard(instance, fn, context);
           const args = await transferParam(instance, methodName, context);
           const result = await checkByInterceptors(
-            instance,
-            fn,
             context,
             this.globalInterceptors,
-            () => fn.apply(instance, args),
+            fn,
+            {
+              target: instance,
+              methodName,
+              methodType,
+              args,
+              fn,
+            },
           );
           this.transResponseResult(context, result);
           return result;
@@ -135,7 +138,7 @@ class Router extends OriginRouter {
         this.log(
           yellow("[RouterExplorer]"),
           green(
-            `Mapped {${methodKey}, ${method.toUpperCase()}} route ${
+            `Mapped {${methodKey}, ${methodType.toUpperCase()}} route ${
               funcEnd -
               funcStart
             }ms`,

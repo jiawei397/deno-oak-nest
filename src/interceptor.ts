@@ -4,6 +4,7 @@ import { Factory } from "./factorys/class.factory.ts";
 import { ControllerMethod } from "./interfaces/guard.interface.ts";
 import {
   NestInterceptor,
+  NestInterceptorOptions,
   NestUseInterceptors,
   Next,
 } from "./interfaces/interceptor.interface.ts";
@@ -47,15 +48,16 @@ function getInterceptors(
 }
 
 export async function checkByInterceptors(
-  target: InstanceType<Constructor>,
-  fn: ControllerMethod,
   context: Context,
   globalInterceptors: NestUseInterceptors,
-  next: Next,
+  fn: ControllerMethod,
+  options: NestInterceptorOptions,
 ) {
+  const { target, args } = options;
   const interceptors = await getInterceptors(target, fn, globalInterceptors);
+  const next = () => fn.apply(target, args);
   if (interceptors.length > 0) {
-    return compose(interceptors)(context, next);
+    return compose(interceptors)(context, next, options);
   } else {
     return next();
   }
@@ -66,6 +68,7 @@ export function compose(interceptors: NestInterceptor[]) {
   return function composedInterceptors(
     context: Context,
     next?: Next,
+    options?: NestInterceptorOptions,
   ) {
     let index = -1;
 
@@ -81,7 +84,11 @@ export function compose(interceptors: NestInterceptor[]) {
         }
         return;
       }
-      return await interceptor.intercept(context, dispatch.bind(null, i + 1));
+      return await interceptor.intercept(
+        context,
+        dispatch.bind(null, i + 1),
+        options,
+      );
     }
 
     return dispatch(0);

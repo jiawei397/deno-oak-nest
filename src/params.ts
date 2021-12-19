@@ -54,7 +54,7 @@ export async function transferParam(
     methodName,
   );
   if (!paramtypes || paramtypes.length === 0) {
-    return [ctx];
+    return [];
   }
   const args = new Array(paramtypes.length).fill(ctx);
   const addedParameters = Reflect.getOwnMetadata(

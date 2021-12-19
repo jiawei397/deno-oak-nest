@@ -18,9 +18,10 @@ import { AsyncService } from "../../asyncModule/async.service.ts";
 // import { LoggingInterceptor } from "../../interceptor/log.interceptor.ts";
 import { TransformInterceptor } from "../../interceptor/transform.interceptor.ts";
 import { ErrorsInterceptor } from "../../interceptor/errors.interceptor.ts";
+import { CacheInterceptor } from "../../../src/cache/cache.mod.ts";
 
 @Controller("/role")
-// @UseInterceptors(LoggingInterceptor)
+@UseInterceptors(CacheInterceptor)
 export class RoleController {
   constructor(
     private readonly roleService: RoleService,
@@ -58,6 +59,15 @@ export class RoleController {
   @UseInterceptors(ErrorsInterceptor)
   testErrorInterceptor() {
     throw new Error("testErrorInterceptor");
+  }
+
+  @Get("/delay")
+  delay(@Query("id") id: string) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve("delay " + id);
+      }, 1000);
+    });
   }
 
   @Post("/info")

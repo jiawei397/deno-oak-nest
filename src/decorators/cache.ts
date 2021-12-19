@@ -36,6 +36,9 @@ export function Cache(
       setTimeout(() => {
         cache[key] = undefined;
       }, timeout);
+      Promise.resolve(result).catch(() => {
+        cache[key] = undefined;
+      });
       return result;
     };
     return descriptor;
