@@ -16,6 +16,7 @@ import { Add } from "../../decorators/add.ts";
 import { RoleInfoDto } from "../dtos/role.dto.ts";
 import { AsyncService } from "../../asyncModule/async.service.ts";
 import { LoggingInterceptor } from "../../interceptor/log.interceptor.ts";
+import { TransformInterceptor } from "../../interceptor/transform.interceptor.ts";
 
 @Controller("/role")
 @UseInterceptors(LoggingInterceptor)
@@ -39,11 +40,17 @@ export class RoleController {
   }
 
   @Get("/info")
-  // @UseInterceptors(LoggingInterceptor)
   async getInfo(@Res() res: Response, @Query() params: any) {
     console.log("params is ", params);
     res.body = "role get info " + JSON.stringify(params) + " - " +
       await this.roleService.info() + "-\n" + this.asyncService.info();
+  }
+
+  @Get("/testInterceptor")
+  @UseInterceptors(TransformInterceptor)
+  testInterceptor(@Query() params: any) {
+    console.log("params is ", params);
+    return "role testInterceptor " + JSON.stringify(params);
   }
 
   @Post("/info")

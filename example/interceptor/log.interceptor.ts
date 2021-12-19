@@ -7,9 +7,10 @@ import {
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
   async intercept(_context: Context, next: Next) {
-    console.log("Before...");
+    console.log("LoggingInterceptor", "Before...");
     const now = Date.now();
-    await next();
-    console.log(`After... ${Date.now() - now}ms`);
+    const result = await next();
+    console.log("LoggingInterceptor", `After... ${Date.now() - now}ms`);
+    return result; // must return result
   }
 }

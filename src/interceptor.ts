@@ -47,9 +47,9 @@ export async function checkByInterceptors(
 ) {
   const interceptors = await getInterceptors(target, fn);
   if (interceptors.length > 0) {
-    await compose(interceptors)(context, next);
+    return compose(interceptors)(context, next);
   } else {
-    await next();
+    return next();
   }
 }
 
@@ -61,19 +61,19 @@ export function compose(interceptors: NestInterceptor[]) {
   ) {
     let index = -1;
 
-    async function dispatch(i: number): Promise<void> {
+    async function dispatch(i: number): Promise<any> {
       if (i <= index) {
         throw new Error("next() called multiple times.");
       }
       index = i;
       const interceptor = interceptors[i];
       if (!interceptor) {
-        if (next) {
-          await next();
+        if (next && i === interceptors.length) {
+          return next();
         }
         return;
       }
-      await interceptor.intercept(context, dispatch.bind(null, i + 1));
+      return await interceptor.intercept(context, dispatch.bind(null, i + 1));
     }
 
     return dispatch(0);
