@@ -16,10 +16,10 @@ export class CacheInterceptor implements NestInterceptor {
   ttl: number;
   max: number;
   constructor(
-    @Inject(optionKey) private cacheModuleOptions: CacheModuleOptions,
+    @Inject(optionKey) private cacheModuleOptions?: CacheModuleOptions,
   ) {
-    this.ttl = cacheModuleOptions.ttl || 5;
-    this.max = cacheModuleOptions.max || 100;
+    this.ttl = cacheModuleOptions?.ttl || 5;
+    this.max = cacheModuleOptions?.max || 100;
   }
 
   private caches = new Map<string, any>();
@@ -35,7 +35,7 @@ export class CacheInterceptor implements NestInterceptor {
     }
     const constructorName = options.target.constructor.name;
 
-    const key = this.cacheModuleOptions.getCacheKey
+    const key = this.cacheModuleOptions?.getCacheKey
       ? this.cacheModuleOptions.getCacheKey({
         constructorName,
         methodName: options.methodName,
@@ -62,7 +62,7 @@ export class CacheInterceptor implements NestInterceptor {
     }, this.ttl * 1000);
     Promise.resolve(result)
       .then((val) => {
-        if (this.cacheModuleOptions.isCacheableValue) {
+        if (this.cacheModuleOptions?.isCacheableValue) {
           if (!this.cacheModuleOptions.isCacheableValue(val)) {
             cache.delete(key);
             clearTimeout(st);
