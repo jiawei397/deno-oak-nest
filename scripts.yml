@@ -43,7 +43,17 @@ scripts:
     unstable: true
     tsconfig: tsconfig.json
     env:
-      PORT: '1000'          
+      PORT: '1000'    
+  startEs:
+    cmd: deno run modules/elasticsearch/example/main.ts
+    desc: start elasticsearch example
+    allow:
+      - net
+      - env
+    unstable: true
+    tsconfig: tsconfig.json
+    env:
+      PORT: '1000'              
   build:
     cmd: deno bundle example/main.ts example/main.js
     watch: false
