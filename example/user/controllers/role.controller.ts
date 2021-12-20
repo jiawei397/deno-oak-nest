@@ -18,7 +18,7 @@ import { AsyncService } from "../../asyncModule/async.service.ts";
 // import { LoggingInterceptor } from "../../interceptor/log.interceptor.ts";
 import { TransformInterceptor } from "../../interceptor/transform.interceptor.ts";
 import { ErrorsInterceptor } from "../../interceptor/errors.interceptor.ts";
-import { CacheInterceptor } from "../../../modules/cache/cache.mod.ts";
+import { CacheInterceptor } from "../../../modules/cache/mod.ts";
 
 @Controller("/role")
 @UseInterceptors(CacheInterceptor)

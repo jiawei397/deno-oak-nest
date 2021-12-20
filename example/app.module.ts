@@ -1,5 +1,5 @@
 import { Module } from "../mod.ts";
-import { CacheModule } from "../modules/cache/cache.mod.ts";
+import { CacheModule } from "../modules/cache/mod.ts";
 import { AppController } from "./app.controller.ts";
 import { AsyncModule } from "./asyncModule/async.module.ts";
 import { UserModule } from "./user/user.module.ts";
