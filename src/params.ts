@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { Context, Reflect } from "../deps.ts";
-import { ControllerMethod } from "./interfaces/mod.ts";
+import { Instance } from "./interfaces/mod.ts";
+import { ParamDecoratorCallback } from "./interfaces/param.interface.ts";
 
 const paramMetadataKey = Symbol("meta:param");
 
@@ -8,10 +9,10 @@ const paramMetadataKey = Symbol("meta:param");
  * this is a high function which will return a param decorator.
  * @example const Body = createParamDecorator((ctx: Context) => {});
  */
-export const createParamDecorator = (callback: ControllerMethod) => {
+export const createParamDecorator = (callback: ParamDecoratorCallback) => {
   return () =>
     (
-      target: any,
+      target: Instance,
       propertyKey: string | symbol,
       parameterIndex: number,
     ) => {
@@ -38,13 +39,13 @@ export const createParamDecorator = (callback: ControllerMethod) => {
  * @example const Headers = (params: any) => createParamDecoratorWithLowLevel((ctx: Context) => {});
  */
 export const createParamDecoratorWithLowLevel = (
-  callback: ControllerMethod,
+  callback: ParamDecoratorCallback,
 ) => {
   return createParamDecorator(callback)();
 };
 
 export async function transferParam(
-  target: any,
+  target: Instance,
   methodName: string,
   ctx: Context,
 ): Promise<any[]> {
@@ -64,9 +65,10 @@ export async function transferParam(
   );
   if (addedParameters) {
     await Promise.all(
-      addedParameters.map(async (callback: ControllerMethod, index: number) =>
-        args[index] = await callback(ctx, target, methodName, index)
-      ),
+      addedParameters.map(async (
+        callback: ParamDecoratorCallback,
+        index: number,
+      ) => args[index] = await callback(ctx, target, methodName, index)),
     );
   }
   return args;

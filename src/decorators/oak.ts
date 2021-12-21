@@ -61,7 +61,7 @@ export function Query(key?: string) {
   return createParamDecoratorWithLowLevel((ctx: Context) => {
     const { search } = ctx.request.url;
     if (search.startsWith("?")) {
-      const map = parse(search.substr(1));
+      const map = parse(search.substring(1));
       if (key) {
         return map[key];
       }

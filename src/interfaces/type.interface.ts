@@ -4,3 +4,5 @@ export interface Type<T = any> extends Function {
 }
 
 export type Constructor<T = any> = Type<T>;
+
+export type Instance = InstanceType<Constructor>;
