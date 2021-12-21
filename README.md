@@ -248,10 +248,10 @@ await router.add(RoleController, User2Controller);
 import {
   Application,
   isHttpError,
+  Router,
   send,
   Status,
 } from "https://deno.land/x/oak_nest@v0.8.3/mod.ts";
-import router from "./router/index.ts";
 
 const app = new Application();
 
@@ -263,6 +263,7 @@ app.use(async (ctx, next) => {
   ctx.response.headers.set("X-Response-Time", `${ms}ms`);
 });
 
+const router = new Router();
 app.use(router.routes());
 
 const port = Number(Deno.env.get("PORT") || 1000);
@@ -425,7 +426,7 @@ In the above code, `this.model` is the `getModel` result.
 You can also register a Dynamic Module like this:
 
 ```ts
-import { DynamicModule } from "../../src/interfaces/mod.ts";
+import { DynamicModule } from "https://deno.land/x/oak_nest@v0.8.3/mod.ts";
 import { ASYNC_KEY } from "./async.constant.ts";
 import { AsyncService } from "./async.service.ts";
 
@@ -448,7 +449,7 @@ export class AsyncModule {
 And the `AsyncService` like this:
 
 ```ts
-import { Inject, Injectable } from "../../mod.ts";
+import { Inject, Injectable } from "https://deno.land/x/oak_nest@v0.8.3/mod.ts";
 import { ASYNC_KEY } from "./async.constant.ts";
 
 @Injectable()
