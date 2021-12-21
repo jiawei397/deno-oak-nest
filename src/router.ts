@@ -16,7 +16,7 @@ import { transferParam } from "./params.ts";
 import { Context } from "../deps.ts";
 import { checkByInterceptors } from "./interceptor.ts";
 
-class Router extends OriginRouter {
+export class Router extends OriginRouter {
   [x: string]: any
   private apiPrefix = "";
   private routerArr: {
@@ -44,7 +44,7 @@ class Router extends OriginRouter {
       last = "/" + last;
     }
     if (last.endsWith("/")) {
-      last = last.substr(0, last.length - 1);
+      last = last.substring(0, last.length - 1);
     }
     return last;
   }
@@ -160,5 +160,3 @@ class Router extends OriginRouter {
     return result;
   }
 }
-
-export { Router };
