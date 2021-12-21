@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { assert, assertEquals } from "../test_deps.ts";
+import { assert, assertEquals, Context, testing } from "../test_deps.ts";
 import { join, mapRoute, Router } from "./router.ts";
 import { Controller, Get, Post } from "./decorators/controller.ts";
 
@@ -129,9 +129,10 @@ Deno.test("add with prefix", async () => {
   assertEquals(result[0].controllerPath, "", "will not deal prefix now");
 });
 
-Deno.test("routes", async () => {
+Deno.test("routes without controller", async () => {
   const router = new Router();
   router.setGlobalPrefix("api");
+
   class A {
     @Get("/a")
     method1() {}
@@ -145,18 +146,112 @@ Deno.test("routes", async () => {
   const originGet = Router.prototype.get;
   const originPost = Router.prototype.post;
 
-  Router.prototype.get = function (...args: any[]) {
+  const getCtx = testing.createMockContext({
+    path: "/api/a",
+    method: "GET",
+  });
+
+  const postCtx = testing.createMockContext({
+    path: "/api/b",
+    method: "POST",
+  });
+
+  Router.prototype.get = function (
+    url: string,
+    callback: (ctx: Context) => void,
+  ) {
     callStack.push(1);
-    return (originGet as any).apply(this, args);
+    return (originGet as any).call(this, url, () => {
+      callStack.push(3);
+      return callback.call(this, getCtx);
+    });
   };
-  Router.prototype.post = function (...args: any[]) {
+  Router.prototype.post = function (
+    url: string,
+    callback: (ctx: Context) => void,
+  ) {
     callStack.push(2);
-    return (originPost as any).apply(this, args);
+    return (originPost as any).call(this, url, () => {
+      callStack.push(4);
+      return callback.call(this, postCtx);
+    });
   };
 
-  router.routes();
-
+  const mw = router.routes();
   assertEquals(callStack, [1, 2]);
+  const next = testing.createMockNext();
+
+  await mw(getCtx, next);
+
+  assertEquals(callStack, [1, 2, 3]);
+
+  await mw(postCtx, next);
+  assertEquals(callStack, [1, 2, 3, 4]);
+
+  // reset
+  Router.prototype.get = originGet;
+  Router.prototype.post = originPost;
+});
+
+Deno.test("routes with controller", async () => {
+  const router = new Router();
+  router.setGlobalPrefix("api");
+
+  @Controller("user")
+  class A {
+    @Get("/a")
+    method1() {}
+
+    @Post("/b")
+    method2() {}
+  }
+  await router.add(A);
+
+  const callStack: number[] = [];
+  const originGet = Router.prototype.get;
+  const originPost = Router.prototype.post;
+
+  const getCtx = testing.createMockContext({
+    path: "/api/user/a",
+    method: "GET",
+  });
+
+  const postCtx = testing.createMockContext({
+    path: "/api/user/b",
+    method: "POST",
+  });
+
+  Router.prototype.get = function (
+    url: string,
+    callback: (ctx: Context) => void,
+  ) {
+    callStack.push(1);
+    return (originGet as any).call(this, url, () => {
+      callStack.push(3);
+      return callback.call(this, getCtx);
+    });
+  };
+  Router.prototype.post = function (
+    url: string,
+    callback: (ctx: Context) => void,
+  ) {
+    callStack.push(2);
+    return (originPost as any).call(this, url, () => {
+      callStack.push(4);
+      return callback.call(this, postCtx);
+    });
+  };
+
+  const mw = router.routes();
+  assertEquals(callStack, [1, 2]);
+  const next = testing.createMockNext();
+
+  await mw(getCtx, next);
+
+  assertEquals(callStack, [1, 2, 3]);
+
+  await mw(postCtx, next);
+  assertEquals(callStack, [1, 2, 3, 4]);
 
   // reset
   Router.prototype.get = originGet;
