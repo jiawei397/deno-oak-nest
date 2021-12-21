@@ -6,6 +6,12 @@ export interface RouteMap {
   methodType: string;
   fn: ControllerMethod;
   methodName: string;
-  instance: Record<string, unknown>;
+  instance: InstanceType<Type>;
   cls: Type;
 }
+
+export type RouteItem = {
+  controllerPath: string;
+  arr: RouteMap[];
+  cls: Type;
+};

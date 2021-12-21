@@ -9,7 +9,12 @@ import {
   yellow,
 } from "../deps.ts";
 import { checkByGuard } from "./guard.ts";
-import { NestUseInterceptors, RouteMap, Type } from "./interfaces/mod.ts";
+import {
+  NestUseInterceptors,
+  RouteItem,
+  RouteMap,
+  Type,
+} from "./interfaces/mod.ts";
 import { META_METHOD_KEY, META_PATH_KEY } from "./decorators/controller.ts";
 import { Factory } from "./factorys/class.factory.ts";
 import { transferParam } from "./params.ts";
@@ -31,7 +36,7 @@ export function join(...paths: string[]) {
   return last;
 }
 
-export async function mapRoute(Cls: Type) {
+export async function mapRoute(Cls: Type): Promise<RouteMap[]> {
   const instance = await Factory(Cls);
   const prototype = Cls.prototype;
   return Object.getOwnPropertyNames(prototype)
@@ -52,21 +57,17 @@ export async function mapRoute(Cls: Type) {
         route,
         methodType,
         fn,
-        item,
         instance,
         cls: Cls,
         methodName: item,
       };
-    }).filter(Boolean);
+    }).filter(Boolean) as RouteMap[];
 }
 
 export class Router extends OriginRouter {
   [x: string]: any
   private apiPrefix = "";
-  routerArr: {
-    controllerPath: string;
-    arr: any[];
-  }[] = [];
+  private routerArr: RouteItem[] = [];
 
   private globalInterceptors: NestUseInterceptors = [];
 
@@ -78,16 +79,23 @@ export class Router extends OriginRouter {
     this.globalInterceptors.push(...interceptors);
   }
 
-  add(...clsArr: Type[]) {
-    return Promise.all(clsArr.map(async (Cls) => {
+  async add(...clsArr: Type[]) {
+    await Promise.all(clsArr.map(async (Cls) => {
+      const find = this.routerArr.find(({ cls }) => cls === Cls);
+      if (find) {
+        return;
+      }
       const arr = await mapRoute(Cls);
       const path = Reflect.getMetadata(META_PATH_KEY, Cls);
       const controllerPath = join(path);
-      this.routerArr.push({
+      const item = {
         controllerPath,
         arr,
-      });
+        cls: Cls,
+      };
+      this.routerArr.push(item);
     }));
+    return this.routerArr;
   }
 
   private log(...message: string[]) {
