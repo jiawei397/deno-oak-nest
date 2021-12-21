@@ -16,10 +16,54 @@ import { transferParam } from "./params.ts";
 import { Context } from "../deps.ts";
 import { checkByInterceptors } from "./interceptor.ts";
 
+export function join(...paths: string[]) {
+  if (paths.length === 0) {
+    return "";
+  }
+  const str = paths.join("/").replaceAll("///", "/").replaceAll("//", "/");
+  let last = str;
+  if (!last.startsWith("/")) {
+    last = "/" + last;
+  }
+  if (last.endsWith("/")) {
+    last = last.substring(0, last.length - 1);
+  }
+  return last;
+}
+
+export async function mapRoute(Cls: Type) {
+  const instance = await Factory(Cls);
+  const prototype = Cls.prototype;
+  return Object.getOwnPropertyNames(prototype)
+    .map((item) => {
+      if (item === "constructor") {
+        return;
+      }
+      if (typeof prototype[item] !== "function") {
+        return;
+      }
+      const fn = prototype[item];
+      const route = Reflect.getMetadata(META_PATH_KEY, fn);
+      if (!route) {
+        return;
+      }
+      const methodType = Reflect.getMetadata(META_METHOD_KEY, fn);
+      return {
+        route,
+        methodType,
+        fn,
+        item,
+        instance,
+        cls: Cls,
+        methodName: item,
+      };
+    }).filter(Boolean);
+}
+
 export class Router extends OriginRouter {
   [x: string]: any
   private apiPrefix = "";
-  private routerArr: {
+  routerArr: {
     controllerPath: string;
     arr: any[];
   }[] = [];
@@ -34,55 +78,11 @@ export class Router extends OriginRouter {
     this.globalInterceptors.push(...interceptors);
   }
 
-  private join(...paths: string[]) {
-    if (paths.length === 0) {
-      return "";
-    }
-    const str = paths.join("/").replaceAll("///", "/").replaceAll("//", "/");
-    let last = str;
-    if (!last.startsWith("/")) {
-      last = "/" + last;
-    }
-    if (last.endsWith("/")) {
-      last = last.substring(0, last.length - 1);
-    }
-    return last;
-  }
-
-  private async mapRoute(Cls: Type) {
-    const instance = await Factory(Cls);
-    const prototype = Object.getPrototypeOf(instance);
-    return Object.getOwnPropertyNames(prototype)
-      .map((item) => {
-        if (item === "constructor") {
-          return;
-        }
-        if (typeof prototype[item] !== "function") {
-          return;
-        }
-        const fn = prototype[item];
-        const route = Reflect.getMetadata(META_PATH_KEY, fn);
-        if (!route) {
-          return;
-        }
-        const methodType = Reflect.getMetadata(META_METHOD_KEY, fn);
-        return {
-          route,
-          methodType,
-          fn,
-          item,
-          instance,
-          cls: Cls,
-          methodName: item,
-        };
-      }).filter(Boolean);
-  }
-
   add(...clsArr: Type[]) {
     return Promise.all(clsArr.map(async (Cls) => {
-      const arr = await this.mapRoute(Cls);
+      const arr = await mapRoute(Cls);
       const path = Reflect.getMetadata(META_PATH_KEY, Cls);
-      const controllerPath = this.join(path);
+      const controllerPath = join(path);
       this.routerArr.push({
         controllerPath,
         arr,
@@ -108,13 +108,13 @@ export class Router extends OriginRouter {
     const routeStart = Date.now();
     const result = super.routes();
     this.routerArr.forEach(({ controllerPath, arr }) => {
-      const modelPath = this.join(this.apiPrefix, controllerPath);
+      const modelPath = join(this.apiPrefix, controllerPath);
       const startTime = Date.now();
       let lastCls;
       arr.forEach((routeMap: RouteMap) => {
         const { route, methodType, fn, methodName, instance, cls } = routeMap;
         lastCls = cls;
-        const methodKey = this.join(modelPath, route);
+        const methodKey = join(modelPath, route);
         const funcStart = Date.now();
         this[methodType.toLowerCase()](methodKey, async (context: Context) => {
           await checkByGuard(instance, fn, context);
