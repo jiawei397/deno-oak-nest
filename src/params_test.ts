@@ -74,3 +74,52 @@ Deno.test("createParamDecoratorWithLowLevel", async () => {
   assertEquals(ctx.response.body, aResult);
   assertEquals(callStack, [1, 2, 3]);
 });
+
+Deno.test("transferParam", async () => {
+  const callStack: number[] = [];
+  const aResult = "body";
+
+  const Headers = () =>
+    createParamDecoratorWithLowLevel((_ctx: Context) => {
+      callStack.push(1);
+      return 2;
+    });
+
+  const Body = createParamDecorator((_ctx: Context) => {
+    callStack.push(3);
+    return 4;
+  });
+  const ctx = testing.createMockContext({
+    path: "/user/a",
+    method: "GET",
+  });
+
+  @Controller("user")
+  class A {
+    @Get("a")
+    a(
+      @Headers() headers: number,
+      context: Context,
+      @Body() body: number,
+      context2: Context,
+    ) {
+      assertEquals(ctx, context);
+      assertEquals(ctx, context2);
+      callStack.push(headers);
+      callStack.push(body);
+      callStack.push(5);
+      return aResult;
+    }
+  }
+
+  const router = new Router();
+  await router.add(A);
+
+  const mw = router.routes();
+  const next = testing.createMockNext();
+
+  await mw(ctx, next);
+  assertEquals(ctx.response.body, aResult);
+  console.log(callStack);
+  assertEquals(callStack, [1, 3, 2, 4, 5]);
+});
