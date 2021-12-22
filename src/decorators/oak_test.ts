@@ -5,11 +5,12 @@ import {
   IsString,
   Max,
   Min,
+  OakCookie,
   testing,
 } from "../../test_deps.ts";
 import { Router } from "../router.ts";
 import { Controller, Get, Post } from "./controller.ts";
-import { Body, Params, Query, Req, Res } from "./oak.ts";
+import { Body, Cookies, Params, Query, Req, Res } from "./oak.ts";
 
 Deno.test("body", async () => {
   const mockContext = (options: {
@@ -340,4 +341,38 @@ Deno.test("Req and Res", async () => {
   await mw(ctx, next);
 
   assertEquals(callStack, [1]);
+});
+
+Deno.test("Cookies", async () => {
+  const callStack: number[] = [];
+  const ctx = testing.createMockContext({
+    path: "/a",
+    method: "GET",
+  });
+  ctx.request.headers.set("Cookie", "a=b");
+  ctx.cookies = new OakCookie(ctx.request, ctx.response);
+  @Controller("")
+  class A {
+    @Get("a")
+    async a(
+      @Cookies() cookie: any,
+      @Cookies("a") a: string,
+    ) {
+      callStack.push(1);
+      assertEquals(cookie, ctx.cookies);
+      assertEquals(await cookie.get("a"), "b");
+      assertEquals(a, "b");
+    }
+  }
+
+  const router = new Router();
+  await router.add(A);
+
+  const mw = router.routes();
+  const next = testing.createMockNext();
+
+  await mw(ctx, next);
+
+  assertEquals(callStack, [1]);
+  callStack.length = 0;
 });
