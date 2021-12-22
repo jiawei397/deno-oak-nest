@@ -20,3 +20,10 @@ export type {
   Middleware,
   RouterMiddleware,
 } from "https://deno.land/x/oak@v10.1.0/mod.ts";
+
+export {
+  IsString,
+  Max,
+  Min,
+  validateOrReject,
+} from "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts";
