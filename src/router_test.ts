@@ -257,3 +257,75 @@ Deno.test("routes with controller", async () => {
   Router.prototype.get = originGet;
   Router.prototype.post = originPost;
 });
+
+Deno.test("routes check result", async () => {
+  const router = new Router();
+  @Controller("user")
+  class A {
+    @Get("/a")
+    method1() {
+      return "a";
+    }
+
+    @Get("/b")
+    noReturn() {}
+
+    @Get("/c")
+    dealBodySelf(ctx: Context) {
+      ctx.response.body = "c";
+    }
+
+    @Get("/d")
+    error(ctx: Context) {
+      ctx.response.status = 400;
+      ctx.response.body = new Error("d");
+    }
+  }
+  await router.add(A);
+
+  {
+    const ctx = testing.createMockContext({
+      path: "/user/a",
+      method: "GET",
+    });
+    const mw = router.routes();
+    const next = testing.createMockNext();
+
+    await mw(ctx, next);
+    assertEquals(ctx.response.body, "a");
+  }
+
+  {
+    const ctx = testing.createMockContext({
+      path: "/user/b",
+      method: "GET",
+    });
+    const mw = router.routes();
+    const next = testing.createMockNext();
+    await mw(ctx, next);
+    assertEquals(ctx.response.body, undefined);
+  }
+
+  {
+    const ctx = testing.createMockContext({
+      path: "/user/c",
+      method: "GET",
+    });
+    const mw = router.routes();
+    const next = testing.createMockNext();
+    await mw(ctx, next);
+    assertEquals(ctx.response.body, "c");
+  }
+
+  {
+    const ctx = testing.createMockContext({
+      path: "/user/d",
+      method: "GET",
+    });
+    const mw = router.routes();
+    const next = testing.createMockNext();
+    await mw(ctx, next);
+    assert(ctx.response.body instanceof Error);
+    assertEquals(ctx.response.status, 400);
+  }
+});

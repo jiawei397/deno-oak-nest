@@ -25,7 +25,7 @@ export function UseInterceptors(...interceptors: NestUseInterceptors) {
   };
 }
 
-function getInterceptors(
+export function getInterceptors(
   target: InstanceType<Constructor>,
   fn: ControllerMethod,
   globalInterceptors: NestUseInterceptors,
@@ -63,7 +63,7 @@ export async function checkByInterceptors(
   }
 }
 
-/** Compose multiple middleware functions into a single middleware function. */
+/** Compose multiple interceptors functions into a single interceptor function. */
 export function compose(interceptors: NestInterceptor[]) {
   return function composedInterceptors(
     context: Context,

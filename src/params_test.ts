@@ -120,6 +120,5 @@ Deno.test("transferParam", async () => {
 
   await mw(ctx, next);
   assertEquals(ctx.response.body, aResult);
-  console.log(callStack);
   assertEquals(callStack, [1, 3, 2, 4, 5]);
 });
