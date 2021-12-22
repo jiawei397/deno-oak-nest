@@ -5,14 +5,14 @@ import {
   ModuleMetadataKey,
 } from "../interfaces/module.interface.ts";
 
-const MODULE_KEY = Symbol("module:isModule");
+export const MODULE_KEY = Symbol("module:isModule");
 
 export function Module(metadata: ModuleMetadata): ClassDecorator {
   return (target: any) => {
     Object.keys(metadata).forEach((key) => {
       Reflect.defineMetadata(key, (metadata as any)[key], target);
     });
-    Reflect.defineMetadata(MODULE_KEY, true, target);
+    defineModuleMetadata(target);
     return target;
   };
 }
@@ -21,9 +21,14 @@ export function isModule(module: any) {
   if (!module || (typeof module !== "function" && typeof module !== "object")) {
     return false;
   }
-  return "module" in module || Reflect.getMetadata(MODULE_KEY, module);
+  return "module" in module || Reflect.getOwnMetadata(MODULE_KEY, module);
+}
+
+// deno-lint-ignore ban-types
+export function defineModuleMetadata(target: object) {
+  Reflect.defineMetadata(MODULE_KEY, true, target);
 }
 
 export function getModuleMetadata(key: ModuleMetadataKey, module: any) {
-  return Reflect.getMetadata(key, module);
+  return Reflect.getOwnMetadata(key, module);
 }
