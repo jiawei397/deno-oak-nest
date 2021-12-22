@@ -2,7 +2,12 @@ export { Router } from "./src/router.ts";
 
 export * from "./src/params.ts";
 
-export * from "./src/guard.ts";
+export {
+  getMetadataForGuard,
+  Reflector,
+  SetMetadata,
+  UseGuards,
+} from "./src/guard.ts";
 export { UseInterceptors } from "./src/interceptor.ts";
 
 export * from "./src/factorys/class.factory.ts";
