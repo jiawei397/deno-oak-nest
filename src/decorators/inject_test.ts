@@ -2,6 +2,8 @@ import { getInjectData, Inject, Injectable } from "./inject.ts";
 import { assertEquals } from "../../test_deps.ts";
 import { initProvider } from "../factorys/class.factory.ts";
 import { Scope } from "../interfaces/scope-options.interface.ts";
+import { Controller } from "./controller.ts";
+import { Router } from "../router.ts";
 
 Deno.test("Inject alone", () => {
   const injectKey = "injectKey";
@@ -31,5 +33,26 @@ Deno.test("Inject with proviverInit", async () => {
 
   await initProvider(A, Scope.DEFAULT);
 
+  assertEquals(callStack, [1]);
+});
+
+Deno.test("Inject with controller", async () => {
+  const callStack: number[] = [];
+  const InjectModel = (name: string) => Inject(() => name + "1");
+
+  @Controller("")
+  class A {
+    constructor(
+      @InjectModel("a") public a: string,
+      @InjectModel("b") public b: string,
+    ) {
+      callStack.push(1);
+      assertEquals(a, "a1");
+      assertEquals(b, "b1");
+    }
+  }
+
+  const router = new Router();
+  await router.add(A);
   assertEquals(callStack, [1]);
 });
