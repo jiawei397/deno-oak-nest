@@ -9,13 +9,7 @@ import {
 } from "../../test_deps.ts";
 import { Router } from "../router.ts";
 import { Controller, Get, Post } from "./controller.ts";
-import {
-  defineModuleMetadata,
-  getModuleMetadata,
-  isModule,
-  Module,
-} from "./module.ts";
-import { Body, Query } from "./oak.ts";
+import { Body, Params, Query } from "./oak.ts";
 
 Deno.test("body", async () => {
   const mockContext = (options: {
@@ -257,6 +251,62 @@ Deno.test("Query", async () => {
     await mw(ctx, next);
 
     assertEquals(callStack, [3]);
+    callStack.length = 0;
+  }
+});
+
+Deno.test("Params", async () => {
+  const callStack: number[] = [];
+
+  @Controller("")
+  class A {
+    @Get("a/:id")
+    a(
+      @Params() params: any,
+      @Params("id") id: string,
+    ) {
+      callStack.push(1);
+      assertEquals(id, "1");
+      assertEquals(params, { id: "1" });
+    }
+
+    @Get("b")
+    testNoParam(
+      @Params() params: any,
+    ) {
+      callStack.push(2);
+      assertEquals(params, {});
+    }
+  }
+
+  const router = new Router();
+  await router.add(A);
+
+  {
+    const ctx = testing.createMockContext({
+      path: "/a/1",
+      method: "GET",
+    });
+    const mw = router.routes();
+    const next = testing.createMockNext();
+
+    await mw(ctx, next);
+
+    assertEquals(callStack, [1]);
+    callStack.length = 0;
+  }
+
+  {
+    const ctx = testing.createMockContext({
+      path: "/b",
+      method: "GET",
+    });
+    const mw = router.routes();
+    const next = testing.createMockNext();
+
+    await mw(ctx, next);
+
+    assertEquals(callStack, [2]);
     callStack.length = 0;
   }
 });
