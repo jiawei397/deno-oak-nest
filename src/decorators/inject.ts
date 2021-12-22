@@ -12,8 +12,12 @@ export const INJECT_META_KEY = "design:inject";
  * const InjectModel = (name: string) => Inject(() => name);
  * ```
  */
-export function Inject(key: InjectParams) {
-  return (target: any, _propertyKey: string, parameterIndex: number) => {
+export function Inject(key: InjectParams): ParameterDecorator {
+  return (
+    target: any,
+    _propertyKey: string | symbol,
+    parameterIndex: number,
+  ) => {
     Reflect.defineMetadata(INJECT_META_KEY + parameterIndex, key, target);
   };
 }
