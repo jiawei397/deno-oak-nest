@@ -9,7 +9,7 @@ import {
 } from "../../test_deps.ts";
 import { Router } from "../router.ts";
 import { Controller, Get, Post } from "./controller.ts";
-import { Body, Params, Query } from "./oak.ts";
+import { Body, Params, Query, Req, Res } from "./oak.ts";
 
 Deno.test("body", async () => {
   const mockContext = (options: {
@@ -309,4 +309,35 @@ Deno.test("Params", async () => {
     assertEquals(callStack, [2]);
     callStack.length = 0;
   }
+});
+
+Deno.test("Req and Res", async () => {
+  const callStack: number[] = [];
+  const ctx = testing.createMockContext({
+    path: "/a",
+    method: "GET",
+  });
+
+  @Controller("")
+  class A {
+    @Get("a")
+    a(
+      @Req() req: any,
+      @Res() res: any,
+    ) {
+      callStack.push(1);
+      assertEquals(req, ctx.request);
+      assertEquals(res, ctx.response);
+    }
+  }
+
+  const router = new Router();
+  await router.add(A);
+
+  const mw = router.routes();
+  const next = testing.createMockNext();
+
+  await mw(ctx, next);
+
+  assertEquals(callStack, [1]);
 });
