@@ -3,7 +3,7 @@ import { Context, Reflect } from "../deps.ts";
 import { Instance } from "./interfaces/mod.ts";
 import { ParamDecoratorCallback } from "./interfaces/param.interface.ts";
 
-const paramMetadataKey = Symbol("meta:param");
+export const paramMetadataKey = Symbol("meta:param");
 
 /**
  * this is a high function which will return a param decorator.
