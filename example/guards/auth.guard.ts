@@ -17,7 +17,7 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: Context): Promise<boolean> {
-    console.log("--AuthGuard---", this.roleService.info());
+    console.log("--AuthGuard---", await this.roleService.info());
     console.log("roles", getMetadataForGuard<string[]>("roles", context));
     console.log(
       "roles get by reflector",

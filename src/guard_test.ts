@@ -1,15 +1,19 @@
 // deno-lint-ignore-file require-await
 import { Context } from "../deps.ts";
 import { assert, assertEquals, testing } from "../test_deps.ts";
+import { Controller, Get } from "./decorators/controller.ts";
+import { Injectable } from "./decorators/inject.ts";
 import {
   checkByGuard,
   getAllGuards,
   GetMetadata,
   getMetadataForGuard,
+  Reflector,
   SetMetadata,
   UseGuards,
 } from "./guard.ts";
 import { CanActivate } from "./interfaces/mod.ts";
+import { Router } from "./router.ts";
 
 Deno.test("getAllGuards and checkByGuard", async () => {
   class AuthGuard implements CanActivate {
@@ -113,4 +117,44 @@ Deno.test("getMetadataForGuard", async () => {
   await checkByGuard(test, test.a, ctx);
   const result = getMetadataForGuard("roles", ctx);
   assertEquals(result, ["user"]);
+});
+
+Deno.test("Reflector", async () => {
+  const callStack: number[] = [];
+
+  @Injectable() // must injectable
+  class AuthGuard implements CanActivate {
+    constructor(private readonly reflector: Reflector) {
+    }
+    async canActivate(context: Context): Promise<boolean> {
+      callStack.push(1);
+      const role = this.reflector.get<string[]>("roles", context);
+      assertEquals(role, ["user"]);
+      assertEquals(getMetadataForGuard<string[]>("roles", context), ["user"]);
+      return true;
+    }
+  }
+  @UseGuards(AuthGuard)
+  @Controller("")
+  class TestController {
+    @SetMetadata("roles", ["user"])
+    @Get("/a")
+    a() {
+    }
+  }
+
+  assertEquals(callStack, []);
+
+  const router = new Router();
+  const ctx = testing.createMockContext({
+    path: "/a",
+    method: "GET",
+  });
+  await router.add(TestController);
+  const mw = router.routes();
+  const next = testing.createMockNext();
+
+  await mw(ctx, next);
+
+  assertEquals(callStack, [1]);
 });

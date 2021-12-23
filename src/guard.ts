@@ -13,13 +13,13 @@ export const META_GUARD_KEY = Symbol("meta:guard");
 export function UseGuards(...guards: (CanActivate | typeof CanActivate)[]) {
   return function (
     target: any,
-    _property?: string,
+    property?: string,
     descriptor?: TypedPropertyDescriptor<any>,
   ) {
     Reflect.defineMetadata(
       META_GUARD_KEY,
       guards,
-      descriptor ? descriptor.value : target.prototype,
+      property ? descriptor!.value : target.prototype,
     );
   };
 }
@@ -28,8 +28,9 @@ export function getAllGuards(
   target: InstanceType<Constructor>,
   fn: ControllerMethod,
 ): Promise<CanActivate[]> {
-  const classGuards = Reflect.getMetadata(META_GUARD_KEY, target) || [];
-  const fnGuards = Reflect.getMetadata(META_GUARD_KEY, fn) || [];
+  const classGuards = Reflect.getMetadata(META_GUARD_KEY, target) ||
+    []; // defined on prototye, so must use getMetadata instead of getOwnMetadata
+  const fnGuards = Reflect.getOwnMetadata(META_GUARD_KEY, fn) || [];
   const guards = [...classGuards, ...fnGuards];
   return Promise.all(guards.map((guard) => {
     if (typeof guard === "function") {
@@ -76,15 +77,14 @@ export function SetMetadata<K = string, V = any>(
 ) {
   return (
     target: any,
-    _propertyKey?: string | symbol,
+    propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {
-    if (descriptor) {
-      Reflect.defineMetadata(metadataKey, metadataValue, descriptor.value);
+    if (propertyKey) {
+      Reflect.defineMetadata(metadataKey, metadataValue, descriptor!.value);
     } else {
       Reflect.defineMetadata(metadataKey, metadataValue, target);
     }
-    return target;
   };
 }
 
@@ -117,16 +117,5 @@ export class Reflector {
    */
   get<T>(metadataKey: string, context: Context) {
     return getMetadataForGuard<T>(metadataKey, context);
-  }
-  /**
-   * Retrieve metadata for a specified key for a specified set of targets.
-   *
-   * @param metadataKey lookup key for metadata to retrieve
-   * @param targets context (decorated objects) to retrieve metadata from
-   */
-  getAll(metadataKey: string, targets: any[]) {
-    return (targets || []).map((target) =>
-      Reflect.getOwnMetadata(metadataKey, target)
-    );
   }
 }
