@@ -14,6 +14,7 @@ export {
 export type {
   Middleware,
   RouterMiddleware,
+  State,
 } from "https://deno.land/x/oak@v10.1.0/mod.ts";
 
 export { parse } from "https://deno.land/std@0.117.0/node/querystring.ts";

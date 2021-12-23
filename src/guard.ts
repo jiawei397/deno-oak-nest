@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Context, Reflect, UnauthorizedException } from "../deps.ts";
+import { Context, Reflect } from "../deps.ts";
 import { Factory } from "./factorys/class.factory.ts";
 import {
   CanActivate,
@@ -10,8 +10,7 @@ import {
 export const META_FUNCTION_KEY = Symbol("meta:fn");
 export const META_GUARD_KEY = Symbol("meta:guard");
 
-// deno-lint-ignore ban-types
-export function UseGuards(...guards: (CanActivate | Function)[]) {
+export function UseGuards(...guards: (CanActivate | typeof CanActivate)[]) {
   return function (
     target: any,
     _property?: string,
@@ -30,8 +29,9 @@ export async function checkByGuard(
   fn: ControllerMethod,
   context: Context,
 ) {
-  const classGuards = Reflect.getMetadata(META_GUARD_KEY, target) || [];
-  const fnGuards = Reflect.getMetadata(META_GUARD_KEY, fn) || [];
+  const classGuards: CanActivate[] =
+    Reflect.getMetadata(META_GUARD_KEY, target) || [];
+  const fnGuards: CanActivate[] = Reflect.getMetadata(META_GUARD_KEY, fn) || [];
   const guards = [...classGuards, ...fnGuards];
   // I removed the origin error catch, because it should be deal by middleware.
   if (guards.length > 0) {
