@@ -8,7 +8,7 @@ import {
   OakCookie,
   testing,
 } from "../../test_deps.ts";
-import { createMockContext } from "../common_test.ts";
+import { createMockContext } from "../../tests/common_test.ts";
 import { Router } from "../router.ts";
 import { Controller, Get, Post } from "./controller.ts";
 import {
