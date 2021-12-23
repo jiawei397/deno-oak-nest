@@ -137,3 +137,10 @@ export const ControllerName = createParamDecorator(
     return target.constructor.name;
   },
 );
+
+export const UploadedFile = createParamDecorator((ctx) => {
+  const data = ctx.request.body({
+    type: "form-data",
+  });
+  return data.value.read();
+});

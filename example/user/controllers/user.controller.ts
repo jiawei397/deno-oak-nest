@@ -10,6 +10,7 @@ import {
   Query,
   Res,
   Response,
+  UploadedFile,
   UseGuards,
 } from "../../../mod.ts";
 import type { Context } from "../../../mod.ts";
@@ -94,5 +95,11 @@ export class UserController {
     const result = await data.value.read();
     console.log("---upload----", result);
     ctx.response.body = "test ok";
+  }
+
+  @Post("upload2")
+  upload2(@UploadedFile() result: any, @Res() res: Response) {
+    console.log("---upload----", result);
+    res.body = result;
   }
 }
