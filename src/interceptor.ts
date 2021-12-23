@@ -32,18 +32,17 @@ export function getInterceptors(
 ): Promise<NestInterceptor[]> {
   const classInterceptors = Reflect.getMetadata(META_INTERCEPTOR_KEY, target) ||
     [];
-  const fnInterceptors = Reflect.getMetadata(META_INTERCEPTOR_KEY, fn) || [];
+  const fnInterceptors = Reflect.getOwnMetadata(META_INTERCEPTOR_KEY, fn) || [];
   const interceptors = [
     ...globalInterceptors,
     ...classInterceptors,
     ...fnInterceptors,
   ];
-  return Promise.all(interceptors.map(async (interceptor) => {
-    let _interceptor = interceptor;
+  return Promise.all(interceptors.map((interceptor) => {
     if (typeof interceptor === "function") {
-      _interceptor = await Factory(interceptor);
+      return Factory(interceptor);
     }
-    return _interceptor;
+    return interceptor;
   }));
 }
 
