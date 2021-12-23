@@ -10,7 +10,16 @@ import {
 } from "../../test_deps.ts";
 import { Router } from "../router.ts";
 import { Controller, Get, Post } from "./controller.ts";
-import { Body, Cookies, Params, Query, Req, Res } from "./oak.ts";
+import {
+  Body,
+  ControllerName,
+  Cookies,
+  MethodName,
+  Params,
+  Query,
+  Req,
+  Res,
+} from "./oak.ts";
 
 Deno.test("body", async () => {
   const mockContext = (options: {
@@ -312,7 +321,7 @@ Deno.test("Params", async () => {
   }
 });
 
-Deno.test("Req and Res", async () => {
+Deno.test("Req, Res, ControllerName, MethodName", async () => {
   const callStack: number[] = [];
   const ctx = testing.createMockContext({
     path: "/a",
@@ -325,10 +334,14 @@ Deno.test("Req and Res", async () => {
     a(
       @Req() req: any,
       @Res() res: any,
+      @ControllerName() controllerName: string,
+      @MethodName() methodName: string,
     ) {
       callStack.push(1);
       assertEquals(req, ctx.request);
       assertEquals(res, ctx.response);
+      assertEquals(controllerName, "A");
+      assertEquals(methodName, "a");
     }
   }
 
