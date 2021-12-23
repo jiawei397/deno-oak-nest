@@ -58,24 +58,44 @@ export async function checkByGuard(
   return true;
 }
 
+/**
+ * Decorator that assigns metadata to the class/function using the
+ * specified `key`.
+ *
+ * Requires two parameters:
+ * - `key` - a value defining the key under which the metadata is stored
+ * - `value` - metadata to be associated with `key`
+ *
+ * This metadata can be reflected using the `Reflector` class.
+ *
+ * Example: `@SetMetadata('roles', ['admin'])`
+ */
 export function SetMetadata<K = string, V = any>(
   metadataKey: K,
   metadataValue: V,
 ) {
   return (
     target: any,
-    _propertyKey: string | symbol,
-    descriptor: PropertyDescriptor,
+    _propertyKey?: string | symbol,
+    descriptor?: PropertyDescriptor,
   ) => {
     if (descriptor) {
       Reflect.defineMetadata(metadataKey, metadataValue, descriptor.value);
     } else {
       Reflect.defineMetadata(metadataKey, metadataValue, target);
     }
+    return target;
   };
 }
 
-export function getMetadataForGuard<T>(
+export function GetMetadata<T = any>(
+  metadataKey: string,
+  target: any,
+): T | undefined {
+  return Reflect.getOwnMetadata(metadataKey, target);
+}
+
+export function getMetadataForGuard<T = any>(
   metadataKey: string,
   context: Context,
 ): T | undefined {

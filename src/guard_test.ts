@@ -1,7 +1,14 @@
 // deno-lint-ignore-file require-await
 import { Context } from "../deps.ts";
 import { assert, assertEquals, testing } from "../test_deps.ts";
-import { checkByGuard, getAllGuards, UseGuards } from "./guard.ts";
+import {
+  checkByGuard,
+  getAllGuards,
+  GetMetadata,
+  getMetadataForGuard,
+  SetMetadata,
+  UseGuards,
+} from "./guard.ts";
 import { CanActivate } from "./interfaces/mod.ts";
 
 Deno.test("getAllGuards and checkByGuard", async () => {
@@ -68,4 +75,42 @@ Deno.test("getAllGuards and checkByGuard", async () => {
     const result = await checkByGuard(test, test.b, ctx);
     assertEquals(result, false);
   }
+});
+
+Deno.test("SetMetadata and GetMetadata", async () => {
+  @SetMetadata("roles", ["admin"])
+  class A {
+    @SetMetadata("roles", ["user"])
+    a() {
+    }
+  }
+
+  const result = GetMetadata("roles", A);
+  assertEquals(result, ["admin"]);
+
+  const result2 = GetMetadata("roles", A.prototype.a);
+  assertEquals(result2, ["user"]);
+});
+
+Deno.test("getMetadataForGuard", async () => {
+  class AuthGuard implements CanActivate {
+    async canActivate(_context: Context): Promise<boolean> {
+      return true;
+    }
+  }
+  @UseGuards(AuthGuard)
+  class TestController {
+    @SetMetadata("roles", ["user"])
+    a() {
+    }
+  }
+
+  const test = new TestController();
+  const ctx = testing.createMockContext({
+    path: "/a",
+    method: "GET",
+  });
+  await checkByGuard(test, test.a, ctx);
+  const result = getMetadataForGuard("roles", ctx);
+  assertEquals(result, ["user"]);
 });
