@@ -26,6 +26,7 @@ Deno.test("join", () => {
   assertEquals(join("/api", "/user", "add/"), "/api/user/add");
   assertEquals(join("/api", "/user/", "add/"), "/api/user/add");
   assertEquals(join("/api", "/user/", "/add"), "/api/user/add");
+  assertEquals(join("/api", "/user/", "/add/"), "/api/user/add");
 });
 
 Deno.test("mapRoute without controller route", async () => {

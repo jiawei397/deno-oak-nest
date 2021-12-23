@@ -6,6 +6,8 @@ import {
   OriginRouter,
   red,
   Reflect,
+  Status,
+  STATUS_TEXT,
   yellow,
 } from "../deps.ts";
 import { checkByGuard } from "./guard.ts";
@@ -125,7 +127,12 @@ export class Router extends OriginRouter {
         const methodKey = join(modelPath, route);
         const funcStart = Date.now();
         this[methodType.toLowerCase()](methodKey, async (context: Context) => {
-          await checkByGuard(instance, fn, context);
+          const guardResult = await checkByGuard(instance, fn, context);
+          if (!guardResult) {
+            context.response.status = Status.Forbidden;
+            context.response.body = STATUS_TEXT.get(Status.Forbidden);
+            return;
+          }
           const args = await transferParam(instance, methodName, context);
           const result = await checkByInterceptors(
             context,

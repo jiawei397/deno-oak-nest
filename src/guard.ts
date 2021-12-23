@@ -43,10 +43,11 @@ export async function checkByGuard(
       Reflect.defineMetadata(META_FUNCTION_KEY, fn, context); // record the function to context
       const result = await _guard.canActivate(context);
       if (!result) {
-        throw new UnauthorizedException(UnauthorizedException.name);
+        return false; // will not continue to next guard and not throw an exception
       }
     }
   }
+  return true;
 }
 
 export function SetMetadata<K = string, V = any>(

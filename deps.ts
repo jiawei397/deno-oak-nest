@@ -8,6 +8,7 @@ export {
   Router as OriginRouter,
   send,
   Status,
+  STATUS_TEXT,
 } from "https://deno.land/x/oak@v10.1.0/mod.ts";
 
 export type {
