@@ -24,24 +24,32 @@ export function UseGuards(...guards: (CanActivate | typeof CanActivate)[]) {
   };
 }
 
+export function getAllGuards(
+  target: InstanceType<Constructor>,
+  fn: ControllerMethod,
+): Promise<CanActivate[]> {
+  const classGuards = Reflect.getMetadata(META_GUARD_KEY, target) || [];
+  const fnGuards = Reflect.getMetadata(META_GUARD_KEY, fn) || [];
+  const guards = [...classGuards, ...fnGuards];
+  return Promise.all(guards.map((guard) => {
+    if (typeof guard === "function") {
+      return Factory(guard);
+    }
+    return guard;
+  }));
+}
+
 export async function checkByGuard(
   target: InstanceType<Constructor>,
   fn: ControllerMethod,
   context: Context,
 ) {
-  const classGuards: CanActivate[] =
-    Reflect.getMetadata(META_GUARD_KEY, target) || [];
-  const fnGuards: CanActivate[] = Reflect.getMetadata(META_GUARD_KEY, fn) || [];
-  const guards = [...classGuards, ...fnGuards];
-  // I removed the origin error catch, because it should be deal by middleware.
+  const guards = await getAllGuards(target, fn);
   if (guards.length > 0) {
-    for (const guard of guards) {
-      let _guard = guard;
-      if (typeof guard === "function") {
-        _guard = await Factory(guard);
-      }
-      Reflect.defineMetadata(META_FUNCTION_KEY, fn, context); // record the function to context
-      const result = await _guard.canActivate(context);
+    Reflect.defineMetadata(META_FUNCTION_KEY, fn, context); // record the function to context
+    for (let i = 0; i < guards.length; i++) {
+      const guard = guards[i];
+      const result = await guard.canActivate(context);
       if (!result) {
         return false; // will not continue to next guard and not throw an exception
       }
@@ -54,29 +62,26 @@ export function SetMetadata<K = string, V = any>(
   metadataKey: K,
   metadataValue: V,
 ) {
-  const decoratorFactory = (
+  return (
     target: any,
     _propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) => {
     if (descriptor) {
       Reflect.defineMetadata(metadataKey, metadataValue, descriptor.value);
-      return descriptor;
+    } else {
+      Reflect.defineMetadata(metadataKey, metadataValue, target);
     }
-    Reflect.defineMetadata(metadataKey, metadataValue, target);
-    return target;
   };
-  decoratorFactory.KEY = metadataKey;
-  return decoratorFactory;
 }
 
 export function getMetadataForGuard<T>(
   metadataKey: string,
   context: Context,
 ): T | undefined {
-  const fn = Reflect.getMetadata(META_FUNCTION_KEY, context);
+  const fn = Reflect.getOwnMetadata(META_FUNCTION_KEY, context);
   if (fn) {
-    return Reflect.getMetadata(metadataKey, fn);
+    return Reflect.getOwnMetadata(metadataKey, fn);
   }
 }
 
@@ -101,7 +106,7 @@ export class Reflector {
    */
   getAll(metadataKey: string, targets: any[]) {
     return (targets || []).map((target) =>
-      Reflect.getMetadata(metadataKey, target)
+      Reflect.getOwnMetadata(metadataKey, target)
     );
   }
 }
