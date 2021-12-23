@@ -8,6 +8,7 @@ import {
   OakCookie,
   testing,
 } from "../../test_deps.ts";
+import { createMockContext } from "../common_test.ts";
 import { Router } from "../router.ts";
 import { Controller, Get, Post } from "./controller.ts";
 import {
@@ -19,6 +20,7 @@ import {
   Query,
   Req,
   Res,
+  UploadedFile,
 } from "./oak.ts";
 
 Deno.test("body", async () => {
@@ -388,4 +390,78 @@ Deno.test("Cookies", async () => {
 
   assertEquals(callStack, [1]);
   callStack.length = 0;
+});
+
+Deno.test("UploadedFile", async () => {
+  const callStack: number[] = [];
+  const fileMockData = {
+    fields: { test: "a" },
+    files: [
+      {
+        content: undefined,
+        contentType: "text/markdown",
+        name: "file",
+        filename: "/var/folders/xx.md",
+        originalName: "b.md",
+      },
+    ],
+  };
+
+  @Controller("")
+  class A {
+    @Post("a")
+    noUpload(@UploadedFile() body: any) {
+      callStack.push(1);
+      assertEquals(body, undefined, "get will not pass body");
+    }
+
+    @Post("b")
+    upload(@UploadedFile() body: any) {
+      callStack.push(2);
+      assertEquals(body, fileMockData, "get will pass body");
+    }
+  }
+
+  const router = new Router();
+  await router.add(A);
+
+  {
+    const ctx = createMockContext({
+      path: "/a",
+      method: "POST",
+      body: {
+        type: "undefined",
+        value: undefined,
+      },
+    });
+
+    const mw = router.routes();
+    const next = testing.createMockNext();
+
+    await mw(ctx, next);
+
+    assertEquals(callStack, [1]);
+
+    callStack.length = 0;
+  }
+
+  {
+    const ctx = createMockContext({
+      path: "/b",
+      method: "POST",
+      body: {
+        type: "form-data",
+        value: {
+          read: () => Promise.resolve(fileMockData),
+        },
+      },
+    });
+    const mw = router.routes();
+    const next = testing.createMockNext();
+
+    await mw(ctx, next);
+
+    assertEquals(callStack, [2]);
+    callStack.length = 0;
+  }
 });

@@ -142,5 +142,7 @@ export const UploadedFile = createParamDecorator((ctx) => {
   const data = ctx.request.body({
     type: "form-data",
   });
-  return data.value.read();
+  if (data?.value) {
+    return data.value.read();
+  }
 });
