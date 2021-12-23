@@ -1,3 +1,4 @@
+// deno-lint-ignore-file
 import { Context } from "../deps.ts";
 import { assert, assertEquals, testing } from "../test_deps.ts";
 import {
@@ -7,7 +8,7 @@ import {
 } from "./interceptor.ts";
 import { NestInterceptor, Next } from "./interfaces/mod.ts";
 
-Deno.test("UseInterceptors", async () => {
+Deno.test("UseInterceptors sort", async () => {
   const callStack: number[] = [];
 
   class GlobalInterceptor implements NestInterceptor {
@@ -99,7 +100,6 @@ Deno.test("UseInterceptors", async () => {
       },
     );
     assertEquals(result, "a");
-    console.log(callStack);
     assertEquals(callStack, [1, 3, 5, 7, 8, 6, 4, 2]);
     callStack.length = 0;
   }
@@ -124,8 +124,120 @@ Deno.test("UseInterceptors", async () => {
       },
     );
     assertEquals(result, "b");
-    console.log(callStack);
     assertEquals(callStack, [1, 3, 4, 2]);
+    callStack.length = 0;
+  }
+});
+
+Deno.test("UseInterceptors cache", async () => {
+  const callStack: number[] = [];
+
+  class CacheInterceptor implements NestInterceptor {
+    caches = new Set<number>();
+
+    async intercept(_ctx: Context, next: Next) {
+      if (this.caches.has(1)) {
+        return "cached";
+      }
+      this.caches.add(1);
+      callStack.push(1);
+      const result = await next();
+      callStack.push(2);
+      return result;
+    }
+  }
+
+  @UseInterceptors(CacheInterceptor)
+  class TestController {
+    a() {
+      callStack.push(3);
+      return "a";
+    }
+  }
+
+  const test = new TestController();
+
+  {
+    const ctx = testing.createMockContext({
+      path: "/a",
+      method: "GET",
+    });
+    const result = await checkByInterceptors(
+      ctx,
+      [],
+      test.a,
+      {
+        target: test,
+        args: [],
+        methodName: "a",
+        methodType: "GET",
+        fn: test.a,
+      },
+    );
+    assertEquals(result, "a");
+    assertEquals(callStack, [1, 3, 2]);
+    callStack.length = 0;
+
+    const result2 = await checkByInterceptors(
+      ctx,
+      [],
+      test.a,
+      {
+        target: test,
+        args: [],
+        methodName: "a",
+        methodType: "GET",
+        fn: test.a,
+      },
+    );
+    assertEquals(result2, "cached");
+    console.log(callStack);
+    assertEquals(callStack, []);
+
+    callStack.length = 0;
+  }
+});
+
+Deno.test("UseInterceptors intercept", async () => {
+  const callStack: number[] = [];
+
+  class Interceptor implements NestInterceptor {
+    async intercept(_ctx: Context, _next: Next) {
+      callStack.push(1);
+      return "intercepted";
+    }
+  }
+
+  @UseInterceptors(Interceptor)
+  class TestController {
+    a() {
+      callStack.push(2);
+      return "a";
+    }
+  }
+
+  const test = new TestController();
+
+  {
+    const ctx = testing.createMockContext({
+      path: "/a",
+      method: "GET",
+    });
+    const result = await checkByInterceptors(
+      ctx,
+      [],
+      test.a,
+      {
+        target: test,
+        args: [],
+        methodName: "a",
+        methodType: "GET",
+        fn: test.a,
+      },
+    );
+    assertEquals(result, "intercepted");
+    assertEquals(callStack, [1]);
+
     callStack.length = 0;
   }
 });
