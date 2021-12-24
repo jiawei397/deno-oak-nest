@@ -10,7 +10,7 @@ export {
 } from "./src/guard.ts";
 export { UseInterceptors } from "./src/interceptor.ts";
 
-export * from "./src/factorys/class.factory.ts";
+export { Factory } from "./src/factorys/class.factory.ts";
 export * from "./src/factorys/nest.factory.ts";
 
 export * from "./src/decorators/mod.ts";
