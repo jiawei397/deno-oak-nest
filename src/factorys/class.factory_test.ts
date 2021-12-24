@@ -1,6 +1,6 @@
-import { assert, assertEquals } from "../../test_deps.ts";
+import { assert, assertEquals, assertRejects } from "../../test_deps.ts";
 import { Scope } from "../interfaces/scope-options.interface.ts";
-import { Factory } from "./class.factory.ts";
+import { Factory, initProvider } from "./class.factory.ts";
 
 Deno.test("Factory without providers", async () => {
   class A {
@@ -47,4 +47,77 @@ Deno.test("Factory with providers", async () => {
   assert(a.getB() instanceof B);
   assert(a.getC());
   assert(a.getC() instanceof C);
+});
+
+Deno.test("initProvider", async () => {
+  class A {
+  }
+
+  const a = await initProvider(A);
+  assert(a instanceof A);
+
+  const c = await initProvider(A, Scope.REQUEST);
+  assert(c !== a);
+
+  const d = await initProvider(A, Scope.TRANSIENT);
+  assert(d !== a);
+
+  { // useExisting
+    const provider = {
+      provide: "a",
+      useExisting: A,
+    };
+    const b = await initProvider(provider);
+    assert(b === a);
+
+    const provider2 = {
+      provide: "b",
+      useExisting: "a",
+    };
+    const e = await initProvider(provider2);
+    assert(e === a);
+
+    const provider3 = {
+      provide: "c",
+      useExisting: "d",
+    };
+    await assertRejects(
+      () => initProvider(provider3),
+    ); // Cannot find provider for "d".
+  }
+
+  { // use value
+    const provider = {
+      provide: "a",
+      useValue: "b",
+    };
+    const b = await initProvider(provider);
+    assertEquals(b, provider.useValue);
+  }
+
+  { // use class
+    const provider = {
+      provide: "a",
+      useClass: A,
+    };
+    const b = await initProvider(provider);
+    assert(b === a);
+
+    class B {}
+    const provider2 = {
+      provide: "b",
+      useClass: B,
+    };
+    const e = await initProvider(provider2);
+    assert(e instanceof B);
+  }
+
+  { // use factory
+    const provider = {
+      provide: "a",
+      useFactory: () => "b",
+    };
+    const b = await initProvider(provider);
+    assertEquals(b, provider.useFactory());
+  }
 });

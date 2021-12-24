@@ -22,6 +22,17 @@ export const Factory = async <T>(
   scope: Scope = Scope.DEFAULT,
   factoryCaches = globalFactoryCaches,
 ): Promise<T> => {
+  if (scope === Scope.DEFAULT) { // singleton
+    if (factoryCaches.has(target)) {
+      //   console.debug("factory.has cache", target);
+      return factoryCaches.get(target);
+    }
+  }
+  if (!target || (typeof target !== "object" && typeof target !== "function")) {
+    throw new Error(
+      `Factory target must be a class or function, but got ${target}`,
+    );
+  }
   const paramtypes = Reflect.getMetadata("design:paramtypes", target);
   let args: any[] = [];
   if (paramtypes?.length) {
@@ -52,22 +63,16 @@ export const Factory = async <T>(
       }),
     );
   }
+  const instance = new target(...args);
   if (scope === Scope.DEFAULT) { // singleton
-    if (factoryCaches.has(target)) {
-      //   console.debug("factory.has cache", target);
-      return factoryCaches.get(target);
-    }
-    const instance = new target(...args);
     setFactoryCaches(target, instance);
-    return instance;
-  } else {
-    return new target(...args);
   }
+  return instance;
 };
 
 export async function initProvider(
   item: Provider,
-  scope: Scope,
+  scope = Scope.DEFAULT,
   cache = globalFactoryCaches,
 ) {
   if (!item) {
@@ -88,7 +93,7 @@ export async function initProvider(
         );
       }
       cache.set(itemProvider.provide, existingInstance);
-      return itemProvider.useExisting;
+      return existingInstance;
     } else if ("useValue" in item) {
       const itemProvider = item as ValueProvider;
       cache.set(itemProvider.provide, itemProvider.useValue);
