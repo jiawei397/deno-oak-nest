@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-unused-vars no-explicit-any
 import { Application, assert, assertEquals } from "../../test_deps.ts";
 import { Module } from "../decorators/module.ts";
 import { Provider } from "../interfaces/provider.interface.ts";

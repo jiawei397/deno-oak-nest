@@ -4,7 +4,6 @@ import {
   getMetadataForGuard,
   Injectable,
   Reflector,
-  UnauthorizedException,
 } from "../../mod.ts";
 import { delay } from "../deps.ts";
 import { RoleService } from "../user/services/role.service.ts";
