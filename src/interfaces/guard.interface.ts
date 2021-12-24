@@ -1,11 +1,12 @@
-// deno-lint-ignore-file no-explicit-any no-unused-vars
+// deno-lint-ignore-file no-explicit-any
 import type { Context } from "../../deps.ts";
 
-export abstract class CanActivate {
-  constructor(...args: any[]) {}
-  canActivate(context: Context): boolean | Promise<boolean> {
-    throw new Error("Method not implemented.");
-  }
+export interface CanActivate {
+  canActivate(context: Context): boolean | Promise<boolean>;
+}
+
+export interface Guard {
+  new (...args: any[]): CanActivate;
 }
 
 export type ControllerMethod = (...args: any[]) => any;

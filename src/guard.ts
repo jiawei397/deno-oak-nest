@@ -5,12 +5,13 @@ import {
   CanActivate,
   Constructor,
   ControllerMethod,
+  Guard,
 } from "./interfaces/mod.ts";
 
 export const META_FUNCTION_KEY = Symbol("meta:fn");
 export const META_GUARD_KEY = Symbol("meta:guard");
 
-export function UseGuards(...guards: (CanActivate | typeof CanActivate)[]) {
+export function UseGuards(...guards: (CanActivate | Guard)[]) {
   return function (
     target: any,
     property?: string,
