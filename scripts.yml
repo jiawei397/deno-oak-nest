@@ -1,4 +1,4 @@
-version: 0.9.1
+version: 0.10.0
 name: oak_nest
 scripts:
   dev:
@@ -61,7 +61,7 @@ scripts:
     env:
       NODE_ENV: production
   test:
-    cmd: deno test 
+    cmd: deno test src/decorators/oak_test.ts
     watch: false
     unstable: false
     tsconfig: tsconfig.json
