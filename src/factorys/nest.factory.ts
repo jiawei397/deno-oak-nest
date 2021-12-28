@@ -19,7 +19,8 @@ export type ApplicationEx = Application & {
 export async function findControllers(
   module: ModuleType,
   controllerArr: Type<any>[],
-  providerArr: Provider[],
+  registeredProviderArr: Provider[],
+  dynamicProviders: Provider[],
 ) {
   if (!isModule(module)) {
     return;
@@ -42,7 +43,11 @@ export async function findControllers(
     controllerArr.push(...controllers);
   }
   if (providers) {
-    providerArr.push(...providers);
+    if (isDynamicModule) {
+      dynamicProviders.push(...providers);
+    } else {
+      registeredProviderArr.push(...providers);
+    }
   }
   if (!imports || !imports.length) {
     return;
@@ -52,7 +57,12 @@ export async function findControllers(
       return;
     }
     const module = await item;
-    return findControllers(module, controllerArr, providerArr);
+    return findControllers(
+      module,
+      controllerArr,
+      registeredProviderArr,
+      dynamicProviders,
+    );
   }));
 }
 
@@ -83,9 +93,16 @@ export class NestFactory {
     const app = new Application() as ApplicationEx;
     const router = new Router();
     const controllers: Type<any>[] = [];
-    const providers: Provider<any>[] = [];
-    await findControllers(module, controllers, providers);
-    await initProviders(providers);
+    const registeredProviders: Provider<any>[] = [];
+    const dynamicProviders: Provider<any>[] = [];
+    await findControllers(
+      module,
+      controllers,
+      registeredProviders,
+      dynamicProviders,
+    );
+    await initProviders(dynamicProviders); // init dynamic providers first to avoid it be inited first by other providers
+    await initProviders(registeredProviders);
 
     if (controllers.length) {
       await router.add(...controllers);
