@@ -1,6 +1,8 @@
 import { assert, assertEquals, assertRejects } from "../../test_deps.ts";
+import { Reflect } from "../../deps.ts";
+import { Injectable } from "../decorators/inject.ts";
 import { Scope } from "../interfaces/scope-options.interface.ts";
-import { Factory, initProvider } from "./class.factory.ts";
+import { Factory, initProvider, META_CONTAINER_KEY } from "./class.factory.ts";
 
 Deno.test("Factory without providers", async () => {
   class A {
@@ -26,6 +28,9 @@ Deno.test("Factory with providers", async () => {
   class B {
   }
 
+  @Injectable({
+    singleton: false,
+  })
   class C {
   }
 
@@ -47,6 +52,15 @@ Deno.test("Factory with providers", async () => {
   assert(a.getB() instanceof B);
   assert(a.getC());
   assert(a.getC() instanceof C);
+
+  const a1 = await Factory(A);
+  assert(a1.getB() === a.getB(), "Factory should return the same instance");
+  assert(a1.getC() !== a.getC(), "c should be different instance");
+
+  assertEquals(Reflect.getMetadata(META_CONTAINER_KEY, a), undefined);
+  assertEquals(Reflect.getMetadata(META_CONTAINER_KEY, a.getB()), undefined);
+  assert(Reflect.getMetadata(META_CONTAINER_KEY, a.getC()) === a);
+  assert(Reflect.getMetadata(META_CONTAINER_KEY, a1.getC()) === a1);
 });
 
 Deno.test("initProvider", async () => {

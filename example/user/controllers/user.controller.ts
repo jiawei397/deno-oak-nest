@@ -20,10 +20,15 @@ import { AuthGuard2 } from "../../guards/auth2.guard.ts";
 import { AuthGuard3, SSOGuard } from "../../guards/auth3.guard.ts";
 import { RoleAction, Roles } from "../../decorators/roles.ts";
 import { LogTime } from "../../decorators/time.ts";
+import { LoggerService } from "../services/logger.service.ts";
 
 @UseGuards(AuthGuard, SSOGuard)
 @Controller("/user")
 export class UserController {
+  constructor(private readonly loggerService: LoggerService) {
+    this.loggerService.info("user");
+  }
+
   @UseGuards(AuthGuard2, AuthGuard3)
   @Get("/info")
   info(

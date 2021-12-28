@@ -1,8 +1,11 @@
 // deno-lint-ignore-file no-explicit-any
 import { InjectParams } from "../interfaces/factory.interface.ts";
 import { Reflect } from "../../deps.ts";
+import { Constructor } from "../interfaces/type.interface.ts";
 
 export const INJECT_META_KEY = "design:inject";
+
+export const SINGLETON_MEAT_KEY = "meta:singleton";
 
 /**
  * Inject decorator
@@ -29,4 +32,16 @@ export function getInjectData(
   return Reflect.getMetadata(INJECT_META_KEY + parameterIndex, target);
 }
 
-export const Injectable = (): ClassDecorator => (_target) => {};
+export const Injectable = ({
+  singleton = true,
+} = {}): ClassDecorator =>
+  (target) => {
+    if (!singleton) { // default is singleton
+      Reflect.defineMetadata(SINGLETON_MEAT_KEY, false, target);
+    }
+  };
+
+export function isSingleton(Cls: Constructor) {
+  const meta = Reflect.getMetadata(SINGLETON_MEAT_KEY, Cls);
+  return meta !== false;
+}

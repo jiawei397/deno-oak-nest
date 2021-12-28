@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Reflect } from "../../deps.ts";
-import { getInjectData } from "../decorators/inject.ts";
+import { getInjectData, isSingleton } from "../decorators/inject.ts";
 import {
   ClassProvider,
   ExistingProvider,
@@ -11,6 +11,7 @@ import {
   ValueProvider,
 } from "../interfaces/mod.ts";
 
+export const META_CONTAINER_KEY = "meta:container"; // the container of the class
 export const globalFactoryCaches = new Map();
 
 export const setFactoryCaches = (key: any, value: any) => {
@@ -22,7 +23,10 @@ export const Factory = async <T>(
   scope: Scope = Scope.DEFAULT,
   factoryCaches = globalFactoryCaches,
 ): Promise<T> => {
-  if (scope === Scope.DEFAULT) { // singleton
+  const singleton = typeof target === "function"
+    ? isSingleton(target)
+    : scope === Scope.DEFAULT;
+  if (singleton) {
     if (factoryCaches.has(target)) {
       //   console.debug("factory.has cache", target);
       return factoryCaches.get(target);
@@ -37,7 +41,7 @@ export const Factory = async <T>(
   let args: any[] = [];
   if (paramtypes?.length) {
     args = await Promise.all(
-      paramtypes.map((paramtype: Type, index: number) => {
+      paramtypes.map(async (paramtype: Type, index: number) => {
         const injectedData = getInjectData(target, index);
         if (injectedData) {
           if (
@@ -55,16 +59,21 @@ export const Factory = async <T>(
             );
           }
         }
+        let param;
         if (scope === Scope.REQUEST) { // TODO I don't quite understand the difference between REQUEST and TRANSIENT, so it maybe error.
-          return Factory(paramtype, Scope.DEFAULT);
+          param = await Factory(paramtype, Scope.DEFAULT);
         } else {
-          return Factory(paramtype, scope);
+          param = await Factory(paramtype, scope);
         }
+        if (!singleton) {
+          Reflect.defineMetadata(META_CONTAINER_KEY, target, param);
+        }
+        return param;
       }),
     );
   }
   const instance = new target(...args);
-  if (scope === Scope.DEFAULT) { // singleton
+  if (singleton) {
     setFactoryCaches(target, instance);
   }
   return instance;

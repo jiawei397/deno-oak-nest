@@ -4,8 +4,10 @@ import {
   Controller,
   Get,
   Headers,
+  Inject,
   Post,
   Query,
+  Reflect,
   Res,
   Response,
   UseInterceptors,
@@ -19,6 +21,7 @@ import { AsyncService } from "../../asyncModule/async.service.ts";
 import { TransformInterceptor } from "../../interceptor/transform.interceptor.ts";
 import { ErrorsInterceptor } from "../../interceptor/errors.interceptor.ts";
 import { CacheInterceptor } from "../../../modules/cache/mod.ts";
+import { LoggerService } from "../services/logger.service.ts";
 
 @Controller("/role")
 @UseInterceptors(CacheInterceptor)
@@ -26,7 +29,9 @@ export class RoleController {
   constructor(
     private readonly roleService: RoleService,
     private readonly asyncService: AsyncService,
+    private readonly loggerService: LoggerService,
   ) {
+    this.loggerService.info("role");
   }
 
   @Get("/info/:id")
@@ -36,6 +41,7 @@ export class RoleController {
     @Query() params: any,
     @Query("age") age: string,
   ) {
+    this.loggerService.info("info test", name, params, age);
     console.log(params, age);
     context.response.body = "role info " + name + " - " +
       JSON.stringify(params);
