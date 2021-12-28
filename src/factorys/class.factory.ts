@@ -23,9 +23,7 @@ export const Factory = async <T>(
   scope: Scope = Scope.DEFAULT,
   factoryCaches = globalFactoryCaches,
 ): Promise<T> => {
-  const singleton = typeof target === "function"
-    ? isSingleton(target)
-    : scope === Scope.DEFAULT;
+  const singleton = scope === Scope.DEFAULT;
   if (singleton) {
     if (factoryCaches.has(target)) {
       //   console.debug("factory.has cache", target);
@@ -61,11 +59,11 @@ export const Factory = async <T>(
         }
         let param;
         if (scope === Scope.REQUEST) { // TODO I don't quite understand the difference between REQUEST and TRANSIENT, so it maybe error.
-          param = await Factory(paramtype, Scope.DEFAULT);
+          param = await Factory(paramtype, Scope.DEFAULT, factoryCaches);
         } else {
-          param = await Factory(paramtype, scope);
+          param = await Factory(paramtype, scope, factoryCaches);
         }
-        if (!singleton) {
+        if (!isSingleton(paramtype)) {
           Reflect.defineMetadata(META_CONTAINER_KEY, target, param);
         }
         return param;
@@ -74,7 +72,7 @@ export const Factory = async <T>(
   }
   const instance = new target(...args);
   if (singleton) {
-    setFactoryCaches(target, instance);
+    factoryCaches.set(target, instance);
   }
   return instance;
 };
