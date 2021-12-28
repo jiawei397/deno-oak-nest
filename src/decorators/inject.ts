@@ -42,6 +42,9 @@ export const Injectable = ({
   };
 
 export function isSingleton(Cls: Constructor) {
-  const meta = Reflect.getMetadata(SINGLETON_MEAT_KEY, Cls);
-  return meta !== false;
+  if (typeof Cls === "function") {
+    const meta = Reflect.getMetadata(SINGLETON_MEAT_KEY, Cls);
+    return meta !== false;
+  }
+  return true;
 }

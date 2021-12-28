@@ -23,7 +23,7 @@ export const Factory = async <T>(
   scope: Scope = Scope.DEFAULT,
   factoryCaches = globalFactoryCaches,
 ): Promise<T> => {
-  const singleton = scope === Scope.DEFAULT;
+  const singleton = isSingleton(target) && scope === Scope.DEFAULT;
   if (singleton) {
     if (factoryCaches.has(target)) {
       //   console.debug("factory.has cache", target);
