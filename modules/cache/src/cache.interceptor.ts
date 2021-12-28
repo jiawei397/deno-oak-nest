@@ -23,6 +23,19 @@ export class CacheInterceptor implements NestInterceptor {
   }
 
   private caches = new Map<string, any>();
+
+  joinArgs(args: any[]) {
+    let result = "";
+    args.forEach((arg) => {
+      if (typeof arg === "object") {
+        result += JSON.stringify(arg);
+      } else {
+        result += arg;
+      }
+    });
+    return result;
+  }
+
   intercept(
     _context: Context,
     next: Next,
@@ -46,7 +59,7 @@ export class CacheInterceptor implements NestInterceptor {
         constructorName,
         options.methodName,
         options.methodType,
-        options.args.join("-"),
+        this.joinArgs(options.args),
       ].join("_");
     const cacheValue = cache.get(key);
     if (cacheValue !== undefined) {
