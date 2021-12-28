@@ -14,3 +14,13 @@ export class AuthGuard3 implements CanActivate {
     console.log("---test");
   }
 }
+
+function SSOGuard2() {
+  return class Guard implements CanActivate {
+    async canActivate(_context: Context) {
+      return true;
+    }
+  };
+}
+
+export const SSOGuard = SSOGuard2();
