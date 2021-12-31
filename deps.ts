@@ -14,10 +14,12 @@ export {
 export type {
   Middleware,
   RouterMiddleware,
+  SendOptions,
   State,
 } from "https://deno.land/x/oak@v10.1.0/mod.ts";
 
 export { parse } from "https://deno.land/std@0.117.0/node/querystring.ts";
+export { extname, resolve } from "https://deno.land/std@0.117.0/path/mod.ts";
 
 export {
   bgBlue,
@@ -48,3 +50,5 @@ export {
   BodyParamValidationException,
   UnauthorizedException,
 } from "https://deno.land/x/oak_exception@v0.0.7/mod.ts";
+
+export { gzip } from "https://deno.land/x/denoflate@1.2.1/mod.ts";

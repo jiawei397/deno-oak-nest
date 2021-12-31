@@ -5,6 +5,10 @@ import { LoggingInterceptor } from "./interceptor/log.interceptor.ts";
 const app = await NestFactory.create(AppModule);
 app.setGlobalPrefix("/api");
 app.useGlobalInterceptors(new LoggingInterceptor());
+app.useStaticAssets("example/static", {
+  prefix: "/static",
+  gzip: true,
+});
 
 // Logger
 app.use(async (ctx: Context, next) => {
@@ -57,6 +61,8 @@ app.get("/hello", (ctx: Context) => {
 });
 
 app.use(app.routes());
+
+// app.useStaticAssets("example/static");
 
 const port = Number(Deno.env.get("PORT") || 1000);
 console.log(`app will start with: http://localhost:${port}`);
