@@ -33,9 +33,11 @@ export function Cache(
       }
       const result = originalMethod.apply(this, args);
       cache[key] = result;
-      setTimeout(() => {
-        cache[key] = undefined;
-      }, timeout);
+      if (timeout >= 0) {
+        setTimeout(() => {
+          cache[key] = undefined;
+        }, timeout);
+      }
       Promise.resolve(result).catch(() => {
         cache[key] = undefined;
       });
