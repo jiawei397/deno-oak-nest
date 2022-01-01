@@ -27,7 +27,8 @@ Deno.test("findControllers", async () => {
   const callStack: number[] = [];
 
   const controllerArr: Type<any>[] = [];
-  const providerArr: Provider[] = [];
+  const registeredProviderArr: Provider[] = [];
+  const dynamicProviders: Provider[] = [];
   const Controller = (): ClassDecorator => () => {};
 
   class ChildService {}
@@ -70,19 +71,22 @@ Deno.test("findControllers", async () => {
   await findControllers(
     AppModule,
     controllerArr,
-    providerArr,
+    registeredProviderArr,
+    dynamicProviders,
   );
 
   assertEquals(controllerArr.length, 2);
   assertEquals(controllerArr[0], AppController);
   assertEquals(controllerArr[1], ChildController);
 
-  assertEquals(providerArr.length, 1);
-  assertEquals(providerArr[0], SchedulerService);
+  assertEquals(registeredProviderArr.length, 1);
+  assertEquals(registeredProviderArr[0], SchedulerService);
 
-  await initProviders(providerArr);
+  assertEquals(dynamicProviders.length, 0);
+
+  await initProviders(registeredProviderArr);
   assertEquals(callStack, [1]);
 
-  await initProviders(providerArr);
+  await initProviders(registeredProviderArr);
   assertEquals(callStack, [1], "should not call onModuleInit twice");
 });
