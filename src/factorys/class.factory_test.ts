@@ -54,13 +54,16 @@ Deno.test("Factory with providers", async () => {
   assert(a.getC() instanceof C);
 
   const a1 = await Factory(A);
-  assert(a1.getB() === a.getB(), "Factory should return the same instance");
-  assert(a1.getC() !== a.getC(), "c should be different instance");
+  assert(a === a1, "Factory should return the same instance");
 
   assertEquals(Reflect.getMetadata(META_CONTAINER_KEY, a), undefined);
   assertEquals(Reflect.getMetadata(META_CONTAINER_KEY, a.getB()), undefined);
-  assert(Reflect.getMetadata(META_CONTAINER_KEY, a.getC()) === a);
-  assert(Reflect.getMetadata(META_CONTAINER_KEY, a1.getC()) === a1);
+  assert(Reflect.getMetadata(META_CONTAINER_KEY, a.getC()) === A);
+
+  const c = await Factory(C);
+  assert(c instanceof C);
+  const c1 = await Factory(C);
+  assert(c !== c1, "C should return different instance");
 });
 
 Deno.test("initProvider", async () => {
