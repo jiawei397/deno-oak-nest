@@ -2,6 +2,7 @@
 import {
   assert,
   BodyParamValidationException,
+  FormDataReadOptions,
   parse,
   Reflect,
   validateOrReject,
@@ -138,11 +139,13 @@ export const ControllerName = createParamDecorator(
   },
 );
 
-export const UploadedFile = createParamDecorator((ctx) => {
-  const data = ctx.request.body({
-    type: "form-data",
+export function UploadedFile(options: FormDataReadOptions = {}) {
+  return createParamDecoratorWithLowLevel((ctx: Context) => {
+    const data = ctx.request.body({
+      type: "form-data",
+    });
+    if (data?.value) {
+      return data.value.read(options);
+    }
   });
-  if (data?.value) {
-    return data.value.read();
-  }
-});
+}

@@ -97,13 +97,20 @@ export class UserController {
     const data = ctx.request.body({
       type: "form-data",
     });
-    const result = await data.value.read();
+    const result = await data.value.read({
+      maxFileSize: 10 * 1024 * 1024 * 1024,
+    });
     console.log("---upload----", result);
     ctx.response.body = "test ok";
   }
 
   @Post("upload2")
-  upload2(@UploadedFile() result: any, @Res() res: Response) {
+  upload2(
+    @UploadedFile({
+      maxFileSize: 10 * 1024 * 1024 * 1024,
+    }) result: any,
+    @Res() res: Response,
+  ) {
     console.log("---upload----", result);
     res.body = result;
   }
