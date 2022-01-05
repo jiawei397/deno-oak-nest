@@ -6,7 +6,7 @@ const app = await NestFactory.create(AppModule);
 app.setGlobalPrefix("/api");
 app.useGlobalInterceptors(new LoggingInterceptor());
 app.useStaticAssets("example/static", {
-  prefix: "/static",
+  prefix: "static",
   gzip: true,
 });
 

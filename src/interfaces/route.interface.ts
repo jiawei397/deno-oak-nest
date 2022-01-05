@@ -34,5 +34,13 @@ export interface ServeStaticOptions extends Omit<SendOptions, "root" | "gzip"> {
    */
   prefix?: string;
 
+  /**
+   * If true, will gzip the files, and will generate the corresponding .gz file
+   */
   gzip?: boolean | GzipOptions;
+
+  /**
+   * If true, will use the oak gzip, it will check the file extension with .gz, if it exists, it will use gzip, otherwise it will not process the file.
+   */
+  useOriginGzip?: boolean;
 }

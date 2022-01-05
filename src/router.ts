@@ -1,20 +1,26 @@
 // deno-lint-ignore-file no-explicit-any
 import {
   blue,
+  extname,
   format,
   green,
+  gzip,
   OriginRouter,
   red,
   Reflect,
+  resolve,
+  send,
   Status,
   STATUS_TEXT,
   yellow,
 } from "../deps.ts";
 import { checkByGuard } from "./guard.ts";
 import {
+  GzipOptions,
   NestUseInterceptors,
   RouteItem,
   RouteMap,
+  ServeStaticOptions,
   Type,
 } from "./interfaces/mod.ts";
 import { META_METHOD_KEY, META_PATH_KEY } from "./decorators/controller.ts";
@@ -22,6 +28,12 @@ import { Factory } from "./factorys/class.factory.ts";
 import { transferParam } from "./params.ts";
 import { Context } from "../deps.ts";
 import { checkByInterceptors } from "./interceptor.ts";
+
+const defaultGzipOptions: GzipOptions = {
+  extensions: [".js", ".css", ".wasm"],
+  threshold: 1024 * 10, // 10kb
+  level: 5,
+};
 
 export function join(...paths: string[]) {
   if (paths.length === 0) {
@@ -75,10 +87,114 @@ export class Router extends OriginRouter {
 
   setGlobalPrefix(apiPrefix: string) {
     this.apiPrefix = apiPrefix;
+    return this;
   }
 
   useGlobalInterceptors(...interceptors: NestUseInterceptors) {
     this.globalInterceptors.push(...interceptors);
+    return this;
+  }
+
+  /**
+   * Sets a base directory for public assets.
+   * @example
+   * app.useStaticAssets('public')
+   */
+  useStaticAssets(
+    path: string,
+    options: ServeStaticOptions = {},
+  ) {
+    const { prefix = "/", gzip: _gzip, useOriginGzip, ...otherOptions } =
+      options;
+    const prefixWithoutSlash = join(prefix);
+    const root = resolve(Deno.cwd(), path);
+    const index = options?.index || "index.html";
+    this.get(prefixWithoutSlash, (context) => {
+      const pathname = context.request.url.pathname;
+      if (!pathname.endsWith("/")) {
+        const response = context.response;
+        response.status = 301;
+        response.redirect(pathname + "/");
+        return;
+      }
+      return send(context, "", {
+        ...otherOptions,
+        index,
+        root,
+      });
+    })
+      .get(prefixWithoutSlash + "/:id", async (context) => {
+        const pathname = context.request.url.pathname; //static/1.js
+        const formattedPath = pathname.substring(prefixWithoutSlash.length + 1);
+        const sendFile = () =>
+          send(context, formattedPath, {
+            ...otherOptions,
+            index,
+            root,
+            gzip: useOriginGzip || false,
+          });
+        if (useOriginGzip) {
+          return sendFile();
+        }
+        let canGzip = !!_gzip;
+        if (_gzip) {
+          let extensions: string[] = defaultGzipOptions.extensions!;
+          if (typeof _gzip !== "boolean") {
+            if (Array.isArray(_gzip.extensions)) {
+              extensions = _gzip.extensions;
+            }
+          }
+          canGzip = extensions.includes(extname(pathname));
+        }
+        if (!canGzip) {
+          return sendFile();
+        }
+        const gzipOptions = typeof _gzip === "boolean"
+          ? defaultGzipOptions
+          : Object.assign({}, defaultGzipOptions, _gzip!);
+        const realFilePath = resolve(
+          Deno.cwd(),
+          path,
+          formattedPath,
+        );
+        const gzipPath = realFilePath + ".gz";
+        const fileContent = await Deno.readFile(gzipPath).catch(() => {});
+        if (fileContent) {
+          context.response.body = fileContent;
+        } else {
+          const fileContent = await Deno.readFile(realFilePath).catch(() => {});
+          if (!fileContent) {
+            context.response.status = 404;
+            context.response.body = "not found";
+            return;
+          }
+          if (gzipOptions.filter && !gzipOptions.filter(context, fileContent)) {
+            return sendFile();
+          }
+          if (fileContent.length < gzipOptions.threshold!) {
+            // console.debug(
+            //   "File is too small to gzip",
+            //   realFilePath,
+            //   fileContent.length,
+            //   gzipOptions.threshold,
+            // );
+            return sendFile();
+          }
+          const gzipContent = gzip(fileContent, gzipOptions.level);
+          context.response.body = gzipContent;
+          const status = await Deno.permissions.query({ name: "write" });
+          if (status.state === "granted") {
+            Deno.writeFile(gzipPath, gzipContent).then(() => {
+              console.info(`${blue("write gzip file success")} [${gzipPath}]`);
+            }).catch(console.error);
+          } else {
+            console.warn(`${yellow("write gzip file denied")} [${gzipPath}]`);
+          }
+        }
+        context.response.headers.set("Content-Encoding", "gzip");
+        context.response.headers.delete("Content-Length");
+      });
+    return this;
   }
 
   async add(...clsArr: Type[]) {
