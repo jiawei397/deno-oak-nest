@@ -17,6 +17,8 @@ app.use(async (ctx: Context, next) => {
   console.log(`${ctx.request.method} ${ctx.request.url} - ${rt}`);
 });
 
+// app.use(proxy("https://www.google.com.hk/"));
+
 // // Timing moved to LoggingInterceptor
 // app.use(async (ctx: Context, next) => {
 //   const start = Date.now();

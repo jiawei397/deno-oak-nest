@@ -3,6 +3,7 @@ export {
   Context,
   Cookies as OakCookie,
   isHttpError,
+  proxy,
   Request,
   Response,
   Router as OriginRouter,
