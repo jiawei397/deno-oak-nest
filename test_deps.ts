@@ -5,6 +5,8 @@ export {
   assertRejects,
 } from "https://deno.land/std@0.118.0/testing/asserts.ts";
 
+export { delay } from "https://deno.land/std@0.118.0/async/mod.ts";
+
 export {
   Application,
   Context,

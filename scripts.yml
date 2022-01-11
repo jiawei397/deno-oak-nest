@@ -64,4 +64,8 @@ scripts:
     cmd: deno test
     watch: false
     unstable: false
+    allow:
+      - env
+    env:
+      DEBUG: 'true'  
     tsconfig: tsconfig.json
