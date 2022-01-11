@@ -8,6 +8,16 @@ app.get("/hello", (ctx: Context) => {
   ctx.response.body = "hello";
 });
 
+app.use(async (ctx, next) => {
+  try {
+    await next();
+  } catch (e) {
+    console.error(e);
+    ctx.response.body = e.stack;
+    ctx.response.status = e.status || 500;
+  }
+});
+
 app.use(app.routes());
 
 const port = Number(Deno.env.get("PORT") || 1000);
