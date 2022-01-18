@@ -6,10 +6,17 @@ import {
   NestInterceptor,
   NestInterceptorOptions,
   Next,
+  Reflect,
 } from "../../../mod.ts";
 import { isDebug } from "../../../src/utils.ts";
-import { optionKey } from "./cache.constant.ts";
+import { META_CACHE_TTL_KEY, optionKey } from "./cache.constant.ts";
 import { CacheModuleOptions } from "./cache.interface.ts";
+
+export function CacheTTL(ttl: number) {
+  return (_target: any, _methodName: string, descriptor: any) => {
+    Reflect.defineMetadata(META_CACHE_TTL_KEY, ttl, descriptor.value);
+  };
+}
 
 @Injectable()
 export class CacheInterceptor implements NestInterceptor {
@@ -70,9 +77,14 @@ export class CacheInterceptor implements NestInterceptor {
     }
     const result = next();
     cache.set(key, result);
+
+    const ttl = Reflect.getOwnMetadata(
+      META_CACHE_TTL_KEY,
+      options.target[options.methodName],
+    ) || this.ttl;
     const st = setTimeout(() => {
       cache.delete(key);
-    }, this.ttl * 1000);
+    }, ttl * 1000);
     Promise.resolve(result)
       .then((val) => {
         if (this.cacheModuleOptions?.isCacheableValue) {
