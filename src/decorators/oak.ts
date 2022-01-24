@@ -3,7 +3,6 @@ import {
   assert,
   BodyParamValidationException,
   FormDataReadOptions,
-  parse,
   Reflect,
   validateOrReject,
   ValidationError,
@@ -13,6 +12,7 @@ import {
   createParamDecorator,
   createParamDecoratorWithLowLevel,
 } from "../params.ts";
+import { parseSearch } from "../utils.ts";
 
 export const Body = createParamDecorator(
   async (ctx: Context, target: any, methodName: string, index: number) => {
@@ -61,14 +61,11 @@ export const Body = createParamDecorator(
 export function Query(key?: string) {
   return createParamDecoratorWithLowLevel((ctx: Context) => {
     const { search } = ctx.request.url;
-    if (search.startsWith("?")) {
-      const map = parse(search.substring(1));
-      if (key) {
-        return map[key];
-      }
-      return map;
+    const map = parseSearch(search);
+    if (key) {
+      return map[key];
     }
-    return key ? undefined : {};
+    return map;
   });
 }
 
