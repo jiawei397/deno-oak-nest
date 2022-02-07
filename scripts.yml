@@ -58,6 +58,7 @@ scripts:
     cmd: deno bundle example/main.ts example/main.js
     watch: false
     unstable: false
+    tsconfig: tsconfig.json
     env:
       NODE_ENV: production
   test:
@@ -69,3 +70,9 @@ scripts:
     env:
       DEBUG: 'true'  
     tsconfig: tsconfig.json
+  cache: 
+    cmd: deno cache --lock-write example/main.ts
+    watch: false
+    unstable: true
+    tsconfig: tsconfig.json
+    lock: lock.json

@@ -10,7 +10,7 @@ export {
   send,
   Status,
   STATUS_TEXT,
-} from "https://deno.land/x/oak@v10.1.0/mod.ts";
+} from "https://deno.land/x/oak@v10.2.0/mod.ts";
 
 export type {
   FormDataReadOptions,
@@ -18,7 +18,7 @@ export type {
   RouterMiddleware,
   SendOptions,
   State,
-} from "https://deno.land/x/oak@v10.1.0/mod.ts";
+} from "https://deno.land/x/oak@v10.2.0/mod.ts";
 
 export { extname, resolve } from "https://deno.land/std@0.122.0/path/mod.ts";
 
