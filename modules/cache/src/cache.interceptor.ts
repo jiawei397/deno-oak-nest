@@ -1,6 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 import {
+  calculate,
   Context,
+  ifNoneMatch,
   Inject,
   Injectable,
   NestInterceptor,
@@ -11,10 +13,11 @@ import {
 import { isDebug } from "../../../src/utils.ts";
 import {
   META_CACHE_KEY_KEY,
+  META_CACHE_POLICY_KEY,
   META_CACHE_TTL_KEY,
   optionKey,
 } from "./cache.constant.ts";
-import { CacheModuleOptions } from "./cache.interface.ts";
+import { CacheModuleOptions, CachePolicy } from "./cache.interface.ts";
 
 export function CacheTTL(ttl: number) {
   return (_target: any, _methodName: string, descriptor: any) => {
@@ -28,15 +31,23 @@ export function CacheKey(key: string) {
   };
 }
 
+export function SetCachePolicy(policy: CachePolicy) {
+  return (_target: any, _methodName: string, descriptor: any) => {
+    Reflect.defineMetadata(META_CACHE_POLICY_KEY, policy, descriptor.value);
+  };
+}
+
 @Injectable()
 export class CacheInterceptor implements NestInterceptor {
   ttl: number;
   max: number;
+  policy: CachePolicy;
   constructor(
     @Inject(optionKey) private cacheModuleOptions?: CacheModuleOptions,
   ) {
     this.ttl = cacheModuleOptions?.ttl || 5;
     this.max = cacheModuleOptions?.max || 100;
+    this.policy = cacheModuleOptions?.policy || "no-cache";
   }
 
   private caches = new Map<string, any>();
@@ -55,8 +66,23 @@ export class CacheInterceptor implements NestInterceptor {
     return result;
   }
 
-  intercept(
-    _context: Context,
+  async checkEtag(context: Context, val: unknown) {
+    const etag = context.request.headers.get("If-None-Match");
+    const str = JSON.stringify(val);
+    const etagOptions = { weak: true };
+    const actual = await calculate(str, etagOptions);
+    context.response.headers.set("etag", actual);
+    context.response.headers.set("Cache-Control", "no-cache");
+    if (
+      etag && !await ifNoneMatch(etag, str, etagOptions) // if etag is not match, then will return 200
+    ) {
+      context.response.status = 304;
+    }
+    return val;
+  }
+
+  async intercept(
+    context: Context,
     next: Next,
     options: NestInterceptorOptions,
   ) {
@@ -84,11 +110,18 @@ export class CacheInterceptor implements NestInterceptor {
           options.methodType,
           this.joinArgs(options.args),
         ].join("_"));
-    console.log(key);
     const cacheValue = cache.get(key);
+    const policy = Reflect.getOwnMetadata(
+      META_CACHE_POLICY_KEY,
+      options.target[options.methodName],
+    ) || this.policy;
+
     if (cacheValue !== undefined) {
       if (isDebug()) {
         console.debug("cache hit", key, cacheValue);
+      }
+      if (policy === "no-cache") { // may return 304 when not modified
+        return this.checkEtag(context, await cacheValue);
       }
       return cacheValue;
     }
@@ -102,19 +135,28 @@ export class CacheInterceptor implements NestInterceptor {
     const st = setTimeout(() => {
       cache.delete(key);
     }, ttl * 1000);
-    Promise.resolve(result)
-      .then((val) => {
-        if (this.cacheModuleOptions?.isCacheableValue) {
-          if (!this.cacheModuleOptions.isCacheableValue(val)) {
-            cache.delete(key);
-            clearTimeout(st);
-          }
+    try {
+      const val = await result;
+      if (this.cacheModuleOptions?.isCacheableValue) {
+        if (!this.cacheModuleOptions.isCacheableValue(val)) {
+          cache.delete(key);
+          clearTimeout(st);
+          return val;
         }
-      })
-      .catch(() => {
-        cache.delete(key);
-        clearTimeout(st);
-      });
-    return result;
+      }
+      if (policy === "no-cache") {
+        return this.checkEtag(context, val);
+      } else {
+        context.response.headers.set(
+          "Cache-Control",
+          policy === "public" ? `max-age=${ttl}` : `${policy}, max-age=${ttl}`,
+        );
+        return val;
+      }
+    } catch (error) {
+      cache.delete(key);
+      clearTimeout(st);
+      throw error;
+    }
   }
 }

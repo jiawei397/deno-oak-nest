@@ -225,7 +225,9 @@ export class Router extends OriginRouter {
   }
 
   private transResponseResult(context: Context, result: any) {
-    if (context.response.body === undefined) {
+    if (context.response.status === 304) {
+      context.response.body = undefined;
+    } else if (context.response.body === undefined) {
       context.response.body = result;
     }
   }

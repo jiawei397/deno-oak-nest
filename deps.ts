@@ -11,6 +11,10 @@ export {
   Status,
   STATUS_TEXT,
 } from "https://deno.land/x/oak@v10.2.0/mod.ts";
+export {
+  calculate,
+  ifNoneMatch,
+} from "https://deno.land/x/oak@v10.2.0/etag.ts";
 
 export type {
   FormDataReadOptions,

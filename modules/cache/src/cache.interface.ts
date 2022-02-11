@@ -1,4 +1,13 @@
 // deno-lint-ignore-file no-explicit-any
+
+/**
+ * If you want the results to be cached directly by the browser, you can set it to public or private.
+ *
+ * If you want get the results from the cache, but not to trans it by net, you can set it to no-cache, and the status may be 304 if no modified.
+ * @see https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Cache-Control
+ */
+export type CachePolicy = "public" | "private" | "no-cache";
+
 /**
  * Interface defining Cache Manager configuration options.
  *
@@ -29,6 +38,12 @@ export interface CacheManagerOptions {
     methodType: string;
     args: any[];
   }) => string;
+
+  /**
+   * This options will be used to configure the cache-control header.
+   * @default "no-cache"
+   */
+  policy?: CachePolicy;
 }
 
 export interface CacheModuleOptions extends CacheManagerOptions {
