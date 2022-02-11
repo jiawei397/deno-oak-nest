@@ -5,13 +5,14 @@ import {
   Query,
   UseInterceptors,
 } from "../../../mod.ts";
-import { CacheInterceptor, CacheTTL } from "../mod.ts";
+import { CacheInterceptor, CacheKey, CacheTTL } from "../mod.ts";
 
 @Controller("")
 @UseInterceptors(CacheInterceptor)
 export class AppController {
   constructor() {}
   @Get("/delay")
+  @CacheKey("test")
   // @UseInterceptors(CacheInterceptor)
   delay(@Query("id") id: string) {
     return new Promise((resolve) => {

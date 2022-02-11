@@ -9,12 +9,22 @@ import {
   Reflect,
 } from "../../../mod.ts";
 import { isDebug } from "../../../src/utils.ts";
-import { META_CACHE_TTL_KEY, optionKey } from "./cache.constant.ts";
+import {
+  META_CACHE_KEY_KEY,
+  META_CACHE_TTL_KEY,
+  optionKey,
+} from "./cache.constant.ts";
 import { CacheModuleOptions } from "./cache.interface.ts";
 
 export function CacheTTL(ttl: number) {
   return (_target: any, _methodName: string, descriptor: any) => {
     Reflect.defineMetadata(META_CACHE_TTL_KEY, ttl, descriptor.value);
+  };
+}
+
+export function CacheKey(key: string) {
+  return (_target: any, _methodName: string, descriptor: any) => {
+    Reflect.defineMetadata(META_CACHE_KEY_KEY, key, descriptor.value);
   };
 }
 
@@ -37,7 +47,9 @@ export class CacheInterceptor implements NestInterceptor {
       if (typeof arg === "object") {
         result += JSON.stringify(arg);
       } else {
-        result += arg;
+        if (arg) {
+          result += arg;
+        }
       }
     });
     return result;
@@ -55,19 +67,24 @@ export class CacheInterceptor implements NestInterceptor {
     }
     const constructorName = options.target.constructor.name;
 
-    const key = this.cacheModuleOptions?.getCacheKey
-      ? this.cacheModuleOptions.getCacheKey({
-        constructorName,
-        methodName: options.methodName,
-        methodType: options.methodType,
-        args: options.args,
-      })
-      : [
-        constructorName,
-        options.methodName,
-        options.methodType,
-        this.joinArgs(options.args),
-      ].join("_");
+    const key = Reflect.getOwnMetadata(
+      META_CACHE_KEY_KEY,
+      options.target[options.methodName],
+    ) ||
+      (this.cacheModuleOptions?.getCacheKey
+        ? this.cacheModuleOptions.getCacheKey({
+          constructorName,
+          methodName: options.methodName,
+          methodType: options.methodType,
+          args: options.args,
+        })
+        : [
+          constructorName,
+          options.methodName,
+          options.methodType,
+          this.joinArgs(options.args),
+        ].join("_"));
+    console.log(key);
     const cacheValue = cache.get(key);
     if (cacheValue !== undefined) {
       if (isDebug()) {
