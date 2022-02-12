@@ -3,6 +3,11 @@ import { ajax } from "../tools/ajax.ts";
 import { CanActivate, Context, UnauthorizedException } from "../../deps.ts";
 import { Logger, SSOUserInfo } from "../types.ts";
 import { stringify } from "../tools/utils.ts";
+import { Injectable, Reflector, SetMetadata } from "../../../../mod.ts";
+
+const SSO_STATUS_META_KEY = "meta:sso:status";
+
+export const Public = () => SetMetadata(SSO_STATUS_META_KEY, "true");
 
 /**
  * sso守卫
@@ -11,6 +16,7 @@ export function SSOGuard(options: {
   logger?: Logger;
   ssoApi?: string;
   ssoUserAgent?: string;
+  ssoUserInfoUrl?: string;
   referer?: string;
   cacheTimeout?: number;
   ssoAllowAllUsers?: boolean;
@@ -20,10 +26,17 @@ export function SSOGuard(options: {
     ssoApi,
     ssoUserAgent,
     ssoAllowAllUsers,
+    ssoUserInfoUrl = "/user/userinfo",
     referer,
     cacheTimeout = 60 * 60 * 1000,
   } = options;
-  return class Guard implements CanActivate {
+
+  @Injectable()
+  class Guard implements CanActivate {
+    constructor(
+      private readonly reflector: Reflector,
+    ) {}
+
     async canActivate(context: Context) {
       const b = await this.validateRequest(context);
       if (!b) {
@@ -39,13 +52,9 @@ export function SSOGuard(options: {
       };
     }
 
-    async getSSO(
-      request: Request & {
-        userInfo?: SSOUserInfo;
-      },
-    ) {
+    private async getSSO(request: Request) {
       const headers = request.headers;
-      const userInfo = await ajax.get<SSOUserInfo>("/user/userinfo", null, {
+      const userInfo = await ajax.get<SSOUserInfo>(ssoUserInfoUrl, null, {
         baseURL: ssoApi || Deno.env.get("ssoApi"),
         headers: {
           cookie: headers.get("cookie") || "",
@@ -56,7 +65,6 @@ export function SSOGuard(options: {
         cacheTimeout,
       });
       userInfo.id = userInfo.user_id + "";
-      request.userInfo = userInfo;
       return userInfo;
     }
 
@@ -65,7 +73,8 @@ export function SSOGuard(options: {
         const request: any = context.request;
         if (request.userInfo) {
           logger.debug(
-            `【sso guard】上一个guard中已经有用户信息：${
+            "SSOGuard",
+            `上一个guard中已经有用户信息：${
               stringify(this.getSimpleUserInfo(request.userInfo))
             }`,
           );
@@ -73,19 +82,29 @@ export function SSOGuard(options: {
         }
         const userInfo = await this.getSSO(request);
         const simpleInfo = this.getSimpleUserInfo(userInfo);
-        if (
-          !userInfo.internal &&
-          (!ssoAllowAllUsers && Deno.env.get("ssoAllowAllUsers") !== "true")
-        ) { // 外来用户
-          logger.error(`【sso guard】外来用户校验信息未通过：${stringify(simpleInfo)}`);
-          return false;
+        if (!userInfo.internal) { // 外部用户
+          if (
+            !ssoAllowAllUsers && Deno.env.get("ssoAllowAllUsers") !== "true"
+          ) {
+            const isAllow = this.reflector.get<"true">(
+              SSO_STATUS_META_KEY,
+              context,
+            ) === "true"; // 在不允许所有用户的情况下，要想跳过验证，只有使用Public方法
+            if (!isAllow) {
+              logger.error("SSOGuard", `外部用户校验信息未通过：${stringify(simpleInfo)}`);
+              return false;
+            }
+          }
         }
-        logger.debug(`【sso guard】校验通过，得到用户信息为：${stringify(simpleInfo)}`);
+        logger.debug("SSOGuard", `校验通过，得到用户信息为：${stringify(simpleInfo)}`);
+        request.userInfo = userInfo;
         return true;
       } catch (e) {
-        logger.error(`【sso guard】校验信息未通过，原因是：${e.message || e}`);
+        logger.error("SSOGuard", `校验信息未通过，原因是：${e.message || e}`);
         return false;
       }
     }
-  };
+  }
+
+  return Guard;
 }
