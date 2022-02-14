@@ -1,6 +1,6 @@
 // deno-lint-ignore-file require-await
 import { assert, assertEquals, delay } from "../../test_deps.ts";
-import { Cache } from "./cache.ts";
+import { Cache, clearCacheTimeout } from "./cache.ts";
 
 Deno.test("cache hit", async () => {
   const callStacks: number[] = [];
@@ -47,7 +47,7 @@ Deno.test("cache hit", async () => {
   assertEquals(callStacks, [1]);
   await p6;
 
-  await delay(200);
+  clearCacheTimeout();
 });
 
 Deno.test("self key", async () => {
@@ -99,5 +99,31 @@ Deno.test("self key", async () => {
   assertEquals(callStacks, [1, 2, 3, 4]);
   assertEquals(await p4, await p6);
 
-  await delay(200);
+  clearCacheTimeout();
+});
+
+Deno.test("clearCache", async () => {
+  const callStacks: number[] = [];
+  const cacheKey = "test";
+  class A {
+    @Cache(1000 * 60 * 60, () => cacheKey)
+    method(id: number) {
+      callStacks.push(1);
+      return id;
+    }
+  }
+
+  const a = new A();
+  const p1 = a.method(1);
+  const p2 = a.method(1);
+  assert(p1 === p2);
+  assertEquals(callStacks, [1]);
+
+  dispatchEvent(new CustomEvent("clearCache_" + cacheKey));
+
+  const p3 = a.method(1);
+  assert(p3 === p1);
+  assertEquals(callStacks, [1, 1]);
+
+  clearCacheTimeout();
 });
