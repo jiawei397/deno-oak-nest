@@ -67,5 +67,15 @@ app.use(app.routes());
 // app.useStaticAssets("example/static");
 
 const port = Number(Deno.env.get("PORT") || 1000);
-console.log(`app will start with: http://localhost:${port}`);
+
+app.addEventListener("listen", ({ hostname, port, secure }) => {
+  console.log(
+    `Listening on: ${secure ? "https://" : "http://"}${
+      hostname ??
+        "localhost"
+    }:${port}`,
+  );
+  // console.log(Deno.memoryUsage());
+});
+
 await app.listen({ port });
