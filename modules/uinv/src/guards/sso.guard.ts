@@ -77,7 +77,8 @@ export function SSOGuard(options: {
     async validateRequest(context: Context) {
       try {
         const request: any = context.request;
-        if (request.userInfo) {
+        let userInfo: SSOUserInfo = request.userInfo;
+        if (userInfo && userInfo.internal) {
           logger.debug(
             "SSOGuard",
             `上一个guard中已经有用户信息：${
@@ -86,7 +87,9 @@ export function SSOGuard(options: {
           );
           return true;
         }
-        const userInfo = await this.getSSO(request);
+        if (!userInfo) {
+          userInfo = await this.getSSO(request);
+        }
         const simpleInfo = this.getSimpleUserInfo(userInfo);
         if (!userInfo.internal) { // 外部用户
           const allowAllUsers = ssoAllowAllUsers ||
@@ -104,11 +107,10 @@ export function SSOGuard(options: {
               return false;
             }
           } else {
-            const isAllow =
-              this.reflector.get<"true" | "false">(
-                SSO_STATUS_META_KEY,
-                context,
-              ) === "true"; // 在不允许所有用户的情况下，要想跳过验证，只有使用Public方法
+            const isAllow = this.reflector.get<"true" | "false">(
+              SSO_STATUS_META_KEY,
+              context,
+            ) === "true"; // 在不允许所有用户的情况下，要想跳过验证，只有使用Public方法
             if (!isAllow) {
               logger.error(
                 "SSOGuard",
