@@ -7,7 +7,13 @@ import { Injectable, Reflector, SetMetadata } from "../../../../mod.ts";
 
 const SSO_STATUS_META_KEY = "meta:sso:status";
 
-export const Public = () => SetMetadata(SSO_STATUS_META_KEY, "true");
+/**
+ * 如果不允许外部用户访问，则用此方法跳过限制。
+ * 如果允许外部用户访问，则用此方法保护内部接口。
+ * @param status
+ */
+export const Public = (status = true) =>
+  SetMetadata(SSO_STATUS_META_KEY, status);
 
 /**
  * sso守卫
@@ -83,15 +89,31 @@ export function SSOGuard(options: {
         const userInfo = await this.getSSO(request);
         const simpleInfo = this.getSimpleUserInfo(userInfo);
         if (!userInfo.internal) { // 外部用户
-          if (
-            !ssoAllowAllUsers && Deno.env.get("ssoAllowAllUsers") !== "true"
-          ) {
-            const isAllow = this.reflector.get<"true">(
+          const allowAllUsers = ssoAllowAllUsers ||
+            Deno.env.get("ssoAllowAllUsers") === "true";
+          if (allowAllUsers) {
+            const isDisable = this.reflector.get<"true" | "false">(
               SSO_STATUS_META_KEY,
               context,
-            ) === "true"; // 在不允许所有用户的情况下，要想跳过验证，只有使用Public方法
+            ) === "false"; // 在允许所有用户的情况下，要想保护接口，只有使用Public方法
+            if (isDisable) {
+              logger.error(
+                "SSOGuard",
+                `外部用户不允许访问private接口：${stringify(simpleInfo)}`,
+              );
+              return false;
+            }
+          } else {
+            const isAllow =
+              this.reflector.get<"true" | "false">(
+                SSO_STATUS_META_KEY,
+                context,
+              ) === "true"; // 在不允许所有用户的情况下，要想跳过验证，只有使用Public方法
             if (!isAllow) {
-              logger.error("SSOGuard", `外部用户校验信息未通过：${stringify(simpleInfo)}`);
+              logger.error(
+                "SSOGuard",
+                `外部用户校验信息未通过：${stringify(simpleInfo)}`,
+              );
               return false;
             }
           }
