@@ -95,10 +95,10 @@ export function SSOGuard(options: {
           const allowAllUsers = ssoAllowAllUsers ||
             Deno.env.get("ssoAllowAllUsers") === "true";
           if (allowAllUsers) {
-            const isDisable = this.reflector.get<"true" | "false">(
+            const isDisable = this.reflector.get<boolean>(
               SSO_STATUS_META_KEY,
               context,
-            ) === "false"; // 在允许所有用户的情况下，要想保护接口，只有使用Public方法
+            ) === false; // 在允许所有用户的情况下，要想保护接口，只有使用Public方法
             if (isDisable) {
               logger.error(
                 "SSOGuard",
@@ -107,10 +107,10 @@ export function SSOGuard(options: {
               return false;
             }
           } else {
-            const isAllow = this.reflector.get<"true" | "false">(
+            const isAllow = this.reflector.get<boolean>(
               SSO_STATUS_META_KEY,
               context,
-            ) === "true"; // 在不允许所有用户的情况下，要想跳过验证，只有使用Public方法
+            ) === true; // 在不允许所有用户的情况下，要想跳过验证，只有使用Public方法
             if (!isAllow) {
               logger.error(
                 "SSOGuard",
