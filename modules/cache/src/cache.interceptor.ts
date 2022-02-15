@@ -19,9 +19,9 @@ import {
 } from "./cache.constant.ts";
 import { CacheModuleOptions, CachePolicy } from "./cache.interface.ts";
 
-export function CacheTTL(ttl: number) {
+export function CacheTTL(seconds: number) {
   return (_target: any, _methodName: string, descriptor: any) => {
-    Reflect.defineMetadata(META_CACHE_TTL_KEY, ttl, descriptor.value);
+    Reflect.defineMetadata(META_CACHE_TTL_KEY, seconds, descriptor.value);
   };
 }
 
@@ -135,12 +135,15 @@ export class CacheInterceptor implements NestInterceptor {
     const st = setTimeout(() => {
       cache.delete(key);
     }, ttl * 1000);
+    const clear = () => {
+      cache.delete(key);
+      clearTimeout(st);
+    };
     try {
       const val = await result;
       if (this.cacheModuleOptions?.isCacheableValue) {
         if (!this.cacheModuleOptions.isCacheableValue(val)) {
-          cache.delete(key);
-          clearTimeout(st);
+          clear();
           return val;
         }
       }
@@ -154,8 +157,7 @@ export class CacheInterceptor implements NestInterceptor {
         return val;
       }
     } catch (error) {
-      cache.delete(key);
-      clearTimeout(st);
+      clear();
       throw error;
     }
   }
