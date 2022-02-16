@@ -180,8 +180,10 @@ Deno.test("Query", async () => {
   const mockQuery = {
     a: "b",
     c: "4",
+    f: "false",
+    g: "true",
   };
-  const mockPath = "/a?a=b&c=4";
+  const mockPath = "/a?a=b&c=4&f=false&g=true";
 
   @Controller("")
   class A {
@@ -190,8 +192,11 @@ Deno.test("Query", async () => {
       @Query() query: any,
       @Query("a") a: string,
       @Query("c") c: string,
-      @Query("e") e: string,
       @Query("c") c1: number,
+      @Query("e") e: string,
+      @Query("f") f: boolean,
+      @Query("g") g: boolean,
+      @Query("h") h: boolean,
     ) {
       callStack.push(1);
       assertEquals(query, mockQuery);
@@ -200,6 +205,13 @@ Deno.test("Query", async () => {
       assertEquals(e, undefined);
       assertEquals<number>(c1, Number(mockQuery.c));
       assert(typeof c1 === "number");
+      assertEquals(f, false);
+      assertEquals(g, true);
+      assertEquals(
+        h,
+        undefined,
+        "if no parsed, should be undefined instead of false",
+      );
     }
 
     @Post("a")

@@ -67,8 +67,11 @@ function parseNumOrBool(
     );
     if (providers?.[index]) {
       const type = providers[index];
-      if ([Number, Boolean].includes(type)) { // enum also can be Number or Boolean
-        return type(val);
+      if (type === Boolean) {
+        return val === "true";
+      }
+      if (type === Number) {
+        return Number(val);
       }
     }
   }
