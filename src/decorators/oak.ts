@@ -24,9 +24,7 @@ export const Body = createParamDecorator(
         target,
         methodName,
       );
-      if (
-        providers?.length && providers[index] && providers[index] !== Object
-      ) { // if no class validation, we can skip this
+      if (providers?.[index] && providers[index] !== Object) { // if no class validation, we can skip this
         const post = new providers[index]();
         Object.assign(post, value);
         try {
@@ -55,37 +53,75 @@ export const Body = createParamDecorator(
   },
 );
 
-/**
- * url后面拼接的参数获取
- */
-export function Query(key?: string) {
-  return createParamDecoratorWithLowLevel((ctx: Context) => {
-    const { search } = ctx.request.url;
-    const map = parseSearch(search);
-    if (key) {
-      return map[key];
+function parseNumOrBool(
+  val: unknown,
+  target: any,
+  methodName: string,
+  index: number,
+) {
+  if (val !== undefined && val !== null) {
+    const providers = Reflect.getMetadata( // get the params providers
+      "design:paramtypes",
+      target,
+      methodName,
+    );
+    if (providers?.[index]) {
+      const type = providers[index];
+      if ([Number, Boolean].includes(type)) { // enum also can be Number or Boolean
+        return type(val);
+      }
     }
-    return map;
-  });
+  }
+  return val;
 }
 
 /**
- * 获取路由动态参数，比如http://localhost:1000/api/role/info/114，拿到114
+ * get the params from the request, if has key, then return the value which is parse by it`s type
+ * @example such as `http://localhost/api/users/1?name=tom`, then params is {name: tom}
+ */
+export function Query(key?: string) {
+  return createParamDecoratorWithLowLevel(
+    (ctx: Context, target: any, methodName: string, index: number) => {
+      const { search } = ctx.request.url;
+      const map = parseSearch(search);
+      if (!key) {
+        return map;
+      }
+      return parseNumOrBool(map[key], target, methodName, index);
+    },
+  );
+}
+
+/**
+ * Get params by router
+ * @example such as `http://localhost:1000/api/role/info/114`， then params is {id: 114}
  */
 export function Params(key?: string) {
-  return createParamDecoratorWithLowLevel((ctx: Context) => {
-    const { params } = ctx as any;
-    return key ? params[key] : params;
-  });
+  return createParamDecoratorWithLowLevel(
+    (ctx: Context, target: any, methodName: string, index: number) => {
+      const { params } = ctx as any;
+      if (!key) {
+        return params;
+      }
+      return parseNumOrBool(params[key], target, methodName, index);
+    },
+  );
 }
 
 export function Headers(key?: string) {
-  return createParamDecoratorWithLowLevel((ctx: Context) => {
-    if (key) {
-      return ctx.request.headers.get(key);
-    }
-    return ctx.request.headers;
-  });
+  return createParamDecoratorWithLowLevel(
+    (ctx: Context, target: any, methodName: string, index: number) => {
+      if (key) {
+        return parseNumOrBool(
+          ctx.request.headers.get(key),
+          target,
+          methodName,
+          index,
+        );
+      }
+      return ctx.request.headers;
+    },
+  );
 }
 
 export const Header = Headers;
@@ -108,12 +144,19 @@ export const Host = createParamDecorator((ctx: Context) => {
 });
 
 export function Cookies(key?: string) {
-  return createParamDecoratorWithLowLevel((ctx: Context) => {
-    if (key) {
-      return ctx.cookies.get(key);
-    }
-    return ctx.cookies;
-  });
+  return createParamDecoratorWithLowLevel(
+    async (ctx: Context, target: any, methodName: string, index: number) => {
+      if (key) {
+        return parseNumOrBool(
+          await ctx.cookies.get(key),
+          target,
+          methodName,
+          index,
+        );
+      }
+      return ctx.cookies;
+    },
+  );
 }
 
 export const Cookie = Cookies;

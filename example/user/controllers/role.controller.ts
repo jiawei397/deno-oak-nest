@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Headers,
+  Params,
   Post,
   Query,
   Res,
@@ -32,15 +33,21 @@ export class RoleController {
     this.loggerService.info("role");
   }
 
+  @Get("param/:name/:id")
+  testParam(@Params() params: any, @Params("id") id: number) {
+    console.log("params is ", params, id, typeof id);
+    return params;
+  }
+
   @Get("/info/:id")
   test(
     context: Context,
     @Add() name: string,
     @Query() params: any,
-    @Query("age") age: string,
+    @Query("age") age: number,
   ) {
     this.loggerService.info("info test", name, params, age);
-    console.log(params, age);
+    console.log(params, age, typeof age);
     context.response.body = "role info " + name + " - " +
       JSON.stringify(params);
   }

@@ -15,6 +15,7 @@ import {
   Body,
   ControllerName,
   Cookies,
+  Headers,
   MethodName,
   Params,
   Query,
@@ -178,9 +179,9 @@ Deno.test("Query", async () => {
   const callStack: number[] = [];
   const mockQuery = {
     a: "b",
-    c: "d",
+    c: "4",
   };
-  const mockPath = "/a?a=b&c=d";
+  const mockPath = "/a?a=b&c=4";
 
   @Controller("")
   class A {
@@ -190,12 +191,15 @@ Deno.test("Query", async () => {
       @Query("a") a: string,
       @Query("c") c: string,
       @Query("e") e: string,
+      @Query("c") c1: number,
     ) {
       callStack.push(1);
       assertEquals(query, mockQuery);
       assertEquals(a, mockQuery.a);
       assertEquals(c, mockQuery.c);
       assertEquals(e, undefined);
+      assertEquals<number>(c1, Number(mockQuery.c));
+      assert(typeof c1 === "number");
     }
 
     @Post("a")
@@ -276,10 +280,15 @@ Deno.test("Params", async () => {
     a(
       @Params() params: any,
       @Params("id") id: string,
+      @Params("id") id2: number,
+      @Params("name") name: string,
     ) {
       callStack.push(1);
       assertEquals(id, "1");
       assertEquals(params, { id: "1" });
+      assert(typeof id2 === "number");
+      assertEquals<number>(id2, 1);
+      assert(!name);
     }
 
     @Get("b")
@@ -364,7 +373,7 @@ Deno.test("Cookies", async () => {
     path: "/a",
     method: "GET",
   });
-  ctx.request.headers.set("Cookie", "a=b");
+  ctx.request.headers.set("Cookie", "a=b; c=4;");
   ctx.cookies = new OakCookie(ctx.request, ctx.response);
   @Controller("")
   class A {
@@ -372,11 +381,59 @@ Deno.test("Cookies", async () => {
     async a(
       @Cookies() cookie: any,
       @Cookies("a") a: string,
+      @Cookies("c") c: string,
+      @Cookies("c") c1: number,
+      @Cookies("d") d: string,
     ) {
       callStack.push(1);
       assertEquals(cookie, ctx.cookies);
       assertEquals(await cookie.get("a"), "b");
+      assertEquals(await cookie.get("c"), "4");
       assertEquals(a, "b");
+      assertEquals(c, "4");
+      assertEquals(c1, 4);
+      assert(typeof c1 === "number");
+      assert(!d);
+    }
+  }
+
+  const router = new Router();
+  await router.add(A);
+
+  const mw = router.routes();
+  const next = testing.createMockNext();
+
+  await mw(ctx, next);
+
+  assertEquals(callStack, [1]);
+  callStack.length = 0;
+});
+
+Deno.test("Headers", async () => {
+  const callStack: number[] = [];
+  const ctx = testing.createMockContext({
+    path: "/a",
+    method: "GET",
+  });
+  ctx.request.headers.set("a", "b");
+  ctx.request.headers.set("c", "4");
+
+  @Controller("")
+  class A {
+    @Get("a")
+    a(
+      @Headers() headers: any,
+      @Headers("a") a: string,
+      @Headers("c") c: string,
+      @Headers("c") c1: number,
+    ) {
+      callStack.push(1);
+      assertEquals(headers, ctx.request.headers);
+      assertEquals(headers.get("a"), "b");
+      assertEquals(a, "b");
+      assertEquals<string>(c, "4");
+      assertEquals<number>(c1, 4);
+      assert(typeof c1 === "number");
     }
   }
 
