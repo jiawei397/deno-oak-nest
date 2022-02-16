@@ -67,6 +67,9 @@ export class CacheInterceptor implements NestInterceptor {
   }
 
   async checkEtag(context: Context, val: unknown) {
+    if (!val) {
+      return;
+    }
     const etag = context.request.headers.get("If-None-Match");
     const str = JSON.stringify(val);
     const etagOptions = { weak: true };
