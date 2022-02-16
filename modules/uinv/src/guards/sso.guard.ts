@@ -102,7 +102,7 @@ export function SSOGuard(options: {
     async validateRequest(context: Context) {
       try {
         const request: any = context.request;
-        let userInfo: SSOUserInfo = request.userInfo;
+        let userInfo: SSOUserInfo | undefined = request.userInfo;
         if (userInfo && userInfo.internal) {
           logger.debug(
             "SSOGuard",
@@ -114,6 +114,9 @@ export function SSOGuard(options: {
         }
         if (!userInfo) {
           userInfo = await this.getSSO(request);
+        }
+        if (!userInfo) {
+          return false;
         }
         const simpleInfo = this.getSimpleUserInfo(userInfo);
         if (!userInfo.internal) { // 外部用户
