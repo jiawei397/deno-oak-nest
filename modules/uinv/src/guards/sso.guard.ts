@@ -67,6 +67,7 @@ export function SSOGuard(options: {
           "user-agent": headers.get("user-agent") || ssoUserAgent ||
             Deno.env.get("ssoUserAgent") || "",
           referer: headers.get("referer") || referer || "",
+          "Authorization": headers.get("Authorization") || "",
         },
         cacheTimeout,
       });
