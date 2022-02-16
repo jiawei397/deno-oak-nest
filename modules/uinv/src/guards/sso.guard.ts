@@ -60,18 +60,42 @@ export function SSOGuard(options: {
 
     private async getSSO(request: Request) {
       const headers = request.headers;
-      const userInfo = await ajax.get<SSOUserInfo>(ssoUserInfoUrl, null, {
-        baseURL: ssoApi || Deno.env.get("ssoApi"),
-        headers: {
-          cookie: headers.get("cookie") || "",
-          "user-agent": headers.get("user-agent") || ssoUserAgent ||
-            Deno.env.get("ssoUserAgent") || "",
-          referer: headers.get("referer") || referer || "",
-          "Authorization": headers.get("Authorization") || "",
-        },
-        cacheTimeout,
-      });
-      userInfo.id = userInfo.user_id + "";
+      let userInfo: SSOUserInfo | undefined;
+      const userAgent = headers.get("user-agent") || ssoUserAgent ||
+        Deno.env.get("ssoUserAgent") || "";
+      if (headers.get("app") === "1") {
+        const userInfos = await ajax.post<SSOUserInfo[]>(
+          "user/list/users_by_id",
+          {
+            user_ids: [1],
+          },
+          {
+            baseURL: ssoApi || Deno.env.get("ssoApi"),
+            headers: {
+              "user-agent": userAgent,
+              referer: headers.get("referer") || referer || "",
+              "Authorization": headers.get("Authorization") || "",
+            },
+            cacheTimeout,
+          },
+        );
+        if (userInfos && userInfos.length > 0) {
+          userInfo = userInfos[0];
+        }
+      } else {
+        userInfo = await ajax.get<SSOUserInfo>(ssoUserInfoUrl, null, {
+          baseURL: ssoApi || Deno.env.get("ssoApi"),
+          headers: {
+            cookie: headers.get("cookie") || "",
+            "user-agent": userAgent,
+            referer: headers.get("referer") || referer || "",
+          },
+          cacheTimeout,
+        });
+      }
+      if (userInfo) {
+        userInfo.id = userInfo.user_id + "";
+      }
       return userInfo;
     }
 
