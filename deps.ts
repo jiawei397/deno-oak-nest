@@ -44,7 +44,7 @@ export { assert } from "https://deno.land/std@0.122.0/testing/asserts.ts";
 
 export { format } from "https://deno.land/std@0.122.0/datetime/mod.ts";
 
-export { Reflect } from "https://deno.land/x/reflect_metadata@v0.1.12-2/mod.ts";
+export { Reflect } from "https://deno.land/x/deno_reflect@v0.1.13/mod.ts";
 
 export {
   validateOrReject,

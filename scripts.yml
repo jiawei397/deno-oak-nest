@@ -61,6 +61,20 @@ scripts:
     tsconfig: tsconfig.json
     env:
       NODE_ENV: production
+  dist:
+    cmd: deno run example/main.js
+    desc: run dist server
+    allow:
+      - net
+      - env
+      - write
+      - read
+    unstable: true
+    watch: false
+    tsconfig: tsconfig.json
+    env:
+      NODE_ENV: production
+      PORT: '2000'
   test:
     cmd: deno test
     watch: false
