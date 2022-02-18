@@ -5,6 +5,7 @@ import { LoggingInterceptor } from "./interceptor/log.interceptor.ts";
 const app = await NestFactory.create(AppModule);
 app.setGlobalPrefix("/api");
 app.useGlobalInterceptors(new LoggingInterceptor());
+// app.disableGetComputeEtag();
 app.useStaticAssets("example/static", {
   prefix: "static",
   gzip: true,

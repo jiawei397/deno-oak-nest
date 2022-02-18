@@ -82,6 +82,7 @@ export async function mapRoute(Cls: Type): Promise<RouteMap[]> {
 export class Router extends OriginRouter {
   [x: string]: any
   private apiPrefix = "";
+  private _diabledGetComputeEtag = false;
   private routerArr: RouteItem[] = [];
 
   private globalInterceptors: NestUseInterceptors = [];
@@ -89,6 +90,11 @@ export class Router extends OriginRouter {
   setGlobalPrefix(apiPrefix: string) {
     this.apiPrefix = apiPrefix;
     return this;
+  }
+
+  /** diable 304 get */
+  disableGetComputeEtag() {
+    this._diabledGetComputeEtag = true;
   }
 
   useGlobalInterceptors(...interceptors: NestUseInterceptors) {
@@ -234,7 +240,7 @@ export class Router extends OriginRouter {
       context.response.body = undefined;
       return;
     }
-    if (methodType === "get") { // if get method, then deal 304
+    if (methodType === "get" && !this._diabledGetComputeEtag) { // if get method, then deal 304
       await checkEtag(context, result);
     } else if (context.response.body === undefined) {
       context.response.body = result;

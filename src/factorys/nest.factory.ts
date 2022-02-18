@@ -14,6 +14,7 @@ export type ApplicationEx = Application & {
   use: typeof Router.prototype.use;
   useGlobalInterceptors: typeof Router.prototype.useGlobalInterceptors;
   useStaticAssets: typeof Router.prototype.useStaticAssets;
+  disableGetComputeEtag: typeof Router.prototype.disableGetComputeEtag;
   router: Router;
 };
 
@@ -115,6 +116,7 @@ export class NestFactory {
     app.routes = router.routes.bind(router);
     app.useGlobalInterceptors = router.useGlobalInterceptors.bind(router);
     app.useStaticAssets = router.useStaticAssets.bind(router);
+    app.disableGetComputeEtag = router.disableGetComputeEtag.bind(router);
     app.router = router;
 
     return app;
