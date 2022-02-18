@@ -20,8 +20,12 @@ export class ScheduleExplorer {
       cronJobs.forEach((cronItem: CronJob) => {
         const cronTime = cronItem.cronTime;
         const methodName = cronItem.methodName;
-        cron(cronTime, () => {
-          instance[methodName]();
+        cron(cronTime, async () => {
+          try {
+            await instance[methodName]();
+          } catch (err) {
+            console.error("SchedulerError", err);
+          }
         });
       });
     }
@@ -37,8 +41,12 @@ export class ScheduleExplorer {
         const delay = timeoutItem.delay;
         const methodName = timeoutItem.methodName;
         const jobName = timeoutItem.jobName;
-        const timeKey = setTimeout(() => {
-          instance[methodName]();
+        const timeKey = setTimeout(async () => {
+          try {
+            await instance[methodName]();
+          } catch (err) {
+            console.error("SchedulerError", err);
+          }
         }, delay);
         schedulerRegistry.registerTime(timeKey, jobName);
       });
@@ -55,8 +63,12 @@ export class ScheduleExplorer {
         const delay = intervalItem.delay;
         const methodName = intervalItem.methodName;
         const jobName = intervalItem.jobName;
-        const timeKey = setInterval(() => {
-          instance[methodName]();
+        const timeKey = setInterval(async () => {
+          try {
+            await instance[methodName]();
+          } catch (err) {
+            console.error("SchedulerError", err);
+          }
         }, delay);
         schedulerRegistry.registerTime(timeKey, jobName);
       });
