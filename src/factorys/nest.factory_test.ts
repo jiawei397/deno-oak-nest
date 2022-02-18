@@ -29,6 +29,7 @@ Deno.test("findControllers", async () => {
   const controllerArr: Type<any>[] = [];
   const registeredProviderArr: Provider[] = [];
   const dynamicProviders: Provider[] = [];
+  const specialProviders: Provider[] = [];
   const Controller = (): ClassDecorator => () => {};
 
   class ChildService {}
@@ -73,6 +74,7 @@ Deno.test("findControllers", async () => {
     controllerArr,
     registeredProviderArr,
     dynamicProviders,
+    specialProviders,
   );
 
   assertEquals(controllerArr.length, 2);
@@ -83,6 +85,8 @@ Deno.test("findControllers", async () => {
   assertEquals(registeredProviderArr[0], SchedulerService);
 
   assertEquals(dynamicProviders.length, 0);
+
+  assertEquals(specialProviders.length, 0);
 
   await initProviders(registeredProviderArr);
   assertEquals(callStack, [1]);
