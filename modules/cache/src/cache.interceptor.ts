@@ -1,8 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import {
-  calculate,
   Context,
-  ifNoneMatch,
   Inject,
   Injectable,
   NestInterceptor,
@@ -65,34 +63,18 @@ export class CacheInterceptor implements NestInterceptor {
     });
     return result;
   }
-
-  async checkEtag(context: Context, val: unknown) {
-    if (!val) {
-      return;
-    }
-    const etag = context.request.headers.get("If-None-Match");
-    const str = JSON.stringify(val);
-    const etagOptions = { weak: true };
-    const actual = await calculate(str, etagOptions);
-    context.response.headers.set("etag", actual);
-    context.response.headers.set("Cache-Control", "no-cache");
-    if (
-      etag && !await ifNoneMatch(etag, str, etagOptions) // if etag is not match, then will return 200
-    ) {
-      context.response.status = 304;
-    }
-    return val;
-  }
-
   async intercept(
     context: Context,
     next: Next,
     options: NestInterceptorOptions,
   ) {
+    if (context.request.method !== "GET") { // only deal get request
+      return next();
+    }
     const cache = this.caches;
     if (cache.size >= this.max) {
       console.warn("cache size has reached the max", cache.size);
-      return;
+      return next();
     }
     const constructorName = options.target.constructor.name;
 
@@ -123,9 +105,6 @@ export class CacheInterceptor implements NestInterceptor {
       if (isDebug()) {
         console.debug("cache hit", key, cacheValue);
       }
-      if (policy === "no-cache") { // may return 304 when not modified
-        return this.checkEtag(context, await cacheValue);
-      }
       return cacheValue;
     }
     const result = next();
@@ -143,22 +122,24 @@ export class CacheInterceptor implements NestInterceptor {
       clearTimeout(st);
     };
     try {
-      const val = await result;
+      let val = await result;
+      if (context.response.body !== undefined) {
+        val = context.response.body;
+        cache.set(key, val);
+      }
       if (this.cacheModuleOptions?.isCacheableValue) {
         if (!this.cacheModuleOptions.isCacheableValue(val)) {
           clear();
           return val;
         }
       }
-      if (policy === "no-cache") {
-        return this.checkEtag(context, val);
-      } else {
+      if (policy === "public" || policy === "private") {
         context.response.headers.set(
           "Cache-Control",
           policy === "public" ? `max-age=${ttl}` : `${policy}, max-age=${ttl}`,
         );
-        return val;
       }
+      return val;
     } catch (error) {
       clear();
       throw error;

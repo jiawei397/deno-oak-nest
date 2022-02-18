@@ -61,6 +61,11 @@ export class UserController {
     return;
   }
 
+  @Get("/304")
+  test304() {
+    return "test 304 ok";
+  }
+
   @Get("/err")
   err() {
     throw new BadRequestException("bad request");

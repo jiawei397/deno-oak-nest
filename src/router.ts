@@ -28,6 +28,7 @@ import { Factory } from "./factorys/class.factory.ts";
 import { transferParam } from "./params.ts";
 import { Context } from "../deps.ts";
 import { checkByInterceptors } from "./interceptor.ts";
+import { checkEtag } from "./utils.ts";
 
 const defaultGzipOptions: GzipOptions = {
   extensions: [".js", ".css", ".wasm"],
@@ -224,9 +225,17 @@ export class Router extends OriginRouter {
     );
   }
 
-  private transResponseResult(context: Context, result: any) {
+  private async transResponseResult(
+    context: Context,
+    result: any,
+    methodType: string,
+  ) {
     if (context.response.status === 304) {
       context.response.body = undefined;
+      return;
+    }
+    if (methodType === "get") { // if get method, then deal 304
+      await checkEtag(context, result);
     } else if (context.response.body === undefined) {
       context.response.body = result;
     }
@@ -264,8 +273,11 @@ export class Router extends OriginRouter {
               fn,
             },
           );
-          this.transResponseResult(context, result);
-          return result;
+          await this.transResponseResult(
+            context,
+            context.response.body ?? result,
+            methodType.toLowerCase(),
+          );
         });
         const funcEnd = Date.now();
         this.log(

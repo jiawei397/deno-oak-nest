@@ -5,7 +5,12 @@ import {
   Query,
   UseInterceptors,
 } from "../../../mod.ts";
-import { CacheInterceptor, CacheKey, CacheTTL } from "../mod.ts";
+import {
+  CacheInterceptor,
+  CacheKey,
+  CacheTTL,
+  SetCachePolicy,
+} from "../mod.ts";
 
 @Controller("")
 @UseInterceptors(CacheInterceptor)
@@ -30,5 +35,11 @@ export class AppController {
         resolve("delay " + id);
       }, 500);
     });
+  }
+
+  @Get("public")
+  @SetCachePolicy("private")
+  public() {
+    return "public";
   }
 }
