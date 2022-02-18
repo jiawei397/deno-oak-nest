@@ -1,5 +1,5 @@
 import { DynamicModule } from "../../../src/interfaces/module.interface.ts";
-import { ScheduleExplorer } from "./schedule.explorer.ts";
+import { ScheduleExplorer } from "./scheduler.explorer.ts";
 
 export class ScheduleModule {
   static forRoot(): DynamicModule {
