@@ -10,12 +10,16 @@ export class ScheduleService {
   onceJob() {
     assert(this.testService, "testService is not defined");
     console.log("-----once---", this.testService.info());
+    // setTimeout(() => { // cannot catch timeout error, must in promise
+    throw new Error("once job error");
+    // }, 0);
   }
 
-  @Interval(5000)
+  @Interval(500)
   async intervalJob() {
     assert(this.testService, "testService is not defined");
     console.log("-----interval---", await this.testService.info());
+    // throw new Error("interval job error");
   }
 
   @Cron("0 */1 * * * *")
