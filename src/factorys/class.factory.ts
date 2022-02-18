@@ -18,7 +18,7 @@ export const setFactoryCaches = (key: any, value: any) => {
   globalFactoryCaches.set(key, value);
 };
 
-export const Factory = async <T>(
+export const Factory = <T>(
   target: Type<T>,
   scope: Scope = Scope.DEFAULT,
   factoryCaches = globalFactoryCaches,
@@ -30,6 +30,18 @@ export const Factory = async <T>(
       return factoryCaches.get(target);
     }
   }
+  const instance = getInstance(target, scope, factoryCaches);
+  if (singleton) {
+    factoryCaches.set(target, instance);
+  }
+  return instance;
+};
+
+export const getInstance = async <T>(
+  target: Type<T>,
+  scope: Scope = Scope.DEFAULT,
+  factoryCaches = globalFactoryCaches,
+): Promise<T> => {
   if (!target || (typeof target !== "object" && typeof target !== "function")) {
     throw new Error(
       `Factory target must be a class or function, but got ${target}`,
@@ -71,9 +83,6 @@ export const Factory = async <T>(
     );
   }
   const instance = new target(...args);
-  if (singleton) {
-    factoryCaches.set(target, instance);
-  }
   return instance;
 };
 

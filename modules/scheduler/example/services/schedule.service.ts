@@ -15,7 +15,7 @@ export class ScheduleService {
     // }, 0);
   }
 
-  @Interval(500)
+  @Interval(5000)
   async intervalJob() {
     assert(this.testService, "testService is not defined");
     console.log("-----interval---", await this.testService.info());

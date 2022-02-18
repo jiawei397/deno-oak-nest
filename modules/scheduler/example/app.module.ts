@@ -1,6 +1,7 @@
 import { Module } from "../../../mod.ts";
 import { ScheduleModule } from "../mod.ts";
 import { ScheduleService } from "./services/schedule.service.ts";
+import { Test2Service } from "./services/test2.service.ts";
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ScheduleService } from "./services/schedule.service.ts";
       useValue: "connected",
     },
     ScheduleService,
+    Test2Service,
   ],
 })
 export class AppModule {}

@@ -25,6 +25,7 @@ Deno.test("Factory without providers", async () => {
 Deno.test("Factory with providers", async () => {
   const Controller = (): ClassDecorator => () => {};
 
+  @Injectable()
   class B {
   }
 
@@ -55,6 +56,8 @@ Deno.test("Factory with providers", async () => {
 
   const a1 = await Factory(A);
   assert(a === a1, "Factory should return the same instance");
+  assert(a.getB() === a1.getB(), "B should return the same instance");
+  assert(a.getC() === a1.getC(), "C should return the same instance");
 
   assertEquals(Reflect.getMetadata(META_CONTAINER_KEY, a), undefined);
   assertEquals(Reflect.getMetadata(META_CONTAINER_KEY, a.getB()), undefined);

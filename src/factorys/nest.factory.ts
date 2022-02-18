@@ -21,8 +21,9 @@ export type ApplicationEx = Application & {
 export async function findControllers(
   module: ModuleType,
   controllerArr: Type<any>[],
-  registeredProviderArr: Provider[],
+  registeredProviders: Provider[],
   dynamicProviders: Provider[],
+  specialProviders: Provider[],
 ) {
   if (!isModule(module)) {
     return;
@@ -35,7 +36,7 @@ export async function findControllers(
   const controllers = isDynamicModule
     ? module.controllers
     : getModuleMetadata("controllers", module);
-  const providers = isDynamicModule
+  const providers: Provider[] = isDynamicModule
     ? module.providers
     : getModuleMetadata("providers", module);
   // const exports = isDynamicModule
@@ -48,7 +49,13 @@ export async function findControllers(
     if (isDynamicModule) {
       dynamicProviders.push(...providers);
     } else {
-      registeredProviderArr.push(...providers);
+      providers.forEach((provider) => {
+        if ("provide" in provider) {
+          specialProviders.push(provider);
+        } else {
+          registeredProviders.push(provider);
+        }
+      });
     }
   }
   if (!imports || !imports.length) {
@@ -62,8 +69,9 @@ export async function findControllers(
     return findControllers(
       module,
       controllerArr,
-      registeredProviderArr,
+      registeredProviders,
       dynamicProviders,
+      specialProviders,
     );
   }));
 }
@@ -97,12 +105,15 @@ export class NestFactory {
     const controllers: Type<any>[] = [];
     const registeredProviders: Provider<any>[] = [];
     const dynamicProviders: Provider<any>[] = [];
+    const specialProviders: Provider<any>[] = [];
     await findControllers(
       module,
       controllers,
       registeredProviders,
       dynamicProviders,
+      specialProviders,
     );
+    await initProviders(specialProviders);
     await initProviders(dynamicProviders); // init dynamic providers first to avoid it be inited first by other providers
     await initProviders(registeredProviders);
 
