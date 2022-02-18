@@ -1,4 +1,4 @@
-version: 1.5.0
+version: 1.4.1
 name: oak_nest
 scripts:
   dev:
@@ -90,3 +90,6 @@ scripts:
     unstable: true
     tsconfig: tsconfig.json
     lock: lock.json
+  publish: 
+    cmd: deno_tag -D
+    watch: false
