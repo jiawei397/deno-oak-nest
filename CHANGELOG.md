@@ -1,3 +1,13 @@
+# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.5.0...v) (2022-02-25)
+
+
+### Features
+
+* **cache:** deal expired ([6ffa626](https://github.com/jiawei397/deno-oak-nest/commit/6ffa6262a6bd7960463ea725d3ee4a4661930e5d))
+* **cache:** support location ([85dfbd8](https://github.com/jiawei397/deno-oak-nest/commit/85dfbd8ba482ae0fe3408bdae87ed22fd061575e))
+
+
+
 # [](https://github.com/jiawei397/deno-oak-nest/compare/v1.5.0...v) (2022-02-24)
 
 
