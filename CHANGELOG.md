@@ -1,4 +1,4 @@
-# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.5.0...v) (2022-02-25)
+# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.5.1...v) (2022-02-25)
 
 
 ### Features
@@ -8,12 +8,7 @@
 
 
 
-# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.5.0...v) (2022-02-24)
-
-
-### Features
-
-* **cache:** support location ([85dfbd8](https://github.com/jiawei397/deno-oak-nest/commit/85dfbd8ba482ae0fe3408bdae87ed22fd061575e))
+## [1.5.1](https://github.com/jiawei397/deno-oak-nest/compare/v1.5.0...v1.5.1) (2022-02-24)
 
 
 
