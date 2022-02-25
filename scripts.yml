@@ -25,7 +25,7 @@ scripts:
       PORT: '1000'
       # DEBUG: 'true'  
   startCache:
-    cmd: deno run modules/cache/example/main.ts
+    cmd: deno run --location https://www.baidu.com modules/cache/example/main.ts
     allow:
       - net
       - env

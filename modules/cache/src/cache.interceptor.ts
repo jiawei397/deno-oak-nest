@@ -15,7 +15,12 @@ import {
   META_CACHE_TTL_KEY,
   optionKey,
 } from "./cache.constant.ts";
-import { CacheModuleOptions, CachePolicy } from "./cache.interface.ts";
+import {
+  CacheModuleOptions,
+  CachePolicy,
+  CacheStore,
+} from "./cache.interface.ts";
+import { LocalStore, MemoryStore } from "./cache.store.ts";
 
 export function CacheTTL(seconds: number) {
   return (_target: any, _methodName: string, descriptor: any) => {
@@ -40,15 +45,23 @@ export class CacheInterceptor implements NestInterceptor {
   ttl: number;
   max: number;
   policy: CachePolicy;
+  caches: CacheStore | undefined;
+  memoryCache: MemoryStore;
   constructor(
     @Inject(optionKey) private cacheModuleOptions?: CacheModuleOptions,
   ) {
     this.ttl = cacheModuleOptions?.ttl || 5;
     this.max = cacheModuleOptions?.max || 100;
     this.policy = cacheModuleOptions?.policy || "no-cache";
+    this.memoryCache = new MemoryStore();
+    if (!cacheModuleOptions?.store || cacheModuleOptions.store === "memory") {
+      // this.caches = new MemoryStore();
+    } else if (cacheModuleOptions.store === "localStorage") {
+      this.caches = new LocalStore();
+    } else {
+      this.caches = cacheModuleOptions.store;
+    }
   }
-
-  private caches = new Map<string, any>();
 
   joinArgs(args: any[]) {
     let result = "";
@@ -71,9 +84,9 @@ export class CacheInterceptor implements NestInterceptor {
     if (context.request.method !== "GET") { // only deal get request
       return next();
     }
-    const cache = this.caches;
-    if (cache.size >= this.max) {
-      console.warn("cache size has reached the max", cache.size);
+    const size = await (this.caches || this.memoryCache).size();
+    if (size >= this.max) {
+      console.warn("cache size has reached the max", size);
       return next();
     }
     const constructorName = options.target.constructor.name;
@@ -95,7 +108,7 @@ export class CacheInterceptor implements NestInterceptor {
           options.methodType,
           this.joinArgs(options.args),
         ].join("_"));
-    const cacheValue = cache.get(key);
+    const cacheValue = this.memoryCache.get(key) || this.caches?.get(key);
     const policy = Reflect.getOwnMetadata(
       META_CACHE_POLICY_KEY,
       options.target[options.methodName],
@@ -108,28 +121,30 @@ export class CacheInterceptor implements NestInterceptor {
       return cacheValue;
     }
     const result = next();
-    cache.set(key, result);
-
-    const ttl = Reflect.getOwnMetadata(
+    const ttl: number = Reflect.getOwnMetadata(
       META_CACHE_TTL_KEY,
       options.target[options.methodName],
     ) || this.ttl;
-    const st = setTimeout(() => {
-      cache.delete(key);
-    }, ttl * 1000);
-    const clear = () => {
-      cache.delete(key);
-      clearTimeout(st);
-    };
+    let isCached = false;
+    if (result && (result instanceof Promise || !this.caches)) {
+      this.memoryCache.set(key, result, { ttl });
+    } else {
+      this.caches!.set(key, result, { ttl });
+      isCached = true;
+    }
     try {
       let val = await result;
       if (context.response.body !== undefined) {
         val = context.response.body;
-        cache.set(key, val);
+      }
+      if (!isCached && this.caches) {
+        await this.caches.set(key, val, { ttl });
+        this.memoryCache.delete(key);
       }
       if (this.cacheModuleOptions?.isCacheableValue) {
         if (!this.cacheModuleOptions.isCacheableValue(val)) {
-          clear();
+          this.memoryCache.delete(key);
+          this.caches?.delete(key);
           return val;
         }
       }
@@ -141,7 +156,8 @@ export class CacheInterceptor implements NestInterceptor {
       }
       return val;
     } catch (error) {
-      clear();
+      this.memoryCache.delete(key);
+      this.caches?.delete(key);
       throw error;
     }
   }
