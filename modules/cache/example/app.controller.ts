@@ -37,6 +37,18 @@ export class AppController {
     });
   }
 
+  @Get("/cache")
+  cache() {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          name: "cache",
+          age: 15,
+        });
+      }, 500);
+    });
+  }
+
   @Get("public")
   @SetCachePolicy("private")
   public() {

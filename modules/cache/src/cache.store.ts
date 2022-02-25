@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { CacheStore } from "./cache.interface.ts";
+import { CacheStore, LocalValue } from "./cache.interface.ts";
 
 export class MemoryStore implements CacheStore {
   cache: Map<string, any>;
@@ -50,18 +50,22 @@ export class LocalStore implements CacheStore {
   get(key: string) {
     const val = localStorage.getItem(key);
     if (val) {
-      try {
-        return JSON.parse(val);
-      } catch {
-        return val;
+      const json = JSON.parse(val) as LocalValue;
+      // console.log("get json", json);
+      if (json.td && Date.now() >= json.td) { // expired
+        // console.debug(`Cache expired: ${key} and will be deleted`);
+        this.delete(key);
+        return;
       }
+      return json.value;
     }
   }
   set(key: string, value: any, options?: { ttl: number }) {
-    localStorage.setItem(
-      key,
-      typeof value === "object" ? JSON.stringify(value) : value,
-    );
+    const val: LocalValue = {
+      td: options?.ttl ? Date.now() + options.ttl * 1000 : undefined,
+      value,
+    };
+    localStorage.setItem(key, JSON.stringify(val));
     if (options?.ttl) {
       setTimeout(() => {
         this.delete(key);
