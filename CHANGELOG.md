@@ -1,4 +1,15 @@
-# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.5.1...v) (2022-02-25)
+# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.5.2...v) (2022-02-28)
+
+
+### Features
+
+* **engine:** support engine such as ejs ([73b33d8](https://github.com/jiawei397/deno-oak-nest/commit/73b33d87fcc800b65f6a78d9fa899d3397ac1ff3))
+* **factory:** export clear ([c7d8e9d](https://github.com/jiawei397/deno-oak-nest/commit/c7d8e9d4bcbb4ab4bbd8ba3208d5abef223541f8))
+* **uinv:** public ajax key ([9245b2b](https://github.com/jiawei397/deno-oak-nest/commit/9245b2ba6e3daab55fe33d75871b95432a457f75))
+
+
+
+## [1.5.2](https://github.com/jiawei397/deno-oak-nest/compare/v1.5.1...v1.5.2) (2022-02-25)
 
 
 ### Features

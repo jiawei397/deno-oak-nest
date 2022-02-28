@@ -93,3 +93,6 @@ scripts:
   publish: 
     cmd: deno_tag -D
     watch: false
+  log: 
+    cmd: conventional-changelog -p angular -i CHANGELOG.md -s -r 0
+    watch: false    
