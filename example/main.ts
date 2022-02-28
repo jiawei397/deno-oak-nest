@@ -1,6 +1,9 @@
-import { Context, isHttpError, NestFactory, Status } from "../mod.ts";
+// deno-lint-ignore-file no-unused-vars
+import { Context, isHttpError, NestFactory, resolve, Status } from "../mod.ts";
 import { AppModule } from "./app.module.ts";
+import { dirname, fromFileUrl, renderFile } from "./deps.ts";
 import { LoggingInterceptor } from "./interceptor/log.interceptor.ts";
+const __dirname = dirname(fromFileUrl(import.meta.url));
 
 const app = await NestFactory.create(AppModule);
 app.setGlobalPrefix("/api");
@@ -8,7 +11,27 @@ app.useGlobalInterceptors(new LoggingInterceptor());
 // app.disableGetComputeEtag();
 app.useStaticAssets("example/static", {
   prefix: "static",
-  gzip: true,
+  // gzip: true,
+});
+
+// Without trailing slash
+app.setView({
+  // prefix: "example",
+  baseDir: "example/views",
+  // baseDir: resolve(__dirname, "./views"),
+  extension: "ejs",
+  renderFile: (path: string, context: Context) => {
+    return renderFile(path, {
+      // ...context.request.locals,
+      // ...context.response.locals,
+      metadata: {
+        title: "test",
+      },
+      data: {
+        content: "hello data",
+      },
+    });
+  },
 });
 
 // Logger

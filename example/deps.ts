@@ -38,3 +38,10 @@ export {
   Status,
   STATUS_TEXT,
 } from "https://deno.land/std@0.115.1/http/http_status.ts";
+
+export { renderFile } from "https://deno.land/x/deno_ejs@v0.2.3/mod.ts";
+
+export {
+  dirname,
+  fromFileUrl,
+} from "https://deno.land/std@0.120.0/path/mod.ts";
