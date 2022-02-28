@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-unused-vars
+// deno-lint-ignore-file no-unused-vars no-explicit-any
 import { Context, isHttpError, NestFactory, resolve, Status } from "../mod.ts";
 import { AppModule } from "./app.module.ts";
 import { dirname, fromFileUrl, renderFile } from "./deps.ts";
@@ -7,6 +7,19 @@ const __dirname = dirname(fromFileUrl(import.meta.url));
 
 const app = await NestFactory.create(AppModule);
 app.setGlobalPrefix("/api");
+
+app.use((context, next) => {
+  (context.request as any).locals = {
+    metadata: {
+      title: "admin",
+    },
+    data: {
+      content: "hello zhangsan",
+    },
+  };
+  return next();
+});
+
 app.useGlobalInterceptors(new LoggingInterceptor());
 // app.disableGetComputeEtag();
 app.useStaticAssets("example/static", {
@@ -21,15 +34,17 @@ app.setView({
   // baseDir: resolve(__dirname, "./views"),
   extension: "ejs",
   renderFile: (path: string, context: Context) => {
+    const request = context.request as any;
+    const response = context.response as any;
     return renderFile(path, {
-      // ...context.request.locals,
-      // ...context.response.locals,
       metadata: {
         title: "test",
       },
       data: {
         content: "hello data",
       },
+      ...request.locals,
+      ...response.locals,
     });
   },
 });
