@@ -132,6 +132,9 @@ export class NestFactory {
   private static viewOptions?: ViewOptions;
   private static staticOptions?: StaticOptions;
 
+  private static isViewStarted: boolean;
+  static app: ApplicationEx;
+
   static async create(module: ModuleType) {
     const app = new Application() as ApplicationEx;
     const router = new Router();
@@ -164,13 +167,14 @@ export class NestFactory {
     app.disableGetComputeEtag = router.disableGetComputeEtag.bind(router);
     app.router = router;
 
-    this.startView(app);
+    this.app = app;
 
     return app;
   }
 
   static setView(viewOptions: ViewOptions) {
     this.viewOptions = viewOptions;
+    this.startView();
   }
 
   private static checkWithPrefix(prefix: string, pathname: string) {
@@ -198,6 +202,7 @@ export class NestFactory {
       baseDir: path,
       ...options,
     };
+    this.startView();
   }
 
   private static async serveStaticAssets(context: Context, next: Next) {
@@ -308,8 +313,12 @@ export class NestFactory {
    *
    * But if there is index.html in the static assets, it will be served first before the view.
    */
-  private static startView(app: ApplicationEx) {
-    app.use(async (context, next) => {
+  private static startView() {
+    if (this.isViewStarted) {
+      return;
+    }
+    this.isViewStarted = true;
+    this.app.use(async (context, next) => {
       const viewOptions = this.viewOptions;
       if (
         (!viewOptions && !this.staticOptions) ||
@@ -318,7 +327,7 @@ export class NestFactory {
         return next();
       }
       const pathname = context.request.url.pathname;
-      if (this.checkWithPrefix(app.router.apiPrefix, pathname)) { // api
+      if (this.checkWithPrefix(this.app.router.apiPrefix, pathname)) { // api
         return next();
       }
       if (
@@ -373,5 +382,6 @@ export class NestFactory {
       filename,
     );
     context.response.body = await viewOptions.renderFile(path, context);
+    // next();
   }
 }
