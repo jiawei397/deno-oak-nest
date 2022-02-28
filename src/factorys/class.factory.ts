@@ -18,6 +18,10 @@ export const setFactoryCaches = (key: any, value: any) => {
   globalFactoryCaches.set(key, value);
 };
 
+export function clearAllFactoryCaches() {
+  globalFactoryCaches.clear();
+}
+
 export const Factory = <T>(
   target: Type<T>,
   scope: Scope = Scope.DEFAULT,
