@@ -2,7 +2,7 @@ import { AjaxConfig, BaseAjax } from "../../deps.ts";
 import { md5 } from "./utils.ts";
 
 class Ajax extends BaseAjax {
-  protected getUniqueKey(config: AjaxConfig) {
+  public getUniqueKey(config: AjaxConfig) {
     // deno-lint-ignore no-explicit-any
     const headers: any = config.headers;
     const key = (config.baseURL || "") + config.url + config.method +
