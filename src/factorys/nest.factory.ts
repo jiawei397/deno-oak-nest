@@ -234,6 +234,10 @@ export class NestFactory {
     if (useOriginGzip) {
       return sendFile();
     }
+    const encodeings = context.request.headers.get("accept-encoding");
+    if (!encodeings || !encodeings.includes("gzip")) {
+      return sendFile();
+    }
     let canGzip = !!_gzip;
     if (_gzip) {
       let extensions: string[] = defaultGzipOptions.extensions!;
@@ -303,7 +307,6 @@ export class NestFactory {
    * Then it will check the extension of the pathname, if it`s optioned such as `ejs`, it will be served view, otherwise it will be served static assets.
    *
    * But if there is index.html in the static assets, it will be served first before the view.
-   * @param app
    */
   private static startView(app: ApplicationEx) {
     app.use(async (context, next) => {
@@ -335,7 +338,11 @@ export class NestFactory {
 
       // first if static, then if view, then api
       try {
-        await this.serveStaticAssets(context, next);
+        if (this.staticOptions) {
+          return await this.serveStaticAssets(context, next);
+        } else {
+          return this.serveViews(context, next);
+        }
       } catch (e) {
         if (e.status === Status.NotFound) {
           try {
