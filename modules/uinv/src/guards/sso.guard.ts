@@ -94,6 +94,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
         const request: any = context.request;
         let userInfo: SSOUserInfo | undefined = request.userInfo;
         if (userInfo && userInfo.internal) {
+          options.formatUserInfo?.(userInfo, context); // 格式化用户信息，可以增加或修改用户信息
           logger.debug(
             "SSOGuard",
             `上一个guard中已经有用户信息：${
