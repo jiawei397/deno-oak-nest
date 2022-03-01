@@ -1,3 +1,5 @@
+import { Context } from "../deps.ts";
+
 // deno-lint-ignore-file camelcase
 export type MsgCallback = (...msg: unknown[]) => unknown;
 
@@ -68,5 +70,5 @@ export type SSOGuardOptions = {
   referer?: string;
   cacheTimeout?: number;
   ssoAllowAllUsers?: boolean;
-  formatUserInfo?: (user: SSOUserInfo) => void;
+  formatUserInfo?: (user: SSOUserInfo, context: Context) => void;
 };

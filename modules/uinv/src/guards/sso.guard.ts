@@ -108,7 +108,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
         if (!userInfo) {
           return false;
         }
-        options.formatUserInfo?.(userInfo); // 格式化用户信息，可以增加或修改用户信息
+        options.formatUserInfo?.(userInfo, context); // 格式化用户信息，可以增加或修改用户信息
         const simpleInfo = this.getSimpleUserInfo(userInfo);
         if (!userInfo.internal) { // 外部用户
           const allowAllUsers = ssoAllowAllUsers ??
