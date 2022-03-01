@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { ajax } from "../tools/ajax.ts";
 import { CanActivate, Context, UnauthorizedException } from "../../deps.ts";
-import { Logger, SSOUserInfo } from "../types.ts";
+import { SSOGuardOptions, SSOUserInfo } from "../types.ts";
 import { stringify } from "../tools/utils.ts";
 import { Injectable, Reflector, SetMetadata } from "../../../../mod.ts";
 
@@ -18,21 +18,14 @@ export const Public = (status = true) =>
 /**
  * sso守卫
  */
-export function SSOGuard(options: {
-  logger?: Logger;
-  ssoApi?: string;
-  ssoUserAgent?: string;
-  ssoUserInfoUrl?: string;
-  referer?: string;
-  cacheTimeout?: number;
-  ssoAllowAllUsers?: boolean;
-} = {}) {
+export function SSOGuard(options: SSOGuardOptions = {}) {
   const {
     logger = console,
-    ssoApi,
+    ssoApi = Deno.env.get("ssoApi"),
     ssoUserAgent,
     ssoAllowAllUsers,
     ssoUserInfoUrl = "/user/userinfo",
+    ssoUserInfosUrl = "/user/list/users_by_id",
     referer,
     cacheTimeout = 60 * 60 * 1000,
   } = options;
@@ -54,7 +47,7 @@ export function SSOGuard(options: {
     getSimpleUserInfo(user: SSOUserInfo) {
       return {
         id: user.user_id,
-        username: user.username,
+        username: user.username || user.nickname,
       };
     }
 
@@ -63,32 +56,29 @@ export function SSOGuard(options: {
       let userInfo: SSOUserInfo | undefined;
       const userAgent = headers.get("user-agent") || ssoUserAgent ||
         Deno.env.get("ssoUserAgent") || "";
+      const realReferer = headers.get("referer") || referer || "";
       if (headers.get("app") === "1") {
-        const userInfos = await ajax.post<SSOUserInfo[]>(
-          "user/list/users_by_id",
-          {
-            user_ids: [1],
+        const userInfos = await ajax.post<SSOUserInfo[]>(ssoUserInfosUrl, {
+          user_ids: [1],
+        }, {
+          baseURL: ssoApi,
+          headers: {
+            "user-agent": userAgent,
+            referer: realReferer,
+            "Authorization": headers.get("Authorization") || "",
           },
-          {
-            baseURL: ssoApi || Deno.env.get("ssoApi"),
-            headers: {
-              "user-agent": userAgent,
-              referer: headers.get("referer") || referer || "",
-              "Authorization": headers.get("Authorization") || "",
-            },
-            cacheTimeout,
-          },
-        );
+          cacheTimeout,
+        });
         if (userInfos && userInfos.length > 0) {
           userInfo = userInfos[0];
         }
       } else {
         userInfo = await ajax.get<SSOUserInfo>(ssoUserInfoUrl, null, {
-          baseURL: ssoApi || Deno.env.get("ssoApi"),
+          baseURL: ssoApi,
           headers: {
             cookie: headers.get("cookie") || "",
             "user-agent": userAgent,
-            referer: headers.get("referer") || referer || "",
+            referer: realReferer,
           },
           cacheTimeout,
         });
@@ -118,9 +108,10 @@ export function SSOGuard(options: {
         if (!userInfo) {
           return false;
         }
+        options.formatUserInfo?.(userInfo); // 格式化用户信息，可以增加或修改用户信息
         const simpleInfo = this.getSimpleUserInfo(userInfo);
         if (!userInfo.internal) { // 外部用户
-          const allowAllUsers = ssoAllowAllUsers ||
+          const allowAllUsers = ssoAllowAllUsers ??
             Deno.env.get("ssoAllowAllUsers") === "true";
           if (allowAllUsers) {
             const isDisable = this.reflector.get<boolean>(

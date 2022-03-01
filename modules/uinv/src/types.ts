@@ -58,3 +58,15 @@ export type AuthGuardOptions = {
   checkUserField?: string;
   tokenField?: string;
 };
+
+export type SSOGuardOptions = {
+  logger?: Logger;
+  ssoApi?: string;
+  ssoUserAgent?: string;
+  ssoUserInfoUrl?: string;
+  ssoUserInfosUrl?: string;
+  referer?: string;
+  cacheTimeout?: number;
+  ssoAllowAllUsers?: boolean;
+  formatUserInfo?: (user: SSOUserInfo) => void;
+};
