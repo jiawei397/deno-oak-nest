@@ -7,8 +7,10 @@ export * from "./src/guards/mod.ts";
 export * from "./src/decorators/mod.ts";
 
 export type {
+  AuthGuardOptions,
   Logger,
   MsgCallback,
+  SSOGuardOptions,
   SSOUserInfo,
   SSOUserKey,
   SSOUserKeys,
