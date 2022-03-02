@@ -1,4 +1,13 @@
-# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.6.3...v) (2022-03-02)
+# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.7.0...v) (2022-03-02)
+
+
+### Features
+
+* **oak:** param if undefined, then not trans ([131f41a](https://github.com/jiawei397/deno-oak-nest/commit/131f41a82cce381cd9bc100de9d218faa6336da0))
+
+
+
+# [1.7.0](https://github.com/jiawei397/deno-oak-nest/compare/v1.6.3...v1.7.0) (2022-03-02)
 
 
 ### Bug Fixes
