@@ -1,4 +1,43 @@
-# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.6.0...v) (2022-02-28)
+# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.6.3...v) (2022-03-02)
+
+
+### Bug Fixes
+
+* **cache:** use response needs to be considered ([4560b78](https://github.com/jiawei397/deno-oak-nest/commit/4560b7882edaf6d9ffd7020698a561b79e8102ee))
+
+
+### Features
+
+* **oak:** query trans params ([7f55a09](https://github.com/jiawei397/deno-oak-nest/commit/7f55a09350e2131030bca4bbd2fc3d1d760ab993))
+* **uinv:** ssoUserInfo add openid ([91aa9b1](https://github.com/jiawei397/deno-oak-nest/commit/91aa9b1473375d5288daba352690670503963989))
+
+
+
+## [1.6.3](https://github.com/jiawei397/deno-oak-nest/compare/v1.6.2...v1.6.3) (2022-03-01)
+
+
+### Features
+
+* **uinv:** sso internal also need format ([b3bdf66](https://github.com/jiawei397/deno-oak-nest/commit/b3bdf665c89bd4cb9b8ebd941512f9c9b36f16a2))
+
+
+
+## [1.6.2](https://github.com/jiawei397/deno-oak-nest/compare/v1.6.1...v1.6.2) (2022-03-01)
+
+
+### Features
+
+* **uinv:** export type ([16feec2](https://github.com/jiawei397/deno-oak-nest/commit/16feec2f1c5edc6468dd5cace4f4be810b939c97))
+* **uinv:** guard param add context ([0393aba](https://github.com/jiawei397/deno-oak-nest/commit/0393aba83c6449df42115661862ca324bd7b5015))
+
+
+
+## [1.6.1](https://github.com/jiawei397/deno-oak-nest/compare/v1.6.0...v1.6.1) (2022-03-01)
+
+
+### Features
+
+* **uinv:** sso guard can format info ([214a1c0](https://github.com/jiawei397/deno-oak-nest/commit/214a1c08db20f01e649b2fa1ca527ccbe0638890))
 
 
 
