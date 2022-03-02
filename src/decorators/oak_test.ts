@@ -217,6 +217,10 @@ Deno.test("Query", async () => {
     i!: boolean;
 
     j!: number;
+
+    k!: boolean;
+
+    l!: number;
   }
 
   // deno-lint-ignore no-unused-vars
@@ -264,6 +268,8 @@ Deno.test("Query", async () => {
       assert(query2.i === false);
       assertEquals(query2.j, mockQuery.j);
       assert(typeof query2.j === "string", "not transferred");
+      assert(query2.k === undefined, "not transferred");
+      assert(query2.l === undefined, "not transferred");
     }
 
     @Post("a")
@@ -289,14 +295,8 @@ Deno.test("Query", async () => {
     }
 
     @Get("d")
-    testErrorQuery(@Query() query: QueryDto) {
-      callStack.push(4);
-      assertEquals(query.a, mockErrorQuery.a);
-      assertEquals(
-        query.c,
-        mockErrorQuery.c,
-      );
-      assert(typeof query.c === "number");
+    testErrorQuery(@Query() _query: QueryDto) {
+      assert(false, "should not be here");
     }
 
     @Get("e")
