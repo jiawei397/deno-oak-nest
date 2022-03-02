@@ -8,6 +8,7 @@
 
 ### Features
 
+* **oak:** also translate params ([eaf8ba0](https://github.com/jiawei397/deno-oak-nest/commit/eaf8ba0908f58bb076122a979d166dac3f26b16d))
 * **oak:** query trans params ([7f55a09](https://github.com/jiawei397/deno-oak-nest/commit/7f55a09350e2131030bca4bbd2fc3d1d760ab993))
 * **uinv:** ssoUserInfo add openid ([91aa9b1](https://github.com/jiawei397/deno-oak-nest/commit/91aa9b1473375d5288daba352690670503963989))
 
