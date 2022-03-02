@@ -94,45 +94,54 @@ function parseNumOrBool(
   return val;
 }
 
+async function transAndValidateParams(
+  target: any,
+  methodName: string,
+  index: number,
+  map: Record<string, any>,
+) {
+  const providers = Reflect.getMetadata( // get the params providers
+    "design:paramtypes",
+    target,
+    methodName,
+  );
+  if (!providers || !providers[index] || providers[index] === Object) {
+    return map;
+  }
+  const cls = providers[index];
+  const keys = Reflect.getMetadataKeys(cls.prototype);
+  let isNeedValidate = false;
+  keys.forEach((key) => {
+    if (!key.startsWith(typePreKey)) {
+      return;
+    }
+    isNeedValidate = true;
+    const type = Reflect.getMetadata(key, cls.prototype);
+    const realKey = key.replace(typePreKey, "");
+    // console.log(key, type);
+    if (type === Boolean) {
+      map[realKey] = map[realKey] === "true";
+    } else if (type === Number) {
+      map[realKey] = Number(map[realKey]);
+    }
+  });
+  if (isNeedValidate) { // if not use Property to translate the params, then we can skip this
+    await validateParams(cls, map);
+  }
+  return map;
+}
+
 /**
  * get the params from the request, if has key, then return the value which is parse by it`s type
  * @example such as `http://localhost/api/users/1?name=tom`, then params is {name: tom}
  */
 export function Query(key?: string) {
   return createParamDecoratorWithLowLevel(
-    async (ctx: Context, target: any, methodName: string, index: number) => {
+    (ctx: Context, target: any, methodName: string, index: number) => {
       const { search } = ctx.request.url;
       const map = parseSearch(search);
       if (!key) {
-        const providers = Reflect.getMetadata( // get the params providers
-          "design:paramtypes",
-          target,
-          methodName,
-        );
-        if (!providers || !providers[index] || providers[index] === Object) {
-          return map;
-        }
-        const cls = providers[index];
-        const keys = Reflect.getMetadataKeys(cls.prototype);
-        let isNeedValidate = false;
-        keys.forEach((key) => {
-          if (!key.startsWith(typePreKey)) {
-            return;
-          }
-          isNeedValidate = true;
-          const type = Reflect.getMetadata(key, cls.prototype);
-          const realKey = key.replace(typePreKey, "");
-          // console.log(key, type);
-          if (type === Boolean) {
-            map[realKey] = map[realKey] === "true";
-          } else if (type === Number) {
-            map[realKey] = Number(map[realKey]);
-          }
-        });
-        if (isNeedValidate) { // if not use Property to translate the params, then we can skip this
-          await validateParams(cls, map);
-        }
-        return map;
+        return transAndValidateParams(target, methodName, index, map);
       }
       return parseNumOrBool(map[key], target, methodName, index);
     },
@@ -148,7 +157,7 @@ export function Params(key?: string) {
     (ctx: Context, target: any, methodName: string, index: number) => {
       const { params } = ctx as any;
       if (!key) {
-        return params;
+        return transAndValidateParams(target, methodName, index, params);
       }
       return parseNumOrBool(params[key], target, methodName, index);
     },
