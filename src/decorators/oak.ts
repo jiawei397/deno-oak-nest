@@ -115,9 +115,12 @@ async function transAndValidateParams(
     if (!key.startsWith(typePreKey)) {
       return;
     }
-    isNeedValidate = true;
     const type = Reflect.getMetadata(key, cls.prototype);
     const realKey = key.replace(typePreKey, "");
+    if (map[realKey] === undefined) {
+      return;
+    }
+    isNeedValidate = true;
     // console.log(key, type);
     if (type === Boolean) {
       map[realKey] = map[realKey] === "true";
