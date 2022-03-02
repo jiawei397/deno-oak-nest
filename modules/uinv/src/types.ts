@@ -16,6 +16,7 @@ export interface Logger {
  */
 export interface SSOUserInfo {
   id: string; // 转换的user_id，方便前台取值。后台返回的并没有
+  openid: string;
   avatar: string;
   email: string;
   internal: boolean;
