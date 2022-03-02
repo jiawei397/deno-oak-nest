@@ -13,6 +13,45 @@ import {
   createParamDecoratorWithLowLevel,
 } from "../params.ts";
 import { parseSearch } from "../utils.ts";
+import { Constructor } from "../interfaces/type.interface.ts";
+
+const typePreKey = "oaktype:";
+
+export function Property(): PropertyDecorator {
+  return (target: any, propertyKey: any) => {
+    const type = Reflect.getMetadata("design:type", target, propertyKey);
+    Reflect.defineMetadata(typePreKey + propertyKey, type, target);
+  };
+}
+
+// deno-lint-ignore ban-types
+async function validateParams(Cls: Constructor, value: object) {
+  if (!Cls || Cls === Object) { // if no class validation, we can skip this
+    return;
+  }
+  const post = new Cls();
+  Object.assign(post, value);
+  try {
+    await validateOrReject(post);
+  } catch (errors) {
+    // console.debug(errors);
+    const msgs: string[] = [];
+    errors.forEach((err: ValidationError) => {
+      if (err.constraints) {
+        Object.values(err.constraints).forEach((element) => {
+          msgs.push(element);
+        });
+      }
+    });
+    assert(
+      msgs.length > 0,
+      `the msgs must be not empty and the validationErrors are ${
+        JSON.stringify(errors)
+      }`,
+    );
+    throw new BodyParamValidationException(msgs.join(","));
+  }
+}
 
 export const Body = createParamDecorator(
   async (ctx: Context, target: any, methodName: string, index: number) => {
@@ -24,30 +63,7 @@ export const Body = createParamDecorator(
         target,
         methodName,
       );
-      if (providers?.[index] && providers[index] !== Object) { // if no class validation, we can skip this
-        const post = new providers[index]();
-        Object.assign(post, value);
-        try {
-          await validateOrReject(post);
-        } catch (errors) {
-          // console.debug(errors);
-          const msgs: string[] = [];
-          errors.forEach((err: ValidationError) => {
-            if (err.constraints) {
-              Object.values(err.constraints).forEach((element) => {
-                msgs.push(element);
-              });
-            }
-          });
-          assert(
-            msgs.length > 0,
-            `the msgs must be not empty and the validationErrors are ${
-              JSON.stringify(errors)
-            }`,
-          );
-          throw new BodyParamValidationException(msgs.join(","));
-        }
-      }
+      await validateParams(providers?.[index], value);
       return value;
     }
   },
@@ -84,10 +100,38 @@ function parseNumOrBool(
  */
 export function Query(key?: string) {
   return createParamDecoratorWithLowLevel(
-    (ctx: Context, target: any, methodName: string, index: number) => {
+    async (ctx: Context, target: any, methodName: string, index: number) => {
       const { search } = ctx.request.url;
       const map = parseSearch(search);
       if (!key) {
+        const providers = Reflect.getMetadata( // get the params providers
+          "design:paramtypes",
+          target,
+          methodName,
+        );
+        if (!providers || !providers[index] || providers[index] === Object) {
+          return map;
+        }
+        const cls = providers[index];
+        const keys = Reflect.getMetadataKeys(cls.prototype);
+        let isNeedValidate = false;
+        keys.forEach((key) => {
+          if (!key.startsWith(typePreKey)) {
+            return;
+          }
+          isNeedValidate = true;
+          const type = Reflect.getMetadata(key, cls.prototype);
+          const realKey = key.replace(typePreKey, "");
+          // console.log(key, type);
+          if (type === Boolean) {
+            map[realKey] = map[realKey] === "true";
+          } else if (type === Number) {
+            map[realKey] = Number(map[realKey]);
+          }
+        });
+        if (isNeedValidate) { // if not use Property to translate the params, then we can skip this
+          await validateParams(cls, map);
+        }
         return map;
       }
       return parseNumOrBool(map[key], target, methodName, index);

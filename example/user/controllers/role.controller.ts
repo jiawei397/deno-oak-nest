@@ -53,7 +53,7 @@ export class RoleController {
   }
 
   @Get("/info")
-  async getInfo(@Res() res: Response, @Query() params: any) {
+  async getInfo(@Res() res: Response, @Query() params: RoleInfoDto) {
     console.log("params is ", params);
     res.body = "role get info " + JSON.stringify(params) + " - " +
       await this.roleService.info() + "-\n" + this.asyncService.info();

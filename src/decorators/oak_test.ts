@@ -18,6 +18,7 @@ import {
   Headers,
   MethodName,
   Params,
+  Property,
   Query,
   Req,
   Res,
@@ -182,8 +183,49 @@ Deno.test("Query", async () => {
     c: "4",
     f: "false",
     g: "true",
+    i: "dd",
+    j: "5",
   };
-  const mockPath = "/a?a=b&c=4&f=false&g=true";
+  const mockPath = "/a?a=b&c=4&f=false&g=true&i=dd&j=5";
+  const mockErrorPath = "/d?a=b&c=30";
+  const mockErrorQuery = {
+    a: "b",
+    c: 30,
+  };
+  const mockErrorButNotValidatePath = "/e?a=b&d=30";
+  const mockErrorButNotValidatePathQuery = {
+    a: "b",
+    d: "30",
+  };
+
+  // deno-lint-ignore no-unused-vars
+  class QueryDto {
+    @Property()
+    a!: string;
+
+    @Property()
+    @Max(20)
+    c!: number;
+
+    @Property()
+    f!: boolean;
+
+    @Property()
+    g!: boolean;
+
+    @Property()
+    i!: boolean;
+
+    j!: number;
+  }
+
+  // deno-lint-ignore no-unused-vars
+  class QueryNotValidateDto {
+    a!: string;
+
+    @Max(20)
+    d!: number;
+  }
 
   @Controller("")
   class A {
@@ -197,6 +239,7 @@ Deno.test("Query", async () => {
       @Query("f") f: boolean,
       @Query("g") g: boolean,
       @Query("h") h: boolean,
+      @Query() query2: QueryDto,
     ) {
       callStack.push(1);
       assertEquals(query, mockQuery);
@@ -212,6 +255,15 @@ Deno.test("Query", async () => {
         undefined,
         "if no parsed, should be undefined instead of false",
       );
+      // query2 is translated
+      assert(typeof query2.c === "number");
+      assertEquals(query2.c, Number(mockQuery.c));
+      assertEquals(query2.a, mockQuery.a);
+      assert(query2.f === false);
+      assert(query2.g === true);
+      assert(query2.i === false);
+      assertEquals(query2.j, mockQuery.j);
+      assert(typeof query2.j === "string", "not transferred");
     }
 
     @Post("a")
@@ -234,6 +286,31 @@ Deno.test("Query", async () => {
     ) {
       callStack.push(3);
       assertEquals(query, {});
+    }
+
+    @Get("d")
+    testErrorQuery(@Query() query: QueryDto) {
+      callStack.push(4);
+      assertEquals(query.a, mockErrorQuery.a);
+      assertEquals(
+        query.c,
+        mockErrorQuery.c,
+      );
+      assert(typeof query.c === "number");
+    }
+
+    @Get("e")
+    testErrorButNotValidateQuery(@Query() query: QueryNotValidateDto) {
+      callStack.push(5);
+      assertEquals(query.a, mockErrorButNotValidatePathQuery.a);
+      assertEquals(
+        query.d,
+        mockErrorButNotValidatePathQuery.d,
+      );
+      assert(
+        typeof query.d === "string",
+        "not set Property, so should be string type",
+      );
     }
   }
 
@@ -279,6 +356,37 @@ Deno.test("Query", async () => {
     await mw(ctx, next);
 
     assertEquals(callStack, [3]);
+    callStack.length = 0;
+  }
+
+  {
+    const ctx = testing.createMockContext({
+      path: mockErrorPath,
+      method: "GET",
+    });
+    const mw = router.routes();
+    const next = testing.createMockNext();
+
+    try {
+      await mw(ctx, next);
+    } catch (error) {
+      // console.log(error);
+      assertEquals(error.message, "c must not be greater than 20");
+      callStack.push(5);
+    }
+    assertEquals(callStack, [5]);
+    callStack.length = 0;
+  }
+
+  {
+    const ctx = testing.createMockContext({
+      path: mockErrorButNotValidatePath,
+      method: "GET",
+    });
+    const mw = router.routes();
+    const next = testing.createMockNext();
+    await mw(ctx, next);
+    assertEquals(callStack, [5]);
     callStack.length = 0;
   }
 });
