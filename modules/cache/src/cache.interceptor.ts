@@ -127,7 +127,17 @@ export class CacheInterceptor implements NestInterceptor {
     ) || this.ttl;
     let isCached = false;
     if (result && (result instanceof Promise || !this.caches)) {
-      this.memoryCache.set(key, result, { ttl });
+      if (result instanceof Promise) {
+        this.memoryCache.set(
+          key,
+          result.then((val) => {
+            return context.response.body ?? val;
+          }),
+          { ttl },
+        );
+      } else {
+        this.memoryCache.set(key, result, { ttl });
+      }
     } else {
       this.caches!.set(key, result, { ttl });
       isCached = true;
