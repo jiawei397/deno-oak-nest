@@ -1,4 +1,8 @@
-# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.7.0...v) (2022-03-02)
+# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.7.1...v) (2022-03-02)
+
+
+
+## [1.7.1](https://github.com/jiawei397/deno-oak-nest/compare/v1.7.0...v1.7.1) (2022-03-02)
 
 
 ### Features
