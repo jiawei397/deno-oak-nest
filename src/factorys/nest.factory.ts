@@ -356,8 +356,11 @@ export class NestFactory {
         if (e.status === Status.NotFound) {
           try {
             return await this.serveViews(context, next);
-          } catch {
-            return next(); // api
+          } catch (e2) {
+            if (e2.status === Status.NotFound) {
+              return next(); // api
+            }
+            throw e2;
           }
         } else {
           throw e;
