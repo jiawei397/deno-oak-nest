@@ -1,4 +1,22 @@
-# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.7.1...v) (2022-03-02)
+# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.7.3...v) (2022-03-07)
+
+
+
+## [1.7.3](https://github.com/jiawei397/deno-oak-nest/compare/v1.7.2...v1.7.3) (2022-03-07)
+
+
+### Bug Fixes
+
+* **cache:** cache maybe error, not catched before ([3493918](https://github.com/jiawei397/deno-oak-nest/commit/3493918e53a33befb6074f985629cb811a5df6f0))
+
+
+
+## [1.7.2](https://github.com/jiawei397/deno-oak-nest/compare/v1.7.1...v1.7.2) (2022-03-04)
+
+
+### Bug Fixes
+
+* **view:** if not 404 throw error ([37ad74d](https://github.com/jiawei397/deno-oak-nest/commit/37ad74d853b5649a3445a1c40833fd5ccce9a693))
 
 
 
