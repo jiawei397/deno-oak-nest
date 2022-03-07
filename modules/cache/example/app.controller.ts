@@ -49,6 +49,15 @@ export class AppController {
     });
   }
 
+  @Get("/error")
+  error() {
+    return new Promise((_resolve, reject) => {
+      setTimeout(() => {
+        reject("this is my error");
+      }, 50);
+    });
+  }
+
   @Get("public")
   @SetCachePolicy("private")
   public() {

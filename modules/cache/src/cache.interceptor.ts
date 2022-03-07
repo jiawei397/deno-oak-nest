@@ -126,27 +126,18 @@ export class CacheInterceptor implements NestInterceptor {
       options.target[options.methodName],
     ) || this.ttl;
     let isCached = false;
+    let lastResult: any = context.response.body ?? result;
     if (result && (result instanceof Promise || !this.caches)) {
       if (result instanceof Promise) {
-        this.memoryCache.set(
-          key,
-          result.then((val) => {
-            return context.response.body ?? val;
-          }),
-          { ttl },
-        );
-      } else {
-        this.memoryCache.set(key, result, { ttl });
+        lastResult = result.then((val) => context.response.body ?? val);
       }
+      this.memoryCache.set(key, lastResult, { ttl });
     } else {
-      this.caches!.set(key, result, { ttl });
+      this.caches?.set(key, lastResult, { ttl });
       isCached = true;
     }
     try {
-      let val = await result;
-      if (context.response.body !== undefined) {
-        val = context.response.body;
-      }
+      const val = await lastResult;
       if (!isCached && this.caches) {
         await this.caches.set(key, val, { ttl });
         this.memoryCache.delete(key);
