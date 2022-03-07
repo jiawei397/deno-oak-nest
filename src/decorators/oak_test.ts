@@ -188,10 +188,6 @@ Deno.test("Query", async () => {
   };
   const mockPath = "/a?a=b&c=4&f=false&g=true&i=dd&j=5";
   const mockErrorPath = "/d?a=b&c=30";
-  const mockErrorQuery = {
-    a: "b",
-    c: 30,
-  };
   const mockErrorButNotValidatePath = "/e?a=b&d=30";
   const mockErrorButNotValidatePathQuery = {
     a: "b",
