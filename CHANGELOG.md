@@ -1,4 +1,17 @@
-# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.7.3...v) (2022-03-07)
+# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.0...v) (2022-03-07)
+
+
+
+# [1.8.0](https://github.com/jiawei397/deno-oak-nest/compare/v1.7.4...v1.8.0) (2022-03-07)
+
+
+### Features
+
+* **oak:** update to 10.4.0 ([73123a9](https://github.com/jiawei397/deno-oak-nest/commit/73123a9cd6bcd71e0074cb83f5f039632b2e2fb1))
+
+
+
+## [1.7.4](https://github.com/jiawei397/deno-oak-nest/compare/v1.7.3...v1.7.4) (2022-03-07)
 
 
 
