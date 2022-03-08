@@ -7,7 +7,7 @@ import { RedisModule } from "../mod.ts";
     RedisModule.forRoot({
       port: 6379,
       hostname: "192.168.21.176",
-      password: "123456",
+      // password: "123456",
     }),
   ],
   controllers: [AppController],

@@ -16,7 +16,8 @@ export function stringify(data: any): string {
   }
 }
 
-export function jsonParse(str: string): any {
+export function jsonParse(str: any): any {
+  if (!str) return;
   try {
     return JSON.parse(str);
   } catch (err) {

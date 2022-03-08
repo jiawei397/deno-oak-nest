@@ -12,10 +12,10 @@ export {
   yellow,
 } from "https://deno.land/std@0.117.0/fmt/colors.ts";
 
-export { connect } from "https://deno.land/x/redis@v0.24.0/mod.ts";
+export { connect } from "https://deno.land/x/redis@v0.25.3/mod.ts";
 export type {
   Redis,
   RedisConnectOptions,
-} from "https://deno.land/x/redis@v0.24.0/mod.ts";
+} from "https://deno.land/x/redis@v0.25.3/mod.ts";
 
 export { Inject, Injectable } from "../../src/decorators/inject.ts";

@@ -5,25 +5,18 @@ import { jsonParse, stringify } from "./utils.ts";
 
 @Injectable()
 export class RedisService {
-  constructor(@Inject(REDIS_KEY) private readonly client: Redis) {
+  constructor(@Inject(REDIS_KEY) public readonly client: Redis) {
   }
 
   //设置值的方法
-  async set(key: string, value: any, seconds?: number) {
+  set(key: string, value: any, seconds?: number) {
     value = stringify(value);
-    if (!seconds) {
-      await this.client.set(key, value);
-    } else {
-      await this.client.set(key, value, {
-        ex: seconds,
-      });
-    }
+    return this.client.set(key, value, seconds ? { ex: seconds } : undefined);
   }
 
   //获取值的方法
   async get(key: string) {
     const data = await this.client.get(key);
-    if (!data) return;
     return jsonParse(data);
   }
 
@@ -42,21 +35,18 @@ export class RedisService {
   //去掉第一个
   async shift(key: string) {
     const data = await this.client.lpop(key);
-    if (!data) return;
     return jsonParse(data);
   }
 
   //删除最后一个
   async pop(key: string) {
     const data = await this.client.rpop(key);
-    if (!data) return;
     return jsonParse(data);
   }
 
   //根据索引获取
   async index(key: string, index: number) {
     const data = await this.client.lindex(key, index);
-    if (!data) return;
     return jsonParse(data);
   }
 
@@ -67,5 +57,9 @@ export class RedisService {
   async isEmpty(key: string) {
     const len = await this.size(key);
     return len === 0;
+  }
+
+  getRange(key: string, start: number, end: number) {
+    return this.client.lrange(key, start, end);
   }
 }
