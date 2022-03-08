@@ -1,4 +1,14 @@
-# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.0...v) (2022-03-07)
+# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.1...v) (2022-03-08)
+
+
+
+## [1.8.1](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.0...v1.8.1) (2022-03-08)
+
+
+### Features
+
+* **redis:** public client to use in controller ([cd8e307](https://github.com/jiawei397/deno-oak-nest/commit/cd8e3074656f33a85b1d6cdf32ee70040d418623))
+* **uinv:**  add originInternal to userinfo ([ae006c8](https://github.com/jiawei397/deno-oak-nest/commit/ae006c8bf7b58f523bde0160c4090285326e76d5))
 
 
 
