@@ -5,8 +5,8 @@ This is a `schedule` module for [`oak_nest`](https://deno.land/x/oak_nest).
 ## example
 
 ```typescript
-import { Module } from "https://deno.land/x/oak_nest@v1.8.0/mod.ts";
-import { CacheModule } from "https://deno.land/x/oak_nest@v1.8.0/modules/cache/mod.ts";
+import { Module } from "https://deno.land/x/oak_nest@v1.8.1/mod.ts";
+import { CacheModule } from "https://deno.land/x/oak_nest@v1.8.1/modules/cache/mod.ts";
 import { AppController } from "./app.controller.ts";
 
 @Module({
@@ -23,8 +23,8 @@ export class AppModule {}
 Then `CacheInterceptor` can be used in any Controllers, or in a specific method.
 
 ```ts
-import { CacheInterceptor } from "https://deno.land/x/oak_nest@v1.8.0/modules/cache/mod.ts";
-import { Controller, Get } from "https://deno.land/x/oak_nest@v1.8.0/mod.ts";
+import { CacheInterceptor } from "https://deno.land/x/oak_nest@v1.8.1/modules/cache/mod.ts";
+import { Controller, Get } from "https://deno.land/x/oak_nest@v1.8.1/mod.ts";
 
 @Controller("")
 @UseInterceptors(CacheInterceptor)
