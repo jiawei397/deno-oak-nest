@@ -20,11 +20,12 @@ export interface SSOUserInfo {
   avatar: string;
   email: string;
   internal: boolean;
+  originInternal?: boolean; // 原始的internal，上面的internal可能被修改
   last_login: string;
   nickname: string; // 昵称
   phone: string;
   realname: string;
-  user_id: number; // 比如81
+  user_id: number;
   username: string;
 }
 
