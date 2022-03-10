@@ -1,4 +1,18 @@
-# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.1...v) (2022-03-08)
+# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.2...v) (2022-03-10)
+
+
+
+## [1.8.2](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.1...v1.8.2) (2022-03-10)
+
+
+### Bug Fixes
+
+* **redis:** delete key when expired ([1e0b7f1](https://github.com/jiawei397/deno-oak-nest/commit/1e0b7f179c78661e825e7df6430f0b0516b5c93b))
+
+
+### Features
+
+* **cache:** register redis cache store ([aa74832](https://github.com/jiawei397/deno-oak-nest/commit/aa748329da1e3e3fcdccb28f5854073ab3333ae7))
 
 
 
