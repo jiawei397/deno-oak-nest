@@ -27,6 +27,12 @@ export class RedisStore implements CacheStore {
   ): Promise<string> {
     const newKey = this.getNewKey(key);
     await this.client.sadd(this.key, key);
+
+    if (options?.ttl) {
+      setTimeout(() => {
+        this.client.srem(this.key, key).catch(console.error);
+      }, options.ttl * 1000);
+    }
     return this.client.set(
       newKey,
       stringify(value),
