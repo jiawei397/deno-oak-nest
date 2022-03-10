@@ -1,3 +1,5 @@
+import { UseInterceptors } from "../../../mod.ts";
+import { CacheInterceptor } from "../../cache/mod.ts";
 import { Inject, Redis } from "../deps.ts";
 import { REDIS_KEY, RedisService } from "../mod.ts";
 import { Controller, Get } from "./deps.ts";
@@ -23,12 +25,14 @@ export class AppController {
   }
 
   @Get("/service")
+  @UseInterceptors(CacheInterceptor)
   async userService() {
     await this.redisService.push("userIds", {
       id: 1,
     });
     // const arr = await this.redisService.getRange("userIds", 0, 10);
     const arr = await this.redisService.client.lrange("userIds", 0, -1);
+    console.log("----");
     return arr;
   }
 
@@ -36,7 +40,8 @@ export class AppController {
   async testSet() {
     await this.client.srem("ids", 3);
     // await this.client.del("ids");
-    // await this.client.sadd("ids", 5, 2, 1, 3, 4);
+    const result = await this.client.sadd("ids", 10);
+    console.log(`result: ${result}`);
     const count = await this.client.scard("ids");
     const data = await this.client.smembers("ids");
     const hasNum = await this.client.sismember("ids", "5888");

@@ -54,12 +54,18 @@ export class CacheInterceptor implements NestInterceptor {
     this.max = cacheModuleOptions?.max || 100;
     this.policy = cacheModuleOptions?.policy || "no-cache";
     this.memoryCache = new MemoryStore();
+    this.init(cacheModuleOptions);
+  }
+
+  async init(cacheModuleOptions?: CacheModuleOptions) {
     if (!cacheModuleOptions?.store || cacheModuleOptions.store === "memory") {
       // this.caches = new MemoryStore();
     } else if (cacheModuleOptions.store === "localStorage") {
       this.caches = new LocalStore();
     } else {
-      this.caches = cacheModuleOptions.store;
+      this.caches = typeof cacheModuleOptions.store === "function"
+        ? await cacheModuleOptions.store()
+        : cacheModuleOptions.store;
     }
   }
 
@@ -108,7 +114,7 @@ export class CacheInterceptor implements NestInterceptor {
           options.methodType,
           this.joinArgs(options.args),
         ].join("_"));
-    const cacheValue = this.memoryCache.get(key) || this.caches?.get(key);
+    const cacheValue = this.memoryCache.get(key) || await this.caches?.get(key);
     const policy = Reflect.getOwnMetadata(
       META_CACHE_POLICY_KEY,
       options.target[options.methodName],
