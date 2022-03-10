@@ -2,7 +2,7 @@
 import { Factory } from "../../../src/factorys/class.factory.ts";
 import { CacheStore } from "../../cache/src/cache.interface.ts";
 import { Inject, Redis } from "../deps.ts";
-import { REDIS_KEY } from "./redis.constant.ts";
+import { REDIS_KEY, REDIS_STORE_NAME } from "./redis.constant.ts";
 import { jsonParse, stringify } from "./utils.ts";
 
 export class RedisStore implements CacheStore {
@@ -64,6 +64,9 @@ export class RedisStore implements CacheStore {
   }
 }
 
-export const createStore = () => {
-  return Factory(RedisStore);
+export const createStore = async () => {
+  return {
+    name: REDIS_STORE_NAME,
+    store: await Factory(RedisStore),
+  };
 };

@@ -25,7 +25,14 @@ export interface CacheStore {
   size(): Promise<number> | number;
 }
 
-export type CacheFactory = () => CacheStore | Promise<CacheStore>;
+export interface CacheStoreMap {
+  name: string;
+  store: CacheStore;
+}
+
+export type CacheFactory = () =>
+  | CacheStoreMap
+  | Promise<CacheStoreMap>;
 
 /**
  * Interface defining Cache Manager configuration options.
@@ -38,7 +45,8 @@ export interface CacheManagerOptions {
    * [Different stores](https://docs.nestjs.com/techniques/caching#different-stores)
    * for more info.
    */
-  store?: "memory" | "localStorage" | CacheStore | CacheFactory;
+  store?: "memory" | "localStorage" | CacheStoreMap | CacheFactory;
+  defaultStore?: "memory" | "localStorage" | string;
   /**
    * Time to live - amount of time in seconds that a response is cached before it
    * is deleted. Subsequent request will call through the route handler and refresh

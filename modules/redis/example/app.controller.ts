@@ -1,5 +1,5 @@
 import { UseInterceptors } from "../../../mod.ts";
-import { CacheInterceptor } from "../../cache/mod.ts";
+import { CacheInterceptor, SetCacheStore } from "../../cache/mod.ts";
 import { Inject, Redis } from "../deps.ts";
 import { REDIS_KEY, RedisService } from "../mod.ts";
 import { Controller, Get } from "./deps.ts";
@@ -18,6 +18,7 @@ export class AppController {
   }
 
   @Get("/client")
+  @UseInterceptors(CacheInterceptor)
   async useInjectedClient() {
     await this.client.lpush("userIds", "123");
     const arr = await this.client.lrange("userIds", 0, -1);
@@ -26,6 +27,7 @@ export class AppController {
 
   @Get("/service")
   @UseInterceptors(CacheInterceptor)
+  @SetCacheStore("redis")
   async userService() {
     await this.redisService.push("userIds", {
       id: 1,

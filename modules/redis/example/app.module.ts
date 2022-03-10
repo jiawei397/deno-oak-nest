@@ -13,6 +13,8 @@ import { CacheModule } from "../../cache/mod.ts";
     CacheModule.register({
       ttl: 30,
       store: createStore,
+      // defaultStore: "localStorage",
+      defaultStore: "memory",
     }),
   ],
   controllers: [AppController],
