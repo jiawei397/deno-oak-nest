@@ -1,4 +1,13 @@
-# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.2...v) (2022-03-10)
+# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.3...v) (2022-03-11)
+
+
+
+## [1.8.3](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.2...v1.8.3) (2022-03-11)
+
+
+### Features
+
+* **cache:** can use other default store ([bdd53a6](https://github.com/jiawei397/deno-oak-nest/commit/bdd53a6797b7ebfb0262a4a7b3e3268ab83fcce3))
 
 
 
