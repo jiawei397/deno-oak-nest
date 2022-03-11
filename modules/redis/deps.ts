@@ -12,7 +12,11 @@ export {
   yellow,
 } from "https://deno.land/std@0.117.0/fmt/colors.ts";
 
-export { connect } from "https://deno.land/x/redis@v0.25.3/mod.ts";
+export {
+  connect,
+  create,
+  createLazyClient,
+} from "https://deno.land/x/redis@v0.25.3/mod.ts";
 export type {
   Redis,
   RedisConnectOptions,
