@@ -248,3 +248,19 @@ export function UploadedFile(options: FormDataReadOptions = {}) {
     }
   });
 }
+
+export function Form() {
+  return createParamDecoratorWithLowLevel(
+    async (ctx: Context, target: any, methodName: string, index: number) => {
+      const data = ctx.request.body({
+        type: "form",
+      });
+      const result = await data.value;
+      const map: Record<string, string> = {};
+      result.forEach((value, key) => {
+        map[key] = value;
+      });
+      return transAndValidateParams(target, methodName, index, map);
+    },
+  );
+}

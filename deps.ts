@@ -17,6 +17,7 @@ export {
 } from "https://deno.land/x/oak@v10.4.0/etag.ts";
 
 export type {
+  FormDataBody,
   FormDataReadOptions,
   Middleware,
   RouterMiddleware,
