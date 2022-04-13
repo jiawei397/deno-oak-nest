@@ -17,6 +17,10 @@ export * from "./src/decorators/mod.ts";
 
 export * from "./src/interfaces/mod.ts";
 
-export type { CanActivate, Constructor } from "./src/interfaces/mod.ts";
+export type {
+  CanActivate,
+  Constructor,
+  FormDataFormattedBody,
+} from "./src/interfaces/mod.ts";
 
 export * from "./deps.ts";
