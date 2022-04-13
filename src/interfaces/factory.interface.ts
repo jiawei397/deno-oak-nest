@@ -13,6 +13,7 @@ export type InjectParams = (() => any) | string | symbol | InjectedData;
 export interface ViewOptions {
   /**
    * the end of the file extension
+   * @example ejs
    */
   extension: string;
 

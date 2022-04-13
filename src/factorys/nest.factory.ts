@@ -206,10 +206,10 @@ export class NestFactory {
   }
 
   private static async serveStaticAssets(context: Context, next: Next) {
-    if (!this.staticOptions) {
+    const options = this.staticOptions;
+    if (!options) {
       return next();
     }
-    const options = this.staticOptions;
     const {
       baseDir,
       prefix = "/",
@@ -375,16 +375,21 @@ export class NestFactory {
       return next();
     }
     const pathname = context.request.url.pathname;
+    const extension = extname(pathname);
+    if (extension && extension.substring(1) !== viewOptions.extension) { // not allow filename includes .
+      return next();
+    }
     let name = pathname.substring(1);
     if (viewOptions.prefix) {
       name = pathname.replace(join(viewOptions.prefix), "");
     }
-    const filename = (name || "index") + "." + viewOptions.extension;
+    const filename = extension
+      ? name
+      : (name || "index") + "." + viewOptions.extension;
     const path = resolve(
       viewOptions.baseDir,
       filename,
     );
     context.response.body = await viewOptions.renderFile(path, context);
-    // next();
   }
 }
