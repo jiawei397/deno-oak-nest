@@ -21,6 +21,8 @@ export { mockjs };
 export { delay } from "https://deno.land/std@0.97.0/async/mod.ts";
 
 export {
+  IsNumber,
+  IsString,
   Max,
   Min,
   validateOrReject,

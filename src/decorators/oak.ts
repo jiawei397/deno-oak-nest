@@ -2,7 +2,6 @@
 import {
   assert,
   BodyParamValidationException,
-  FormDataReadOptions,
   Reflect,
   validateOrReject,
   ValidationError,
@@ -14,6 +13,10 @@ import {
 } from "../params.ts";
 import { parseSearch } from "../utils.ts";
 import { Constructor } from "../interfaces/type.interface.ts";
+import {
+  FormDataFormattedBody,
+  FormDataOptions,
+} from "../interfaces/param.interface.ts";
 
 const typePreKey = "oaktype:";
 
@@ -94,7 +97,7 @@ function parseNumOrBool(
   return val;
 }
 
-async function transAndValidateParams(
+function transAndValidateParams(
   target: any,
   methodName: string,
   index: number,
@@ -109,6 +112,13 @@ async function transAndValidateParams(
     return map;
   }
   const cls = providers[index];
+  return transAndValidateByCls(cls, map);
+}
+
+async function transAndValidateByCls(
+  cls: Constructor,
+  map: Record<string, any>,
+) {
   const keys = Reflect.getMetadataKeys(cls.prototype);
   let isNeedValidate = false;
   keys.forEach((key) => {
@@ -238,15 +248,23 @@ export const ControllerName = createParamDecorator(
   },
 );
 
-export function UploadedFile(options: FormDataReadOptions = {}) {
-  return createParamDecoratorWithLowLevel((ctx: Context) => {
-    const data = ctx.request.body({
-      type: "form-data",
-    });
-    if (data?.value) {
-      return data.value.read(options);
-    }
-  });
+export function UploadedFile(options: FormDataOptions = {}) {
+  return createParamDecoratorWithLowLevel(
+    async (ctx: Context) => {
+      const data = ctx.request.body({
+        type: "form-data",
+      });
+      const result = await data.value.read(options);
+      if (options.validateCls) {
+        await transAndValidateByCls(
+          options.validateCls,
+          result.fields,
+        );
+        return result as FormDataFormattedBody<typeof options.validateCls>;
+      }
+      return result;
+    },
+  );
 }
 
 export function Form() {

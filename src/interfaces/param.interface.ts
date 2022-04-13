@@ -1,5 +1,5 @@
-import { Context } from "../../deps.ts";
-import { Instance } from "./type.interface.ts";
+import { Context, FormDataBody, FormDataReadOptions } from "../../deps.ts";
+import { Constructor, Instance } from "./type.interface.ts";
 
 export type ParamDecoratorCallback = (
   ctx: Context,
@@ -8,3 +8,11 @@ export type ParamDecoratorCallback = (
   index: number,
   // deno-lint-ignore no-explicit-any
 ) => any;
+
+export interface FormDataOptions extends FormDataReadOptions {
+  validateCls?: Constructor;
+}
+
+export type FormDataFormattedBody<T = Record<string, string>> = FormDataBody & {
+  fields: T;
+};

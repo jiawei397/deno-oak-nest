@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   ControllerName,
+  FormDataFormattedBody,
   Get,
   Ip,
   MethodName,
@@ -21,6 +22,7 @@ import { AuthGuard3, SSOGuard } from "../../guards/auth3.guard.ts";
 import { RoleAction, Roles } from "../../decorators/roles.ts";
 import { LogTime } from "../../decorators/time.ts";
 import { LoggerService } from "../services/logger.service.ts";
+import { UploadDto } from "../dtos/user.dto.ts";
 
 @UseGuards(AuthGuard, SSOGuard)
 @Controller("/user")
@@ -113,10 +115,12 @@ export class UserController {
   upload2(
     @UploadedFile({
       maxFileSize: 10 * 1024 * 1024 * 1024,
-    }) result: any,
+      validateCls: UploadDto, // this will validate the param
+    }) result: FormDataFormattedBody<UploadDto>,
     @Res() res: Response,
   ) {
     console.log("---upload----", result);
+    console.log(result.fields.age);
     res.body = result;
   }
 }
