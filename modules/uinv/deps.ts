@@ -14,6 +14,7 @@ export {
 
 export {
   BadRequestException,
+  ForbiddenException,
   UnauthorizedException,
 } from "https://deno.land/x/oak_exception@v0.0.9/mod.ts";
 
