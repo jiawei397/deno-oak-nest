@@ -603,8 +603,10 @@ Deno.test("UploadedFile", async () => {
       path: "/a",
       method: "POST",
       body: {
-        type: "undefined",
-        value: undefined,
+        type: "form-data",
+        value: {
+          read() {},
+        },
       },
     });
 

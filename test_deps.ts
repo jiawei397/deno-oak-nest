@@ -18,12 +18,12 @@ export {
   send,
   Status,
   testing,
-} from "https://deno.land/x/oak@v10.4.0/mod.ts";
+} from "https://deno.land/x/oak@v10.5.0/mod.ts";
 
 export type {
   Middleware,
   RouterMiddleware,
-} from "https://deno.land/x/oak@v10.4.0/mod.ts";
+} from "https://deno.land/x/oak@v10.5.0/mod.ts";
 
 export {
   IsOptional,
