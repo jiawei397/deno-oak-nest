@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   ControllerName,
+  Delete,
   FormDataFormattedBody,
   Get,
   Ip,
@@ -122,5 +123,10 @@ export class UserController {
     console.log("---upload----", result);
     console.log(result.fields.age);
     res.body = result;
+  }
+
+  @Delete("del")
+  del(@Body() params: any) {
+    return params;
   }
 }
