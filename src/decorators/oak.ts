@@ -28,7 +28,7 @@ export function Property(): PropertyDecorator {
 }
 
 // deno-lint-ignore ban-types
-async function validateParams(Cls: Constructor, value: object) {
+export async function validateParams(Cls: Constructor, value: object) {
   if (!Cls || Cls === Object) { // if no class validation, we can skip this
     return;
   }
@@ -73,25 +73,20 @@ export const Body = createParamDecorator(
 );
 
 function parseNumOrBool(
-  val: unknown,
+  val: string | null | undefined,
   target: any,
   methodName: string,
   index: number,
 ) {
-  if (val !== undefined && val !== null) {
+  if (val) {
     const providers = Reflect.getMetadata( // get the params providers
       "design:paramtypes",
       target,
       methodName,
     );
     if (providers?.[index]) {
-      const type = providers[index];
-      if (type === Boolean) {
-        return val === "true";
-      }
-      if (type === Number) {
-        return Number(val);
-      }
+      // cannot deal Array here, because cannot get the real type of every item.
+      return getTransNumOrBool(providers[index], val);
     }
   }
   return val;
@@ -101,7 +96,7 @@ function transAndValidateParams(
   target: any,
   methodName: string,
   index: number,
-  map: Record<string, any>,
+  map: Record<string, string>,
 ) {
   const providers = Reflect.getMetadata( // get the params providers
     "design:paramtypes",
@@ -115,9 +110,19 @@ function transAndValidateParams(
   return transAndValidateByCls(cls, map);
 }
 
+export function getTransNumOrBool(type: Constructor, val: string) {
+  if (type === Boolean) {
+    return val === "true";
+  }
+  if (type === Number) {
+    return Number(val);
+  }
+  return val;
+}
+
 async function transAndValidateByCls(
   cls: Constructor,
-  map: Record<string, any>,
+  map: Record<string, string | number | boolean>,
 ) {
   const keys = Reflect.getMetadataKeys(cls.prototype);
   let isNeedValidate = false;
@@ -131,12 +136,10 @@ async function transAndValidateByCls(
       return;
     }
     isNeedValidate = true;
-    // console.log(key, type);
-    if (type === Boolean) {
-      map[realKey] = map[realKey] === "true";
-    } else if (type === Number) {
-      map[realKey] = Number(map[realKey]);
-    }
+    map[realKey] = getTransNumOrBool(
+      type,
+      map[realKey] as string,
+    );
   });
   if (isNeedValidate) { // if not use Property to translate the params, then we can skip this
     await validateParams(cls, map);
