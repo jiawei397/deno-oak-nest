@@ -33,9 +33,29 @@ export async function checkEtag(context: Context, val: any) {
   const etagOptions = { weak: true };
   const actual = await calculate(str, etagOptions);
   context.response.headers.set("etag", actual);
-  if (!context.response.headers.has("Cache-Control")) {
-    context.response.headers.set("Cache-Control", "no-cache");
+
+  // cache-control see https://cloud.tencent.com/developer/section/1189911
+  const requestCacheControl = context.request.headers.get("Cache-Control");
+  let responseCacheControl = context.response.headers.get("Cache-Control");
+  if (!responseCacheControl) {
+    if (requestCacheControl) {
+      const cacheArr = requestCacheControl.split(",");
+      const cacheResHeaders = [
+        "max-age",
+        "no-cache",
+        "no-store",
+        "no-transform",
+      ];
+      responseCacheControl = cacheArr.filter((str) => {
+        const key = str.split("=")[0];
+        return cacheResHeaders.includes(key.trim().toLowerCase());
+      }).join(",");
+    } else {
+      responseCacheControl = "no-cache";
+    }
   }
+
+  context.response.headers.set("Cache-Control", responseCacheControl);
   if (
     etag && !await ifNoneMatch(etag, str, etagOptions) // if etag is not match, then will return 200
   ) {
