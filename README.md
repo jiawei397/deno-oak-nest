@@ -494,9 +494,120 @@ You can also see the `RedisModule` example
 [this way](https://deno.land/x/oak_nest_redis_module) or use the modules such as
 `cache` and `scheduler` in the `modules` dir.
 
+## unit
+
+If you want to test your application, you can use `createTestingModule` to help
+use.
+
+First, let us create Service B and C, create a Controller A.
+
+```ts
+@Injectable()
+class B {
+  findAll() {
+    return "b";
+  }
+}
+
+@Controller("")
+class A {
+  constructor(private readonly b: B) {}
+
+  find() {
+    return this.b.findAll();
+  }
+}
+```
+
+Then use `createTestingModule`:
+
+```ts
+import { createTestingModule } from "https://deno.land/x/oak_nest@v1.8.9/mod.ts";
+
+Deno.test("test origin only with controller", async () => {
+  const moduleRef = await createTestingModule({
+    controllers: [A],
+  })
+    .compile();
+  const a = await moduleRef.get(A);
+  assert(a instanceof A);
+  const b = await moduleRef.get(B);
+  assert(b instanceof B);
+  assert(a["b"] === b);
+  assertEquals(a.find(), "b");
+});
+
+Deno.test("test origin with providers", async () => {
+  const moduleRef = await createTestingModule({
+    controllers: [A],
+    providers: [B],
+  })
+    .compile();
+  const a = await moduleRef.get(A);
+  assert(a instanceof A);
+  const b = await moduleRef.get(B);
+  assert(b instanceof B);
+  assert(a["b"] === b);
+  assertEquals(a.find(), "b");
+});
+
+Deno.test("inject data by other object", async () => {
+  const d = {
+    findAll() {
+      return "d";
+    },
+  };
+  const moduleRef = await createTestingModule({
+    controllers: [A],
+  }).overrideProvider(B, d)
+    .compile();
+  const a = await moduleRef.get(A);
+  assert(a instanceof A);
+  const b = await moduleRef.get(B);
+  assert(!(b instanceof B));
+  assert(a["b"] === b);
+  assert(b === d);
+  assertEquals(a.find(), "d");
+});
+
+Deno.test("change provider self", async () => {
+  const moduleRef = await createTestingModule({
+    controllers: [A],
+  })
+    .compile();
+  const a = await moduleRef.get(A);
+  assert(a instanceof A);
+  const b = await moduleRef.get(B);
+  assert(b instanceof B);
+
+  b.findAll = () => {
+    return "bb";
+  };
+
+  assert(a["b"] === b);
+  assertEquals(a.find(), "bb");
+});
+
+Deno.test("resolve will return not same", async () => {
+  const moduleRef = await createTestingModule({
+    controllers: [A],
+  })
+    .compile();
+  const b = await moduleRef.get(B);
+  assert(b instanceof B);
+  const c = await moduleRef.resolve(B);
+  assert(c instanceof B);
+  assert(b !== c);
+
+  const d = await moduleRef.resolve(B);
+  assert(d !== c);
+});
+```
+
 ## TODO
 
-- [x] unit test
+- [x] unit test self
+- [x] provide API to help unit
 
 ---
 
