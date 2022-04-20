@@ -6,7 +6,7 @@ export interface Abstract<T> extends Function {
   prototype: T;
 }
 
-type provide = string | symbol | Type<any> | Abstract<any>;
+export type Provide = string | symbol | Type<any> | Abstract<any>;
 
 /**
  * @publicApi
@@ -40,7 +40,7 @@ export interface ClassProvider<T = any> {
   /**
    * Injection token
    */
-  provide: provide;
+  provide: Provide;
   /**
    * Type (class name) of provider (instance to be injected).
    */
@@ -69,7 +69,7 @@ export interface ValueProvider<T = any> {
   /**
    * Injection token
    */
-  provide: provide;
+  provide: Provide;
   /**
    * Instance of a provider to be injected.
    */
@@ -99,7 +99,7 @@ export interface FactoryProvider<T = any> {
   /**
    * Injection token
    */
-  provide: provide;
+  provide: Provide;
   /**
    * Factory function that returns an instance of the provider to be injected.
    */
@@ -132,9 +132,9 @@ export interface ExistingProvider<T = any> {
   /**
    * Injection token
    */
-  provide: provide;
+  provide: Provide;
   /**
    * Provider to be aliased by the Injection token.
    */
-  useExisting: any;
+  useExisting: T;
 }

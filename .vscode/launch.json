@@ -20,6 +20,23 @@
                 "--unstable",
             ],
             "attachSimplePort": 9229
+        },
+        {
+            "request": "launch",
+            "name": "test",
+            "type": "pwa-node",
+            "program": "${workspaceFolder}/src/factorys/test.ts",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "C:\\bin\\deno.exe",
+            "runtimeArgs": [
+                "run",
+                "--inspect-brk",
+                "-A",
+                "--config",
+                "tsconfig.json",
+                "--unstable",
+            ],
+            "attachSimplePort": 9229
         }
     ]
 }

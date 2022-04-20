@@ -24,7 +24,7 @@ import {
   ViewOptions,
 } from "../interfaces/mod.ts";
 import { join, Router } from "../router.ts";
-import { initProvider } from "./class.factory.ts";
+import { globalFactoryCaches, initProvider } from "./class.factory.ts";
 
 const onModuleInitedKey = Symbol("onModuleInited");
 
@@ -100,10 +100,11 @@ export async function findControllers(
 
 export async function initProviders(
   providers: Provider[],
+  cache = globalFactoryCaches,
 ) {
   const arr = [];
   for (const provider of providers) {
-    const instance = await initProvider(provider, Scope.DEFAULT);
+    const instance = await initProvider(provider, Scope.DEFAULT, cache);
     if (instance) {
       arr.push({
         instance,
@@ -135,7 +136,7 @@ export class NestFactory {
   private static isViewStarted: boolean;
   static app: ApplicationEx;
 
-  static async create(module: ModuleType) {
+  static async create(module: ModuleType, cache = globalFactoryCaches) {
     const app = new Application() as ApplicationEx;
     const router = new Router();
     const controllers: Type<any>[] = [];
@@ -149,9 +150,9 @@ export class NestFactory {
       dynamicProviders,
       specialProviders,
     );
-    await initProviders(specialProviders);
-    await initProviders(dynamicProviders); // init dynamic providers first to avoid it be inited first by other providers
-    await initProviders(registeredProviders);
+    await initProviders(specialProviders, cache);
+    await initProviders(dynamicProviders, cache); // init dynamic providers first to avoid it be inited first by other providers
+    await initProviders(registeredProviders, cache);
 
     if (controllers.length) {
       await router.add(...controllers);
