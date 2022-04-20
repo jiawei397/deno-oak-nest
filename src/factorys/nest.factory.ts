@@ -1,9 +1,9 @@
 // deno-lint-ignore-file no-explicit-any
-import { createHttpError } from "https://deno.land/x/oak@v10.2.0/httpError.ts";
 import {
   Application,
   blue,
   Context,
+  createHttpError,
   extname,
   gzip,
   Reflect,

@@ -15,6 +15,7 @@ export {
   calculate,
   ifNoneMatch,
 } from "https://deno.land/x/oak@v10.5.0/etag.ts";
+export { createHttpError } from "https://deno.land/x/oak@v10.5.0/httpError.ts";
 
 export type {
   FormDataBody,
