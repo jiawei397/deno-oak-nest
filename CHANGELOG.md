@@ -1,4 +1,57 @@
-# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.3...v) (2022-03-11)
+# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.8...v) (2022-04-20)
+
+
+### Features
+
+* **test:** add test module ([f032ee3](https://github.com/jiawei397/deno-oak-nest/commit/f032ee3db6df7814edd15152a49030fcb19259c1))
+
+
+### Performance Improvements
+
+* **oak:** encapsulation trans function ([1bb98a0](https://github.com/jiawei397/deno-oak-nest/commit/1bb98a05c7cd46e8463eddab9b17e3582f04c05c))
+
+
+
+## [1.8.8](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.7...v1.8.8) (2022-04-14)
+
+
+
+## [1.8.7](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.6...v1.8.7) (2022-04-13)
+
+
+### Features
+
+* **decorator:** add Form ([35d8494](https://github.com/jiawei397/deno-oak-nest/commit/35d8494827cb9a974cb6d7dfa8214156814db09a))
+* **param:** uploadedFile validate ([6343b2a](https://github.com/jiawei397/deno-oak-nest/commit/6343b2aa7760816079c2602c95e78e59b7095ac4))
+* **type:** export type FormDataFormattedBody ([a2b42f6](https://github.com/jiawei397/deno-oak-nest/commit/a2b42f6b06061f9dc7f02674d8a31df60e760195))
+
+
+
+## [1.8.6](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.5...v1.8.6) (2022-04-13)
+
+
+### Features
+
+* **uinv:** sso throw 403 ([90495ca](https://github.com/jiawei397/deno-oak-nest/commit/90495ca275e4eba5991707f20a3ab21aa1ea5b60))
+* **views:** filename cannot include . ([f0a3717](https://github.com/jiawei397/deno-oak-nest/commit/f0a37179253cedb794775e39511a3e01a8e8b421))
+
+
+
+## [1.8.5](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.4...v1.8.5) (2022-03-25)
+
+
+### Features
+
+* **es:** update es client ([2346b3a](https://github.com/jiawei397/deno-oak-nest/commit/2346b3a1f781199f1094aceb621ecd887a35d4ce))
+
+
+
+## [1.8.4](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.3...v1.8.4) (2022-03-11)
+
+
+### Features
+
+* **redis:** export redis ([19f6b2e](https://github.com/jiawei397/deno-oak-nest/commit/19f6b2efa3f9dda38fd6e0e526949d495f75f112))
 
 
 
