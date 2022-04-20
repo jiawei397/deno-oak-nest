@@ -25,7 +25,7 @@
             "request": "launch",
             "name": "test",
             "type": "pwa-node",
-            "program": "${workspaceFolder}/src/factorys/test.ts",
+            "program": "${workspaceFolder}/example/app.controller_test.ts",
             "cwd": "${workspaceFolder}",
             "runtimeExecutable": "C:\\bin\\deno.exe",
             "runtimeArgs": [

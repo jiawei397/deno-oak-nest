@@ -12,6 +12,7 @@ export { UseInterceptors } from "./src/interceptor.ts";
 
 export { Factory } from "./src/factorys/class.factory.ts";
 export { NestFactory } from "./src/factorys/nest.factory.ts";
+export * from "./src/factorys/test.module.ts";
 
 export * from "./src/decorators/mod.ts";
 

@@ -78,7 +78,7 @@ scripts:
   test:
     cmd: deno test
     watch: false
-    unstable: false
+    unstable: true
     allow:
       - env
     env:
