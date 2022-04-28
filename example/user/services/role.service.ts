@@ -12,4 +12,8 @@ export class RoleService {
     await delay(500);
     return "info from RoleService";
   }
+
+  getRole() {
+    return { name: "admin" };
+  }
 }
