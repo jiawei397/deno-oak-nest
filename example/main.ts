@@ -22,12 +22,13 @@ app.use((context, next) => {
 
 app.useGlobalInterceptors(new LoggingInterceptor());
 // app.disableGetComputeEtag();
+
+// must before routes
 app.useStaticAssets("example/static", {
   prefix: "static",
   // gzip: true,
 });
 
-// Without trailing slash
 app.setView({
   // prefix: "example",
   baseDir: "example/views",
@@ -103,9 +104,12 @@ app.get("/hello", (ctx: Context) => {
 
 app.use(app.routes());
 
-// app.useStaticAssets("example/static");
-
 const port = Number(Deno.env.get("PORT") || 1000);
+
+// app.addEventListener("error", (evt) => {
+//   // Will log the thrown error to the console.
+//   console.log("------error---", evt.error);
+// });
 
 app.addEventListener("listen", ({ hostname, port, secure }) => {
   console.log(
