@@ -16,7 +16,6 @@ import { getModuleMetadata, isModule } from "../decorators/module.ts";
 import {
   GzipOptions,
   ModuleType,
-  Next,
   Provider,
   Scope,
   StaticOptions,
@@ -161,7 +160,11 @@ export class NestFactory {
     // bind router methods to app
     app.setGlobalPrefix = router.setGlobalPrefix.bind(router);
     app.get = router.get.bind(router);
-    app.routes = router.routes.bind(router);
+    app.routes = () => {
+      const res = router.routes();
+      this.startView();
+      return res;
+    };
     app.useGlobalInterceptors = router.useGlobalInterceptors.bind(router);
     app.useStaticAssets = this.useStaticAssets.bind(this);
     app.setView = this.setView.bind(this);
@@ -175,7 +178,6 @@ export class NestFactory {
 
   static setView(viewOptions: ViewOptions) {
     this.viewOptions = viewOptions;
-    this.startView();
   }
 
   private static checkWithPrefix(prefix: string, pathname: string) {
@@ -203,13 +205,12 @@ export class NestFactory {
       baseDir: path,
       ...options,
     };
-    this.startView();
   }
 
-  private static async serveStaticAssets(context: Context, next: Next) {
+  private static async serveStaticAssets(context: Context) {
     const options = this.staticOptions;
     if (!options) {
-      return next();
+      return;
     }
     const {
       baseDir,
@@ -315,27 +316,25 @@ export class NestFactory {
    * But if there is index.html in the static assets, it will be served first before the view.
    */
   private static startView() {
-    if (this.isViewStarted) {
+    const viewOptions = this.viewOptions;
+    if (this.isViewStarted || (!viewOptions && !this.staticOptions)) {
       return;
     }
     this.isViewStarted = true;
     this.app.use(async (context, next) => {
-      const viewOptions = this.viewOptions;
-      if (
-        (!viewOptions && !this.staticOptions) ||
-        context.request.method !== "GET"
-      ) {
+      if (context.request.method !== "GET") {
         return next();
+      }
+      await next();
+      if (context.response.status !== 404) {
+        return;
       }
       const pathname = context.request.url.pathname;
-      if (this.checkWithPrefix(this.app.router.apiPrefix, pathname)) { // api
-        return next();
-      }
       if (
         this.staticOptions?.prefix &&
         this.checkWithPrefix(this.staticOptions.prefix, pathname) // static
       ) {
-        return this.serveStaticAssets(context, next);
+        return this.serveStaticAssets(context);
       }
       if (
         viewOptions &&
@@ -343,42 +342,35 @@ export class NestFactory {
           (viewOptions.prefix &&
             this.checkWithPrefix(viewOptions.prefix, pathname)))
       ) {
-        return this.serveViews(context, next);
+        return this.serveViews(context);
       }
 
-      // first if static, then if view, then api
+      // first if static, then view
       try {
         if (this.staticOptions) {
-          return await this.serveStaticAssets(context, next);
+          return await this.serveStaticAssets(context);
         } else {
-          return this.serveViews(context, next);
+          return this.serveViews(context);
         }
       } catch (e) {
         if (e.status === Status.NotFound) {
-          try {
-            return await this.serveViews(context, next);
-          } catch (e2) {
-            if (e2.status === Status.NotFound) {
-              return next(); // api
-            }
-            throw e2;
-          }
+          return this.serveViews(context);
         } else {
-          throw e;
+          throw e; // this error caused by static assets should be handled
         }
       }
     });
   }
 
-  private static async serveViews(context: Context, next: Next) {
+  private static async serveViews(context: Context) {
     const viewOptions = this.viewOptions;
     if (!viewOptions) {
-      return next();
+      return;
     }
     const pathname = context.request.url.pathname;
     const extension = extname(pathname);
     if (extension && extension.substring(1) !== viewOptions.extension) { // not allow filename includes .
-      return next();
+      return;
     }
     let name = pathname.substring(1);
     if (viewOptions.prefix) {
