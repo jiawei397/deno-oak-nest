@@ -144,10 +144,13 @@ export class Router extends OriginRouter {
         const methodKey = join(modelPath, route);
         const funcStart = Date.now();
         this[methodType](methodKey, async (context: Context) => {
+          const originStatus = context.response.status; // 404
           const guardResult = await checkByGuard(instance, fn, context);
           if (!guardResult) {
-            context.response.status = Status.Forbidden;
-            context.response.body = STATUS_TEXT.get(Status.Forbidden);
+            if (context.response.status === originStatus) {
+              context.response.status = Status.Forbidden;
+              context.response.body = STATUS_TEXT.get(Status.Forbidden);
+            }
             return;
           }
           const args = await transferParam(instance, methodName, context);

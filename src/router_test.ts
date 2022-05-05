@@ -1,7 +1,16 @@
 // deno-lint-ignore-file no-explicit-any
-import { assert, assertEquals, Context, testing } from "../test_deps.ts";
+import {
+  assert,
+  assertEquals,
+  Context,
+  Status,
+  testing,
+} from "../test_deps.ts";
 import { join, mapRoute, Router } from "./router.ts";
 import { Controller, Get, Post } from "./decorators/controller.ts";
+import { CanActivate } from "./interfaces/guard.interface.ts";
+import { UseGuards } from "./guard.ts";
+import { Injectable } from "./decorators/inject.ts";
 
 Deno.test("join", () => {
   assertEquals(join(""), "");
@@ -329,4 +338,113 @@ Deno.test("routes check result", async () => {
     assert(ctx.response.body instanceof Error);
     assertEquals(ctx.response.status, 400);
   }
+});
+
+Deno.test("routes with guard success", async () => {
+  const router = new Router();
+
+  class AuthGuard implements CanActivate {
+    // deno-lint-ignore require-await
+    async canActivate(_context: Context): Promise<boolean> {
+      return true;
+    }
+  }
+
+  const callStack: number[] = [];
+
+  @UseGuards(AuthGuard)
+  @Controller("user")
+  class A {
+    @Get("/a")
+    method1() {
+      callStack.push(1);
+      return "a";
+    }
+  }
+  await router.add(A);
+
+  const ctx = testing.createMockContext({
+    path: "/user/a",
+    method: "GET",
+  });
+  const mw = router.routes();
+  const next = testing.createMockNext();
+
+  await mw(ctx, next);
+  assertEquals(ctx.response.body, "a");
+  assertEquals(callStack, [1]);
+});
+
+Deno.test("routes with guard forbidden", async () => {
+  const router = new Router();
+
+  @Injectable()
+  class AuthGuard implements CanActivate {
+    // deno-lint-ignore require-await
+    async canActivate(_context: Context): Promise<boolean> {
+      return false;
+    }
+  }
+
+  const callStack: number[] = [];
+
+  @UseGuards(AuthGuard)
+  @Controller("user")
+  class A {
+    @Get("/a")
+    method1() {
+      callStack.push(1);
+      return "a";
+    }
+  }
+  await router.add(A);
+
+  const ctx = testing.createMockContext({
+    path: "/user/a",
+    method: "GET",
+  });
+  const mw = router.routes();
+  const next = testing.createMockNext();
+
+  await mw(ctx, next);
+  assertEquals(ctx.response.status, Status.Forbidden);
+  assertEquals(callStack, []);
+});
+
+Deno.test("routes with guard status self", async () => {
+  const router = new Router();
+  const url = `https://www.baidu.com`;
+
+  class AuthGuard implements CanActivate {
+    // deno-lint-ignore require-await
+    async canActivate(context: Context): Promise<boolean> {
+      context.response.redirect(url);
+      return false;
+    }
+  }
+
+  const callStack: number[] = [];
+
+  @UseGuards(AuthGuard)
+  @Controller("user")
+  class A {
+    @Get("/a")
+    method1() {
+      callStack.push(1);
+      return "a";
+    }
+  }
+  await router.add(A);
+
+  const ctx = testing.createMockContext({
+    path: "/user/a",
+    method: "GET",
+  });
+  const mw = router.routes();
+  const next = testing.createMockNext();
+
+  await mw(ctx, next);
+  assertEquals(ctx.response.headers.get("Location"), url);
+  assertEquals(ctx.response.status, 302);
+  assertEquals(callStack, []);
 });
