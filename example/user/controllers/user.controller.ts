@@ -32,6 +32,11 @@ export class UserController {
     this.loggerService.info("user");
   }
 
+  @Get("large")
+  large() {
+    return new Array(100000).fill("Hello World").join("\n");
+  }
+
   @UseGuards(AuthGuard2, AuthGuard3)
   @Get("/info")
   info(
