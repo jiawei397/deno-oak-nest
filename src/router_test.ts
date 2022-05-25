@@ -268,7 +268,7 @@ Deno.test("routes with controller", async () => {
   Router.prototype.post = originPost;
 });
 
-Deno.test("routes check result", async () => {
+Deno.test("routes check result", async (t) => {
   const router = new Router();
   @Controller("user")
   class A {
@@ -293,7 +293,7 @@ Deno.test("routes check result", async () => {
   }
   await router.add(A);
 
-  {
+  await t.step("get a ", async () => {
     const ctx = testing.createMockContext({
       path: "/user/a",
       method: "GET",
@@ -303,9 +303,9 @@ Deno.test("routes check result", async () => {
 
     await mw(ctx, next);
     assertEquals(ctx.response.body, "a");
-  }
+  });
 
-  {
+  await t.step("get b", async () => {
     const ctx = testing.createMockContext({
       path: "/user/b",
       method: "GET",
@@ -314,9 +314,9 @@ Deno.test("routes check result", async () => {
     const next = testing.createMockNext();
     await mw(ctx, next);
     assertEquals(ctx.response.body, undefined);
-  }
+  });
 
-  {
+  await t.step("get c", async () => {
     const ctx = testing.createMockContext({
       path: "/user/c",
       method: "GET",
@@ -325,9 +325,9 @@ Deno.test("routes check result", async () => {
     const next = testing.createMockNext();
     await mw(ctx, next);
     assertEquals(ctx.response.body, "c");
-  }
+  });
 
-  {
+  await t.step("get d", async () => {
     const ctx = testing.createMockContext({
       path: "/user/d",
       method: "GET",
@@ -337,7 +337,7 @@ Deno.test("routes check result", async () => {
     await mw(ctx, next);
     assert(ctx.response.body instanceof Error);
     assertEquals(ctx.response.status, 400);
-  }
+  });
 });
 
 Deno.test("routes with guard success", async () => {
