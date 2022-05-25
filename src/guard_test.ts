@@ -15,7 +15,7 @@ import {
 import { CanActivate } from "./interfaces/mod.ts";
 import { Router } from "./router.ts";
 
-Deno.test("getAllGuards and checkByGuard", async () => {
+Deno.test("getAllGuards and checkByGuard", async (t) => {
   class AuthGuard implements CanActivate {
     async canActivate(_context: Context): Promise<boolean> {
       return true;
@@ -47,38 +47,38 @@ Deno.test("getAllGuards and checkByGuard", async () => {
 
   const test = new TestController();
 
-  {
+  await t.step("test a", async () => {
     const guards = await getAllGuards(test, test.a);
     assertEquals(guards.length, 2);
     assert(guards[0] instanceof AuthGuard);
     assert(guards[1] instanceof AuthGuard2);
-  }
+  });
 
-  {
+  await t.step("test b", async () => {
     const guards2 = await getAllGuards(test, test.b);
     assertEquals(guards2.length, 3);
     assert(guards2[0] instanceof AuthGuard);
     assert(guards2[1] instanceof AuthGuard2);
     assert(guards2[2] instanceof AuthGuard3);
-  }
+  });
 
-  {
+  await t.step("get a", async () => {
     const ctx = testing.createMockContext({
       path: "/a",
       method: "GET",
     });
     const result = await checkByGuard(test, test.a, ctx);
     assertEquals(result, true);
-  }
+  });
 
-  {
+  await t.step("get b", async () => {
     const ctx = testing.createMockContext({
       path: "/b",
       method: "GET",
     });
     const result = await checkByGuard(test, test.b, ctx);
     assertEquals(result, false);
-  }
+  });
 });
 
 Deno.test("SetMetadata and GetMetadata", async () => {
