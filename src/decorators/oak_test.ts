@@ -2,6 +2,7 @@
 import {
   assert,
   assertEquals,
+  IsNumber,
   IsString,
   Max,
   Min,
@@ -22,6 +23,7 @@ import {
   Query,
   Req,
   Res,
+  transAndValidateByCls,
   UploadedFile,
 } from "./oak.ts";
 
@@ -176,7 +178,7 @@ Deno.test("body", async () => {
   }
 });
 
-Deno.test("Query", async () => {
+Deno.test("Query", async (t) => {
   const callStack: number[] = [];
   const mockQuery = {
     a: "b",
@@ -193,6 +195,7 @@ Deno.test("Query", async () => {
     a: "b",
     d: "30",
   };
+  const mockErrorValidatePath = "/f?a=b&d=30";
 
   // deno-lint-ignore no-unused-vars
   class QueryDto {
@@ -221,6 +224,13 @@ Deno.test("Query", async () => {
 
   // deno-lint-ignore no-unused-vars
   class QueryNotValidateDto {
+    a!: string;
+
+    d!: number;
+  }
+
+  // deno-lint-ignore no-unused-vars
+  class QueryValidateErrorDto {
     a!: string;
 
     @Max(20)
@@ -308,12 +318,17 @@ Deno.test("Query", async () => {
         "not set Property, so should be string type",
       );
     }
+
+    @Get("f")
+    testErrorValidateQuery(@Query() _query: QueryValidateErrorDto) {
+      assert(false, "should not be here");
+    }
   }
 
   const router = new Router();
   await router.add(A);
 
-  {
+  await t.step("get mock", async () => {
     const ctx = testing.createMockContext({
       path: mockPath,
       method: "GET",
@@ -325,9 +340,9 @@ Deno.test("Query", async () => {
 
     assertEquals(callStack, [1]);
     callStack.length = 0;
-  }
+  });
 
-  {
+  await t.step("post mock", async () => {
     const ctx = testing.createMockContext({
       method: "POST",
       path: mockPath,
@@ -339,9 +354,9 @@ Deno.test("Query", async () => {
 
     assertEquals(callStack, [2]);
     callStack.length = 0;
-  }
+  });
 
-  {
+  await t.step("get b", async () => {
     const ctx = testing.createMockContext({
       path: "/b",
       method: "GET",
@@ -353,9 +368,9 @@ Deno.test("Query", async () => {
 
     assertEquals(callStack, [3]);
     callStack.length = 0;
-  }
+  });
 
-  {
+  await t.step("get error", async () => {
     const ctx = testing.createMockContext({
       path: mockErrorPath,
       method: "GET",
@@ -368,13 +383,13 @@ Deno.test("Query", async () => {
     } catch (error) {
       // console.log(error);
       assertEquals(error.message, "c must not be greater than 20");
-      callStack.push(5);
+      callStack.push(6);
     }
-    assertEquals(callStack, [5]);
+    assertEquals(callStack, [6]);
     callStack.length = 0;
-  }
+  });
 
-  {
+  await t.step("get error but not validate path", async () => {
     const ctx = testing.createMockContext({
       path: mockErrorButNotValidatePath,
       method: "GET",
@@ -384,7 +399,25 @@ Deno.test("Query", async () => {
     await mw(ctx, next);
     assertEquals(callStack, [5]);
     callStack.length = 0;
-  }
+  });
+
+  await t.step("get validate path", async () => {
+    const ctx = testing.createMockContext({
+      path: mockErrorValidatePath,
+      method: "GET",
+    });
+    const mw = router.routes();
+    const next = testing.createMockNext();
+    try {
+      await mw(ctx, next);
+    } catch (error) {
+      // console.log(error);
+      assertEquals(error.message, "d must not be greater than 20");
+      callStack.push(7);
+    }
+    assertEquals(callStack, [7]);
+    callStack.length = 0;
+  });
 });
 
 Deno.test("Params", async () => {
@@ -565,7 +598,7 @@ Deno.test("Headers", async () => {
   callStack.length = 0;
 });
 
-Deno.test("UploadedFile", async () => {
+Deno.test("UploadedFile form data", async (t) => {
   const callStack: number[] = [];
   const fileMockData = {
     fields: { test: "a" },
@@ -585,20 +618,20 @@ Deno.test("UploadedFile", async () => {
     @Post("a")
     noUpload(@UploadedFile() body: any) {
       callStack.push(1);
-      assertEquals(body, undefined, "get will not pass body");
+      assertEquals(body, undefined, "no upload data will not pass body");
     }
 
     @Post("b")
     upload(@UploadedFile() body: any) {
       callStack.push(2);
-      assertEquals(body, fileMockData, "get will pass body");
+      assertEquals(body, fileMockData, "will pass body");
     }
   }
 
   const router = new Router();
   await router.add(A);
 
-  {
+  await t.step("not upload", async () => {
     const ctx = createMockContext({
       path: "/a",
       method: "POST",
@@ -618,9 +651,9 @@ Deno.test("UploadedFile", async () => {
     assertEquals(callStack, [1]);
 
     callStack.length = 0;
-  }
+  });
 
-  {
+  await t.step("upload", async () => {
     const ctx = createMockContext({
       path: "/b",
       method: "POST",
@@ -638,5 +671,39 @@ Deno.test("UploadedFile", async () => {
 
     assertEquals(callStack, [2]);
     callStack.length = 0;
-  }
+  });
+});
+
+Deno.test("transAndValidateByCls", async (t) => {
+  await t.step("not trans", async () => {
+    class A {
+      @IsNumber()
+      age: number;
+    }
+    try {
+      await transAndValidateByCls(A, {
+        age: "12",
+      });
+      assert(false, "should not reach here");
+    } catch (error) {
+      assertEquals(
+        error.message,
+        "age must be a number conforming to the specified constraints",
+      );
+    }
+  });
+
+  await t.step("trans", async () => {
+    class A {
+      @IsNumber()
+      @Property()
+      age: number;
+    }
+    const result = await transAndValidateByCls(A, {
+      age: "12",
+    });
+    assertEquals(result, {
+      age: 12,
+    });
+  });
 });

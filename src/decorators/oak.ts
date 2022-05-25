@@ -120,12 +120,11 @@ export function getTransNumOrBool(type: Constructor, val: string) {
   return val;
 }
 
-async function transAndValidateByCls(
+export async function transAndValidateByCls(
   cls: Constructor,
   map: Record<string, string | number | boolean>,
 ) {
   const keys = Reflect.getMetadataKeys(cls.prototype);
-  let isNeedValidate = false;
   keys.forEach((key) => {
     if (!key.startsWith(typePreKey)) {
       return;
@@ -135,15 +134,12 @@ async function transAndValidateByCls(
     if (map[realKey] === undefined) {
       return;
     }
-    isNeedValidate = true;
     map[realKey] = getTransNumOrBool(
       type,
       map[realKey] as string,
     );
   });
-  if (isNeedValidate) { // if not use Property to translate the params, then we can skip this
-    await validateParams(cls, map);
-  }
+  await validateParams(cls, map);
   return map;
 }
 
