@@ -1,4 +1,49 @@
-# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.8...v) (2022-04-20)
+# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.9.2...v) (2022-05-25)
+
+
+### Bug Fixes
+
+* **oak:** origin Cls should also validate ([6d48105](https://github.com/jiawei397/deno-oak-nest/commit/6d4810587df07e6a56a10eb80b7b2497c7f2807e))
+
+
+
+## [1.9.2](https://github.com/jiawei397/deno-oak-nest/compare/v1.9.1...v1.9.2) (2022-05-07)
+
+
+### Features
+
+* **modules:** update es client ([e192e46](https://github.com/jiawei397/deno-oak-nest/commit/e192e46d065472ed4d13bc882c6489c93d1d1245))
+
+
+
+## [1.9.1](https://github.com/jiawei397/deno-oak-nest/compare/v1.9.0...v1.9.1) (2022-05-05)
+
+
+### Features
+
+* **router:** guard can set status self ([47d3f2d](https://github.com/jiawei397/deno-oak-nest/commit/47d3f2d1c69d21cbc08852ae232e5641fad66ddb))
+
+
+
+# [1.9.0](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.10...v1.9.0) (2022-04-29)
+
+
+### Features
+
+* **views:** server api first, only file when 404 ([9d58db0](https://github.com/jiawei397/deno-oak-nest/commit/9d58db0ae8076a71fb99a7198af8482cf2a08f47))
+
+
+
+## [1.8.10](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.9...v1.8.10) (2022-04-20)
+
+
+### Features
+
+* **cache:** response GET cache-control by request ([308458f](https://github.com/jiawei397/deno-oak-nest/commit/308458f6042d1421defcf71089b00d0abccf9e09))
+
+
+
+## [1.8.9](https://github.com/jiawei397/deno-oak-nest/compare/v1.8.8...v1.8.9) (2022-04-20)
 
 
 ### Features
