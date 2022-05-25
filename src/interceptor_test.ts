@@ -8,7 +8,7 @@ import {
 } from "./interceptor.ts";
 import { NestInterceptor, Next } from "./interfaces/mod.ts";
 
-Deno.test("UseInterceptors sort", async () => {
+Deno.test("UseInterceptors sort", async (t) => {
   const callStack: number[] = [];
 
   class GlobalInterceptor implements NestInterceptor {
@@ -60,7 +60,7 @@ Deno.test("UseInterceptors sort", async () => {
 
   const test = new TestController();
 
-  {
+  await t.step("a", async () => {
     const interceptors = await getInterceptors(test, test.a, [
       GlobalInterceptor,
     ]);
@@ -69,18 +69,18 @@ Deno.test("UseInterceptors sort", async () => {
     assert(interceptors[1] instanceof ControllerInterceptor);
     assert(interceptors[2] instanceof Interceptor1);
     assert(interceptors[3] instanceof Interceptor2);
-  }
+  });
 
-  {
+  await t.step("b", async () => {
     const interceptors = await getInterceptors(test, test.b, [
       GlobalInterceptor,
     ]);
     assertEquals(interceptors.length, 2);
     assert(interceptors[0] instanceof GlobalInterceptor);
     assert(interceptors[1] instanceof ControllerInterceptor);
-  }
+  });
 
-  {
+  await t.step("get a", async () => {
     const ctx = testing.createMockContext({
       path: "/a",
       method: "GET",
@@ -102,9 +102,9 @@ Deno.test("UseInterceptors sort", async () => {
     assertEquals(result, "a");
     assertEquals(callStack, [1, 3, 5, 7, 8, 6, 4, 2]);
     callStack.length = 0;
-  }
+  });
 
-  {
+  await t.step("get b", async () => {
     const ctx = testing.createMockContext({
       path: "/b",
       method: "GET",
@@ -126,10 +126,10 @@ Deno.test("UseInterceptors sort", async () => {
     assertEquals(result, "b");
     assertEquals(callStack, [1, 3, 4, 2]);
     callStack.length = 0;
-  }
+  });
 });
 
-Deno.test("UseInterceptors cache", async () => {
+Deno.test("UseInterceptors cache", async (t) => {
   const callStack: number[] = [];
 
   class CacheInterceptor implements NestInterceptor {
@@ -156,12 +156,12 @@ Deno.test("UseInterceptors cache", async () => {
   }
 
   const test = new TestController();
+  const ctx = testing.createMockContext({
+    path: "/a",
+    method: "GET",
+  });
 
-  {
-    const ctx = testing.createMockContext({
-      path: "/a",
-      method: "GET",
-    });
+  await t.step("first get", async () => {
     const result = await checkByInterceptors(
       ctx,
       [],
@@ -177,7 +177,9 @@ Deno.test("UseInterceptors cache", async () => {
     assertEquals(result, "a");
     assertEquals(callStack, [1, 3, 2]);
     callStack.length = 0;
+  });
 
+  await t.step("second get", async () => {
     const result2 = await checkByInterceptors(
       ctx,
       [],
@@ -191,11 +193,10 @@ Deno.test("UseInterceptors cache", async () => {
       },
     );
     assertEquals(result2, "cached");
-    console.log(callStack);
     assertEquals(callStack, []);
 
     callStack.length = 0;
-  }
+  });
 });
 
 Deno.test("UseInterceptors intercept", async () => {
@@ -218,26 +219,24 @@ Deno.test("UseInterceptors intercept", async () => {
 
   const test = new TestController();
 
-  {
-    const ctx = testing.createMockContext({
-      path: "/a",
-      method: "GET",
-    });
-    const result = await checkByInterceptors(
-      ctx,
-      [],
-      test.a,
-      {
-        target: test,
-        args: [],
-        methodName: "a",
-        methodType: "GET",
-        fn: test.a,
-      },
-    );
-    assertEquals(result, "intercepted");
-    assertEquals(callStack, [1]);
+  const ctx = testing.createMockContext({
+    path: "/a",
+    method: "GET",
+  });
+  const result = await checkByInterceptors(
+    ctx,
+    [],
+    test.a,
+    {
+      target: test,
+      args: [],
+      methodName: "a",
+      methodType: "GET",
+      fn: test.a,
+    },
+  );
+  assertEquals(result, "intercepted");
+  assertEquals(callStack, [1]);
 
-    callStack.length = 0;
-  }
+  callStack.length = 0;
 });
