@@ -27,7 +27,7 @@ import {
   UploadedFile,
 } from "./oak.ts";
 
-Deno.test("body", async () => {
+Deno.test("body", async (t) => {
   const mockContext = (options: {
     path: string;
     method: string;
@@ -98,7 +98,7 @@ Deno.test("body", async () => {
   const router = new Router();
   await router.add(A);
 
-  {
+  await t.step("get", async () => {
     const ctx = mockContext({
       path: "/a",
       method: "GET",
@@ -116,9 +116,9 @@ Deno.test("body", async () => {
     assertEquals(callStack, [1]);
 
     callStack.length = 0;
-  }
+  });
 
-  {
+  await t.step("post json number", async () => {
     const ctx = mockContext({
       path: "/a",
       method: "POST",
@@ -134,9 +134,9 @@ Deno.test("body", async () => {
 
     assertEquals(callStack, [2]);
     callStack.length = 0;
-  }
+  });
 
-  {
+  await t.step("post normal body", async () => {
     const ctx = mockContext({
       path: "/b",
       method: "POST",
@@ -152,9 +152,9 @@ Deno.test("body", async () => {
 
     assertEquals(callStack, [3]);
     callStack.length = 0;
-  }
+  });
 
-  {
+  await t.step("post error body", async () => {
     const ctx = mockContext({
       path: "/c",
       method: "POST",
@@ -175,7 +175,7 @@ Deno.test("body", async () => {
     assertEquals(callStack, [6]);
 
     callStack.length = 0;
-  }
+  });
 });
 
 Deno.test("Query", async (t) => {
@@ -420,7 +420,7 @@ Deno.test("Query", async (t) => {
   });
 });
 
-Deno.test("Params", async () => {
+Deno.test("Params", async (t) => {
   const callStack: number[] = [];
 
   @Controller("")
@@ -452,7 +452,7 @@ Deno.test("Params", async () => {
   const router = new Router();
   await router.add(A);
 
-  {
+  await t.step("a 1", async () => {
     const ctx = testing.createMockContext({
       path: "/a/1",
       method: "GET",
@@ -464,9 +464,9 @@ Deno.test("Params", async () => {
 
     assertEquals(callStack, [1]);
     callStack.length = 0;
-  }
+  });
 
-  {
+  await t.step("b", async () => {
     const ctx = testing.createMockContext({
       path: "/b",
       method: "GET",
@@ -478,7 +478,7 @@ Deno.test("Params", async () => {
 
     assertEquals(callStack, [2]);
     callStack.length = 0;
-  }
+  });
 });
 
 Deno.test("Req, Res, ControllerName, MethodName", async () => {
