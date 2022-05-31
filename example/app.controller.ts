@@ -1,4 +1,4 @@
-import { Controller, Get } from "../mod.ts";
+import { Controller, Get, Header } from "../mod.ts";
 import { UserService } from "./user/services/user.service.ts";
 
 @Controller("")
@@ -15,6 +15,8 @@ export class AppController {
   @Get("/v2/test", {
     isAbsolute: true,
   })
+  @Header("a", "b")
+  @Header("c", "d")
   test() {
     return "test";
   }

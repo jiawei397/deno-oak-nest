@@ -192,8 +192,6 @@ export function Headers(key?: string) {
   );
 }
 
-export const Header = Headers;
-
 export const Req = createParamDecorator((ctx: Context) => {
   return ctx.request;
 });

@@ -12,6 +12,8 @@ import {
 } from "../deps.ts";
 import { checkByGuard } from "./guard.ts";
 import {
+  Constructor,
+  ControllerMethod,
   NestUseInterceptors,
   RouteItem,
   RouteMap,
@@ -19,6 +21,8 @@ import {
 } from "./interfaces/mod.ts";
 import {
   META_ALIAS_KEY,
+  META_HEADER_KEY,
+  META_HTTP_CODE_KEY,
   META_ISABSOLUTE_KEY,
   META_METHOD_KEY,
   META_PATH_KEY,
@@ -128,16 +132,42 @@ export class Router extends OriginRouter {
   private async transResponseResult(
     context: Context,
     result: any,
-    methodType: string,
+    options: {
+      target: InstanceType<Constructor>;
+      args: any[];
+      methodName: string;
+      methodType: string; // get/post/put/delete
+      fn: ControllerMethod;
+    },
   ) {
     if (context.response.status === 304) {
       context.response.body = undefined;
-      return;
-    }
-    if (methodType === "get" && !this._diabledGetComputeEtag) { // if get method, then deal 304
+    } else if (
+      options.methodType.toLowerCase() === "get" && !this._diabledGetComputeEtag
+    ) { // if get method, then deal 304
       await checkEtag(context, result);
     } else if (context.response.body === undefined) {
       context.response.body = result;
+    }
+
+    // response headers
+    const headers: Record<string, string> = Reflect.getMetadata(
+      META_HEADER_KEY,
+      options.fn,
+    );
+    if (headers) {
+      Object.keys(headers).forEach((key) => {
+        context.response.headers.set(key, headers[key]);
+      });
+    }
+
+    // response http code
+    const code: number = Reflect.getMetadata(
+      META_HTTP_CODE_KEY,
+      options.fn,
+    );
+    if (code) {
+      context.response.status = code;
     }
   }
 
@@ -190,7 +220,13 @@ export class Router extends OriginRouter {
           await this.transResponseResult(
             context,
             context.response.body ?? result,
-            methodType.toLowerCase(),
+            {
+              fn,
+              target: instance,
+              methodType,
+              args,
+              methodName,
+            },
           );
         };
         this[methodType](methodKey, callback);

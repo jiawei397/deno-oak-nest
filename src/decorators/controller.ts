@@ -4,6 +4,8 @@ export const META_METHOD_KEY = Symbol("meta:method");
 export const META_PATH_KEY = Symbol("meta:path");
 export const META_ALIAS_KEY = Symbol("meta:alias");
 export const META_ISABSOLUTE_KEY = Symbol("meta:isAbsolute");
+export const META_HTTP_CODE_KEY = Symbol("meta:http:code");
+export const META_HEADER_KEY = Symbol("meta:header");
 
 export const Controller = (path: string): ClassDecorator => {
   return (target) => {
@@ -52,3 +54,17 @@ export const Put = createMappingDecorator(Methods.PUT);
 export const Head = createMappingDecorator(Methods.HEAD);
 export const Options = createMappingDecorator(Methods.OPTIONS);
 export const Patch = createMappingDecorator(Methods.PATCH);
+
+export function HttpCode(code: number): MethodDecorator {
+  return (_target, _property, descriptor) => {
+    Reflect.defineMetadata(META_HTTP_CODE_KEY, code, descriptor.value);
+  };
+}
+
+export function Header(key: string, val: string): MethodDecorator {
+  return (_target, _property, descriptor) => {
+    const map = Reflect.getMetadata(META_HEADER_KEY, descriptor.value) || {};
+    map[key] = val;
+    Reflect.defineMetadata(META_HEADER_KEY, map, descriptor.value);
+  };
+}
