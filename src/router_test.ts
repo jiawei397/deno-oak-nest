@@ -53,7 +53,7 @@ Deno.test("mapRoute without controller route", async () => {
 
   const map1 = result[0];
   assert(map1);
-  assertEquals(map1.route, "/a");
+  assertEquals(map1.methodPath, "/a");
   assertEquals(map1.methodName, "method1");
   assertEquals(map1.methodType, "get");
   assert(map1.instance instanceof A);
@@ -61,7 +61,7 @@ Deno.test("mapRoute without controller route", async () => {
 
   const map2 = result[1];
   assert(map2);
-  assertEquals(map2.route, "/b");
+  assertEquals(map2.methodPath, "/b");
   assertEquals(map2.methodName, "method2");
   assertEquals(map2.methodType, "post");
   assert(map2.instance instanceof A);
@@ -87,7 +87,7 @@ Deno.test("mapRoute with controller route", async () => {
   result.forEach((item) => {
     assert(item);
     assert(
-      !item.route.startsWith("/user/"),
+      !item.methodPath.startsWith("/user/"),
       'should not start with "/user/", this function not deal with controller route',
     );
   });
@@ -108,7 +108,7 @@ Deno.test("add", async () => {
   const arr = result[0].arr;
   assert(Array.isArray(arr));
   assertEquals(arr.length, 1);
-  assertEquals(arr[0].route, "/a");
+  assertEquals(arr[0].methodPath, "/a");
   assertEquals(arr[0].methodName, "method1");
 
   const result2 = await router.add(A);
