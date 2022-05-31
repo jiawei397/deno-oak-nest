@@ -2,6 +2,8 @@ import { Reflect } from "../../deps.ts";
 
 export const META_METHOD_KEY = Symbol("meta:method");
 export const META_PATH_KEY = Symbol("meta:path");
+export const META_ALIAS_KEY = Symbol("meta:alias");
+export const META_ISABSOLUTE_KEY = Symbol("meta:isAbsolute");
 
 export const Controller = (path: string): ClassDecorator => {
   return (target) => {
@@ -20,10 +22,26 @@ export enum Methods {
 }
 
 const createMappingDecorator = (method: Methods) =>
-  (path: string): MethodDecorator => {
+  (path: string, options?: {
+    alias?: string;
+    isAbsolute?: boolean;
+  }): MethodDecorator => {
     return (_target, _property, descriptor) => {
       Reflect.defineMetadata(META_PATH_KEY, path, descriptor.value);
       Reflect.defineMetadata(META_METHOD_KEY, method, descriptor.value);
+      if (!options) {
+        return;
+      }
+      if (options.alias) {
+        Reflect.defineMetadata(META_ALIAS_KEY, options.alias, descriptor.value);
+      }
+      if (options.isAbsolute) {
+        Reflect.defineMetadata(
+          META_ISABSOLUTE_KEY,
+          options.isAbsolute,
+          descriptor.value,
+        );
+      }
     };
   };
 

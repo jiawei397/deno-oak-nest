@@ -17,7 +17,12 @@ import {
   RouteMap,
   Type,
 } from "./interfaces/mod.ts";
-import { META_METHOD_KEY, META_PATH_KEY } from "./decorators/controller.ts";
+import {
+  META_ALIAS_KEY,
+  META_ISABSOLUTE_KEY,
+  META_METHOD_KEY,
+  META_PATH_KEY,
+} from "./decorators/controller.ts";
 import { Factory } from "./factorys/class.factory.ts";
 import { transferParam } from "./params.ts";
 import { Context } from "../deps.ts";
@@ -42,8 +47,9 @@ export function join(...paths: string[]) {
 export async function mapRoute(Cls: Type): Promise<RouteMap[]> {
   const instance = await Factory(Cls);
   const prototype = Cls.prototype;
-  return Object.getOwnPropertyNames(prototype)
-    .map((item) => {
+  const result: RouteMap[] = [];
+  Object.getOwnPropertyNames(prototype)
+    .forEach((item) => {
       if (item === "constructor") {
         return;
       }
@@ -51,20 +57,25 @@ export async function mapRoute(Cls: Type): Promise<RouteMap[]> {
         return;
       }
       const fn = prototype[item];
-      const route = Reflect.getMetadata(META_PATH_KEY, fn);
-      if (!route) {
+      const methodPath = Reflect.getMetadata(META_PATH_KEY, fn);
+      if (!methodPath) {
         return;
       }
       const methodType = Reflect.getMetadata(META_METHOD_KEY, fn);
-      return {
-        route,
+      const alias = Reflect.getMetadata(META_ALIAS_KEY, fn);
+      const isAbsolute = Reflect.getMetadata(META_ISABSOLUTE_KEY, fn);
+      result.push({
+        methodPath,
+        alias,
         methodType: methodType.toLowerCase(),
         fn,
         instance,
         cls: Cls,
         methodName: item,
-      };
-    }).filter(Boolean) as RouteMap[];
+        isAbsolute,
+      });
+    });
+  return result;
 }
 
 export class Router extends OriginRouter {
@@ -97,12 +108,11 @@ export class Router extends OriginRouter {
       const arr = await mapRoute(Cls);
       const path = Reflect.getMetadata(META_PATH_KEY, Cls);
       const controllerPath = join(path);
-      const item = {
+      this.routerArr.push({
         controllerPath,
         arr,
         cls: Cls,
-      };
-      this.routerArr.push(item);
+      });
     }));
     return this.routerArr;
   }
@@ -135,15 +145,26 @@ export class Router extends OriginRouter {
     const routeStart = Date.now();
     const result = super.routes();
     this.routerArr.forEach(({ controllerPath, arr }) => {
-      const modelPath = join(this.apiPrefix, controllerPath);
+      const contollerPathWithPrefix = join(this.apiPrefix, controllerPath);
       const startTime = Date.now();
       let lastCls;
       arr.forEach((routeMap: RouteMap) => {
-        const { route, methodType, fn, methodName, instance, cls } = routeMap;
+        const {
+          methodPath,
+          alias,
+          methodType,
+          fn,
+          methodName,
+          instance,
+          cls,
+          isAbsolute,
+        } = routeMap;
         lastCls = cls;
-        const methodKey = join(modelPath, route);
+        const methodKey = isAbsolute
+          ? methodPath
+          : join(contollerPathWithPrefix, methodPath);
         const funcStart = Date.now();
-        this[methodType](methodKey, async (context: Context) => {
+        const callback = async (context: Context) => {
           const originStatus = context.response.status; // 404
           const guardResult = await checkByGuard(instance, fn, context);
           if (!guardResult) {
@@ -171,12 +192,18 @@ export class Router extends OriginRouter {
             context.response.body ?? result,
             methodType.toLowerCase(),
           );
-        });
+        };
+        this[methodType](methodKey, callback);
+        if (alias) {
+          this[methodType](alias, callback);
+        }
         const funcEnd = Date.now();
         this.log(
           yellow("[RouterExplorer]"),
           green(
-            `Mapped {${methodKey}, ${methodType.toUpperCase()}} route ${
+            `Mapped {${
+              alias ? (methodKey + ", " + red(alias)) : methodKey
+            }, ${methodType.toUpperCase()}} route ${
               funcEnd -
               funcStart
             }ms`,
@@ -188,7 +215,7 @@ export class Router extends OriginRouter {
       const name = lastCls?.["name"];
       this.log(
         red("[RoutesResolver]"),
-        blue(`${name} {${modelPath}} ${endTime - startTime}ms`),
+        blue(`${name} {${contollerPathWithPrefix}} ${endTime - startTime}ms`),
       );
     });
     this.log(
