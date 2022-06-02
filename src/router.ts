@@ -112,11 +112,13 @@ export class Router extends OriginRouter {
       }
       const arr = await mapRoute(Cls);
       const path = Reflect.getMetadata(META_PATH_KEY, Cls);
+      const aliasOptions = Reflect.getMetadata(META_ALIAS_KEY, Cls);
       const controllerPath = join(path);
       this.routerArr.push({
         controllerPath,
         arr,
         cls: Cls,
+        aliasOptions,
       });
     }));
     return this.routerArr;
@@ -175,86 +177,98 @@ export class Router extends OriginRouter {
   routes() {
     const routeStart = Date.now();
     const result = super.routes();
-    this.routerArr.forEach(({ controllerPath, arr }) => {
-      const contollerPathWithPrefix = join(this.apiPrefix, controllerPath);
-      const startTime = Date.now();
-      let lastCls;
-      arr.forEach((routeMap: RouteMap) => {
-        const {
-          methodPath,
-          aliasOptions,
-          methodType,
-          fn,
-          methodName,
-          instance,
-          cls,
-        } = routeMap;
-        lastCls = cls;
-        const methodKey = aliasOptions?.isAbsolute
-          ? methodPath
-          : join(contollerPathWithPrefix, methodPath);
-        const funcStart = Date.now();
-        const callback = async (context: Context) => {
-          const originStatus = context.response.status; // 404
-          const guardResult = await checkByGuard(instance, fn, context);
-          if (!guardResult) {
-            if (context.response.status === originStatus) {
-              context.response.status = Status.Forbidden;
-              context.response.body = STATUS_TEXT.get(Status.Forbidden);
-            }
-            return;
-          }
-          const args = await transferParam(instance, methodName, context);
-          const result = await checkByInterceptors(
-            context,
-            this.globalInterceptors,
+    this.routerArr.forEach(
+      ({ controllerPath, arr, aliasOptions: controllerAliasOptions }) => {
+        const contollerPathWithPrefix = controllerAliasOptions?.isAbsolute
+          ? controllerPath
+          : join(this.apiPrefix, controllerPath);
+        const controllerAliasPath = controllerAliasOptions?.alias;
+        const startTime = Date.now();
+        let lastCls;
+        arr.forEach((routeMap: RouteMap) => {
+          const {
+            methodPath,
+            aliasOptions,
+            methodType,
             fn,
-            {
-              target: instance,
-              methodName,
-              methodType,
-              args,
+            methodName,
+            instance,
+            cls,
+          } = routeMap;
+          lastCls = cls;
+          const isAbsolute = aliasOptions?.isAbsolute;
+          const alias = aliasOptions?.alias;
+          const originPath = isAbsolute
+            ? methodPath
+            : join(contollerPathWithPrefix, methodPath);
+          const aliasPath = alias ??
+            (controllerAliasPath && !isAbsolute &&
+              join(controllerAliasPath, methodPath));
+          const funcStart = Date.now();
+          const callback = async (context: Context) => {
+            const originStatus = context.response.status; // 404
+            const guardResult = await checkByGuard(instance, fn, context);
+            if (!guardResult) {
+              if (context.response.status === originStatus) {
+                context.response.status = Status.Forbidden;
+                context.response.body = STATUS_TEXT.get(Status.Forbidden);
+              }
+              return;
+            }
+            const args = await transferParam(instance, methodName, context);
+            const result = await checkByInterceptors(
+              context,
+              this.globalInterceptors,
               fn,
-            },
-          );
-          await this.transResponseResult(
-            context,
-            context.response.body ?? result,
-            {
-              fn,
-              target: instance,
-              methodType,
-              args,
-              methodName,
-            },
-          );
-        };
-        this[methodType](methodKey, callback);
-        const alias = aliasOptions?.alias;
-        if (alias) {
-          this[methodType](alias, callback);
-        }
-        const funcEnd = Date.now();
-        this.log(
-          yellow("[RouterExplorer]"),
-          green(
-            `Mapped {${
-              alias ? (methodKey + ", " + red(alias)) : methodKey
-            }, ${methodType.toUpperCase()}} route ${
-              funcEnd -
-              funcStart
-            }ms`,
-          ),
-        );
-      });
+              {
+                target: instance,
+                methodName,
+                methodType,
+                args,
+                fn,
+              },
+            );
+            await this.transResponseResult(
+              context,
+              context.response.body ?? result,
+              {
+                fn,
+                target: instance,
+                methodType,
+                args,
+                methodName,
+              },
+            );
+          };
+          this[methodType](originPath, callback);
 
-      const endTime = Date.now();
-      const name = lastCls?.["name"];
-      this.log(
-        red("[RoutesResolver]"),
-        blue(`${name} {${contollerPathWithPrefix}} ${endTime - startTime}ms`),
-      );
-    });
+          if (aliasPath) {
+            this[methodType](aliasPath, callback);
+          }
+          const funcEnd = Date.now();
+          this.log(
+            yellow("[RouterExplorer]"),
+            green(
+              `Mapped {${
+                aliasPath
+                  ? (originPath + ", " + red(aliasPath))
+                  : (isAbsolute ? red(originPath) : originPath)
+              }, ${methodType.toUpperCase()}} route ${
+                funcEnd -
+                funcStart
+              }ms`,
+            ),
+          );
+        });
+
+        const endTime = Date.now();
+        const name = lastCls?.["name"];
+        this.log(
+          red("[RoutesResolver]"),
+          blue(`${name} {${contollerPathWithPrefix}} ${endTime - startTime}ms`),
+        );
+      },
+    );
     this.log(
       yellow("[Routes application]"),
       green(`successfully started ${Date.now() - routeStart}ms`),

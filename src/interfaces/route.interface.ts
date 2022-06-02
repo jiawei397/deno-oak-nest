@@ -16,4 +16,5 @@ export type RouteItem = {
   controllerPath: string;
   arr: RouteMap[];
   cls: Type;
+  aliasOptions?: AliasOptions;
 };

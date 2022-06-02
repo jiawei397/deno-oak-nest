@@ -26,19 +26,25 @@ import { LoggerService } from "../services/logger.service.ts";
 import { UploadDto } from "../dtos/user.dto.ts";
 
 @UseGuards(AuthGuard, SSOGuard)
-@Controller("/user")
+@Controller("/user", {
+  alias: "/v1/user",
+})
 export class UserController {
   constructor(private readonly loggerService: LoggerService) {
     this.loggerService.info("user");
   }
 
-  @Get("large")
+  @Get("/v2/user/large", {
+    isAbsolute: true,
+  })
   large() {
     return new Array(100000).fill("Hello World").join("\n");
   }
 
   @UseGuards(AuthGuard2, AuthGuard3)
-  @Get("/info")
+  @Get("/info", {
+    alias: "/v2/user/info",
+  })
   info(
     @MethodName() methodName: string,
     @ControllerName() controllerName: string,

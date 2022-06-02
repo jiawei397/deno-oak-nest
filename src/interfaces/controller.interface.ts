@@ -1,4 +1,4 @@
 export type AliasOptions = {
   alias?: string;
-  isAbsolute?: boolean;
+  isAbsolute?: boolean; // path whether add the normal prefix
 };
