@@ -23,7 +23,6 @@ import {
   META_ALIAS_KEY,
   META_HEADER_KEY,
   META_HTTP_CODE_KEY,
-  META_ISABSOLUTE_KEY,
   META_METHOD_KEY,
   META_PATH_KEY,
 } from "./decorators/controller.ts";
@@ -32,6 +31,7 @@ import { transferParam } from "./params.ts";
 import { Context } from "../deps.ts";
 import { checkByInterceptors } from "./interceptor.ts";
 import { checkEtag } from "./utils.ts";
+import { AliasOptions } from "./interfaces/controller.interface.ts";
 
 export function join(...paths: string[]) {
   if (paths.length === 0) {
@@ -66,17 +66,18 @@ export async function mapRoute(Cls: Type): Promise<RouteMap[]> {
         return;
       }
       const methodType = Reflect.getMetadata(META_METHOD_KEY, fn);
-      const alias = Reflect.getMetadata(META_ALIAS_KEY, fn);
-      const isAbsolute = Reflect.getMetadata(META_ISABSOLUTE_KEY, fn);
+      const aliasOptions: AliasOptions = Reflect.getMetadata(
+        META_ALIAS_KEY,
+        fn,
+      );
       result.push({
         methodPath,
-        alias,
+        aliasOptions,
         methodType: methodType.toLowerCase(),
         fn,
         instance,
         cls: Cls,
         methodName: item,
-        isAbsolute,
       });
     });
   return result;
@@ -181,16 +182,15 @@ export class Router extends OriginRouter {
       arr.forEach((routeMap: RouteMap) => {
         const {
           methodPath,
-          alias,
+          aliasOptions,
           methodType,
           fn,
           methodName,
           instance,
           cls,
-          isAbsolute,
         } = routeMap;
         lastCls = cls;
-        const methodKey = isAbsolute
+        const methodKey = aliasOptions?.isAbsolute
           ? methodPath
           : join(contollerPathWithPrefix, methodPath);
         const funcStart = Date.now();
@@ -230,6 +230,7 @@ export class Router extends OriginRouter {
           );
         };
         this[methodType](methodKey, callback);
+        const alias = aliasOptions?.alias;
         if (alias) {
           this[methodType](alias, callback);
         }

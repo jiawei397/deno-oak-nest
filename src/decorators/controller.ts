@@ -1,15 +1,21 @@
 import { Reflect } from "../../deps.ts";
+import { AliasOptions } from "../interfaces/controller.interface.ts";
 
 export const META_METHOD_KEY = Symbol("meta:method");
 export const META_PATH_KEY = Symbol("meta:path");
 export const META_ALIAS_KEY = Symbol("meta:alias");
-export const META_ISABSOLUTE_KEY = Symbol("meta:isAbsolute");
 export const META_HTTP_CODE_KEY = Symbol("meta:http:code");
 export const META_HEADER_KEY = Symbol("meta:header");
 
-export const Controller = (path: string): ClassDecorator => {
+export const Controller = (
+  path: string,
+  options?: AliasOptions,
+): ClassDecorator => {
   return (target) => {
     Reflect.defineMetadata(META_PATH_KEY, path, target);
+    if (options) {
+      Reflect.defineMetadata(META_ALIAS_KEY, options, target);
+    }
   };
 };
 
@@ -24,26 +30,14 @@ export enum Methods {
 }
 
 const createMappingDecorator = (method: Methods) =>
-  (path: string, options?: {
-    alias?: string;
-    isAbsolute?: boolean;
-  }): MethodDecorator => {
+  (path: string, options?: AliasOptions): MethodDecorator => {
     return (_target, _property, descriptor) => {
       Reflect.defineMetadata(META_PATH_KEY, path, descriptor.value);
       Reflect.defineMetadata(META_METHOD_KEY, method, descriptor.value);
       if (!options) {
         return;
       }
-      if (options.alias) {
-        Reflect.defineMetadata(META_ALIAS_KEY, options.alias, descriptor.value);
-      }
-      if (options.isAbsolute) {
-        Reflect.defineMetadata(
-          META_ISABSOLUTE_KEY,
-          options.isAbsolute,
-          descriptor.value,
-        );
-      }
+      Reflect.defineMetadata(META_ALIAS_KEY, options, descriptor.value);
     };
   };
 
