@@ -9,8 +9,16 @@ export class User2Controller {
     private readonly userService: UserService,
   ) {
   }
-  @Get("/user2")
+  @Get("/info")
   info(context: Context) {
     context.response.body = this.userService.info();
+  }
+
+  @Get("/info2", {
+    // alias: "/v1/info2",
+    alias: "${controller}/info2",
+  })
+  info2(context: Context) {
+    context.response.body = "info2";
   }
 }

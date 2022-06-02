@@ -56,13 +56,22 @@ export function replaceSuffix(str: string, suffix: string) {
   return join(str.replace(/\$\{suffix\}/, suffix));
 }
 
+export function replaceController(str: string, suffix: string) {
+  return join(str.replace(/\$\{controller\}/, suffix));
+}
+
 export function replacePrefixAndSuffix(
   str: string,
   prefix: string,
   suffix: string,
+  controller?: string,
 ) {
-  const temp = replacePrefix(str, prefix);
-  return replaceSuffix(temp, suffix);
+  let temp = replacePrefix(str, prefix);
+  if (controller) {
+    temp = replaceController(temp, controller);
+  }
+  temp = replaceSuffix(temp, suffix);
+  return temp;
 }
 
 export async function mapRoute(Cls: Type): Promise<RouteMap[]> {
@@ -274,6 +283,7 @@ export class Router extends OriginRouter {
               aliasPath,
               this.apiPrefix,
               methodPath,
+              controllerPath,
             );
             this[methodType](aliasPath, callback);
           }

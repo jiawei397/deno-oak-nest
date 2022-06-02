@@ -113,10 +113,7 @@ const port = Number(Deno.env.get("PORT") || 1000);
 
 app.addEventListener("listen", ({ hostname, port, secure }) => {
   console.log(
-    `Listening on: ${secure ? "https://" : "http://"}${
-      hostname ??
-        "localhost"
-    }:${port}`,
+    `Listening on: ${secure ? "https://" : "http://"}${"localhost"}:${port}`,
   );
   // console.log(Deno.memoryUsage());
 });

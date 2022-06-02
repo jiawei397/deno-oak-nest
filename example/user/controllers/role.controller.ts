@@ -22,7 +22,9 @@ import { ErrorsInterceptor } from "../../interceptor/errors.interceptor.ts";
 import { CacheInterceptor } from "../../../modules/cache/mod.ts";
 import { LoggerService } from "../services/logger.service.ts";
 
-@Controller("/role")
+@Controller("/role", {
+  alias: "/v1/role",
+})
 @UseInterceptors(CacheInterceptor)
 export class RoleController {
   constructor(

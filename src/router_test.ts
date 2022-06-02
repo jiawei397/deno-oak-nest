@@ -51,6 +51,16 @@ Deno.test("replacePrefix", async (t) => {
     assertEquals(replacePrefix(str, "/api/"), str);
   });
 
+  await t.step("replace empty prefix", () => {
+    const str = "${prefix}/v1/user";
+    assertEquals(replacePrefix(str, ""), "/v1/user");
+  });
+
+  await t.step("replace  prefix /", () => {
+    const str = "${prefix}/v1/user";
+    assertEquals(replacePrefix(str, "/"), "/v1/user");
+  });
+
   await t.step("replace prefix", () => {
     const str = "${prefix}/v1/user";
     assertEquals(replacePrefix(str, "/api/"), "/api/v1/user");
@@ -144,6 +154,14 @@ Deno.test("replacePrefixAndSuffix", async (t) => {
     const str = "${prefix}/v1/user/${suffix}";
     assertEquals(
       replacePrefixAndSuffix(str, "/api/", "/info/"),
+      "/api/v1/user/info",
+    );
+  });
+
+  await t.step("replace prefix suffix and controller", () => {
+    const str = "${prefix}/v1/${controller}/${suffix}";
+    assertEquals(
+      replacePrefixAndSuffix(str, "/api/", "/info/", "user"),
       "/api/v1/user/info",
     );
   });

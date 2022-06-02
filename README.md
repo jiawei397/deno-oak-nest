@@ -450,7 +450,10 @@ export class AsyncModule {
 And the `AsyncService` like this:
 
 ```ts
-import { Inject, Injectable } from "https://deno.land/x/oak_nest@v1.10.1/mod.ts";
+import {
+  Inject,
+  Injectable,
+} from "https://deno.land/x/oak_nest@v1.10.1/mod.ts";
 import { ASYNC_KEY } from "./async.constant.ts";
 
 @Injectable()
@@ -493,6 +496,134 @@ export class AppModule {}
 You can also see the `RedisModule` example
 [this way](https://deno.land/x/oak_nest_redis_module) or use the modules such as
 `cache` and `scheduler` in the `modules` dir.
+
+## use alias
+
+If you want to manage your API with version, then you can use the alias.
+
+### Controller alias
+
+#### no prefix
+
+Here is a controller file named `user.controller.ts`:
+
+```typescript
+@Controller("user", {
+  alias: "/v1/user/",
+})
+export class UserController {
+  @Get("/info")
+  info(context: Context) {
+    context.response.body = "info";
+  }
+}
+```
+
+Then you will have both API such as `/user/info` and `/v1/user/info`.
+
+#### has global prefix
+
+If you has setted global API prefix by this:
+
+```typescript
+const app = await NestFactory.create(AppModule);
+app.setGlobalPrefix("/api");
+```
+
+Then you API is `/api/user/info` and `/v1/user/info`.
+
+If you want your alias with prefix such as `/api/v1/user/info`, you can set
+alias with template `${prefix}/`:
+
+```typescript
+@Controller("user", {
+  alias: "${prefix}/v1/user/",
+})
+```
+
+Similarly, you can set suffix like this:
+
+```typescript
+@Controller("user", {
+  alias: "/v1/${suffix}",
+})
+```
+
+Of course, you can set it at the same time:
+
+```typescript
+@Controller("user", {
+  alias: "${prefix}/v1/${suffix}",
+})
+```
+
+If you want your API not start with global prefix,then use the options
+`isAbsolute`:
+
+```typescript
+@Controller("/v1/user", {
+  isAbsolute: true,
+})
+```
+
+### method alias
+
+```typescript
+@Controller("/user")
+export class UserController {
+  @Get("/info", {
+    alias: "/v1/user/info",
+  })
+  info() {}
+}
+```
+
+Then you will have both API `/user/info` and `/v1/user/info`.
+
+#### template
+
+The template `${prefix}` and `${suffix}` also work like above, and add
+`${controller}`:
+
+```typescript
+@Controller("/user")
+export class UserController {
+  @Get("/info", {
+    alias: "${prefix}/v3/${controller}/${suffix}",
+  })
+  info() {}
+}
+```
+
+#### isAbsolute
+
+`isAbsolute` also work to set a Special API such as:
+
+```typescript
+@Controller("/user")
+export class UserController {
+  @Get("/v2/user/info", {
+    isAbsolute: true,
+  })
+  info() {}
+}
+```
+
+Then get an API `/v2/user/info`.
+
+You can also use template as same:
+
+```typescript
+@Controller("/user")
+export class UserController {
+  @Get("${prefix}/v2/${controller}/info", {
+    isAbsolute: true,
+  })
+  info() {}
+}
+```
+
+But if you set global prefix `/api`, this will get `/api/v2/user/info`.
 
 ## unit
 
