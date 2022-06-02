@@ -48,6 +48,14 @@ export function join(...paths: string[]) {
   return last;
 }
 
+export function replacePrefix(str: string, prefix: string) {
+  return join(str.replace(/\$\{prefix\}/, prefix));
+}
+
+export function replaceSuffix(str: string, suffix: string) {
+  return join(str.replace(/\$\{suffix\}/, suffix));
+}
+
 export async function mapRoute(Cls: Type): Promise<RouteMap[]> {
   const instance = await Factory(Cls);
   const prototype = Cls.prototype;
@@ -179,9 +187,13 @@ export class Router extends OriginRouter {
     const result = super.routes();
     this.routerArr.forEach(
       ({ controllerPath, arr, aliasOptions: controllerAliasOptions }) => {
-        const contollerPathWithPrefix = controllerAliasOptions?.isAbsolute
+        let contollerPathWithPrefix = controllerAliasOptions?.isAbsolute
           ? controllerPath
           : join(this.apiPrefix, controllerPath);
+        contollerPathWithPrefix = replacePrefix(
+          contollerPathWithPrefix,
+          this.apiPrefix,
+        );
         const controllerAliasPath = controllerAliasOptions?.alias;
         const startTime = Date.now();
         let lastCls;
@@ -199,9 +211,9 @@ export class Router extends OriginRouter {
           const isAbsolute = aliasOptions?.isAbsolute;
           const alias = aliasOptions?.alias;
           const originPath = isAbsolute
-            ? methodPath
+            ? replacePrefix(methodPath, this.apiPrefix)
             : join(contollerPathWithPrefix, methodPath);
-          const aliasPath = alias ??
+          let aliasPath = alias ??
             (controllerAliasPath && !isAbsolute &&
               join(controllerAliasPath, methodPath));
           const funcStart = Date.now();
@@ -243,6 +255,8 @@ export class Router extends OriginRouter {
           this[methodType](originPath, callback);
 
           if (aliasPath) {
+            aliasPath = replacePrefix(aliasPath, this.apiPrefix);
+            aliasPath = replaceSuffix(aliasPath, methodPath);
             this[methodType](aliasPath, callback);
           }
           const funcEnd = Date.now();

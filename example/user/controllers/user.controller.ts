@@ -27,14 +27,14 @@ import { UploadDto } from "../dtos/user.dto.ts";
 
 @UseGuards(AuthGuard, SSOGuard)
 @Controller("/user", {
-  alias: "/v1/user",
+  alias: "${prefix}/v1/user",
 })
 export class UserController {
   constructor(private readonly loggerService: LoggerService) {
     this.loggerService.info("user");
   }
 
-  @Get("/v2/user/large", {
+  @Get("/v2/${prefix}/user/large", {
     isAbsolute: true,
   })
   large() {
@@ -58,7 +58,9 @@ export class UserController {
     });
   }
 
-  @Get("/info2")
+  @Get("/info2", {
+    alias: "${prefix}/v3/user/${suffix}",
+  })
   @UseGuards(AuthGuard2, AuthGuard3)
   info2(@Res() res: Response, @Query() params: any) {
     res.body = mockjs.mock({
