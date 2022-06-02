@@ -1,4 +1,26 @@
-# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.9.2...v) (2022-05-25)
+# [](https://github.com/jiawei397/deno-oak-nest/compare/v1.10.1...v) (2022-06-02)
+
+
+
+## [1.10.1](https://github.com/jiawei397/deno-oak-nest/compare/v1.10.0...v1.10.1) (2022-05-31)
+
+
+### Features
+
+* **decorator:** add Header and HttpCode ([dee15cf](https://github.com/jiawei397/deno-oak-nest/commit/dee15cf3f0fc9911c9c8734d7f8ae25a7588d55a))
+
+
+
+# [1.10.0](https://github.com/jiawei397/deno-oak-nest/compare/v1.9.3...v1.10.0) (2022-05-31)
+
+
+### Features
+
+* **router:** add alias method path ([b27c20f](https://github.com/jiawei397/deno-oak-nest/commit/b27c20fa3d8b6bb85d5ba148c401343aa5d95681))
+
+
+
+## [1.9.3](https://github.com/jiawei397/deno-oak-nest/compare/v1.9.2...v1.9.3) (2022-05-25)
 
 
 ### Bug Fixes
