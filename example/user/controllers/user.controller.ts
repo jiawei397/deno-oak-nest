@@ -27,7 +27,7 @@ import { UploadDto } from "../dtos/user.dto.ts";
 
 @UseGuards(AuthGuard, SSOGuard)
 @Controller("/user", {
-  alias: "${prefix}/v1/user",
+  alias: "${prefix}/v1/${suffix}",
 })
 export class UserController {
   constructor(private readonly loggerService: LoggerService) {

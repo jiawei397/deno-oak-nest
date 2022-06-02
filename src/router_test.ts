@@ -10,6 +10,7 @@ import {
   join,
   mapRoute,
   replacePrefix,
+  replacePrefixAndSuffix,
   replaceSuffix,
   Router,
 } from "./router.ts";
@@ -105,6 +106,51 @@ Deno.test("replaceSuffix", async (t) => {
   await t.step("replace suffix not ok", () => {
     const str = "${suffix2}/v1/user";
     assertEquals(replaceSuffix(str, "api/"), "/" + str);
+  });
+});
+
+Deno.test("replacePrefixAndSuffix", async (t) => {
+  await t.step("no replace", () => {
+    const str = "/v1/user";
+    assertEquals(replacePrefixAndSuffix(str, "/api/", "info"), str);
+  });
+
+  await t.step("replace suffix", () => {
+    const str = "${suffix}/v1/user";
+    assertEquals(replacePrefixAndSuffix(str, "/api/", "info"), "/info/v1/user");
+  });
+
+  await t.step("replace prefix", () => {
+    const str = "${prefix}/v1/user";
+    assertEquals(replacePrefixAndSuffix(str, "api/", "info"), "/api/v1/user");
+  });
+
+  await t.step("replace prefix and suffix", () => {
+    const str = "${prefix}/v1/user/${suffix}";
+    assertEquals(
+      replacePrefixAndSuffix(str, "api", "info"),
+      "/api/v1/user/info",
+    );
+  });
+  await t.step("replace prefix and suffix2", () => {
+    const str = "${prefix}/v1/user/${suffix}";
+    assertEquals(
+      replacePrefixAndSuffix(str, "/api", "/info"),
+      "/api/v1/user/info",
+    );
+  });
+
+  await t.step("replace prefix and suffix3", () => {
+    const str = "${prefix}/v1/user/${suffix}";
+    assertEquals(
+      replacePrefixAndSuffix(str, "/api/", "/info/"),
+      "/api/v1/user/info",
+    );
+  });
+
+  await t.step("replace not ok", () => {
+    const str = "${suffix2}/v1/user";
+    assertEquals(replacePrefixAndSuffix(str, "/api/", "/info/"), "/" + str);
   });
 });
 

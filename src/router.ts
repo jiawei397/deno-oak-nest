@@ -56,6 +56,15 @@ export function replaceSuffix(str: string, suffix: string) {
   return join(str.replace(/\$\{suffix\}/, suffix));
 }
 
+export function replacePrefixAndSuffix(
+  str: string,
+  prefix: string,
+  suffix: string,
+) {
+  const temp = replacePrefix(str, prefix);
+  return replaceSuffix(temp, suffix);
+}
+
 export async function mapRoute(Cls: Type): Promise<RouteMap[]> {
   const instance = await Factory(Cls);
   const prototype = Cls.prototype;
@@ -190,11 +199,17 @@ export class Router extends OriginRouter {
         let contollerPathWithPrefix = controllerAliasOptions?.isAbsolute
           ? controllerPath
           : join(this.apiPrefix, controllerPath);
-        contollerPathWithPrefix = replacePrefix(
+        contollerPathWithPrefix = replacePrefixAndSuffix(
           contollerPathWithPrefix,
           this.apiPrefix,
+          controllerPath,
         );
-        const controllerAliasPath = controllerAliasOptions?.alias;
+        const controllerAliasPath = controllerAliasOptions?.alias &&
+          replacePrefixAndSuffix(
+            controllerAliasOptions.alias,
+            this.apiPrefix,
+            controllerPath,
+          );
         const startTime = Date.now();
         let lastCls;
         arr.forEach((routeMap: RouteMap) => {
@@ -255,8 +270,11 @@ export class Router extends OriginRouter {
           this[methodType](originPath, callback);
 
           if (aliasPath) {
-            aliasPath = replacePrefix(aliasPath, this.apiPrefix);
-            aliasPath = replaceSuffix(aliasPath, methodPath);
+            aliasPath = replacePrefixAndSuffix(
+              aliasPath,
+              this.apiPrefix,
+              methodPath,
+            );
             this[methodType](aliasPath, callback);
           }
           const funcEnd = Date.now();
