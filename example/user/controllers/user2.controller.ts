@@ -1,8 +1,8 @@
 import { Context, Controller, Get } from "../../../mod.ts";
 import { UserService } from "../services/user.service.ts";
 
-@Controller("/v1/user", {
-  isAbsolute: true,
+@Controller("v1/user", {
+  // isAbsolute: true,
 })
 export class User2Controller {
   constructor(

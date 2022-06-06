@@ -6,7 +6,9 @@ import { LoggingInterceptor } from "./interceptor/log.interceptor.ts";
 const __dirname = dirname(fromFileUrl(import.meta.url));
 
 const app = await NestFactory.create(AppModule);
-app.setGlobalPrefix("/api");
+app.setGlobalPrefix("/api", {
+  exclude: ["^/?v\\d{1,3}/"],
+});
 
 app.use((context, next) => {
   (context.request as any).locals = {

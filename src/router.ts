@@ -109,16 +109,27 @@ export async function mapRoute(Cls: Type): Promise<RouteMap[]> {
   return result;
 }
 
+type ApiPrefixOptions = {
+  /**
+   * The controller path will check by exclude regExp
+   * @example
+   * ["^/?v\\d{1,3}/", /^\/?v\d{1,3}\//]
+   */
+  exclude?: (string | RegExp)[];
+};
+
 export class Router extends OriginRouter {
   [x: string]: any
   apiPrefix = "";
+  apiPrefixOptions: ApiPrefixOptions = {};
   private _diabledGetComputeEtag = false;
   private routerArr: RouteItem[] = [];
 
   private globalInterceptors: NestUseInterceptors = [];
 
-  setGlobalPrefix(apiPrefix: string) {
+  setGlobalPrefix(apiPrefix: string, options: ApiPrefixOptions = {}) {
     this.apiPrefix = apiPrefix;
+    this.apiPrefixOptions = options;
   }
 
   /** diable 304 get */
@@ -203,9 +214,18 @@ export class Router extends OriginRouter {
   routes() {
     const routeStart = Date.now();
     const result = super.routes();
+    const apiPrefixReg = this.apiPrefixOptions?.exclude;
+
     this.routerArr.forEach(
       ({ controllerPath, arr, aliasOptions: controllerAliasOptions }) => {
-        let contollerPathWithPrefix = controllerAliasOptions?.isAbsolute
+        let isAbsolute = controllerAliasOptions?.isAbsolute;
+        if (!isAbsolute && apiPrefixReg) {
+          isAbsolute = apiPrefixReg.some((str) => {
+            const reg = typeof str === "string" ? new RegExp(str) : str;
+            return reg.test(controllerPath);
+          });
+        }
+        let contollerPathWithPrefix = isAbsolute
           ? controllerPath
           : join(this.apiPrefix, controllerPath);
         contollerPathWithPrefix = replacePrefixAndSuffix(
