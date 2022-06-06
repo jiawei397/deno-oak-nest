@@ -56,21 +56,26 @@ export async function validateParams(Cls: Constructor, value: object) {
   }
 }
 
-export const Body = createParamDecorator(
-  async (ctx: Context, target: any, methodName: string, index: number) => {
-    const result = ctx.request.body(); // content type automatically detected
-    if (result.type === "json") {
-      const value = await result.value; // an object of parsed JSON
-      const providers = Reflect.getMetadata( // get the params providers
-        "design:paramtypes",
-        target,
-        methodName,
-      );
-      await validateParams(providers?.[index], value);
-      return value;
-    }
-  },
-);
+export function Body(key?: string) {
+  return createParamDecoratorWithLowLevel(
+    async (ctx: Context, target: any, methodName: string, index: number) => {
+      const result = ctx.request.body(); // content type automatically detected
+      if (result.type === "json") {
+        const value = await result.value; // an object of parsed JSON
+        const providers = Reflect.getMetadata( // get the params providers
+          "design:paramtypes",
+          target,
+          methodName,
+        );
+        await validateParams(providers?.[index], value);
+        if (key) {
+          return value?.[key];
+        }
+        return value;
+      }
+    },
+  );
+}
 
 function parseNumOrBool(
   val: string | null | undefined,

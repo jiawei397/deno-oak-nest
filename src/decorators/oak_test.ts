@@ -83,9 +83,10 @@ Deno.test("body", async (t) => {
     }
 
     @Post("b")
-    normal(@Body() body: Dto) {
+    normal(@Body() body: Dto, @Body("name") name: string) {
       callStack.push(3);
       assertEquals(body, normalBody);
+      assertEquals(name, normalBody.name);
     }
 
     @Post("c")
