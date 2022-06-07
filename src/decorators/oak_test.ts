@@ -16,6 +16,7 @@ import {
   Body,
   ControllerName,
   Cookies,
+  getTransNumOrBoolOrArray,
   Headers,
   MethodName,
   Params,
@@ -26,6 +27,21 @@ import {
   transAndValidateByCls,
   UploadedFile,
 } from "./oak.ts";
+
+Deno.test("getTransNumOrBoolOrArray", () => {
+  assertEquals(getTransNumOrBoolOrArray(Number, "1"), 1);
+  assertEquals(getTransNumOrBoolOrArray(Boolean, "true"), true);
+  assertEquals(getTransNumOrBoolOrArray(Boolean, "false"), false);
+  assertEquals(getTransNumOrBoolOrArray(Boolean, "aa"), false);
+  assertEquals(getTransNumOrBoolOrArray(Object, "aa"), "aa");
+  assertEquals(getTransNumOrBoolOrArray(Array, "id, name"), ["id", "name"]);
+  assertEquals(getTransNumOrBoolOrArray(Array, "1, 2", "number"), [1, 2]);
+  assertEquals(getTransNumOrBoolOrArray(Array, "1,2", "number"), [1, 2]);
+  assertEquals(getTransNumOrBoolOrArray(Array, "true, false", "boolean"), [
+    true,
+    false,
+  ]);
+});
 
 Deno.test("body", async (t) => {
   const mockContext = (options: {

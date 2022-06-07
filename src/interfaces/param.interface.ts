@@ -16,3 +16,5 @@ export interface FormDataOptions extends FormDataReadOptions {
 export type FormDataFormattedBody<T = Record<string, string>> = FormDataBody & {
   fields: T;
 };
+
+export type ArrayItemType = "boolean" | "number" | "string";

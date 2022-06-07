@@ -23,7 +23,7 @@ import { AuthGuard3, SSOGuard } from "../../guards/auth3.guard.ts";
 import { RoleAction, Roles } from "../../decorators/roles.ts";
 import { LogTime } from "../../decorators/time.ts";
 import { LoggerService } from "../services/logger.service.ts";
-import { UploadDto } from "../dtos/user.dto.ts";
+import { QueryUserInfoDto, UploadDto } from "../dtos/user.dto.ts";
 
 @UseGuards(AuthGuard, SSOGuard)
 @Controller("/user", {
@@ -62,7 +62,7 @@ export class UserController {
     alias: "${prefix}/v3/user/${suffix}",
   })
   @UseGuards(AuthGuard2, AuthGuard3)
-  info2(@Res() res: Response, @Query() params: any) {
+  info2(@Res() res: Response, @Query() params: QueryUserInfoDto) {
     res.body = mockjs.mock({
       name: "@name",
       "age|1-100": 50,

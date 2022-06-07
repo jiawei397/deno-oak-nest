@@ -14,16 +14,21 @@ import {
 import { parseSearch } from "../utils.ts";
 import { Constructor } from "../interfaces/type.interface.ts";
 import {
+  ArrayItemType,
   FormDataFormattedBody,
   FormDataOptions,
 } from "../interfaces/param.interface.ts";
 
 const typePreKey = "oaktype:";
 
-export function Property(): PropertyDecorator {
+export function Property(arrayItemType?: ArrayItemType): PropertyDecorator {
   return (target: any, propertyKey: any) => {
-    const type = Reflect.getMetadata("design:type", target, propertyKey);
-    Reflect.defineMetadata(typePreKey + propertyKey, type, target);
+    const designType = Reflect.getMetadata("design:type", target, propertyKey);
+    const keyArr = [typePreKey, propertyKey];
+    if (arrayItemType) {
+      keyArr.push(arrayItemType);
+    }
+    Reflect.defineMetadata(keyArr.join("@"), designType, target);
   };
 }
 
@@ -91,7 +96,7 @@ function parseNumOrBool(
     );
     if (providers?.[index]) {
       // cannot deal Array here, because cannot get the real type of every item.
-      return getTransNumOrBool(providers[index], val);
+      return getTransNumOrBoolOrArray(providers[index], val);
     }
   }
   return val;
@@ -115,19 +120,39 @@ function transAndValidateParams(
   return transAndValidateByCls(cls, map);
 }
 
-export function getTransNumOrBool(type: Constructor, val: string) {
+export function getTransNumOrBoolOrArray(
+  type: Constructor,
+  val: string,
+  arrayItemType?: ArrayItemType,
+): boolean | number | string | (boolean | number | string)[] {
   if (type === Boolean) {
     return val === "true";
   }
   if (type === Number) {
     return Number(val);
   }
+  if (type === Array) {
+    return val.split(",").map((str) => {
+      const result = str.trim();
+      if (result && arrayItemType) {
+        if (arrayItemType === "number") {
+          return getTransNumOrBoolOrArray(Number, result) as number;
+        } else if (arrayItemType === "boolean") {
+          return getTransNumOrBoolOrArray(Boolean, result) as boolean;
+        }
+      }
+      return result;
+    });
+  }
   return val;
 }
 
 export async function transAndValidateByCls(
   cls: Constructor,
-  map: Record<string, string | number | boolean>,
+  map: Record<
+    string,
+    string | number | boolean | (string | number | boolean)[]
+  >,
 ) {
   const keys = Reflect.getMetadataKeys(cls.prototype);
   keys.forEach((key) => {
@@ -135,13 +160,15 @@ export async function transAndValidateByCls(
       return;
     }
     const type = Reflect.getMetadata(key, cls.prototype);
-    const realKey = key.replace(typePreKey, "");
+    const arr = key.split("@");
+    const realKey = arr.at(1);
     if (map[realKey] === undefined) {
       return;
     }
-    map[realKey] = getTransNumOrBool(
+    map[realKey] = getTransNumOrBoolOrArray(
       type,
       map[realKey] as string,
+      arr.at(2),
     );
   });
   await validateParams(cls, map);
