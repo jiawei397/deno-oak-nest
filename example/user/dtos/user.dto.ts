@@ -1,4 +1,3 @@
-import { getFromContainer } from "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts";
 import { Property } from "../../../mod.ts";
 import { IsArray, IsNumber, IsString, Max } from "../../deps.ts";
 
