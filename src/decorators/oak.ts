@@ -296,6 +296,8 @@ export function UploadedFile(options: FormDataOptions = {}) {
   );
 }
 
+export const FormData = UploadedFile;
+
 export function Form() {
   return createParamDecoratorWithLowLevel(
     async (ctx: Context, target: any, methodName: string, index: number) => {
