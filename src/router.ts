@@ -74,8 +74,11 @@ export function replacePrefixAndSuffix(
   return temp;
 }
 
-export async function mapRoute(Cls: Type): Promise<RouteMap[]> {
-  const instance = await Factory(Cls);
+export async function mapRoute(
+  Cls: Type,
+  cache?: Map<any, any>,
+): Promise<RouteMap[]> {
+  const instance = await Factory(Cls, undefined, cache);
   const prototype = Cls.prototype;
   const result: RouteMap[] = [];
   Object.getOwnPropertyNames(prototype)
@@ -127,6 +130,8 @@ export class Router extends OriginRouter {
 
   private globalInterceptors: NestUseInterceptors = [];
 
+  defaultCache: Map<any, any> | undefined;
+
   setGlobalPrefix(apiPrefix: string, options: ApiPrefixOptions = {}) {
     this.apiPrefix = apiPrefix;
     this.apiPrefixOptions = options;
@@ -147,7 +152,7 @@ export class Router extends OriginRouter {
       if (find) {
         return;
       }
-      const arr = await mapRoute(Cls);
+      const arr = await mapRoute(Cls, this.defaultCache);
       const path = Reflect.getMetadata(META_PATH_KEY, Cls);
       const aliasOptions = Reflect.getMetadata(META_ALIAS_KEY, Cls);
       const controllerPath = join(path);

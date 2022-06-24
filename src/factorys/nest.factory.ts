@@ -154,6 +154,7 @@ export class NestFactory {
     await initProviders(registeredProviders, cache);
 
     if (controllers.length) {
+      router.defaultCache = cache;
       await router.add(...controllers);
     }
 
