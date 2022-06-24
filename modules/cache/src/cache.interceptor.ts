@@ -16,7 +16,7 @@ import {
   META_CACHE_TTL_KEY,
   optionKey,
 } from "./cache.constant.ts";
-import {
+import type {
   CacheModuleOptions,
   CachePolicy,
   CacheStore,
