@@ -4,7 +4,6 @@ import {
   Controller,
   ControllerName,
   Delete,
-  FormDataFormattedBody,
   Get,
   Ip,
   MethodName,
@@ -15,7 +14,7 @@ import {
   UploadedFile,
   UseGuards,
 } from "../../../mod.ts";
-import type { Context } from "../../../mod.ts";
+import type { Context, FormDataFormattedBody } from "../../../mod.ts";
 import { BadRequestException, mockjs } from "../../deps.ts";
 import { AuthGuard } from "../../guards/auth.guard.ts";
 import { AuthGuard2 } from "../../guards/auth2.guard.ts";
