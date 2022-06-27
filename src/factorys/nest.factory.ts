@@ -9,7 +9,6 @@ import {
   Reflect,
   resolve,
   send,
-  Status,
   yellow,
 } from "../../deps.ts";
 import { getModuleMetadata, isModule } from "../decorators/module.ts";
@@ -20,7 +19,6 @@ import {
   Scope,
   StaticOptions,
   Type,
-  ViewOptions,
 } from "../interfaces/mod.ts";
 import { join, Router } from "../router.ts";
 import { globalFactoryCaches, initProvider } from "./class.factory.ts";
@@ -35,7 +33,6 @@ export type ApplicationEx = Application & {
   useGlobalInterceptors: typeof Router.prototype.useGlobalInterceptors;
   disableGetComputeEtag: typeof Router.prototype.disableGetComputeEtag;
   useStaticAssets: typeof NestFactory.useStaticAssets;
-  setView: typeof NestFactory.setView;
   router: Router;
 };
 
@@ -129,7 +126,6 @@ const defaultGzipOptions: GzipOptions = {
 };
 
 export class NestFactory {
-  private static viewOptions?: ViewOptions;
   private static staticOptions?: StaticOptions;
 
   private static isViewStarted: boolean;
@@ -168,17 +164,12 @@ export class NestFactory {
     };
     app.useGlobalInterceptors = router.useGlobalInterceptors.bind(router);
     app.useStaticAssets = this.useStaticAssets.bind(this);
-    app.setView = this.setView.bind(this);
     app.disableGetComputeEtag = router.disableGetComputeEtag.bind(router);
     app.router = router;
 
     this.app = app;
 
     return app;
-  }
-
-  static setView(viewOptions: ViewOptions) {
-    this.viewOptions = viewOptions;
   }
 
   private static checkWithPrefix(prefix: string, pathname: string) {
@@ -232,13 +223,18 @@ export class NestFactory {
     }
     const pathname = context.request.url.pathname;
     const formattedPath = pathname.replace(prefixWithoutSlash, "");
-    const sendFile = () =>
-      send(context, formattedPath, {
-        ...otherOptions,
-        index,
-        root,
-        gzip: useOriginGzip || false,
-      });
+    const sendFile = async () => {
+      try {
+        await send(context, formattedPath, {
+          ...otherOptions,
+          index,
+          root,
+          gzip: useOriginGzip || false,
+        });
+      } catch {
+        context.response.status = 404;
+      }
+    };
     if (useOriginGzip) {
       return sendFile();
     }
@@ -269,7 +265,7 @@ export class NestFactory {
       formattedPath,
     );
     const gzipPath = realFilePath + ".gz";
-    const fileContent = await Deno.readFile(gzipPath).catch(() => {});
+    const fileContent = await Deno.readFile(gzipPath).catch(() => null);
     if (fileContent) {
       context.response.body = fileContent;
     } else {
@@ -317,11 +313,9 @@ export class NestFactory {
    * But if there is index.html in the static assets, it will be served first before the view.
    */
   private static startView() {
-    const viewOptions = this.viewOptions;
-    if (this.isViewStarted || (!viewOptions && !this.staticOptions)) {
+    if (!this.staticOptions) {
       return;
     }
-    this.isViewStarted = true;
     this.app.use(async (context, next) => {
       if (context.request.method !== "GET") {
         return next();
@@ -330,60 +324,7 @@ export class NestFactory {
       if (context.response.status !== 404) {
         return;
       }
-      const pathname = context.request.url.pathname;
-      if (
-        this.staticOptions?.prefix &&
-        this.checkWithPrefix(this.staticOptions.prefix, pathname) // static
-      ) {
-        return this.serveStaticAssets(context);
-      }
-      if (
-        viewOptions &&
-        (pathname.endsWith(viewOptions.extension) ||
-          (viewOptions.prefix &&
-            this.checkWithPrefix(viewOptions.prefix, pathname)))
-      ) {
-        return this.serveViews(context);
-      }
-
-      // first if static, then view
-      try {
-        if (this.staticOptions) {
-          return await this.serveStaticAssets(context);
-        } else {
-          return this.serveViews(context);
-        }
-      } catch (e) {
-        if (e.status === Status.NotFound) {
-          return this.serveViews(context);
-        } else {
-          throw e; // this error caused by static assets should be handled
-        }
-      }
+      await this.serveStaticAssets(context);
     });
-  }
-
-  private static async serveViews(context: Context) {
-    const viewOptions = this.viewOptions;
-    if (!viewOptions) {
-      return;
-    }
-    const pathname = context.request.url.pathname;
-    const extension = extname(pathname);
-    if (extension && extension.substring(1) !== viewOptions.extension) { // not allow filename includes .
-      return;
-    }
-    let name = pathname.substring(1);
-    if (viewOptions.prefix) {
-      name = pathname.replace(join(viewOptions.prefix), "");
-    }
-    const filename = extension
-      ? name
-      : (name || "index") + "." + viewOptions.extension;
-    const path = resolve(
-      viewOptions.baseDir,
-      filename,
-    );
-    context.response.body = await viewOptions.renderFile(path, context);
   }
 }

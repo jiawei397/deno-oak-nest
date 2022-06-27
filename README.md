@@ -351,6 +351,19 @@ console.log(`app will start with: http://localhost:${port}`);
 await app.listen({ port });
 ```
 
+### use static files
+
+If you want to serve your own static files, you can use the following:
+
+```typescript
+app.useStaticAssets("example/static", {
+  prefix: "static",
+  // gzip: true,
+});
+```
+
+It must be used before the routes (`app.use(app.routes())`).
+
 ### connect db
 
 If you want to connect db such as Mongodb, you can do like this:
