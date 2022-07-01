@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import { Inject, Injectable, Redis } from "../deps.ts";
+import { Inject, Injectable } from "../deps.ts";
+import type { Redis } from "../deps.ts";
 import { REDIS_KEY } from "./redis.constant.ts";
 import { jsonParse, stringify } from "./utils.ts";
 
