@@ -16,10 +16,10 @@ import type {
   GzipOptions,
   ModuleType,
   Provider,
-  Scope,
   StaticOptions,
   Type,
 } from "../interfaces/mod.ts";
+import { Scope } from "../interfaces/mod.ts";
 import { join, Router } from "../router.ts";
 import { globalFactoryCaches, initProvider } from "./class.factory.ts";
 

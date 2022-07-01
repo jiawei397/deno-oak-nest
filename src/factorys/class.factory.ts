@@ -6,10 +6,10 @@ import type {
   ExistingProvider,
   FactoryProvider,
   Provider,
-  Scope,
   Type,
   ValueProvider,
 } from "../interfaces/mod.ts";
+import { Scope } from "../interfaces/mod.ts";
 
 export const META_CONTAINER_KEY = "meta:container"; // the container of the class
 export const globalFactoryCaches = new Map();
