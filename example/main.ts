@@ -1,9 +1,7 @@
 // deno-lint-ignore-file no-unused-vars no-explicit-any
-import { Context, isHttpError, NestFactory, resolve, Status } from "../mod.ts";
+import { Context, isHttpError, NestFactory, Status } from "../mod.ts";
 import { AppModule } from "./app.module.ts";
-import { dirname, fromFileUrl, renderFile } from "./deps.ts";
 import { LoggingInterceptor } from "./interceptor/log.interceptor.ts";
-const __dirname = dirname(fromFileUrl(import.meta.url));
 
 const app = await NestFactory.create(AppModule);
 app.setGlobalPrefix("/api", {
@@ -31,43 +29,17 @@ app.useStaticAssets("example/static", {
   // gzip: true,
 });
 
-app.setView({
-  // prefix: "example",
-  baseDir: "example/views",
-  // baseDir: resolve(__dirname, "./views"),
-  extension: "ejs",
-  renderFile: (path: string, context: Context) => {
-    const request = context.request as any;
-    const response = context.response as any;
-    return renderFile(path, {
-      metadata: {
-        title: "test",
-      },
-      data: {
-        content: "hello data",
-      },
-      ...request.locals,
-      ...response.locals,
-    });
-  },
-});
-
 // Logger
 app.use(async (ctx: Context, next) => {
+  const start = Date.now();
   await next();
-  const rt = ctx.response.headers.get("X-Response-Time");
-  console.log(`${ctx.request.method} ${ctx.request.url} - ${rt}`);
+  const rt = `${Date.now() - start}ms`;
+  console.log(
+    `${ctx.request.method} ${ctx.request.url} - ${ctx.response.status} - ${rt}`,
+  );
 });
 
 // app.use(proxy("https://www.google.com.hk/"));
-
-// // Timing moved to LoggingInterceptor
-// app.use(async (ctx: Context, next) => {
-//   const start = Date.now();
-//   await next();
-//   const ms = Date.now() - start;
-//   ctx.response.headers.set("X-Response-Time", `${ms}ms`);
-// });
 
 // if you want to catch the error, you must set it before the routers.
 app.use(async (ctx: Context, next) => {
