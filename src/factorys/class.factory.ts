@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { Reflect } from "../../deps.ts";
 import { getInjectData, isSingleton } from "../decorators/inject.ts";
-import {
+import type {
   ClassProvider,
   ExistingProvider,
   FactoryProvider,

@@ -12,7 +12,7 @@ import {
   SetMetadata,
   UseGuards,
 } from "./guard.ts";
-import { CanActivate } from "./interfaces/mod.ts";
+import type { CanActivate } from "./interfaces/mod.ts";
 import { Router } from "./router.ts";
 
 Deno.test("getAllGuards and checkByGuard", async (t) => {

@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Reflect } from "../../deps.ts";
-import {
+import type {
   ModuleMetadata,
   ModuleMetadataKey,
 } from "../interfaces/module.interface.ts";

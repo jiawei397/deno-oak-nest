@@ -12,7 +12,7 @@ import {
   yellow,
 } from "../../deps.ts";
 import { getModuleMetadata, isModule } from "../decorators/module.ts";
-import {
+import type {
   GzipOptions,
   ModuleType,
   Provider,

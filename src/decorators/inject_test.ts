@@ -1,7 +1,7 @@
 import { getInjectData, Inject, Injectable } from "./inject.ts";
 import { assertEquals } from "../../test_deps.ts";
 import { initProvider } from "../factorys/class.factory.ts";
-import { Scope } from "../interfaces/scope-options.interface.ts";
+import type { Scope } from "../interfaces/scope-options.interface.ts";
 import { Controller } from "./controller.ts";
 import { Router } from "../router.ts";
 

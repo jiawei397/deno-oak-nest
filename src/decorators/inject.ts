@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
-import { InjectParams } from "../interfaces/factory.interface.ts";
+import type { InjectParams } from "../interfaces/factory.interface.ts";
 import { Reflect } from "../../deps.ts";
-import { Constructor } from "../interfaces/type.interface.ts";
+import type { Constructor } from "../interfaces/type.interface.ts";
 
 export const INJECT_META_KEY = "design:inject";
 

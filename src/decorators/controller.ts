@@ -1,5 +1,5 @@
 import { Reflect } from "../../deps.ts";
-import { AliasOptions } from "../interfaces/controller.interface.ts";
+import type { AliasOptions } from "../interfaces/controller.interface.ts";
 
 export const META_METHOD_KEY = Symbol("meta:method");
 export const META_PATH_KEY = Symbol("meta:path");

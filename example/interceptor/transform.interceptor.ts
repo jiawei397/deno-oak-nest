@@ -1,5 +1,5 @@
 import { Context, Injectable } from "../../mod.ts";
-import {
+import type {
   NestInterceptor,
   Next,
 } from "../../src/interfaces/interceptor.interface.ts";

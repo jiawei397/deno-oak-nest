@@ -1,7 +1,7 @@
 import { assert, assertEquals, assertRejects } from "../../test_deps.ts";
 import { Reflect } from "../../deps.ts";
 import { Injectable } from "../decorators/inject.ts";
-import { Scope } from "../interfaces/scope-options.interface.ts";
+import type { Scope } from "../interfaces/scope-options.interface.ts";
 import { Factory, initProvider, META_CONTAINER_KEY } from "./class.factory.ts";
 
 Deno.test("Factory without providers", async () => {

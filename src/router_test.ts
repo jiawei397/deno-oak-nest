@@ -15,7 +15,7 @@ import {
   Router,
 } from "./router.ts";
 import { Controller, Get, Post } from "./decorators/controller.ts";
-import { CanActivate } from "./interfaces/guard.interface.ts";
+import type { CanActivate } from "./interfaces/guard.interface.ts";
 import { UseGuards } from "./guard.ts";
 import { Injectable } from "./decorators/inject.ts";
 

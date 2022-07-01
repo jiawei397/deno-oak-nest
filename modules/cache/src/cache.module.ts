@@ -1,7 +1,7 @@
-import { DynamicModule } from "../../../src/interfaces/module.interface.ts";
+import type { DynamicModule } from "../../../src/interfaces/module.interface.ts";
 import { optionKey } from "./cache.constant.ts";
 import { CacheInterceptor } from "./cache.interceptor.ts";
-import { CacheModuleOptions } from "./cache.interface.ts";
+import type { CacheModuleOptions } from "./cache.interface.ts";
 
 export class CacheModule {
   static register(options?: CacheModuleOptions): DynamicModule {

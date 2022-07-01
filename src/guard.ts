@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { Context, Reflect } from "../deps.ts";
 import { Factory } from "./factorys/class.factory.ts";
-import {
+import type {
   CanActivate,
   Constructor,
   ControllerMethod,

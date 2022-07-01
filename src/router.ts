@@ -11,7 +11,7 @@ import {
   yellow,
 } from "../deps.ts";
 import { checkByGuard } from "./guard.ts";
-import {
+import type {
   Constructor,
   ControllerMethod,
   NestUseInterceptors,
@@ -31,7 +31,7 @@ import { transferParam } from "./params.ts";
 import { Context } from "../deps.ts";
 import { checkByInterceptors } from "./interceptor.ts";
 import { checkEtag } from "./utils.ts";
-import { AliasOptions } from "./interfaces/controller.interface.ts";
+import type { AliasOptions } from "./interfaces/controller.interface.ts";
 
 export function join(...paths: string[]) {
   if (paths.length === 0) {

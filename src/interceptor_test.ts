@@ -6,7 +6,7 @@ import {
   getInterceptors,
   UseInterceptors,
 } from "./interceptor.ts";
-import { NestInterceptor, Next } from "./interfaces/mod.ts";
+import type { NestInterceptor, Next } from "./interfaces/mod.ts";
 
 Deno.test("UseInterceptors sort", async (t) => {
   const callStack: number[] = [];

@@ -12,8 +12,8 @@ import {
   createParamDecoratorWithLowLevel,
 } from "../params.ts";
 import { parseSearch } from "../utils.ts";
-import { Constructor } from "../interfaces/type.interface.ts";
-import {
+import type { Constructor } from "../interfaces/type.interface.ts";
+import type {
   ArrayItemType,
   FormDataFormattedBody,
   FormDataOptions,

@@ -1,8 +1,12 @@
 // deno-lint-ignore-file no-explicit-any
 import { Module } from "../decorators/module.ts";
-import { ModuleMetadata } from "../interfaces/module.interface.ts";
-import { Provide } from "../interfaces/provider.interface.ts";
-import { Constructor, Instance, Type } from "../interfaces/type.interface.ts";
+import type { ModuleMetadata } from "../interfaces/module.interface.ts";
+import type { Provide } from "../interfaces/provider.interface.ts";
+import type {
+  Constructor,
+  Instance,
+  Type,
+} from "../interfaces/type.interface.ts";
 import { Factory, getInstance } from "./class.factory.ts";
 import { NestFactory } from "./nest.factory.ts";
 
