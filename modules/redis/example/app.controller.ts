@@ -1,6 +1,7 @@
 import { UseInterceptors } from "../../../mod.ts";
 import { CacheInterceptor, SetCacheStore } from "../../cache/mod.ts";
-import { Inject, Redis } from "../deps.ts";
+import { Inject } from "../deps.ts";
+import type { Redis } from "../deps.ts";
 import { REDIS_KEY, RedisService } from "../mod.ts";
 import { Controller, Get } from "./deps.ts";
 

@@ -1,7 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 import { Factory } from "../../../src/factorys/class.factory.ts";
 import { CacheStore } from "../../cache/src/cache.interface.ts";
-import { Inject, Redis } from "../deps.ts";
+import { Inject } from "../deps.ts";
+import type { Redis } from "../deps.ts";
 import { REDIS_KEY, REDIS_STORE_NAME } from "./redis.constant.ts";
 import { jsonParse, stringify } from "./utils.ts";
 

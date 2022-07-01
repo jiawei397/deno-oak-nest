@@ -1,4 +1,5 @@
-import { connect, red, Redis, RedisConnectOptions, yellow } from "../deps.ts";
+import { connect, red, RedisConnectOptions, yellow } from "../deps.ts";
+import type { Redis } from "../deps.ts";
 import { REDIS_KEY } from "./redis.constant.ts";
 import { RedisService } from "./redis.service.ts";
 import { RedisStore } from "./redis.store.ts";
