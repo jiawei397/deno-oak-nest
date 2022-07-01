@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Logger } from "../types.ts";
+import type { Logger } from "../types.ts";
 
 export function logTime(options: {
   str?: string;

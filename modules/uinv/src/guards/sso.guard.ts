@@ -1,12 +1,12 @@
 // deno-lint-ignore-file no-explicit-any
 import { ajax } from "../tools/ajax.ts";
 import {
-  CanActivate,
   Context,
   ForbiddenException,
   UnauthorizedException,
 } from "../../deps.ts";
-import { SSOGuardOptions, SSOUserInfo } from "../types.ts";
+import type { CanActivate } from "../../deps.ts";
+import type { SSOGuardOptions, SSOUserInfo } from "../types.ts";
 import { stringify } from "../tools/utils.ts";
 import { Injectable, Reflector, SetMetadata } from "../../../../mod.ts";
 

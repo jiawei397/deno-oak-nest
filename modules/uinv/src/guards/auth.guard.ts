@@ -1,12 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 import { ajax } from "../tools/ajax.ts";
-import {
-  CanActivate,
-  Context,
-  Request,
-  UnauthorizedException,
-} from "../../deps.ts";
-import { AuthGuardOptions, Token, User } from "../types.ts";
+import type { CanActivate } from "../../deps.ts";
+import { Context, Request, UnauthorizedException } from "../../deps.ts";
+import type { AuthGuardOptions, Token, User } from "../types.ts";
 import { getFirstOriginByHost, isDist } from "../tools/utils.ts";
 
 /**

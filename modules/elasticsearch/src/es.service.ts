@@ -1,7 +1,7 @@
 import { Client } from "../deps.ts";
 import { Inject, Injectable } from "../../../mod.ts";
 import { ES_KEY } from "./es.constant.ts";
-import { ElasticSearchOptions } from "./types.ts";
+import type { ElasticSearchOptions } from "./types.ts";
 
 @Injectable()
 export class ElasticsearchService extends Client {

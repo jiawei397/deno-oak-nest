@@ -1,4 +1,5 @@
-import { AjaxConfig, BaseAjax } from "../../deps.ts";
+import { BaseAjax } from "../../deps.ts";
+import type { AjaxConfig } from "../../deps.ts";
 import { md5 } from "./utils.ts";
 
 class Ajax extends BaseAjax {

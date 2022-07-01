@@ -1,6 +1,6 @@
 import { ES_KEY } from "./es.constant.ts";
 import { ElasticsearchService } from "./es.service.ts";
-import { ElasticSearchOptions } from "./types.ts";
+import type { ElasticSearchOptions } from "./types.ts";
 import { DynamicModule } from "../../../mod.ts";
 
 export class ElasticsearchModule {
