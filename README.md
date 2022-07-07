@@ -15,7 +15,7 @@ I will update the `oak` version if need.
 ## run
 
 ```
-deno run --allow-net --allow-env --allow-write --unstable --config tsconfig.json example/main.ts
+deno run --allow-net --allow-env --allow-write --unstable --config deno.json example/main.ts
 ```
 
 or you can use [denon](https://deno.land/x/denon)：

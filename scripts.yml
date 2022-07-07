@@ -10,9 +10,10 @@ scripts:
       - write
       - read
     unstable: true
-    tsconfig: tsconfig.json
+    tsconfig: deno.json
     env:
-      PORT: '1000'
+      PORT: '2000'
+      # HTTP_PROXY: "http://localhost"
       # DEBUG: 'true'
   startScheduler:
     cmd: deno run modules/scheduler/example/main.ts
@@ -20,7 +21,7 @@ scripts:
       - net
       - env
     unstable: true
-    tsconfig: tsconfig.json
+    tsconfig: deno.json
     env:
       PORT: '1000'
       # DEBUG: 'true'  
@@ -30,7 +31,7 @@ scripts:
       - net
       - env
     unstable: true
-    tsconfig: tsconfig.json
+    tsconfig: deno.json
     env:
       PORT: '1000'
       # DEBUG: 'true'  
@@ -41,7 +42,7 @@ scripts:
       - net
       - env
     unstable: true
-    tsconfig: tsconfig.json
+    tsconfig: deno.json
     env:
       PORT: '1000'    
   startEs:
@@ -51,14 +52,14 @@ scripts:
       - net
       - env
     unstable: true
-    tsconfig: tsconfig.json
+    tsconfig: deno.json
     env:
       PORT: '1000'              
   build:
     cmd: deno bundle example/main.ts example/main.js
     watch: false
     unstable: false
-    tsconfig: tsconfig.json
+    tsconfig: deno.json
     env:
       NODE_ENV: production
   dist:
@@ -71,7 +72,7 @@ scripts:
       - read
     unstable: true
     watch: false
-    tsconfig: tsconfig.json
+    tsconfig: deno.json
     env:
       NODE_ENV: production
       PORT: '2000'
@@ -83,12 +84,12 @@ scripts:
       - env
     env:
       DEBUG: 'true'  
-    tsconfig: tsconfig.json
+    tsconfig: deno.json
   cache: 
     cmd: deno cache --lock-write example/main.ts
     watch: false
     unstable: true
-    tsconfig: tsconfig.json
+    tsconfig: deno.json
     lock: lock.json
   publish: 
     cmd: deno_tag -D

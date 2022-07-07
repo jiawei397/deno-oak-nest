@@ -3,7 +3,7 @@
   "deno.suggest.imports.hosts": {
     "https://deno.land": true
   },
-  "deno.config": "tsconfig.json",
+  "deno.config": "deno.json",
   "deno.lint": true,
   "deno.suggest.autoImports": true
 }
