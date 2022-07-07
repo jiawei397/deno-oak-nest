@@ -78,7 +78,7 @@ app.get("/hello", (ctx: Context) => {
 
 app.use(app.routes());
 
-const port = Number(Deno.env.get("PORT") || 1000);
+const port = Number(Deno.env.get("PORT") || 2000);
 
 // app.addEventListener("error", (evt) => {
 //   // Will log the thrown error to the console.

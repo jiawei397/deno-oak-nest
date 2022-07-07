@@ -22,7 +22,12 @@ export { delay } from "https://deno.land/std@0.97.0/async/mod.ts";
 
 export {
   IsArray,
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsMongoId,
   IsNumber,
+  IsOptional,
   IsString,
   Max,
   Min,

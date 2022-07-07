@@ -1,5 +1,5 @@
 import { Property } from "../../../mod.ts";
-import { IsArray, IsNumber, IsString, Max } from "../../deps.ts";
+import { IsEnum, IsNumber, IsString, Max } from "../../deps.ts";
 
 export class UploadDto {
   @Property()
@@ -12,9 +12,13 @@ export class UploadDto {
   age: number;
 }
 
+enum Status {
+  private,
+  innner,
+}
+
 export class QueryUserInfoDto {
-  @IsArray()
-  @IsString({ each: true })
   @Property()
-  keys: string[];
+  @IsEnum(Status)
+  status?: number; // cannnot set to Status when used in a GET request, because Deno now not infer the enum type to number
 }
