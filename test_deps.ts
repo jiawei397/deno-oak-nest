@@ -26,6 +26,7 @@ export type {
 } from "https://deno.land/x/oak@v10.5.0/mod.ts";
 
 export {
+  IsEnum,
   IsNumber,
   IsOptional,
   IsString,

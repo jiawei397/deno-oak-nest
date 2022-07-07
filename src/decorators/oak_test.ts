@@ -2,7 +2,9 @@
 import {
   assert,
   assertEquals,
+  IsEnum,
   IsNumber,
+  IsOptional,
   IsString,
   Max,
   Min,
@@ -711,16 +713,42 @@ Deno.test("transAndValidateByCls", async (t) => {
   });
 
   await t.step("trans", async () => {
+    enum Status {
+      Open,
+      Closed,
+    }
     class A {
       @IsNumber()
       @Property()
       age: number;
+
+      @IsEnum(Status)
+      @IsOptional()
+      @Property()
+      status?: number;
     }
     const result = await transAndValidateByCls(A, {
       age: "12",
+      status: "1",
     });
+    assert(typeof result.status === "number");
+    assert(typeof result.age === "number");
     assertEquals(result, {
       age: 12,
+      status: 1,
     });
+
+    try {
+      await transAndValidateByCls(A, {
+        age: "12",
+        status: "3",
+      });
+      assert(false, "should not reach here");
+    } catch (error) {
+      assertEquals(
+        error.message,
+        "status must be a valid enum value",
+      );
+    }
   });
 });
