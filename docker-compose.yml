@@ -1,0 +1,14 @@
+# docker-compose build or up
+version: '3'
+services:
+  server:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "2000:2000"
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      # - ./deno-dir:/app/deno-dir
+      - ./example:/app/example
