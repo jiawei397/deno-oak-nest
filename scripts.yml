@@ -76,6 +76,16 @@ scripts:
     env:
       NODE_ENV: production
       PORT: '2000'
+  compile:
+    cmd: deno compile -o nest example/main.ts 
+    allow:
+      - net
+      - env
+      - write
+      - read
+    unstable: true
+    watch: false
+    tsconfig: deno.json
   test:
     cmd: deno test
     watch: false
