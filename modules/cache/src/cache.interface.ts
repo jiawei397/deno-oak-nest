@@ -57,6 +57,7 @@ export interface CacheManagerOptions {
    * Maximum number of responses to store in the cache.  Defaults to 100.
    */
   max?: number;
+  maxSize?: number;
   isCacheableValue?: (value: any) => boolean;
 
   getCacheKey?: (params: {

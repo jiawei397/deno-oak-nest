@@ -7,7 +7,7 @@ import { AppController } from "./app.controller.ts";
     CacheModule.register({
       ttl: 60,
       // policy: "public",
-      store: "localStorage",
+      // store: "localStorage",
     }),
   ],
   controllers: [AppController],

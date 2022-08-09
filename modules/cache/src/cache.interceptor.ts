@@ -22,7 +22,8 @@ import type {
   CacheStore,
   CacheStoreMap,
 } from "./cache.interface.ts";
-import { LocalStore, MemoryStore } from "./cache.store.ts";
+import { LocalStore } from "./cache.store.ts";
+import { LRU } from "../deps.ts";
 
 export function CacheTTL(seconds: number) {
   return (_target: any, _methodName: string, descriptor: any) => {
@@ -50,19 +51,32 @@ export function SetCachePolicy(policy: CachePolicy) {
 @Injectable()
 export class CacheInterceptor implements NestInterceptor {
   ttl: number;
-  max: number;
   policy: CachePolicy;
   customCache?: CacheStore;
-  memoryCache: MemoryStore;
+  lruCache: LRU<string, unknown>;
   localCache?: LocalStore;
   defaultStore?: string;
   constructor(
     @Inject(optionKey) private cacheModuleOptions?: CacheModuleOptions,
   ) {
     this.ttl = cacheModuleOptions?.ttl || 5;
-    this.max = cacheModuleOptions?.max || 100;
     this.policy = cacheModuleOptions?.policy || "no-cache";
-    this.memoryCache = new MemoryStore();
+    this.lruCache = new LRU({
+      max: cacheModuleOptions?.max || 100,
+      maxSize: cacheModuleOptions?.maxSize || 100_000,
+      ttl: this.ttl * 1000,
+      sizeCalculation: (value) => {
+        if (typeof value !== "string") {
+          return 1;
+        }
+        return value.length;
+      },
+      dispose: (_value, key) => {
+        if (isDebug()) {
+          console.debug(`cache ${key} will be disposed`);
+        }
+      },
+    });
     this.defaultStore = cacheModuleOptions?.defaultStore;
     this.init(cacheModuleOptions);
   }
@@ -88,7 +102,7 @@ export class CacheInterceptor implements NestInterceptor {
       }
     } else {
       if (!this.defaultStore) {
-        this.defaultStore = "memory";
+        this.defaultStore = "LRU";
       }
     }
   }
@@ -112,11 +126,6 @@ export class CacheInterceptor implements NestInterceptor {
     options: NestInterceptorOptions,
   ) {
     if (context.request.method !== "GET") { // only deal get request
-      return next();
-    }
-    const size = await (this.customCache || this.memoryCache).size();
-    if (size >= this.max) {
-      console.warn("cache size has reached the max", size);
       return next();
     }
     const constructorName = options.target.constructor.name;
@@ -148,11 +157,11 @@ export class CacheInterceptor implements NestInterceptor {
       }
       caches = this.localCache;
       // deno-lint-ignore no-empty
-    } else if (storeName === "memory") {
+    } else if (storeName === "LRU") {
     } else {
       caches = this.customCache!;
     }
-    const cacheValue = this.memoryCache.get(key) || await caches?.get(key);
+    const cacheValue = this.lruCache.get(key) ?? await caches?.get(key);
     if (cacheValue !== undefined) {
       if (isDebug()) {
         console.debug("cache hit", key, cacheValue);
@@ -168,7 +177,7 @@ export class CacheInterceptor implements NestInterceptor {
       if (result instanceof Promise) {
         lastResult = result.then((val) => context.response.body ?? val);
       }
-      this.memoryCache.set(key, lastResult, { ttl });
+      this.lruCache.set(key, lastResult, { ttl: ttl * 1000 }); // LRU is in milliseconds
     } else {
       await caches?.set(key, lastResult, { ttl });
       isCached = true;
@@ -177,14 +186,14 @@ export class CacheInterceptor implements NestInterceptor {
       const val = await lastResult;
       if (this.cacheModuleOptions?.isCacheableValue) {
         if (!this.cacheModuleOptions.isCacheableValue(val)) {
-          this.memoryCache.delete(key);
+          this.lruCache.delete(key);
           await caches?.delete(key);
           return val;
         }
       }
       if (!isCached && caches) {
         await caches.set(key, val, { ttl });
-        this.memoryCache.delete(key);
+        this.lruCache.delete(key);
       }
       if (policy === "public" || policy === "private") {
         context.response.headers.set(
@@ -194,7 +203,7 @@ export class CacheInterceptor implements NestInterceptor {
       }
       return val;
     } catch (error) {
-      this.memoryCache.delete(key);
+      this.lruCache.delete(key);
       await caches?.delete(key);
       throw error;
     }
