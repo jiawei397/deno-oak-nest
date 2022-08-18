@@ -1,4 +1,4 @@
-import { Context } from "../deps.ts";
+import { AjaxData, Context, Method } from "../deps.ts";
 
 // deno-lint-ignore-file camelcase
 export type MsgCallback = (...msg: unknown[]) => unknown;
@@ -74,3 +74,53 @@ export type SSOGuardOptions = {
   ssoAllowAllUsers?: boolean;
   formatUserInfo?: (user: SSOUserInfo, context: Context) => void;
 };
+
+export type BaseResult<T> = {
+  code: string;
+  request_id: string;
+  data: T;
+  success: boolean;
+  message: string | null;
+};
+
+export type AccessTokenResult = {
+  access_token: string;
+  expires_in: number;
+  scope: Scope[];
+  created_at: number;
+  state: number;
+};
+
+export type Scope =
+  | "openid"
+  | "read_userinfo"
+  | "read_userinfo_by_phone"
+  | "mmd_id"
+  | "wecom";
+
+export type AuthorizationType = "Basic" | "Bearer";
+
+export interface GetAccessTokenOptions {
+  client_id: string;
+  client_secret: string;
+  user_agent: string;
+  scope: Scope;
+  originHeaders?: Headers;
+  cacheTimeout?: number;
+}
+
+export interface GetOpenAPIOptions {
+  client_id: string;
+  access_token: string;
+  user_agent: string;
+  url: string;
+  method: Method;
+  authorizationType: AuthorizationType;
+  body?: AjaxData;
+  originHeaders?: Headers;
+  apiCacheTimeout?: number;
+}
+
+export type GetAutoOpenAPIOptions =
+  & GetAccessTokenOptions
+  & Omit<GetOpenAPIOptions, "access_token">;

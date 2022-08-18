@@ -18,13 +18,16 @@ export {
   UnauthorizedException,
 } from "https://deno.land/x/oak_exception@v0.0.9/mod.ts";
 
-export { BaseAjax } from "https://deno.land/x/jw_fetch@v0.2.3/mod.ts";
+export { BaseAjax } from "https://deno.land/x/jw_fetch@v0.2.7/mod.ts";
 export type {
   AjaxConfig,
+  AjaxData,
   Method,
-} from "https://deno.land/x/jw_fetch@v0.2.3/mod.ts";
+} from "https://deno.land/x/jw_fetch@v0.2.7/mod.ts";
 
 export { encode, Hash } from "https://deno.land/x/checksum@1.2.0/mod.ts";
 
 export { createParamDecorator } from "../../mod.ts";
 export type { CanActivate, Context, Request } from "../../mod.ts";
+
+export { nanoid } from "https://deno.land/x/nanoid@v3.0.0/mod.ts";
