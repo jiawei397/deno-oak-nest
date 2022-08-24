@@ -4,16 +4,19 @@ import { md5 } from "./utils.ts";
 
 class Ajax extends BaseAjax {
   public getUniqueKey(config: AjaxConfig) {
-    // deno-lint-ignore no-explicit-any
-    const headers: any = config.headers;
-    const key = (config.baseURL || "") + config.url + config.method +
-      (config.data ? JSON.stringify(config.data) : "");
-    let lastKey = key;
+    const headers = config.headers;
+    const keys = [
+      config.baseURL,
+      config.url,
+      config.method,
+      config.data ? JSON.stringify(config.data) : "",
+    ];
     if (headers) {
-      const cookie = headers["cookie"] || headers.get?.("cookie") || "";
-      lastKey += cookie;
+      Object.keys(headers).forEach((key) =>
+        keys.push(key + "=" + headers[key])
+      );
     }
-    return md5(lastKey);
+    return md5(keys.filter(Boolean).join("_"));
   }
 
   /**
