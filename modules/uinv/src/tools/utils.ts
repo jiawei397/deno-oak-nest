@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { BadRequestException, encode, Hash } from "../../deps.ts";
+import { BadRequestException } from "../../deps.ts";
 
 export function isDist(): boolean {
   return Deno.env.get("NODE_ENV") === "production";
@@ -75,10 +75,6 @@ export function jsonParse(str: string): any {
     }
     return str;
   }
-}
-
-export function md5(str: string) {
-  return new Hash("md5").digest(encode(str)).hex();
 }
 
 export function delay(time: number) {
