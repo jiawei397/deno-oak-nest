@@ -73,6 +73,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
             "Authorization": headers.get("Authorization") || "",
           },
           cacheTimeout,
+          originHeaders: headers,
         });
         if (userInfos && userInfos.length > 0) {
           userInfo = userInfos[0];
@@ -86,6 +87,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
             referer: realReferer,
           },
           cacheTimeout,
+          originHeaders: headers,
         });
       }
       if (userInfo) {

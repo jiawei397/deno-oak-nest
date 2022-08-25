@@ -103,6 +103,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
         baseURL: authApi,
         headers: this.pickHeaders(headers),
         cacheTimeout,
+        originHeaders: headers,
       });
     }
 
@@ -140,6 +141,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
         baseURL: authApi,
         headers: this.pickHeaders(headers),
         cacheTimeout,
+        originHeaders: headers,
       });
     }
 
