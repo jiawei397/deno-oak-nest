@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
-import { CacheStore, LocalValue } from "./cache.interface.ts";
+import { ICacheStore, LocalValue } from "./cache.interface.ts";
 
-export class MemoryStore implements CacheStore {
+export class MemoryStore implements ICacheStore {
   cache: Map<string, any>;
   timeoutMap: Map<string, number>;
   constructor() {
@@ -40,7 +40,7 @@ export class MemoryStore implements CacheStore {
   }
 }
 
-export class LocalStore implements CacheStore {
+export class LocalStore implements ICacheStore {
   timeoutMap: Map<string, number>;
 
   constructor() {
@@ -67,9 +67,10 @@ export class LocalStore implements CacheStore {
     };
     localStorage.setItem(key, JSON.stringify(val));
     if (options?.ttl) {
-      setTimeout(() => {
+      const st = setTimeout(() => {
         this.delete(key);
       }, options.ttl * 1000);
+      this.timeoutMap.set(key, st);
     }
   }
   delete(key: string) {

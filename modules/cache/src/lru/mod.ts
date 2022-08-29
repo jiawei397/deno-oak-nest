@@ -97,7 +97,7 @@ export default class LRUCache<K, V> {
   updateAgeOnHas: boolean;
   ttlResolution: number;
   ttlAutopurge: boolean;
-  ttl: any;
+  ttl: number;
   ttls?: ZeroArray;
   starts?: ZeroArray;
   calculatedSize?: number;

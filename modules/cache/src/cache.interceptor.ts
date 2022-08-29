@@ -19,8 +19,8 @@ import {
 import type {
   CacheModuleOptions,
   CachePolicy,
-  CacheStore,
   CacheStoreMap,
+  ICacheStore,
 } from "./cache.interface.ts";
 import { LocalStore } from "./cache.store.ts";
 import LRU from "./lru/mod.ts";
@@ -52,7 +52,7 @@ export function SetCachePolicy(policy: CachePolicy) {
 export class CacheInterceptor implements NestInterceptor {
   ttl: number;
   policy: CachePolicy;
-  customCache?: CacheStore;
+  customCache?: ICacheStore;
   lruCache: LRU<string, unknown>;
   localCache?: LocalStore;
   defaultStore?: string;
@@ -152,7 +152,7 @@ export class CacheInterceptor implements NestInterceptor {
       this.policy;
     const storeName = Reflect.getOwnMetadata(META_CACHE_STORE_KEY, func) ||
       this.defaultStore;
-    let caches: CacheStore | undefined;
+    let caches: ICacheStore | undefined;
     if (storeName === "localStorage") {
       if (!this.localCache) {
         this.localCache = new LocalStore();

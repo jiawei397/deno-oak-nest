@@ -24,6 +24,7 @@ export interface SetOptions<K, V> {
    */
   size?: number;
   sizeCalculation?: SizeCalculator<K, V>;
+  /* milliseconds */
   ttl?: number;
   start?: number;
   noDisposeOnSet?: boolean;

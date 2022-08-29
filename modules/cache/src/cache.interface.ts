@@ -8,12 +8,15 @@
  */
 export type CachePolicy = "public" | "private" | "no-cache";
 
-export interface CacheStore {
+export interface ICacheStore {
   get<T = any>(key: string): Promise<T | undefined> | T | undefined;
   set(
     key: string,
     value: any,
-    options?: { ttl: number },
+    options?: {
+      /** ttl should be seconds */
+      ttl: number;
+    },
   ): Promise<any> | any;
 
   delete(key: string): Promise<any> | any;
@@ -27,7 +30,7 @@ export interface CacheStore {
 
 export interface CacheStoreMap {
   name: string;
-  store: CacheStore;
+  store: ICacheStore;
 }
 
 export type CacheFactory = () =>
