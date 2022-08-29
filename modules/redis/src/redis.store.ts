@@ -1,13 +1,14 @@
 // deno-lint-ignore-file no-explicit-any
 import { Factory } from "../../../src/factorys/class.factory.ts";
-import { CacheStore } from "../../cache/src/cache.interface.ts";
+import { ICacheStore } from "../../cache/src/cache.interface.ts";
 import { Inject } from "../deps.ts";
 import type { Redis } from "../deps.ts";
 import { REDIS_KEY, REDIS_STORE_NAME } from "./redis.constant.ts";
 import { jsonParse, stringify } from "./utils.ts";
 
-export class RedisStore implements CacheStore {
+export class RedisStore implements ICacheStore {
   key = "cache_store";
+  timeoutMap: Map<string, number>;
   constructor(@Inject(REDIS_KEY) public readonly client: Redis) {
   }
 
@@ -30,9 +31,10 @@ export class RedisStore implements CacheStore {
     await this.client.sadd(this.key, key);
 
     if (options?.ttl) {
-      setTimeout(() => {
+      const st = setTimeout(() => {
         this.client.srem(this.key, key).catch(console.error);
       }, options.ttl * 1000);
+      this.timeoutMap.set(key, st);
     }
     return this.client.set(
       newKey,
@@ -48,11 +50,15 @@ export class RedisStore implements CacheStore {
     const newKey = this.getNewKey(key);
     const result = await this.client.del(newKey);
     await this.client.srem(this.key, key);
+    this.timeoutMap.delete(key);
     return result;
   }
   async clear() {
     const keys = await this.client.smembers(this.key);
     await Promise.all(keys.map((key) => this.client.del(this.getNewKey(key))));
+    for (const st of this.timeoutMap.values()) {
+      clearTimeout(st);
+    }
     return this.client.del(this.key);
   }
   async has(key: string) {
