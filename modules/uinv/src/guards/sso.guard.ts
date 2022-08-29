@@ -75,7 +75,9 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
           },
           cacheTimeout,
           originHeaders: headers,
-          cacheStore,
+          cacheStore: typeof cacheStore === "function"
+            ? await cacheStore()
+            : cacheStore,
         });
         if (userInfos && userInfos.length > 0) {
           userInfo = userInfos[0];
@@ -90,7 +92,9 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
           },
           cacheTimeout,
           originHeaders: headers,
-          cacheStore,
+          cacheStore: typeof cacheStore === "function"
+            ? await cacheStore()
+            : cacheStore,
         });
       }
       if (userInfo) {

@@ -53,6 +53,8 @@ export interface Token {
   expires?: Date;
 }
 
+export type ICacheStoreFunc = () => Promise<ICacheStore>;
+
 export type AuthGuardOptions = {
   logger?: Logger;
   authApi?: string;
@@ -61,7 +63,7 @@ export type AuthGuardOptions = {
   privateTokenField?: string;
   checkUserField?: string;
   tokenField?: string;
-  cacheStore?: ICacheStore;
+  cacheStore?: ICacheStore | ICacheStoreFunc;
 };
 
 export type SSOGuardOptions = {
@@ -72,7 +74,7 @@ export type SSOGuardOptions = {
   ssoUserInfosUrl?: string;
   referer?: string;
   cacheTimeout?: number;
-  cacheStore?: ICacheStore;
+  cacheStore?: ICacheStore | ICacheStoreFunc;
   ssoAllowAllUsers?: boolean;
   formatUserInfo?: (user: SSOUserInfo, context: Context) => void;
 };

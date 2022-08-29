@@ -96,7 +96,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
       return false;
     }
 
-    private getUserInfoByPrivateToken(token: string, headers: Headers) {
+    private async getUserInfoByPrivateToken(token: string, headers: Headers) {
       logger.debug(`【AuthGuard】getUserInfoByPrivateToken，参数为：${token}`);
       return ajax.get<User>("/user/getUserInfoByGitlabPrivateToken", {
         token,
@@ -105,7 +105,9 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
         headers: this.pickHeaders(headers),
         cacheTimeout,
         originHeaders: headers,
-        cacheStore,
+        cacheStore: typeof cacheStore === "function"
+          ? await cacheStore()
+          : cacheStore,
       });
     }
 
@@ -135,7 +137,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
       };
     }
 
-    private getTokenInfoInDb(token: string, headers: Headers) {
+    private async getTokenInfoInDb(token: string, headers: Headers) {
       logger.debug(`【AuthGuard】getTokenInfoInDb，参数为：${token}`);
       return ajax.post<Token>("/user/getTokenInfoInDb", {
         token,
@@ -144,7 +146,9 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
         headers: this.pickHeaders(headers),
         cacheTimeout,
         originHeaders: headers,
-        cacheStore,
+        cacheStore: typeof cacheStore === "function"
+          ? await cacheStore()
+          : cacheStore,
       });
     }
 
