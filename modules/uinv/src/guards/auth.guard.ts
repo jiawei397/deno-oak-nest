@@ -17,6 +17,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
     checkUserField = "userid",
     tokenField = "authorization",
     cacheTimeout = 60 * 60 * 1000,
+    cacheStore,
   } = options;
   return class Guard implements CanActivate {
     async canActivate(context: Context) {
@@ -104,6 +105,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
         headers: this.pickHeaders(headers),
         cacheTimeout,
         originHeaders: headers,
+        cacheStore,
       });
     }
 
@@ -142,6 +144,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
         headers: this.pickHeaders(headers),
         cacheTimeout,
         originHeaders: headers,
+        cacheStore,
       });
     }
 

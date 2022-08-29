@@ -33,6 +33,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
     ssoUserInfosUrl = "/user/list/users_by_id",
     referer,
     cacheTimeout = 60 * 60 * 1000,
+    cacheStore,
   } = options;
 
   @Injectable()
@@ -51,7 +52,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
 
     getSimpleUserInfo(user: SSOUserInfo) {
       return {
-        id: user.user_id,
+        id: user.id,
         username: user.username || user.nickname,
       };
     }
@@ -74,6 +75,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
           },
           cacheTimeout,
           originHeaders: headers,
+          cacheStore,
         });
         if (userInfos && userInfos.length > 0) {
           userInfo = userInfos[0];
@@ -88,10 +90,13 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
           },
           cacheTimeout,
           originHeaders: headers,
+          cacheStore,
         });
       }
       if (userInfo) {
-        userInfo.id = userInfo.user_id + "";
+        userInfo.id = userInfo.user_id
+          ? (userInfo.user_id + "")
+          : userInfo.openid;
       }
       return userInfo;
     }

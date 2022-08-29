@@ -1,4 +1,4 @@
-import { AjaxData, Context, Method } from "../deps.ts";
+import { AjaxData, Context, ICacheStore, Method } from "../deps.ts";
 
 // deno-lint-ignore-file camelcase
 export type MsgCallback = (...msg: unknown[]) => unknown;
@@ -61,6 +61,7 @@ export type AuthGuardOptions = {
   privateTokenField?: string;
   checkUserField?: string;
   tokenField?: string;
+  cacheStore?: ICacheStore;
 };
 
 export type SSOGuardOptions = {
@@ -71,6 +72,7 @@ export type SSOGuardOptions = {
   ssoUserInfosUrl?: string;
   referer?: string;
   cacheTimeout?: number;
+  cacheStore?: ICacheStore;
   ssoAllowAllUsers?: boolean;
   formatUserInfo?: (user: SSOUserInfo, context: Context) => void;
 };
