@@ -3,12 +3,12 @@ import {
   Context,
   Inject,
   Injectable,
+  isDebug,
   NestInterceptor,
   NestInterceptorOptions,
   Next,
   Reflect,
 } from "../../../mod.ts";
-import { isDebug } from "../../../src/utils.ts";
 import {
   META_CACHE_KEY_KEY,
   META_CACHE_POLICY_KEY,
@@ -23,7 +23,7 @@ import type {
   CacheStoreMap,
 } from "./cache.interface.ts";
 import { LocalStore } from "./cache.store.ts";
-import { LRU } from "../deps.ts";
+import LRU from "./lru/mod.ts";
 
 export function CacheTTL(seconds: number) {
   return (_target: any, _methodName: string, descriptor: any) => {
@@ -56,14 +56,16 @@ export class CacheInterceptor implements NestInterceptor {
   lruCache: LRU<string, unknown>;
   localCache?: LocalStore;
   defaultStore?: string;
+  isDebug?: boolean;
   constructor(
     @Inject(optionKey) private cacheModuleOptions?: CacheModuleOptions,
   ) {
     this.ttl = cacheModuleOptions?.ttl || 5;
     this.policy = cacheModuleOptions?.policy || "no-cache";
+    this.isDebug = cacheModuleOptions?.isDebug ?? isDebug();
     this.lruCache = new LRU({
-      max: cacheModuleOptions?.max || 100,
-      maxSize: cacheModuleOptions?.maxSize || 100_000,
+      max: cacheModuleOptions?.max || 500,
+      maxSize: cacheModuleOptions?.maxSize || 1_000_000,
       ttl: this.ttl * 1000,
       sizeCalculation: (value) => {
         if (typeof value !== "string") {
@@ -72,7 +74,7 @@ export class CacheInterceptor implements NestInterceptor {
         return value.length;
       },
       dispose: (_value, key) => {
-        if (isDebug()) {
+        if (this.isDebug) {
           console.debug(`cache ${key} will be disposed`);
         }
       },
@@ -163,7 +165,7 @@ export class CacheInterceptor implements NestInterceptor {
     }
     const cacheValue = this.lruCache.get(key) ?? await caches?.get(key);
     if (cacheValue !== undefined) {
-      if (isDebug()) {
+      if (this.isDebug) {
         console.debug("cache hit", key, cacheValue);
       }
       return cacheValue;

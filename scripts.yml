@@ -34,7 +34,7 @@ scripts:
     tsconfig: deno.json
     env:
       PORT: '1000'
-      DEBUG: 'true'  
+      # DEBUG: 'true'  
   startRedis:
     cmd: deno run modules/redis/example/main.ts
     desc: start redis example

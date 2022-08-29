@@ -72,6 +72,8 @@ export interface CacheManagerOptions {
    * @default "no-cache"
    */
   policy?: CachePolicy;
+
+  isDebug?: boolean;
 }
 
 export interface CacheModuleOptions extends CacheManagerOptions {

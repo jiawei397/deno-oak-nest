@@ -24,4 +24,6 @@ export type {
   FormDataFormattedBody,
 } from "./src/interfaces/mod.ts";
 
+export * from "./src/utils.ts";
+
 export * from "./deps.ts";
