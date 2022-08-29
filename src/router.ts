@@ -272,7 +272,7 @@ export class Router extends OriginRouter {
             if (!guardResult) {
               if (context.response.status === originStatus) {
                 context.response.status = Status.Forbidden;
-                context.response.body = STATUS_TEXT.get(Status.Forbidden);
+                context.response.body = STATUS_TEXT[Status.Forbidden];
               }
               return;
             }

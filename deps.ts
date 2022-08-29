@@ -2,6 +2,7 @@ export {
   Application,
   Context,
   Cookies as OakCookie,
+  createHttpError,
   isHttpError,
   proxy,
   REDIRECT_BACK,
@@ -11,12 +12,11 @@ export {
   send,
   Status,
   STATUS_TEXT,
-} from "https://deno.land/x/oak@v10.5.0/mod.ts";
+} from "https://deno.land/x/oak@v11.1.0/mod.ts";
 export {
   calculate,
   ifNoneMatch,
-} from "https://deno.land/x/oak@v10.5.0/etag.ts";
-export { createHttpError } from "https://deno.land/x/oak@v10.5.0/httpError.ts";
+} from "https://deno.land/x/oak@v11.1.0/etag.ts";
 
 export type {
   FormDataBody,
@@ -25,7 +25,7 @@ export type {
   RouterMiddleware,
   SendOptions,
   State,
-} from "https://deno.land/x/oak@v10.5.0/mod.ts";
+} from "https://deno.land/x/oak@v11.1.0/mod.ts";
 
 export { extname, resolve } from "https://deno.land/std@0.122.0/path/mod.ts";
 
