@@ -10,6 +10,7 @@ export class RedisStore implements ICacheStore {
   key = "cache_store";
   timeoutMap: Map<string, number>;
   constructor(@Inject(REDIS_KEY) public readonly client: Redis) {
+    this.timeoutMap = new Map<string, number>();
   }
 
   async get<T = any>(key: string): Promise<T | undefined> {
