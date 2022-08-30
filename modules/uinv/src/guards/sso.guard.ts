@@ -3,10 +3,15 @@ import { ajax } from "../tools/ajax.ts";
 import {
   Context,
   ForbiddenException,
+  ICacheStore,
   UnauthorizedException,
 } from "../../deps.ts";
 import type { CanActivate } from "../../deps.ts";
-import type { SSOGuardOptions, SSOUserInfo } from "../types.ts";
+import type {
+  ICacheStoreFunc,
+  SSOGuardOptions,
+  SSOUserInfo,
+} from "../types.ts";
 import { isDist, stringify } from "../tools/utils.ts";
 import { Injectable, Reflector, SetMetadata } from "../../../../mod.ts";
 
@@ -161,16 +166,20 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
 /**
  * 清理SSO的缓存，配合一个logout接口使用
  */
-export function getClearUserSSOCacheFunc(options: {
-  ssoApi?: string;
-  ssoUserInfoUrl?: string;
-} = {}) {
+export function getClearUserSSOCacheFunc(
+  options: Pick<SSOGuardOptions, "ssoApi" | "ssoUserInfoUrl" | "cacheStore"> =
+    {},
+) {
   const {
     ssoApi = Deno.env.get("ssoApi"),
     ssoUserInfoUrl = "/user/userinfo",
+    cacheStore,
   } = options;
 
-  return (headers: Headers) => {
+  return async (headers: Headers) => {
+    const store = typeof cacheStore === "function"
+      ? await cacheStore()
+      : cacheStore;
     return ajax.clearCacheByConfig({
       url: ssoUserInfoUrl,
       baseURL: ssoApi,
@@ -181,6 +190,7 @@ export function getClearUserSSOCacheFunc(options: {
         "user-agent": headers.get("user-agent") || "",
         referer: headers.get("referer") || "",
       },
+      cacheStore: store,
     });
   };
 }
