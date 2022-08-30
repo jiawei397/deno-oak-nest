@@ -63,6 +63,9 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
       const userAgent = headers.get("user-agent") || ssoUserAgent ||
         Deno.env.get("ssoUserAgent") || "";
       const realReferer = headers.get("referer") || referer || "";
+      const store = typeof cacheStore === "function"
+        ? await cacheStore()
+        : cacheStore;
       if (headers.get("app") === "1") {
         const userInfos = await ajax.post<SSOUserInfo[]>(ssoUserInfosUrl, {
           user_ids: [1],
@@ -75,9 +78,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
           },
           cacheTimeout,
           originHeaders: headers,
-          cacheStore: typeof cacheStore === "function"
-            ? await cacheStore()
-            : cacheStore,
+          cacheStore: store,
         });
         if (userInfos && userInfos.length > 0) {
           userInfo = userInfos[0];
@@ -92,9 +93,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
           },
           cacheTimeout,
           originHeaders: headers,
-          cacheStore: typeof cacheStore === "function"
-            ? await cacheStore()
-            : cacheStore,
+          cacheStore: store,
         });
       }
       if (userInfo) {
