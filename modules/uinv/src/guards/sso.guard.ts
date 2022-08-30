@@ -162,9 +162,9 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
  * 清理SSO的缓存，配合一个logout接口使用
  */
 export function getClearUserSSOCacheFunc(options: {
-  ssoApi: string;
-  ssoUserInfoUrl: string;
-}) {
+  ssoApi?: string;
+  ssoUserInfoUrl?: string;
+} = {}) {
   const {
     ssoApi = Deno.env.get("ssoApi"),
     ssoUserInfoUrl = "/user/userinfo",
