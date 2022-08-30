@@ -18,13 +18,13 @@ export {
   UnauthorizedException,
 } from "https://deno.land/x/oak_exception@v0.0.9/mod.ts";
 
-export { Ajax, md5 } from "https://deno.land/x/jw_fetch@v0.4.0/mod.ts";
+export { Ajax, md5 } from "https://deno.land/x/jw_fetch@v0.4.1/mod.ts";
 export type {
   AjaxConfig,
   AjaxData,
   ICacheStore,
   Method,
-} from "https://deno.land/x/jw_fetch@v0.4.0/mod.ts";
+} from "https://deno.land/x/jw_fetch@v0.4.1/mod.ts";
 
 export { createParamDecorator } from "../../mod.ts";
 export type { CanActivate, Context, Request } from "../../mod.ts";

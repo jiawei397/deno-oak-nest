@@ -27,11 +27,9 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
   const {
     logger = console,
     ssoApi = Deno.env.get("ssoApi"),
-    ssoUserAgent,
     ssoAllowAllUsers,
     ssoUserInfoUrl = "/user/userinfo",
     ssoUserInfosUrl = "/user/list/users_by_id",
-    referer,
     cacheTimeout = 60 * 60 * 1000,
     cacheStore,
     isDebug = !isDist(),
@@ -61,20 +59,17 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
     private async getSSO(request: Request) {
       const headers = request.headers;
       let userInfo: SSOUserInfo | undefined;
-      const userAgent = headers.get("user-agent") || ssoUserAgent ||
-        Deno.env.get("ssoUserAgent") || "";
-      const realReferer = headers.get("referer") || referer || "";
       const store = typeof cacheStore === "function"
         ? await cacheStore()
         : cacheStore;
-      if (headers.get("app") === "1") {
+      if (headers.get("app") === "1") { // 这是服务端调用的
         const userInfos = await ajax.post<SSOUserInfo[]>(ssoUserInfosUrl, {
           user_ids: [1],
         }, {
           baseURL: ssoApi,
           headers: {
-            "user-agent": userAgent,
-            referer: realReferer,
+            "user-agent": headers.get("user-agent") || "",
+            referer: headers.get("referer") || "",
             "Authorization": headers.get("Authorization") || "",
           },
           cacheTimeout,
@@ -85,13 +80,13 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
         if (userInfos && userInfos.length > 0) {
           userInfo = userInfos[0];
         }
-      } else {
+      } else { // 浏览器调用的
         userInfo = await ajax.get<SSOUserInfo>(ssoUserInfoUrl, null, {
           baseURL: ssoApi,
           headers: {
             cookie: headers.get("cookie") || "",
-            "user-agent": userAgent,
-            referer: realReferer,
+            "user-agent": headers.get("user-agent") || "",
+            referer: headers.get("referer") || "",
           },
           cacheTimeout,
           originHeaders: headers,
@@ -161,4 +156,31 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
   }
 
   return Guard;
+}
+
+/**
+ * 清理SSO的缓存，配合一个logout接口使用
+ */
+export function getClearUserSSOCacheFunc(options: {
+  ssoApi: string;
+  ssoUserInfoUrl: string;
+}) {
+  const {
+    ssoApi = Deno.env.get("ssoApi"),
+    ssoUserInfoUrl = "/user/userinfo",
+  } = options;
+
+  return (headers: Headers) => {
+    return ajax.clearCacheByConfig({
+      url: ssoUserInfoUrl,
+      baseURL: ssoApi,
+      data: null,
+      method: "get",
+      headers: {
+        cookie: headers.get("cookie") || "",
+        "user-agent": headers.get("user-agent") || "",
+        referer: headers.get("referer") || "",
+      },
+    });
+  };
 }
