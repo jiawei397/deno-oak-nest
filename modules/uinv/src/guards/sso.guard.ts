@@ -3,15 +3,10 @@ import { ajax } from "../tools/ajax.ts";
 import {
   Context,
   ForbiddenException,
-  ICacheStore,
   UnauthorizedException,
 } from "../../deps.ts";
 import type { CanActivate } from "../../deps.ts";
-import type {
-  ICacheStoreFunc,
-  SSOGuardOptions,
-  SSOUserInfo,
-} from "../types.ts";
+import type { SSOGuardOptions, SSOUserInfo } from "../types.ts";
 import { isDist, stringify } from "../tools/utils.ts";
 import { Injectable, Reflector, SetMetadata } from "../../../../mod.ts";
 
