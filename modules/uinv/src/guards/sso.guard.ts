@@ -7,7 +7,7 @@ import {
 } from "../../deps.ts";
 import type { CanActivate } from "../../deps.ts";
 import type { SSOGuardOptions, SSOUserInfo } from "../types.ts";
-import { stringify } from "../tools/utils.ts";
+import { isDist, stringify } from "../tools/utils.ts";
 import { Injectable, Reflector, SetMetadata } from "../../../../mod.ts";
 
 const SSO_STATUS_META_KEY = "meta:sso:status";
@@ -34,6 +34,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
     referer,
     cacheTimeout = 60 * 60 * 1000,
     cacheStore,
+    isDebug = !isDist(),
   } = options;
 
   @Injectable()
@@ -79,6 +80,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
           cacheTimeout,
           originHeaders: headers,
           cacheStore: store,
+          isDebug,
         });
         if (userInfos && userInfos.length > 0) {
           userInfo = userInfos[0];
@@ -94,6 +96,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
           cacheTimeout,
           originHeaders: headers,
           cacheStore: store,
+          isDebug,
         });
       }
       if (userInfo) {

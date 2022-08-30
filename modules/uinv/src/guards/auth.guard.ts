@@ -18,6 +18,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
     tokenField = "authorization",
     cacheTimeout = 60 * 60 * 1000,
     cacheStore,
+    isDebug = !isDist(),
   } = options;
   return class Guard implements CanActivate {
     async canActivate(context: Context) {
@@ -34,13 +35,14 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
       let b;
       if (headers.get(isPrivateTokenField)) {
         logger.debug(
-          `【${AuthGuard.name}】正在使用private_token校验，headers中${isPrivateTokenField}值为${
+          "AuthGuard",
+          `正在使用private_token校验，headers中${isPrivateTokenField}值为${
             headers.get(isPrivateTokenField)
           }`,
         );
         b = await this.checkPrivateToken(headers, request);
       } else {
-        logger.debug(`【${AuthGuard.name}】使用cookie校验`);
+        logger.debug("AuthGuard", `使用cookie校验`);
         b = await this.checkToken(headers, context);
       }
       if (!b) {
@@ -57,17 +59,17 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
     ): Promise<boolean | User> {
       const userVal = headers.get(checkUserField);
       if (!userVal) {
-        logger.warn(`【${AuthGuard.name}】headers中未找到【${checkUserField}】`);
+        logger.warn("AuthGuard", `headers中未找到【${checkUserField}】`);
         return false;
       }
       const token = headers.get(privateTokenField);
       if (!token) {
-        logger.warn(`【${AuthGuard.name}】headers中未找到【${privateTokenField}】`);
+        logger.warn("AuthGuard", `headers中未找到【${privateTokenField}】`);
         return false;
       }
       const userAgent = headers.get("user-agent");
       if (!userAgent) {
-        logger.warn(`【${AuthGuard.name}】headers中未找到【user-agent】`);
+        logger.warn("AuthGuard", `headers中未找到【user-agent】`);
         return false;
       }
       try {
@@ -76,28 +78,30 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
           if (result.id == userVal) {
             //这里用双等于，可能会是数字
             logger.info(
-              `【${AuthGuard.name}】${userVal}使用private_token校验通过！[user-agent]是${userAgent}`,
+              `${userVal}使用private_token校验通过！[user-agent]是${userAgent}`,
             );
             req.userInfo = result;
             return true;
           } else {
             logger.warn(
-              `【${AuthGuard.name}】用户id不匹配！从headers中传递过来的是【${userVal}】，但从gitlab得到的是【${result.id}】`,
+              "AuthGuard",
+              `用户id不匹配！从headers中传递过来的是【${userVal}】，但从gitlab得到的是【${result.id}】`,
             );
           }
         } else {
-          logger.warn(`【${AuthGuard.name}】调用getUserInfoByPrivateToken，未拿到数据`);
+          logger.warn("AuthGuard", `调用getUserInfoByPrivateToken，未拿到数据`);
         }
       } catch (e) {
         logger.error(
-          `【${AuthGuard.name}】调用getUserInfoByPrivateToken报错，错误信息为：${e.message}`,
+          "AuthGuard",
+          `调用getUserInfoByPrivateToken报错，错误信息为：${e.message}`,
         );
       }
       return false;
     }
 
     private async getUserInfoByPrivateToken(token: string, headers: Headers) {
-      logger.debug(`【AuthGuard】getUserInfoByPrivateToken，参数为：${token}`);
+      logger.debug("AuthGuard", `getUserInfoByPrivateToken，参数为：${token}`);
       return ajax.get<User>("/user/getUserInfoByGitlabPrivateToken", {
         token,
       }, {
@@ -108,6 +112,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
         cacheStore: typeof cacheStore === "function"
           ? await cacheStore()
           : cacheStore,
+        isDebug,
       });
     }
 
@@ -122,7 +127,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
         token = decodeURIComponent(token);
       }
       if (!token) {
-        logger.error(`未找到${tokenField}！`);
+        logger.error("AuthGuard", `未找到${tokenField}！`);
         return;
       }
       return token;
@@ -138,7 +143,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
     }
 
     private async getTokenInfoInDb(token: string, headers: Headers) {
-      logger.debug(`【AuthGuard】getTokenInfoInDb，参数为：${token}`);
+      logger.debug("AuthGuard", `getTokenInfoInDb，参数为：${token}`);
       return ajax.post<Token>("/user/getTokenInfoInDb", {
         token,
       }, {
@@ -149,6 +154,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
         cacheStore: typeof cacheStore === "function"
           ? await cacheStore()
           : cacheStore,
+        isDebug,
       });
     }
 
@@ -156,7 +162,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
       try {
         const token = await this.findToken(context);
         if (!token) {
-          logger.error(`【SimpleGuard】checkToken失败`);
+          logger.error("AuthGuard", `checkToken失败`);
           return false;
         }
         const find = await this.getTokenInfoInDb(
@@ -178,7 +184,8 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
         return true;
       } catch (e) {
         logger.error(
-          `【SimpleGuard】checkExtTokenInfo error and message is ${e.message}`,
+          "AuthGuard",
+          `checkExtTokenInfo error and message is ${e.message}`,
         );
       }
       return false;
@@ -191,16 +198,18 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
       try {
         if (!isDist()) {
           // 开发模式下不校验这些了
-          logger.debug(`【${AuthGuard.name}】开发环境下不校验token`);
+          logger.debug("AuthGuard", `开发环境下不校验token`);
           return true;
         }
         logger.debug(
+          "AuthGuard",
           `记录的ip是【${tokenRes.ip}】，headers中是【${headers.get("x-real-ip")}】`,
         );
         const userAgent = headers.get("user-agent");
         if (tokenRes.userAgent !== userAgent) {
           logger.error(
-            `【${AuthGuard.name}】userAgent不一致！记录的是【${tokenRes.userAgent}】，但headers中是【${userAgent}】`,
+            "AuthGuard",
+            `userAgent不一致！记录的是【${tokenRes.userAgent}】，但headers中是【${userAgent}】`,
           );
           return false;
         }
@@ -210,14 +219,16 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
             getFirstOriginByHost(host)
         ) {
           logger.error(
-            `【${AuthGuard.name}】host不一致！记录的是【${tokenRes.host}】，但headers中是【${host}】`,
+            "AuthGuard",
+            `host不一致！记录的是【${tokenRes.host}】，但headers中是【${host}】`,
           );
           return false;
         }
         return true;
       } catch (e) {
         logger.error(
-          `【${AuthGuard.name}】checkExtTokenInfo报错，错误信息为：【${e.message}】`,
+          "AuthGuard",
+          `checkExtTokenInfo报错，错误信息为：【${e.message}】`,
         );
         return false;
       }

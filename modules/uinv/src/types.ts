@@ -64,6 +64,7 @@ export type AuthGuardOptions = {
   checkUserField?: string;
   tokenField?: string;
   cacheStore?: ICacheStore | ICacheStoreFunc;
+  isDebug?: boolean;
 };
 
 export type SSOGuardOptions = {
@@ -77,6 +78,7 @@ export type SSOGuardOptions = {
   cacheStore?: ICacheStore | ICacheStoreFunc;
   ssoAllowAllUsers?: boolean;
   formatUserInfo?: (user: SSOUserInfo, context: Context) => void;
+  isDebug?: boolean;
 };
 
 export type BaseResult<T> = {
