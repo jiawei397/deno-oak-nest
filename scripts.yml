@@ -87,7 +87,7 @@ scripts:
     watch: false
     tsconfig: deno.json
   test:
-    cmd: deno test
+    cmd: deno test --coverage=cov_profile
     watch: false
     unstable: true
     allow:
@@ -95,6 +95,9 @@ scripts:
     env:
       DEBUG: 'true'  
     tsconfig: deno.json
+  coverage:
+    cmd: denon test && deno coverage cov_profile --lcov --output=cov_profile.lcov && genhtml -o cov_profile/html cov_profile.lcov
+    watch: false  
   cache: 
     cmd: deno cache --lock-write example/main.ts
     watch: false

@@ -5,3 +5,5 @@ index.js
 .deno_plugins
 /public/svg
 /example/*.js
+cov_profile
+*.lcov
