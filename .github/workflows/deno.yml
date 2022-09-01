@@ -25,7 +25,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.23.1
+          deno-version: v1.25.0
 
       # Uncomment this step to verify the use of 'deno fmt' on each commit.
       # - name: Verify formatting
@@ -35,4 +35,12 @@ jobs:
         run: deno lint
 
       - name: Run tests
-        run: deno test -A --unstable --config deno.json
+        run: deno task test
+
+      - name: generate lcov
+        run: deno task coverage > cov.lcov
+
+      - name: upload coverage
+        uses: codecov/codecov-action@v2
+        with:
+          files: cov.lcov  

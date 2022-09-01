@@ -96,7 +96,7 @@ scripts:
       DEBUG: 'true'  
     tsconfig: deno.json
   coverage:
-    cmd: denon test && deno coverage cov_profile --lcov --output=cov_profile.lcov && genhtml -o cov_profile/html cov_profile.lcov
+    cmd: denon test && deno coverage cov_profile  --lcov --output=cov_profile.lcov && genhtml -o cov_profile/html cov_profile.lcov
     watch: false  
   cache: 
     cmd: deno cache --lock-write example/main.ts
