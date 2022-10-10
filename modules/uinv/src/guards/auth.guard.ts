@@ -213,14 +213,14 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
           );
           return false;
         }
-        const host = headers.get("host") || "";
+        const referer = headers.get("referer") || "";
         if (
           getFirstOriginByHost(tokenRes.host) !==
-            getFirstOriginByHost(host)
+            getFirstOriginByHost(referer)
         ) {
           logger.error(
             "AuthGuard",
-            `host不一致！记录的是【${tokenRes.host}】，但headers中是【${host}】`,
+            `host不一致！记录的host是【${tokenRes.host}】，但headers中referer是【${referer}】`,
           );
           return false;
         }
