@@ -201,10 +201,15 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
           logger.debug("AuthGuard", `开发环境下不校验token`);
           return true;
         }
-        logger.debug(
-          "AuthGuard",
-          `记录的ip是【${tokenRes.ip}】，headers中是【${headers.get("x-real-ip")}】`,
-        );
+        const ip = headers.get("x-real-ip");
+        if (ip === tokenRes.ip) {
+          logger.debug("AuthGuard", `获取ip一致：[${ip}] `);
+        } else {
+          logger.warn(
+            "AuthGuard",
+            `记录的ip是【${tokenRes.ip}】，headers中是【${ip}】`,
+          );
+        }
         const userAgent = headers.get("user-agent");
         if (tokenRes.userAgent !== userAgent) {
           logger.error(
