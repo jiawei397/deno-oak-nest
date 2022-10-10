@@ -213,10 +213,15 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
           );
           return false;
         }
-        const referer = headers.get("referer") || "";
+        const referer = headers.get("referer");
+        if (!referer) {
+          logger.error("AuthGuard", `headers referer lost`);
+          return false;
+        }
+        const host = new URL(referer).host;
         if (
           getFirstOriginByHost(tokenRes.host) !==
-            getFirstOriginByHost(referer)
+            getFirstOriginByHost(host)
         ) {
           logger.error(
             "AuthGuard",
