@@ -120,7 +120,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
       let token: string | null | undefined = await context.cookies.get(
         tokenField,
       );
-      if (!isDist() && !token) { //开发时，找不到再到headers中找
+      if (isDebug && !token) { //开发时，找不到再到headers中找
         token = context.request.headers.get(tokenField);
       }
       if (token) {
@@ -196,7 +196,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
      */
     checkExtTokenInfo(tokenRes: Token, headers: Headers) {
       try {
-        if (!isDist()) {
+        if (isDebug) {
           // 开发模式下不校验这些了
           logger.debug("AuthGuard", `开发环境下不校验token`);
           return true;
