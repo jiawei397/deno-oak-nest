@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import {
   Body,
+  Cache,
   Controller,
   ControllerName,
   Delete,
@@ -15,7 +16,7 @@ import {
   UseGuards,
 } from "../../../mod.ts";
 import type { Context, FormDataFormattedBody } from "../../../mod.ts";
-import { BadRequestException, mockjs } from "../../deps.ts";
+import { BadRequestException, mockjs, nanoid } from "../../deps.ts";
 import { AuthGuard } from "../../guards/auth.guard.ts";
 import { AuthGuard2 } from "../../guards/auth2.guard.ts";
 import { AuthGuard3, SSOGuard } from "../../guards/auth3.guard.ts";
@@ -38,6 +39,12 @@ export class UserController {
   })
   large() {
     return new Array(100000).fill("Hello World").join("\n");
+  }
+
+  @Get("testLarge")
+  @Cache(100)
+  testLarge() {
+    return new Array(100000).fill(nanoid()).join("\n");
   }
 
   @UseGuards(AuthGuard2, AuthGuard3)

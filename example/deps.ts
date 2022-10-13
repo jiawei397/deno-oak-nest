@@ -51,3 +51,5 @@ export {
   dirname,
   fromFileUrl,
 } from "https://deno.land/std@0.120.0/path/mod.ts";
+
+export { nanoid } from "https://deno.land/x/nanoid@v3.0.0/mod.ts";
