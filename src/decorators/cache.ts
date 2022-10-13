@@ -15,12 +15,12 @@ function transArgs(...args: any[]) {
   }).join("_");
 }
 
-const timeoutArr: number[] = [];
+const timeoutStore = new Set<number>();
 export function clearCacheTimeout() {
-  timeoutArr.forEach((t) => {
+  for (const t of timeoutStore) {
     clearTimeout(t);
-  });
-  timeoutArr.length = 0;
+  }
+  timeoutStore.clear();
 }
 
 /**
@@ -64,8 +64,9 @@ export function Cache(
       if (timeout >= 0) {
         const st = setTimeout(() => {
           cache[key] = undefined;
+          timeoutStore.delete(st);
         }, timeout);
-        timeoutArr.push(st);
+        timeoutStore.add(st);
       }
       Promise.resolve(result).catch(() => {
         cache[key] = undefined;
