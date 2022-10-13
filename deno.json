@@ -1,6 +1,7 @@
 {
   "tasks": {
     "example": "deno run --unstable --allow-net --allow-read --allow-write --allow-env example/main.ts",
+    "pm2": "pm2 start --name oak_nest example/main.ts --interpreter='deno' --interpreter-args='run --allow-net --allow-env --allow-write --allow-read --unstable'",
     "test": "deno test --allow-env --parallel --ignore=example --coverage=cov_profile",
     "coverage": "deno coverage --unstable --lcov ./cov_profile",
     "coverage:html": "deno task test && deno task coverage > cov.lcov && genhtml -o cov_profile/html cov.lcov"
