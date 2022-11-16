@@ -17,7 +17,12 @@ export class RedisModule {
           useFactory: async () => { // can be async
             try {
               const client = await connect(db);
-              console.info("connect to redis success", yellow(stringify(db)));
+              console.info(
+                "connect to redis success",
+                yellow(
+                  `hostname: ${db.hostname}, port: ${db.port}, database: ${db.db}`,
+                ),
+              );
               this.client = client;
               return client;
             } catch (e) {
