@@ -119,7 +119,12 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
         try {
           userInfo = await this.getSSO(request);
         } catch (e) {
-          logger.error("SSOGuard", `sso校验信息未通过，原因是：${e.message || e}`);
+          const msg = e.message || e;
+          if (msg !== "Unauthorized") {
+            logger.error("SSOGuard", `sso校验信息未通过，原因是：${msg}`);
+          } else {
+            logger.debug("SSOGuard", `sso校验信息Unauthorized`);
+          }
           return false;
         }
       }
