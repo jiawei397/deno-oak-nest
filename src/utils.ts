@@ -66,3 +66,31 @@ export async function checkEtag(context: Context, val: any) {
   }
   return val;
 }
+
+export interface ReadableStreamResult {
+  body: ReadableStream;
+  write(message: string): void;
+  end(message?: string): void;
+}
+
+export function getReadableStream(): ReadableStreamResult {
+  let controller: ReadableStreamDefaultController;
+  const body = new ReadableStream({
+    start(_controller) {
+      controller = _controller;
+    },
+  });
+  const te = new TextEncoder();
+  return {
+    body,
+    write(message: string) {
+      controller.enqueue(te.encode(message));
+    },
+    end(message?: string) {
+      if (message) {
+        controller.enqueue(te.encode(message));
+      }
+      controller.close();
+    },
+  };
+}
