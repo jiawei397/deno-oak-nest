@@ -3,7 +3,6 @@ import type { Redis } from "../deps.ts";
 import { REDIS_KEY } from "./redis.constant.ts";
 import { RedisService } from "./redis.service.ts";
 import { RedisStore } from "./redis.store.ts";
-import { stringify } from "./utils.ts";
 
 export class RedisModule {
   static client: Redis;

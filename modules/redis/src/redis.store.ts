@@ -11,6 +11,7 @@ export class RedisStore implements ICacheStore {
   timeoutMap: Map<string, number>;
   constructor(@Inject(REDIS_KEY) public readonly client: Redis) {
     this.timeoutMap = new Map<string, number>();
+    this.clear().catch(console.error);
   }
 
   async get<T = any>(key: string): Promise<T | undefined> {
@@ -56,11 +57,11 @@ export class RedisStore implements ICacheStore {
   }
   async clear() {
     const keys = await this.client.smembers(this.key);
+    await this.client.del(this.key);
     await Promise.all(keys.map((key) => this.client.del(this.getNewKey(key))));
     for (const st of this.timeoutMap.values()) {
       clearTimeout(st);
     }
-    return this.client.del(this.key);
   }
   async has(key: string) {
     const newKey = this.getNewKey(key);
