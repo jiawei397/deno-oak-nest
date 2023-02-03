@@ -1,10 +1,18 @@
 {
+  "version": "1.14.0",
+  "name": "oak_nest",
   "tasks": {
-    "example": "deno run --unstable --allow-net --allow-read --allow-write --allow-env example/main.ts",
+    "dev": "deno run --unstable --allow-net --allow-read --allow-write --allow-env --check example/main.ts",
+    "dev:scheduler": "deno run --allow-net --allow-env  --unstable modules/scheduler/example/main.ts",
+    "dev:cache": "deno run --allow-net --allow-env  --unstable --location https://www.baidu.com modules/cache/example/main.ts",
+    "dev:redis": "deno run --allow-net --allow-env  --unstable modules/redis/example/main.ts",
+    "dev:es": "deno run --allow-net --allow-env --unstable modules/elasticsearch/example/main.ts",
     "pm2": "pm2 start --name oak_nest example/main.ts --interpreter='deno' --interpreter-args='run --allow-net --allow-env --allow-write --allow-read --unstable'",
     "test": "deno test --allow-env --parallel --ignore=example --coverage=cov_profile",
+    "cache": "deno cache --lock deno.lock --unstable --lock-write deps.ts",
     "coverage": "deno coverage --unstable --lcov ./cov_profile",
-    "coverage:html": "deno task test && deno task coverage > cov.lcov && genhtml -o cov_profile/html cov.lcov"
+    "coverage:html": "deno task test && deno task coverage > cov.lcov && genhtml -o cov_profile/html cov.lcov",
+    "log": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
   },
   "compilerOptions": {
     "removeComments": true,
