@@ -6,9 +6,9 @@ used MySQL client is <https://deno.land/x/mysql@v2.11.0/mod.ts>.
 ## example
 
 ```typescript
-import { Module } from "https://deno.land/x/oak_nest@v1.14.1/mod.ts";
+import { Module } from "https://deno.land/x/oak_nest@v1.14.2/mod.ts";
 import { AppController } from "./app.controller.ts";
-import { MysqlModule } from "https://deno.land/x/oak_nest@v1.14.1/modules/mysql/mod.ts";
+import { MysqlModule } from "https://deno.land/x/oak_nest@v1.14.2/modules/mysql/mod.ts";
 
 @Module({
   imports: [
@@ -31,13 +31,13 @@ Then can be used in AppController:
 import {
   Client,
   MYSQL_KEY,
-} from "https://deno.land/x/oak_nest@v1.14.1/modules/mysql/mod.ts";
+} from "https://deno.land/x/oak_nest@v1.14.2/modules/mysql/mod.ts";
 import {
   Controller,
   Get,
   Inject,
   Query,
-} from "https://deno.land/x/oak_nest@v1.14.1/mod.ts";
+} from "https://deno.land/x/oak_nest@v1.14.2/mod.ts";
 
 @Controller("")
 export class AppController {
