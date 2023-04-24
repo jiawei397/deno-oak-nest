@@ -10,16 +10,16 @@ export {
   rgb24,
   rgb8,
   yellow,
-} from "https://deno.land/std@0.117.0/fmt/colors.ts";
+} from "https://deno.land/std@0.184.0/fmt/colors.ts";
 
 export {
   connect,
   create,
   createLazyClient,
-} from "https://deno.land/x/redis@v0.25.3/mod.ts";
+} from "https://deno.land/x/redis@v0.29.3/mod.ts";
 export type {
   Redis,
   RedisConnectOptions,
-} from "https://deno.land/x/redis@v0.25.3/mod.ts";
+} from "https://deno.land/x/redis@v0.29.3/mod.ts";
 
 export { Inject, Injectable } from "../../src/decorators/inject.ts";
