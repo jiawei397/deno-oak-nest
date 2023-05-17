@@ -18,7 +18,7 @@ export const SINGLETON_MEAT_KEY = "meta:singleton";
 export function Inject(key: InjectParams): ParameterDecorator {
   return (
     target: any,
-    _propertyKey: string | symbol,
+    _propertyKey: unknown,
     parameterIndex: number,
   ) => {
     Reflect.defineMetadata(INJECT_META_KEY + parameterIndex, key, target);
@@ -35,11 +35,11 @@ export function getInjectData(
 export const Injectable = ({
   singleton = true,
 } = {}): ClassDecorator =>
-  (target) => {
-    if (!singleton) { // default is singleton
-      Reflect.defineMetadata(SINGLETON_MEAT_KEY, false, target);
-    }
-  };
+(target) => {
+  if (!singleton) { // default is singleton
+    Reflect.defineMetadata(SINGLETON_MEAT_KEY, false, target);
+  }
+};
 
 export function isSingleton(Cls: Constructor) {
   if (typeof Cls === "function") {
