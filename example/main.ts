@@ -85,6 +85,16 @@ const port = Number(Deno.env.get("PORT") || 2000);
 //   console.log("------error---", evt.error);
 // });
 
+addEventListener("unhandledrejection", (evt) => {
+  evt.preventDefault();
+  console.error(`unhandledrejection`, evt.reason);
+});
+
+addEventListener("error", (evt) => {
+  evt.preventDefault(); // 这句很重要
+  console.error(`global error`, evt.error);
+});
+
 app.addEventListener("listen", ({ hostname, port, secure }) => {
   console.log(
     `Listening on: ${secure ? "https://" : "http://"}${"localhost"}:${port}`,
