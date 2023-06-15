@@ -69,7 +69,9 @@ export async function checkEtag(context: Context, val: any) {
 
 export interface ReadableStreamResult {
   body: ReadableStream;
+  /** write message to stream, but it may cause error if the connection closed before */
   write(message: string): void;
+  /** write last message and end signal to stream, but it may cause error if the connection closed before */
   end(message?: string): void;
 }
 
