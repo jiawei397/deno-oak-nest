@@ -30,7 +30,7 @@ import { Factory } from "./factorys/class.factory.ts";
 import { transferParam } from "./params.ts";
 import { Context } from "../deps.ts";
 import { checkByInterceptors } from "./interceptor.ts";
-import { checkEtag } from "./utils.ts";
+import { checkEtag, setCacheControl } from "./utils.ts";
 import type { AliasOptions } from "./interfaces/controller.interface.ts";
 
 export function join(...paths: string[]) {
@@ -122,7 +122,7 @@ type ApiPrefixOptions = {
 };
 
 export class Router extends OriginRouter {
-  [x: string]: any
+  [x: string]: any;
   apiPrefix = "";
   apiPrefixOptions: ApiPrefixOptions = {};
   private _diabledGetComputeEtag = false;
@@ -190,6 +190,7 @@ export class Router extends OriginRouter {
     } else if (
       options.methodType.toLowerCase() === "get" && !this._diabledGetComputeEtag
     ) { // if get method, then deal 304
+      setCacheControl(context);
       await checkEtag(context, result);
     } else if (context.response.body === undefined) {
       context.response.body = result;

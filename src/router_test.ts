@@ -20,6 +20,7 @@ import { UseGuards } from "./guard.ts";
 import { Injectable } from "./decorators/inject.ts";
 
 Deno.test("join", () => {
+  assertEquals(join(), "");
   assertEquals(join(""), "");
   assertEquals(join("/"), "");
   assertEquals(join("api"), "/api");

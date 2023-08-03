@@ -23,17 +23,42 @@ export function parseSearch(search: string) {
   return map;
 }
 
+/**
+ * check etag and set etag header
+ * @returns If the etag is not match, then return false, else return true
+ */
 export async function checkEtag(context: Context, val: any) {
   if (!val) {
     context.response.body = val;
-    return val;
+    return false;
   }
   const etag = context.request.headers.get("If-None-Match");
   const str = typeof val === "string" ? val : JSON.stringify(val);
   const etagOptions = { weak: true };
-  const actual = await calculate(str, etagOptions);
-  context.response.headers.set("etag", actual);
+  if (
+    etag && !await ifNoneMatch(etag, str, etagOptions) // if etag is not match, then will return 200
+  ) {
+    context.response.status = 304;
+    context.response.body = undefined;
+    context.response.headers.set("etag", etag);
+    return true;
+  } else {
+    const actual = await calculate(str, etagOptions);
+    context.response.headers.set("etag", actual);
+    context.response.body = val;
+    return false;
+  }
+}
 
+export interface ReadableStreamResult {
+  body: ReadableStream;
+  /** write message to stream, but it may cause error if the connection closed before */
+  write(message: string): void;
+  /** write last message and end signal to stream, but it may cause error if the connection closed before */
+  end(message?: string): void;
+}
+
+export function setCacheControl(context: Context) {
   // cache-control see https://cloud.tencent.com/developer/section/1189911
   const requestCacheControl = context.request.headers.get("Cache-Control");
   let responseCacheControl = context.response.headers.get("Cache-Control");
@@ -53,26 +78,8 @@ export async function checkEtag(context: Context, val: any) {
     } else {
       responseCacheControl = "no-cache";
     }
+    context.response.headers.set("Cache-Control", responseCacheControl);
   }
-
-  context.response.headers.set("Cache-Control", responseCacheControl);
-  if (
-    etag && !await ifNoneMatch(etag, str, etagOptions) // if etag is not match, then will return 200
-  ) {
-    context.response.status = 304;
-    context.response.body = undefined;
-  } else {
-    context.response.body = val;
-  }
-  return val;
-}
-
-export interface ReadableStreamResult {
-  body: ReadableStream;
-  /** write message to stream, but it may cause error if the connection closed before */
-  write(message: string): void;
-  /** write last message and end signal to stream, but it may cause error if the connection closed before */
-  end(message?: string): void;
 }
 
 export function getReadableStream(): ReadableStreamResult {
@@ -96,3 +103,5 @@ export function getReadableStream(): ReadableStreamResult {
     },
   };
 }
+
+export const _internals = { ifNoneMatch };

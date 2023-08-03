@@ -291,7 +291,7 @@ Deno.test("Query", async (t) => {
       assert(query2.f === false);
       assert(query2.g === true);
       assert(query2.i === false);
-      assertEquals(query2.j, mockQuery.j);
+      assertEquals<string | number>(query2.j, mockQuery.j);
       assert(typeof query2.j === "string", "not transferred");
       assert(query2.k === undefined, "not transferred");
       assert(query2.l === undefined, "not transferred");
@@ -328,7 +328,7 @@ Deno.test("Query", async (t) => {
     testErrorButNotValidateQuery(@Query() query: QueryNotValidateDto) {
       callStack.push(5);
       assertEquals(query.a, mockErrorButNotValidatePathQuery.a);
-      assertEquals(
+      assertEquals<string | number>(
         query.d,
         mockErrorButNotValidatePathQuery.d,
       );
