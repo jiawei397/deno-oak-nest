@@ -154,7 +154,10 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
           throw new ForbiddenException(`没有权限`);
         }
       }
-      logger.debug("SSOGuard", `校验通过，得到用户信息为：${stringify(simpleInfo)}`);
+      logger.debug(
+        "SSOGuard",
+        `校验通过，得到用户信息为：${stringify(simpleInfo)}`,
+      );
       request.userInfo = userInfo;
       return true;
     }

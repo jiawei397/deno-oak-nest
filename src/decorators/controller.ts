@@ -29,7 +29,8 @@ export enum Methods {
   OPTIONS = "options",
 }
 
-const createMappingDecorator = (method: Methods) =>
+const createMappingDecorator =
+  (method: Methods) =>
   (path: string, options?: AliasOptions): MethodDecorator => {
     return (_target, _property, descriptor) => {
       Reflect.defineMetadata(META_PATH_KEY, path, descriptor.value);

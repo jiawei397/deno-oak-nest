@@ -11,27 +11,27 @@ export const paramMetadataKey = Symbol("meta:param");
  */
 export const createParamDecorator = (callback: ParamDecoratorCallback) => {
   return () =>
-    (
-      target: Instance,
-      propertyKey: string | symbol,
-      parameterIndex: number,
-    ) => {
-      let addedParameters = Reflect.getOwnMetadata(
+  (
+    target: Instance,
+    propertyKey: string | symbol,
+    parameterIndex: number,
+  ) => {
+    let addedParameters = Reflect.getOwnMetadata(
+      paramMetadataKey,
+      target.constructor,
+      propertyKey,
+    );
+    if (!addedParameters) {
+      addedParameters = [];
+      Reflect.defineMetadata(
         paramMetadataKey,
+        addedParameters,
         target.constructor,
         propertyKey,
       );
-      if (!addedParameters) {
-        addedParameters = [];
-        Reflect.defineMetadata(
-          paramMetadataKey,
-          addedParameters,
-          target.constructor,
-          propertyKey,
-        );
-      }
-      addedParameters[parameterIndex] = callback;
-    };
+    }
+    addedParameters[parameterIndex] = callback;
+  };
 };
 
 /**
