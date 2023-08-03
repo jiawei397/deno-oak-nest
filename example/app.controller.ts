@@ -1,4 +1,4 @@
-import { Controller, Get, getReadableStream, Header } from "../mod.ts";
+import { Controller, Get, getReadableStream, Header, HeaderJSON } from "../mod.ts";
 import { UserService } from "./user/services/user.service.ts";
 
 @Controller("")
@@ -48,7 +48,8 @@ export class AppController {
   })
   @Header("a", "b")
   @Header("c", "d")
+  @HeaderJSON()
   test() {
-    return "test";
+    return true;
   }
 }
