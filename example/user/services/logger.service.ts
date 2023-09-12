@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { Injectable } from "../../../src/decorators/inject.ts";
 import { Reflect } from "../../../deps.ts";
+import { bind } from "../../../src/decorators/bind.ts";
 
 interface ILogger {
   info(...messages: any[]): void;
@@ -13,49 +14,41 @@ interface ILogger {
   singleton: false,
 })
 export class LoggerService implements ILogger {
-  debug(...messages: any[]): void {
-    if (this.pre) {
-      console.debug(this.pre, ...messages);
+  private parentName?: string;
+
+  constructor() {
+    this.parentName = Reflect.getMetadata("meta:container", this)?.name;
+  }
+
+  private write(
+    methodName: "warn" | "info" | "debug" | "error",
+    ...messages: any[]
+  ): void {
+    if (this.parentName) {
+      console[methodName](this.parentName, ...messages);
     } else {
-      console.debug(...messages);
+      const [first, ...others] = messages;
+      console[methodName](first, ...others);
     }
   }
 
-  #pre: string | undefined;
-
-  get pre() {
-    if (this.#pre) {
-      return this.#pre;
-    }
-    const parent = Reflect.getMetadata("meta:container", this);
-    if (parent) {
-      this.#pre = parent.name;
-      return this.#pre;
-    }
-    return null;
+  @bind
+  debug(...messages: any[]) {
+    this.write("debug", ...messages);
   }
 
-  info(...messages: any[]) {
-    if (this.pre) {
-      console.log(this.pre, ...messages);
-    } else {
-      console.info(...messages);
-    }
+  @bind
+  info(...messages: any[]): void {
+    this.write("info", ...messages);
   }
 
-  warn(...messages: any[]) {
-    if (this.pre) {
-      console.warn(this.pre, ...messages);
-    } else {
-      console.warn(...messages);
-    }
+  @bind
+  warn(...messages: any[]): void {
+    this.write("warn", ...messages);
   }
 
-  error(...messages: any[]) {
-    if (this.pre) {
-      console.error(this.pre, ...messages);
-    } else {
-      console.error(...messages);
-    }
+  @bind
+  error(...messages: any[]): void {
+    this.write("error", ...messages);
   }
 }
