@@ -3,3 +3,4 @@ export * from "./inject.ts";
 export * from "./oak.ts";
 export * from "./controller.ts";
 export * from "./cache.ts";
+export * from "./bind.ts";
