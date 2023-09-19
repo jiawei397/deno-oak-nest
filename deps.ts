@@ -58,5 +58,3 @@ export {
   BodyParamValidationException,
   UnauthorizedException,
 } from "https://deno.land/x/oak_exception@v0.0.7/mod.ts";
-
-export { gzip } from "https://deno.land/x/denoflate@1.2.1/mod.ts";

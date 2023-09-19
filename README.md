@@ -350,7 +350,6 @@ If you want to serve your own static files, you can use the following:
 ```typescript
 app.useStaticAssets("example/static", {
   prefix: "static",
-  // gzip: true,
 });
 ```
 

@@ -10,15 +10,15 @@ export {
   rgb24,
   rgb8,
   yellow,
-} from "https://deno.land/std@0.97.0/fmt/colors.ts";
+} from "https://deno.land/std@0.191.0/fmt/colors.ts";
 
-export { format } from "https://deno.land/std@0.97.0/datetime/mod.ts";
+export { format } from "https://deno.land/std@0.191.0/datetime/mod.ts";
 
 import mockjs from "https://deno.land/x/deno_mock@v2.0.0/mod.ts";
 
 export { mockjs };
 
-export { delay } from "https://deno.land/std@0.97.0/async/mod.ts";
+export { delay } from "https://deno.land/std@0.191.0/async/mod.ts";
 
 export {
   IsArray,

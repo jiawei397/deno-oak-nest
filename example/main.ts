@@ -26,7 +26,6 @@ app.useGlobalInterceptors(new LoggingInterceptor());
 // must before routes
 app.useStaticAssets("example/static", {
   prefix: "static",
-  // gzip: true,
 });
 
 // Logger

@@ -1,19 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
-import {
-  Application,
-  blue,
-  Context,
-  createHttpError,
-  extname,
-  gzip,
-  Reflect,
-  resolve,
-  send,
-  yellow,
-} from "../../deps.ts";
+import { Application, Context, Reflect, resolve, send } from "../../deps.ts";
 import { getModuleMetadata, isModule } from "../decorators/module.ts";
 import type {
-  GzipOptions,
   ModuleType,
   Provider,
   StaticOptions,
@@ -119,16 +107,9 @@ export async function initProviders(
   }));
 }
 
-const defaultGzipOptions: GzipOptions = {
-  extensions: [".js", ".css", ".wasm"],
-  threshold: 1024 * 10, // 10kb
-  level: 5,
-};
-
 export class NestFactory {
   private static staticOptions?: StaticOptions;
 
-  private static isViewStarted: boolean;
   static app: ApplicationEx;
 
   static async create(module: ModuleType, cache = globalFactoryCaches) {
@@ -172,18 +153,6 @@ export class NestFactory {
     return app;
   }
 
-  private static checkWithPrefix(prefix: string, pathname: string) {
-    const prefixWithoutSlash = join(prefix);
-    if (
-      prefixWithoutSlash !== "" &&
-      (pathname === prefixWithoutSlash ||
-        pathname.startsWith(prefixWithoutSlash + "/"))
-    ) {
-      return true;
-    }
-    return false;
-  }
-
   /**
    * Sets a base directory for public assets.
    * @example
@@ -199,7 +168,7 @@ export class NestFactory {
     };
   }
 
-  private static async serveStaticAssets(context: Context) {
+  private static serveStaticAssets(context: Context) {
     const options = this.staticOptions;
     if (!options) {
       return;
@@ -207,8 +176,6 @@ export class NestFactory {
     const {
       baseDir,
       prefix = "/",
-      gzip: _gzip,
-      useOriginGzip,
       ...otherOptions
     } = options;
     const prefixWithoutSlash = join(prefix);
@@ -229,78 +196,12 @@ export class NestFactory {
           ...otherOptions,
           index,
           root,
-          gzip: useOriginGzip || false,
         });
       } catch {
         context.response.status = 404;
       }
     };
-    if (useOriginGzip) {
-      return sendFile();
-    }
-    const encodeings = context.request.headers.get("accept-encoding");
-    if (!encodeings || !encodeings.includes("gzip")) {
-      return sendFile();
-    }
-    let canGzip = !!_gzip;
-    if (_gzip) {
-      let extensions: string[] = defaultGzipOptions.extensions!;
-      if (typeof _gzip !== "boolean") {
-        if (Array.isArray(_gzip.extensions)) {
-          extensions = _gzip.extensions;
-        }
-      }
-      canGzip = extensions.includes(extname(pathname));
-    }
-    if (!canGzip) {
-      return sendFile();
-    }
-    const gzipOptions = typeof _gzip === "boolean" ? defaultGzipOptions : {
-      ...defaultGzipOptions,
-      ..._gzip,
-    };
-    const realFilePath = resolve(
-      Deno.cwd(),
-      baseDir!,
-      formattedPath,
-    );
-    const gzipPath = realFilePath + ".gz";
-    const fileContent = await Deno.readFile(gzipPath).catch(() => null);
-    if (fileContent) {
-      context.response.body = fileContent;
-    } else {
-      let fileContent: Uint8Array;
-      try {
-        fileContent = await Deno.readFile(realFilePath);
-      } catch (err) {
-        if (err instanceof Deno.errors.NotFound) {
-          throw createHttpError(404, err.message);
-        }
-      }
-      if (gzipOptions.filter && !gzipOptions.filter(context, fileContent!)) {
-        return sendFile();
-      }
-      if (fileContent!.length < gzipOptions.threshold!) {
-        // console.debug(
-        //   "File is too small to gzip",
-        //   realFilePath,
-        //   fileContent.length,
-        //   gzipOptions.threshold,
-        // );
-        return sendFile();
-      }
-      const gzipContent = gzip(fileContent!, gzipOptions.level);
-      context.response.body = gzipContent;
-      const status = await Deno.permissions.query({ name: "write" });
-      if (status.state === "granted") {
-        await Deno.writeFile(gzipPath, gzipContent).catch(console.error);
-        console.info(`${blue("write gzip file success")} [${gzipPath}]`);
-      } else {
-        console.warn(`${yellow("write gzip file denied")} [${gzipPath}]`);
-      }
-    }
-    context.response.headers.set("Content-Encoding", "gzip");
-    context.response.headers.delete("Content-Length");
+    return sendFile();
   }
 
   /**
