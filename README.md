@@ -41,7 +41,7 @@ import {
 } from "https://deno.land/x/oak_nest@v1.15.1/mod.ts";
 import type { CanActivate } from "https://deno.land/x/oak_nest@v1.15.1/mod.ts";
 import mockjs from "https://deno.land/x/deno_mock@v2.0.0/mod.ts";
-import { delay } from "https://deno.land/std/async/mod.ts";
+import { delay } from "https://deno.land/std@0.194.0/async/mod.ts";
 
 class AuthGuard implements CanActivate {
   async canActivate(context: Context): Promise<boolean> {

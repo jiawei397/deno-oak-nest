@@ -27,7 +27,7 @@ export type {
   State,
 } from "https://deno.land/x/oak@v11.1.0/mod.ts";
 
-export { extname, resolve } from "https://deno.land/std@0.122.0/path/mod.ts";
+export { extname, resolve } from "https://deno.land/std@0.194.0/path/mod.ts";
 
 export {
   bgBlue,
@@ -41,11 +41,11 @@ export {
   rgb24,
   rgb8,
   yellow,
-} from "https://deno.land/std@0.122.0/fmt/colors.ts";
+} from "https://deno.land/std@0.194.0/fmt/colors.ts";
 
-export { assert } from "https://deno.land/std@0.122.0/testing/asserts.ts";
+export { assert } from "https://deno.land/std@0.194.0/testing/asserts.ts";
 
-export { format } from "https://deno.land/std@0.122.0/datetime/mod.ts";
+export { format } from "https://deno.land/std@0.194.0/datetime/mod.ts";
 
 export { Reflect } from "https://deno.land/x/deno_reflect@v0.2.1/mod.ts";
 

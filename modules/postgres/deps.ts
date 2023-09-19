@@ -10,7 +10,7 @@ export {
   rgb24,
   rgb8,
   yellow,
-} from "https://deno.land/std@0.117.0/fmt/colors.ts";
+} from "https://deno.land/std@0.194.0/fmt/colors.ts";
 
 export {
   Client,

@@ -14,7 +14,7 @@ export {
   it,
 } from "https://deno.land/std@0.194.0/testing/bdd.ts";
 
-export { delay } from "https://deno.land/std@0.118.0/async/mod.ts";
+export { delay } from "https://deno.land/std@0.194.0/async/mod.ts";
 
 export {
   Application,
