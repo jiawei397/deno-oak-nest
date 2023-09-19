@@ -12,11 +12,12 @@ export {
   send,
   Status,
   STATUS_TEXT,
-} from "https://deno.land/x/oak@v11.1.0/mod.ts";
+} from "https://deno.land/x/oak@v12.6.1/mod.ts";
 export {
   calculate,
+  ifMatch,
   ifNoneMatch,
-} from "https://deno.land/x/oak@v11.1.0/etag.ts";
+} from "https://deno.land/x/oak@v12.6.1/etag.ts";
 
 export type {
   FormDataBody,
@@ -25,7 +26,7 @@ export type {
   RouterMiddleware,
   SendOptions,
   State,
-} from "https://deno.land/x/oak@v11.1.0/mod.ts";
+} from "https://deno.land/x/oak@v12.6.1/mod.ts";
 
 export { extname, resolve } from "https://deno.land/std@0.194.0/path/mod.ts";
 

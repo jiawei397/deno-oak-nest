@@ -66,7 +66,7 @@ describe("checkEtag", () => {
     const val = "test value";
     context.request.headers.set(
       "If-None-Match",
-      `W/"a-1Wx1Pg+M6Euj06soRijPZZT9qnQ"`,
+      `W/"a-R9HYJzcQ/W9qWZX6waCYP+Dogow"`,
     );
     const matched = await checkEtag(context, val);
     assert(matched);

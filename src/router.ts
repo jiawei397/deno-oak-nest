@@ -146,7 +146,12 @@ export class Router extends OriginRouter {
     this.globalInterceptors.push(...interceptors);
   }
 
-  async add(...clsArr: Type[]) {
+  /**
+   * register controller
+   * @description not recommend to use alone
+   * @protected
+   */
+  async register(...clsArr: Type[]) {
     await Promise.all(clsArr.map(async (Cls) => {
       const find = this.routerArr.find(({ cls }) => cls === Cls);
       if (find) {

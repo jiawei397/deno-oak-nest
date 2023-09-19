@@ -5,5 +5,9 @@
   },
   "deno.config": "deno.json",
   "deno.lint": true,
-  "deno.suggest.autoImports": true
+  "deno.suggest.autoImports": true,
+  "code-runner.executorMap": {
+    "javascript": "deno run -A --unstable ",
+    "typescript": "deno run -A --unstable "
+  },
 }

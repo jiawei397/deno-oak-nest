@@ -53,6 +53,6 @@ Deno.test("Inject with controller", async () => {
   }
 
   const router = new Router();
-  await router.add(A);
+  await router.register(A);
   assertEquals(callStack, [1]);
 });

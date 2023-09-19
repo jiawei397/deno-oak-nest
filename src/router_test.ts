@@ -234,7 +234,7 @@ Deno.test("add", async () => {
     @Get("/a")
     method1() {}
   }
-  const result = await router.add(A);
+  const result = await router.register(A);
   assert(Array.isArray(result));
   assertEquals(result.length, 1);
   assert(result[0]);
@@ -246,7 +246,7 @@ Deno.test("add", async () => {
   assertEquals(arr[0].methodPath, "/a");
   assertEquals(arr[0].methodName, "method1");
 
-  const result2 = await router.add(A);
+  const result2 = await router.register(A);
   assertEquals(result2.length, 1, "should not add same controller");
 
   class B {
@@ -257,7 +257,7 @@ Deno.test("add", async () => {
     method3() {}
   }
 
-  const result3 = await router.add(B);
+  const result3 = await router.register(B);
   assertEquals(result3.length, 2, "should add new controller");
   assertEquals(result3[1].arr.length, 2);
 });
@@ -269,7 +269,7 @@ Deno.test("add with prefix", async () => {
     @Get("/a")
     method1() {}
   }
-  const result = await router.add(A);
+  const result = await router.register(A);
   assert(Array.isArray(result));
   assertEquals(result[0].controllerPath, "", "will not deal prefix now");
 });
@@ -285,7 +285,7 @@ Deno.test("routes without controller", async () => {
     @Post("/b")
     method2() {}
   }
-  await router.add(A);
+  await router.register(A);
 
   const callStack: number[] = [];
   const originGet = Router.prototype.get;
@@ -350,7 +350,7 @@ Deno.test("routes with controller", async () => {
     @Post("/b")
     method2() {}
   }
-  await router.add(A);
+  await router.register(A);
 
   const callStack: number[] = [];
   const originGet = Router.prototype.get;
@@ -426,7 +426,7 @@ Deno.test("routes check result", async (t) => {
       ctx.response.body = new Error("d");
     }
   }
-  await router.add(A);
+  await router.register(A);
 
   await t.step("get a ", async () => {
     const ctx = testing.createMockContext({
@@ -496,7 +496,7 @@ Deno.test("routes with guard success", async () => {
       return "a";
     }
   }
-  await router.add(A);
+  await router.register(A);
 
   const ctx = testing.createMockContext({
     path: "/user/a",
@@ -532,7 +532,7 @@ Deno.test("routes with guard forbidden", async () => {
       return "a";
     }
   }
-  await router.add(A);
+  await router.register(A);
 
   const ctx = testing.createMockContext({
     path: "/user/a",
@@ -569,7 +569,7 @@ Deno.test("routes with guard status self", async () => {
       return "a";
     }
   }
-  await router.add(A);
+  await router.register(A);
 
   const ctx = testing.createMockContext({
     path: "/user/a",

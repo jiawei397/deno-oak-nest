@@ -150,7 +150,7 @@ Deno.test("Reflector", async () => {
     path: "/a",
     method: "GET",
   });
-  await router.add(TestController);
+  await router.register(TestController);
   const mw = router.routes();
   const next = testing.createMockNext();
 

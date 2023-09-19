@@ -26,7 +26,7 @@ Deno.test("createParamDecorator", async () => {
   }
 
   const router = new Router();
-  await router.add(A);
+  await router.register(A);
   const ctx = testing.createMockContext({
     path: "/user/a",
     method: "GET",
@@ -61,7 +61,7 @@ Deno.test("createParamDecoratorWithLowLevel", async () => {
   }
 
   const router = new Router();
-  await router.add(A);
+  await router.register(A);
   const ctx = testing.createMockContext({
     path: "/user/a",
     method: "GET",
@@ -113,7 +113,7 @@ Deno.test("transferParam", async () => {
   }
 
   const router = new Router();
-  await router.add(A);
+  await router.register(A);
 
   const mw = router.routes();
   const next = testing.createMockNext();

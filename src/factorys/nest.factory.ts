@@ -132,7 +132,7 @@ export class NestFactory {
 
     if (controllers.length) {
       router.defaultCache = cache;
-      await router.add(...controllers);
+      await router.register(...controllers);
     }
 
     // bind router methods to app

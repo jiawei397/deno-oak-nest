@@ -115,7 +115,7 @@ Deno.test("body", async (t) => {
   }
 
   const router = new Router();
-  await router.add(A);
+  await router.register(A);
 
   await t.step("get", async () => {
     const ctx = mockContext({
@@ -345,7 +345,7 @@ Deno.test("Query", async (t) => {
   }
 
   const router = new Router();
-  await router.add(A);
+  await router.register(A);
 
   await t.step("get mock", async () => {
     const ctx = testing.createMockContext({
@@ -469,7 +469,7 @@ Deno.test("Params", async (t) => {
   }
 
   const router = new Router();
-  await router.add(A);
+  await router.register(A);
 
   await t.step("a 1", async () => {
     const ctx = testing.createMockContext({
@@ -525,7 +525,7 @@ Deno.test("Req, Res, ControllerName, MethodName", async () => {
   }
 
   const router = new Router();
-  await router.add(A);
+  await router.register(A);
 
   const mw = router.routes();
   const next = testing.createMockNext();
@@ -542,7 +542,9 @@ Deno.test("Cookies", async () => {
     method: "GET",
   });
   ctx.request.headers.set("Cookie", "a=b; c=4;");
-  ctx.cookies = new OakCookie(ctx.request, ctx.response);
+  ctx.cookies = new OakCookie(ctx.request, {
+    response: ctx.response,
+  });
   @Controller("")
   class A {
     @Get("a")
@@ -566,7 +568,7 @@ Deno.test("Cookies", async () => {
   }
 
   const router = new Router();
-  await router.add(A);
+  await router.register(A);
 
   const mw = router.routes();
   const next = testing.createMockNext();
@@ -606,7 +608,7 @@ Deno.test("Headers", async () => {
   }
 
   const router = new Router();
-  await router.add(A);
+  await router.register(A);
 
   const mw = router.routes();
   const next = testing.createMockNext();
@@ -648,7 +650,7 @@ Deno.test("UploadedFile form data", async (t) => {
   }
 
   const router = new Router();
-  await router.add(A);
+  await router.register(A);
 
   await t.step("not upload", async () => {
     const ctx = createMockContext({

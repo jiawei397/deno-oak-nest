@@ -32,18 +32,21 @@ export async function checkEtag(context: Context, val: any) {
     context.response.body = val;
     return false;
   }
-  const etag = context.request.headers.get("If-None-Match");
   const str = typeof val === "string" ? val : JSON.stringify(val);
   const etagOptions = { weak: true };
+  const actual = await calculate(str, etagOptions);
+  if (!actual) {
+    return false;
+  }
+  const etag = context.request.headers.get("If-None-Match");
   if (
-    etag && !await ifNoneMatch(etag, str, etagOptions) // if etag is not match, then will return 200
+    etag && !ifNoneMatch(etag, actual) // if etag is not match, then will return 200
   ) {
     context.response.status = 304;
     context.response.body = undefined;
     context.response.headers.set("etag", etag);
     return true;
   } else {
-    const actual = await calculate(str, etagOptions);
     context.response.headers.set("etag", actual);
     context.response.body = val;
     return false;

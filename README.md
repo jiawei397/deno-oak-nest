@@ -4,15 +4,28 @@
 [![Deno](https://github.com/jiawei397/deno-oak-nest/actions/workflows/deno.yml/badge.svg)](https://github.com/jiawei397/deno-oak-nest/actions/workflows/deno.yml)
 [![codecov](https://codecov.io/gh/jiawei397/deno-oak-nest/branch/master/graph/badge.svg?token=NKP41TU4SL)](https://codecov.io/gh/jiawei397/deno-oak-nest)
 
-Rely on [oak@v11.1.0](https://deno.land/x/oak@v11.1.0/mod.ts) to simulate some
-annotation functions of [nestjs](https://docs.nestjs.com/) which is a frame for
-nodejs.
+Rely on [oak@v12.6.1](https://deno.land/x/oak@v12.6.1/mod.ts) to simulate some
+annotation functions of [NestJS](https://docs.nestjs.com/) which is a frame for
+Node.js.
 
 I will update the `oak` version if need.
 
+## config
+
+Before start your app, you may set `deno.json` before:
+
+```json
+"compilerOptions": {
+  "emitDecoratorMetadata": true,
+  "strictPropertyInitialization": false
+}
+```
+
 ## run
 
-```
+You can see the current Demo by:
+
+```bash
 deno task dev
 ```
 
@@ -218,7 +231,7 @@ import { Factory } from "https://deno.land/x/oak_nest@v1.15.2/mod.ts";
 Factory(UserService).info();
 ```
 
-### router add Controller
+### Router add Controller
 
 ```ts
 import { UserController } from "./user.controller.ts";
@@ -227,15 +240,15 @@ import { RoleController } from "./role.controller.ts";
 import { Router } from "https://deno.land/x/oak_nest@v1.15.2/mod.ts";
 
 const router = new Router();
-await router.add(UserController);
+await router.register(UserController);
 router.setGlobalPrefix("api");
-await router.add(RoleController, User2Controller);
+await router.register(RoleController, User2Controller);
 ```
 
-> It should be noted that `router.add` has been modified to asynchronous by me.
+> Note that the `router.add` API has been used by the `oak router` when `12.6`, so I have to change to `router.register`.
 > Of course, I now recommend the following way `use Module`.
 
-### use router in app
+### use Router in app
 
 ```ts
 import {
@@ -409,7 +422,7 @@ import { Inject } from "https://deno.land/x/oak_nest@v1.15.2/mod.ts";
 export const InjectModel = (Cls: Constructor) => Inject(() => getModel(Cls));
 ```
 
-> To support it, I changed the `router.add` method to asynchronous. It was not a
+> To support it, I changed the `router.register` method to asynchronous. It was not a
 > pleasant decision.
 
 Here is a Service example:
