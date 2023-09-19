@@ -10,9 +10,9 @@ module, there are not many lines.
 ## example
 
 ```typescript
-import { Module } from "https://deno.land/x/oak_nest@v1.15.2/mod.ts";
+import { Module } from "https://deno.land/x/oak_nest@v2.0.0/mod.ts";
 import { AppController } from "./app.controller.ts";
-import { PostgresModule } from "https://deno.land/x/oak_nest@v1.15.2/modules/postgres/mod.ts";
+import { PostgresModule } from "https://deno.land/x/oak_nest@v2.0.0/modules/postgres/mod.ts";
 
 @Module({
   imports: [
@@ -35,13 +35,13 @@ Then can be used in AppController:
 import {
   Client,
   POSTGRES_KEY,
-} from "https://deno.land/x/oak_nest@v1.15.2/modules/postgres/mod.ts";
+} from "https://deno.land/x/oak_nest@v2.0.0/modules/postgres/mod.ts";
 import {
   Controller,
   Get,
   Inject,
   Query,
-} from "https://deno.land/x/oak_nest@v1.15.2/mod.ts";
+} from "https://deno.land/x/oak_nest@v2.0.0/mod.ts";
 
 @Controller("")
 export class AppController {
