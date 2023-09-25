@@ -1,4 +1,9 @@
-import { assert, assertEquals, assertRejects } from "../../test_deps.ts";
+import {
+  assert,
+  assertEquals,
+  assertFalse,
+  assertRejects,
+} from "../../test_deps.ts";
 import { Reflect } from "../../deps.ts";
 import { Injectable } from "../decorators/inject.ts";
 import { Scope } from "../interfaces/scope-options.interface.ts";
@@ -25,6 +30,8 @@ Deno.test("Factory without providers", async () => {
 Deno.test("Factory with providers", async () => {
   const Controller = (): ClassDecorator => () => {};
 
+  const callStack: number[] = [];
+
   @Injectable()
   class B {
   }
@@ -33,40 +40,45 @@ Deno.test("Factory with providers", async () => {
     singleton: false,
   })
   class C {
+    constructor() {
+      assertFalse(
+        Reflect.getMetadata(META_CONTAINER_KEY, this),
+        "C not be injected metadata in constructor",
+      );
+    }
+
+    __post__init__() {
+      callStack.push(1);
+    }
   }
 
   @Controller()
   class A {
-    constructor(private readonly b: B, private readonly c: C) {}
-
-    getB() {
-      return this.b;
-    }
-
-    getC() {
-      return this.c;
+    constructor(public readonly b: B, public readonly c: C) {
     }
   }
 
   const a = await Factory(A);
-  assert(a.getB());
-  assert(a.getB() instanceof B);
-  assert(a.getC());
-  assert(a.getC() instanceof C);
+  assert(a.b);
+  assert(a.b instanceof B);
+  assert(a.c);
+  assert(a.c instanceof C);
+
+  assertEquals(callStack, [1]);
 
   const a1 = await Factory(A);
   assert(a === a1, "Factory should return the same instance");
-  assert(a.getB() === a1.getB(), "B should return the same instance");
-  assert(a.getC() === a1.getC(), "C should return the same instance");
+  assert(a.b === a1.b, "B should return the same instance");
+  assert(a.c === a1.c, "C should return the same instance");
+
+  assertEquals(callStack, [1]);
 
   assertEquals(Reflect.getMetadata(META_CONTAINER_KEY, a), undefined);
-  assertEquals(Reflect.getMetadata(META_CONTAINER_KEY, a.getB()), undefined);
-  assert(Reflect.getMetadata(META_CONTAINER_KEY, a.getC()) === A);
-
-  const c = await Factory(C);
-  assert(c instanceof C);
-  const c1 = await Factory(C);
-  assert(c !== c1, "C should return different instance");
+  assertEquals(Reflect.getMetadata(META_CONTAINER_KEY, a.b), undefined);
+  assert(
+    Reflect.getMetadata(META_CONTAINER_KEY, a.c) === A,
+    "C should record the parent class A",
+  );
 });
 
 Deno.test("initProvider", async () => {

@@ -7,3 +7,4 @@ index.js
 /example/*.js
 cov_profile
 *.lcov
+vendor

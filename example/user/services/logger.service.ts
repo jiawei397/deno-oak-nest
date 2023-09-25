@@ -1,7 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import { Injectable } from "../../../src/decorators/inject.ts";
+import { Injectable, META_CONTAINER_KEY } from "../../../mod.ts";
 import { Reflect } from "../../../deps.ts";
-import { bind } from "../../../src/decorators/bind.ts";
 
 interface ILogger {
   info(...messages: any[]): void;
@@ -16,8 +15,12 @@ interface ILogger {
 export class LoggerService implements ILogger {
   private parentName?: string;
 
-  constructor() {
-    this.parentName = Reflect.getMetadata("meta:container", this)?.name;
+  /**
+   * The parent name was not injected when the service was created
+   * @private
+   */
+  __post__init__() {
+    this.parentName = Reflect.getMetadata(META_CONTAINER_KEY, this)?.name;
   }
 
   private write(
@@ -32,22 +35,18 @@ export class LoggerService implements ILogger {
     }
   }
 
-  @bind
   debug(...messages: any[]) {
     this.write("debug", ...messages);
   }
 
-  @bind
   info(...messages: any[]): void {
     this.write("info", ...messages);
   }
 
-  @bind
   warn(...messages: any[]): void {
     this.write("warn", ...messages);
   }
 
-  @bind
   error(...messages: any[]): void {
     this.write("error", ...messages);
   }

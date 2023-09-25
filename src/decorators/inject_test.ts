@@ -1,6 +1,6 @@
 import { getInjectData, Inject, Injectable } from "./inject.ts";
-import { assertEquals } from "../../test_deps.ts";
-import { initProvider } from "../factorys/class.factory.ts";
+import { assert, assertEquals } from "../../test_deps.ts";
+import { Factory, initProvider } from "../factorys/class.factory.ts";
 import { Scope } from "../interfaces/scope-options.interface.ts";
 import { Controller } from "./controller.ts";
 import { Router } from "../router.ts";
@@ -55,4 +55,19 @@ Deno.test("Inject with controller", async () => {
   const router = new Router();
   await router.register(A);
   assertEquals(callStack, [1]);
+});
+
+Deno.test("Injectable singleton false", async (t) => {
+  @Injectable({
+    singleton: false,
+  })
+  class A {}
+
+  await t.step("check instance", async () => {
+    const a1 = await Factory(A);
+    assert(a1 instanceof A);
+    const a2 = await Factory(A);
+    assert(a2 instanceof A);
+    assert(a1 !== a2, "A should return different instance");
+  });
 });

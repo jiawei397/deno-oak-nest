@@ -32,7 +32,7 @@ export class RoleController {
     private readonly asyncService: AsyncService,
     private readonly loggerService: LoggerService,
   ) {
-    this.loggerService.info("role");
+    this.loggerService.info("role"); // Should log: "UserController role"
   }
 
   @Get("param/:name/:id")

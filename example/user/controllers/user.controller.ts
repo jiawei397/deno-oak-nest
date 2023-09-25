@@ -31,7 +31,7 @@ import { QueryUserInfoDto, UploadDto } from "../dtos/user.dto.ts";
 })
 export class UserController {
   constructor(private readonly loggerService: LoggerService) {
-    this.loggerService.info("user");
+    this.loggerService.info("user"); // Should log: "UserController user"
   }
 
   @Get("/v2/${prefix}/user/large", {

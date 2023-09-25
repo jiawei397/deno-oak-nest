@@ -80,7 +80,10 @@ export const getInstance = async <T>(
           param = await Factory(paramtype, scope, factoryCaches);
         }
         if (!isSingleton(paramtype)) {
-          Reflect.defineMetadata(META_CONTAINER_KEY, target, param);
+          Reflect.defineMetadata(META_CONTAINER_KEY, target, param); // the meta can only be set to the instance
+          if (param.__post__init__ instanceof Function) {
+            param.__post__init__();
+          }
         }
         return param;
       }),
