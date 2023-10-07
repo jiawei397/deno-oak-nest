@@ -3,7 +3,6 @@ import { Application, assert, assertEquals } from "../../test_deps.ts";
 import { Module } from "../decorators/module.ts";
 import type { Provider } from "../interfaces/provider.interface.ts";
 import type { Type } from "../interfaces/type.interface.ts";
-import { Router } from "../router.ts";
 import { findControllers, initProviders, NestFactory } from "./nest.factory.ts";
 
 Deno.test("NestFactory", async () => {
@@ -20,7 +19,6 @@ Deno.test("NestFactory", async () => {
   assert(app.useGlobalInterceptors);
   assert(app.use);
   assert(app.get);
-  assert(app.router instanceof Router);
 });
 
 Deno.test("findControllers", async () => {

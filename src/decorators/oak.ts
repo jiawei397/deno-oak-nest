@@ -2,11 +2,12 @@
 import {
   assert,
   BodyParamValidationException,
+  type Context,
+  getCookie,
   Reflect,
   validateOrReject,
   ValidationError,
 } from "../../deps.ts";
-import type { Context } from "../../deps.ts";
 import {
   createParamDecorator,
   createParamDecoratorWithLowLevel,
@@ -18,6 +19,7 @@ import type {
   FormDataFormattedBody,
   FormDataOptions,
 } from "../interfaces/param.interface.ts";
+import { NestResponse } from "../response.ts";
 
 const typePreKey = "oaktype:";
 
@@ -32,7 +34,6 @@ export function Property(arrayItemType?: ArrayItemType): PropertyDecorator {
   };
 }
 
-// deno-lint-ignore ban-types
 export async function validateParams(Cls: Constructor, value: object) {
   if (!Cls || Cls === Object) { // if no class validation, we can skip this
     return;
@@ -64,20 +65,24 @@ export async function validateParams(Cls: Constructor, value: object) {
 export function Body(key?: string) {
   return createParamDecoratorWithLowLevel(
     async (ctx: Context, target: any, methodName: string, index: number) => {
-      const result = ctx.request.body(); // content type automatically detected
-      if (result.type === "json") {
-        const value = await result.value; // an object of parsed JSON
-        const providers = Reflect.getMetadata( // get the params providers
-          "design:paramtypes",
-          target,
-          methodName,
-        );
-        await validateParams(providers?.[index], value);
-        if (key) {
-          return value?.[key];
-        }
-        return value;
+      const result = ctx.req.raw.body; // content type automatically detected
+      const contentType = ctx.req.header("content-type");
+      if (
+        !result || !contentType || !contentType.includes("application/json")
+      ) {
+        return result;
       }
+      const value = await ctx.req.json();
+      const providers = Reflect.getMetadata( // get the params providers
+        "design:paramtypes",
+        target,
+        methodName,
+      );
+      await validateParams(providers?.[index], value);
+      if (key) {
+        return value?.[key];
+      }
+      return value;
     },
   );
 }
@@ -106,7 +111,7 @@ function transAndValidateParams(
   target: any,
   methodName: string,
   index: number,
-  map: Record<string, string>,
+  map: Record<string, string | File>,
 ) {
   const providers = Reflect.getMetadata( // get the params providers
     "design:paramtypes",
@@ -151,7 +156,7 @@ export async function transAndValidateByCls(
   cls: Constructor,
   map: Record<
     string,
-    string | number | boolean | (string | number | boolean)[]
+    string | number | boolean | File | (string | number | boolean | File)[]
   >,
 ) {
   const keys = Reflect.getMetadataKeys(cls.prototype);
@@ -182,7 +187,7 @@ export async function transAndValidateByCls(
 export function Query(key?: string) {
   return createParamDecoratorWithLowLevel(
     (ctx: Context, target: any, methodName: string, index: number) => {
-      const { search } = ctx.request.url;
+      const { search } = new URL(ctx.req.url);
       const map = parseSearch(search);
       if (!key) {
         return transAndValidateParams(target, methodName, index, map);
@@ -213,46 +218,53 @@ export function Headers(key?: string) {
     (ctx: Context, target: any, methodName: string, index: number) => {
       if (key) {
         return parseNumOrBool(
-          ctx.request.headers.get(key),
+          ctx.req.header(key),
           target,
           methodName,
           index,
         );
       }
-      return ctx.request.headers;
+      return ctx.req.header();
     },
   );
 }
 
 export const Req = createParamDecorator((ctx: Context) => {
-  return ctx.request;
+  return ctx.req;
 });
 
+const nestResponseKey = Symbol("nestResponse");
 export const Res = createParamDecorator((ctx: Context) => {
-  return ctx.response;
+  const res = new NestResponse();
+  ctx.set(nestResponseKey, res);
+  return res;
 });
+
+export const getNestResponse = (ctx: Context): NestResponse | null => {
+  return ctx.get(nestResponseKey);
+};
 
 export const Ip = createParamDecorator((ctx: Context) => {
-  const headers = ctx.request.headers;
-  return headers.get("x-real-ip") || headers.get("x-forwarded-for");
+  return ctx.req.header("x-real-ip") || ctx.req.header("x-forwarded-for");
 });
 
 export const Host = createParamDecorator((ctx: Context) => {
-  return ctx.request.headers.get("host");
+  return ctx.req.header("host");
 });
 
 export function Cookies(key?: string) {
   return createParamDecoratorWithLowLevel(
     async (ctx: Context, target: any, methodName: string, index: number) => {
       if (key) {
+        const val = getCookie(ctx, key);
         return parseNumOrBool(
-          await ctx.cookies.get(key),
+          val,
           target,
           methodName,
           index,
         );
       }
-      return ctx.cookies;
+      return getCookie(ctx);
     },
   );
 }
@@ -280,16 +292,27 @@ export const ControllerName = createParamDecorator(
 export function UploadedFile(options: FormDataOptions = {}) {
   return createParamDecoratorWithLowLevel(
     async (ctx: Context) => {
-      const data = ctx.request.body({
-        type: "form-data",
+      const result = await ctx.req.formData();
+      // console.log(result);
+      const fields: Record<string, any> = {};
+      result.forEach((value, key) => {
+        if (value instanceof File) {
+          if (options.maxFileSize && value.size >= options.maxFileSize) {
+            throw new BodyParamValidationException("file size too large");
+          }
+          return;
+        }
+        fields[key] = value;
       });
-      const result = await data.value.read(options);
       if (options.validateCls) {
         await transAndValidateByCls(
           options.validateCls,
-          result.fields,
+          fields,
         );
-        return result as FormDataFormattedBody<typeof options.validateCls>;
+        return {
+          fields,
+          original: result,
+        } as FormDataFormattedBody<typeof options.validateCls>;
       }
       return result;
     },
@@ -301,11 +324,8 @@ export const FormData = UploadedFile;
 export function Form() {
   return createParamDecoratorWithLowLevel(
     async (ctx: Context, target: any, methodName: string, index: number) => {
-      const data = ctx.request.body({
-        type: "form",
-      });
-      const result = await data.value;
-      const map: Record<string, string> = {};
+      const result = await ctx.req.formData();
+      const map: Record<string, string | File> = {};
       result.forEach((value, key) => {
         map[key] = value;
       });

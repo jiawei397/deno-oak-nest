@@ -553,7 +553,7 @@ Deno.test("routes with guard status self", async () => {
   class AuthGuard implements CanActivate {
     // deno-lint-ignore require-await
     async canActivate(context: Context): Promise<boolean> {
-      context.response.redirect(url);
+      context.res.redirect(url);
       return false;
     }
   }

@@ -8,10 +8,10 @@ import {
   Get,
   Ip,
   MethodName,
+  NestResponse as Response,
   Post,
   Query,
   Res,
-  Response,
   UploadedFile,
   UseGuards,
 } from "../../../mod.ts";
@@ -47,6 +47,21 @@ export class UserController {
     return new Array(100000).fill(nanoid()).join("\n");
   }
 
+  @Get("num")
+  getNum() {
+    return 123;
+  }
+
+  @Get("bool")
+  getBool() {
+    return true;
+  }
+
+  @Get("html")
+  getHtml(context: Context) {
+    return context.html("<h1>Hello World</h1>");
+  }
+
   @UseGuards(AuthGuard2, AuthGuard3)
   @Get("/info", {
     alias: "/v2/user/info",
@@ -57,11 +72,16 @@ export class UserController {
     context: Context,
   ) {
     console.log("methodName", methodName, "controllerName", controllerName);
-    context.response.body = mockjs.mock({
+    return context.json(mockjs.mock({
       name: "@name",
       "age|1-100": 50,
       "val|0-2": 1,
-    });
+    }));
+    // return mockjs.mock({
+    //   name: "@name",
+    //   "age|1-100": 50,
+    //   "val|0-2": 1,
+    // });
   }
 
   @Get("/info2", {
@@ -98,9 +118,9 @@ export class UserController {
   @Roles(RoleAction.read)
   list(context: Context) {
     this.testInnerCall();
-    context.response.body = mockjs.mock({
+    return context.json(mockjs.mock({
       "citys|100": [{ name: "@city", "value|1-100": 50, "type|0-2": 1 }],
-    });
+    }));
   }
 
   testInnerCall() {
@@ -116,19 +136,29 @@ export class UserController {
       "citys|100": [{ name: "@city", "value|1-100": 50, "type|0-2": 1 }],
     });
     // console.log(result);
-    ctx.response.body = result;
+    // ctx.response.body = result;
+    return ctx.json(result);
+  }
+
+  @Post("form")
+  async form(ctx: Context) {
+    const data = await ctx.req.formData();
+    const age = data.get("age");
+    console.log("---form----", data, age, typeof age); // age is string
+    return ctx.json({
+      name: data.get("name"),
+      age,
+    });
   }
 
   @Post("upload")
   async upload(ctx: Context) {
-    const data = ctx.request.body({
-      type: "form-data",
-    });
-    const result = await data.value.read({
-      maxFileSize: 10 * 1024 * 1024 * 1024,
-    });
-    console.log("---upload----", result);
-    ctx.response.body = "test ok";
+    const data = await ctx.req.formData();
+    // const result = await data.value.read({
+    //   maxFileSize: 10 * 1024 * 1024 * 1024,
+    // });
+    console.log("---upload----", data.getAll("files"));
+    return ctx.text("upload ok");
   }
 
   @Post("upload2")
@@ -141,7 +171,9 @@ export class UserController {
   ) {
     console.log("---upload----", result);
     console.log(result.fields.age);
-    res.body = result;
+    res.body = result.fields;
+    // res.body = result;
+    // return res.json(result);
   }
 
   @Delete("del")

@@ -2,6 +2,8 @@ export { Router } from "./src/router.ts";
 
 export * from "./src/params.ts";
 
+export * from "./src/response.ts";
+
 export {
   getMetadataForGuard,
   Reflector,

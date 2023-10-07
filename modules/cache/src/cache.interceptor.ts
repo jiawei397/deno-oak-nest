@@ -127,7 +127,7 @@ export class CacheInterceptor implements NestInterceptor {
     next: Next,
     options: NestInterceptorOptions,
   ) {
-    if (context.request.method !== "GET") { // only deal get request
+    if (context.req.method !== "GET") { // only deal get request
       return next();
     }
     const constructorName = options.target.constructor.name;
@@ -174,10 +174,10 @@ export class CacheInterceptor implements NestInterceptor {
     const ttl: number = Reflect.getOwnMetadata(META_CACHE_TTL_KEY, func) ||
       this.ttl;
     let isCached = false;
-    let lastResult: any = context.response.body ?? result;
+    let lastResult: any = context.res.body ?? result;
     if (result && (result instanceof Promise || !caches)) {
       if (result instanceof Promise) {
-        lastResult = result.then((val) => context.response.body ?? val);
+        lastResult = result.then((val) => context.res.body ?? val);
       }
       this.lruCache.set(key, lastResult, { ttl: ttl * 1000 }); // LRU is in milliseconds
     } else {
@@ -198,7 +198,7 @@ export class CacheInterceptor implements NestInterceptor {
         this.lruCache.delete(key);
       }
       if (policy === "public" || policy === "private") {
-        context.response.headers.set(
+        context.res.headers.set(
           "Cache-Control",
           policy === "public" ? `max-age=${ttl}` : `${policy}, max-age=${ttl}`,
         );

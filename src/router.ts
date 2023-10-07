@@ -1,9 +1,9 @@
 // deno-lint-ignore-file no-explicit-any
 import {
+  Application,
   blue,
   format,
   green,
-  OriginRouter,
   red,
   Reflect,
   Status,
@@ -30,8 +30,8 @@ import { Factory } from "./factorys/class.factory.ts";
 import { transferParam } from "./params.ts";
 import { Context } from "../deps.ts";
 import { checkByInterceptors } from "./interceptor.ts";
-import { checkEtag, setCacheControl } from "./utils.ts";
 import type { AliasOptions } from "./interfaces/controller.interface.ts";
+import { getNestResponse } from "./decorators/oak.ts";
 
 export function join(...paths: string[]) {
   if (paths.length === 0) {
@@ -121,11 +121,10 @@ type ApiPrefixOptions = {
   exclude?: (string | RegExp)[];
 };
 
-export class Router extends OriginRouter {
+export class Router {
   [x: string]: any;
   apiPrefix = "";
   apiPrefixOptions: ApiPrefixOptions = {};
-  private _diabledGetComputeEtag = false;
   private routerArr: RouteItem[] = [];
 
   private globalInterceptors: NestUseInterceptors = [];
@@ -135,11 +134,6 @@ export class Router extends OriginRouter {
   setGlobalPrefix(apiPrefix: string, options: ApiPrefixOptions = {}) {
     this.apiPrefix = apiPrefix;
     this.apiPrefixOptions = options;
-  }
-
-  /** diable 304 get */
-  disableGetComputeEtag() {
-    this._diabledGetComputeEtag = true;
   }
 
   useGlobalInterceptors(...interceptors: NestUseInterceptors) {
@@ -179,9 +173,8 @@ export class Router extends OriginRouter {
     );
   }
 
-  private async transResponseResult(
+  private transResponseResult(
     context: Context,
-    result: any,
     options: {
       target: InstanceType<Constructor>;
       args: any[];
@@ -190,17 +183,6 @@ export class Router extends OriginRouter {
       fn: ControllerMethod;
     },
   ) {
-    if (context.response.status === 304) {
-      context.response.body = undefined;
-    } else if (
-      options.methodType.toLowerCase() === "get" && !this._diabledGetComputeEtag
-    ) { // if get method, then deal 304
-      setCacheControl(context);
-      await checkEtag(context, result);
-    } else if (context.response.body === undefined) {
-      context.response.body = result;
-    }
-
     // response headers
     const headers: Record<string, string> = Reflect.getMetadata(
       META_HEADER_KEY,
@@ -208,7 +190,7 @@ export class Router extends OriginRouter {
     );
     if (headers) {
       Object.keys(headers).forEach((key) => {
-        context.response.headers.set(key, headers[key]);
+        context.res.headers.set(key, headers[key]);
       });
     }
 
@@ -218,13 +200,13 @@ export class Router extends OriginRouter {
       options.fn,
     );
     if (code) {
-      context.response.status = code;
+      context.status(code);
     }
   }
 
-  routes() {
+  routes(app: Application) {
     const routeStart = Date.now();
-    const result = super.routes();
+    // const result = super.routes();
     const apiPrefixReg = this.apiPrefixOptions?.exclude;
 
     this.routerArr.forEach(
@@ -236,11 +218,11 @@ export class Router extends OriginRouter {
             return reg.test(controllerPath);
           });
         }
-        let contollerPathWithPrefix = isAbsolute
+        let controllerPathWithPrefix = isAbsolute
           ? controllerPath
           : join(this.apiPrefix, controllerPath);
-        contollerPathWithPrefix = replacePrefixAndSuffix(
-          contollerPathWithPrefix,
+        controllerPathWithPrefix = replacePrefixAndSuffix(
+          controllerPathWithPrefix,
           this.apiPrefix,
           controllerPath,
         );
@@ -267,19 +249,20 @@ export class Router extends OriginRouter {
           const alias = aliasOptions?.alias;
           const originPath = isAbsolute
             ? replacePrefix(methodPath, this.apiPrefix)
-            : join(contollerPathWithPrefix, methodPath);
+            : join(controllerPathWithPrefix, methodPath);
           let aliasPath = alias ??
             (controllerAliasPath && !isAbsolute &&
               join(controllerAliasPath, methodPath));
           const funcStart = Date.now();
           const callback = async (context: Context) => {
-            const originStatus = context.response.status; // 404
+            const originStatus = context.res.status; // 404
             const guardResult = await checkByGuard(instance, fn, context);
             if (!guardResult) {
-              if (context.response.status === originStatus) {
-                context.response.status = Status.Forbidden;
-                context.response.body = STATUS_TEXT[Status.Forbidden];
+              if (context.res.status === originStatus) {
+                context.status(Status.Forbidden);
+                return context.text(STATUS_TEXT.get(Status.Forbidden)!);
               }
+              // TODO: check the return
               return;
             }
             const args = await transferParam(instance, methodName, context);
@@ -295,9 +278,8 @@ export class Router extends OriginRouter {
                 fn,
               },
             );
-            await this.transResponseResult(
+            this.transResponseResult(
               context,
-              context.response.body ?? result,
               {
                 fn,
                 target: instance,
@@ -306,8 +288,40 @@ export class Router extends OriginRouter {
                 methodName,
               },
             );
+            // console.log(context.res.body, result);
+            if (result instanceof Response) {
+              return result;
+            }
+            if (result instanceof ReadableStream) {
+              return new Response(result);
+            }
+            const render = (body: any) => {
+              const contextType = context.res.headers.get("content-type");
+              if (
+                (contextType && contextType.includes("application/json")) ||
+                (body && typeof body !== "string")
+              ) {
+                return context.json(body);
+              }
+              if (contextType && contextType.includes("text/html")) {
+                return context.html(body);
+              }
+              return context.text(body);
+            };
+
+            const nestResponse = getNestResponse(context);
+            if (nestResponse) {
+              context.status(nestResponse.status ?? 200);
+              nestResponse.headers.forEach((key, value) => {
+                context.header(key, value);
+              });
+              // console.log(nestResponse.body);
+              return render(nestResponse.body);
+            } else {
+              return render(result);
+            }
           };
-          this[methodType](originPath, callback);
+          (app as any)[methodType](originPath, callback);
 
           if (aliasPath) {
             aliasPath = replacePrefixAndSuffix(
@@ -316,7 +330,8 @@ export class Router extends OriginRouter {
               methodPath,
               controllerPath,
             );
-            this[methodType](aliasPath, callback);
+            console.log(methodType);
+            (app as any)[methodType](aliasPath, callback);
           }
           const funcEnd = Date.now();
           this.log(
@@ -338,7 +353,9 @@ export class Router extends OriginRouter {
         const name = lastCls?.["name"];
         this.log(
           red("[RoutesResolver]"),
-          blue(`${name} {${contollerPathWithPrefix}} ${endTime - startTime}ms`),
+          blue(
+            `${name} {${controllerPathWithPrefix}} ${endTime - startTime}ms`,
+          ),
         );
       },
     );
@@ -346,6 +363,6 @@ export class Router extends OriginRouter {
       yellow("[Routes application]"),
       green(`successfully started ${Date.now() - routeStart}ms`),
     );
-    return result;
+    // return result;
   }
 }

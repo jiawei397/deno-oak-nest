@@ -1,4 +1,4 @@
-import { Controller, Get, getReadableStream, Header, HeaderJSON } from "../mod.ts";
+import { Controller, Get, getReadableStream, Header } from "../mod.ts";
 import { UserService } from "./user/services/user.service.ts";
 
 @Controller("")
@@ -20,7 +20,7 @@ export class AppController {
     const { body, write, end } = getReadableStream();
     let num = 0;
     const timer = setInterval(() => {
-      if (num === 100) {
+      if (num === 10) {
         clearInterval(timer);
         console.info("end");
         try {
@@ -48,7 +48,6 @@ export class AppController {
   })
   @Header("a", "b")
   @Header("c", "d")
-  @HeaderJSON()
   test() {
     return true;
   }

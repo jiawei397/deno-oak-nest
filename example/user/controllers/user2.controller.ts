@@ -1,4 +1,4 @@
-import { Context, Controller, Get } from "../../../mod.ts";
+import { type Context, Controller, Get } from "../../../mod.ts";
 import { UserService } from "../services/user.service.ts";
 
 @Controller("v1/user", {
@@ -11,7 +11,7 @@ export class User2Controller {
   }
   @Get("/info")
   info(context: Context) {
-    context.response.body = this.userService.info();
+    return context.json(this.userService.info());
   }
 
   @Get("/info2", {
@@ -19,6 +19,6 @@ export class User2Controller {
     alias: "${controller}/info2",
   })
   info2(context: Context) {
-    context.response.body = "info2";
+    return context.text("info2");
   }
 }

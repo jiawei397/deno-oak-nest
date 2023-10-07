@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { calculate, Context, ifNoneMatch } from "../deps.ts";
+import { type Context } from "../deps.ts";
 
 export function isDebug() {
   return Deno.env.get("DEBUG") === "true";
@@ -23,36 +23,6 @@ export function parseSearch(search: string) {
   return map;
 }
 
-/**
- * check etag and set etag header
- * @returns If the etag is not match, then return false, else return true
- */
-export async function checkEtag(context: Context, val: any) {
-  if (!val) {
-    context.response.body = val;
-    return false;
-  }
-  const str = typeof val === "string" ? val : JSON.stringify(val);
-  const etagOptions = { weak: true };
-  const actual = await calculate(str, etagOptions);
-  if (!actual) {
-    return false;
-  }
-  const etag = context.request.headers.get("If-None-Match");
-  if (
-    etag && !ifNoneMatch(etag, actual) // if etag is not match, then will return 200
-  ) {
-    context.response.status = 304;
-    context.response.body = undefined;
-    context.response.headers.set("etag", etag);
-    return true;
-  } else {
-    context.response.headers.set("etag", actual);
-    context.response.body = val;
-    return false;
-  }
-}
-
 export interface ReadableStreamResult {
   body: ReadableStream;
   /** write message to stream, but it may cause error if the connection closed before */
@@ -63,8 +33,8 @@ export interface ReadableStreamResult {
 
 export function setCacheControl(context: Context) {
   // cache-control see https://cloud.tencent.com/developer/section/1189911
-  const requestCacheControl = context.request.headers.get("Cache-Control");
-  let responseCacheControl = context.response.headers.get("Cache-Control");
+  const requestCacheControl = context.req.header("Cache-Control");
+  let responseCacheControl = context.res.headers.get("Cache-Control");
   if (!responseCacheControl) {
     if (requestCacheControl) {
       const cacheArr = requestCacheControl.split(",");
@@ -81,7 +51,7 @@ export function setCacheControl(context: Context) {
     } else {
       responseCacheControl = "no-cache";
     }
-    context.response.headers.set("Cache-Control", responseCacheControl);
+    context.res.headers.set("Cache-Control", responseCacheControl);
   }
 }
 
@@ -106,5 +76,3 @@ export function getReadableStream(): ReadableStreamResult {
     },
   };
 }
-
-export const _internals = { ifNoneMatch };

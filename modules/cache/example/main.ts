@@ -3,7 +3,6 @@ import { AppModule } from "./app.module.ts";
 
 const app = await NestFactory.create(AppModule);
 app.setGlobalPrefix("/api");
-// app.disableGetComputeEtag();
 
 app.get("/hello", (ctx: Context) => {
   ctx.response.body = "hello";

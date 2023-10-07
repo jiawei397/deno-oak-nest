@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Application, Context, Reflect, resolve, send } from "../../deps.ts";
+import { Application, Reflect, serveStatic } from "../../deps.ts";
 import { getModuleMetadata, isModule } from "../decorators/module.ts";
 import type {
   ModuleType,
@@ -8,18 +8,16 @@ import type {
   Type,
 } from "../interfaces/mod.ts";
 import { Scope } from "../interfaces/mod.ts";
-import { join, Router } from "../router.ts";
+import { Router } from "../router.ts";
 import { globalFactoryCaches, initProvider } from "./class.factory.ts";
 
 const onModuleInitedKey = Symbol("onModuleInited");
 
 export type ApplicationEx = Application & {
   setGlobalPrefix: typeof Router.prototype.setGlobalPrefix;
-  routes: typeof Router.prototype.routes;
-  get: typeof Router.prototype.get;
-  use: typeof Router.prototype.use;
+  routes2: () => void;
+  // get: typeof Router.prototype.get;
   useGlobalInterceptors: typeof Router.prototype.useGlobalInterceptors;
-  disableGetComputeEtag: typeof Router.prototype.disableGetComputeEtag;
   useStaticAssets: typeof NestFactory.useStaticAssets;
   router: Router;
 };
@@ -137,16 +135,13 @@ export class NestFactory {
 
     // bind router methods to app
     app.setGlobalPrefix = router.setGlobalPrefix.bind(router);
-    app.get = router.get.bind(router);
-    app.routes = () => {
-      const res = router.routes();
-      this.startView();
-      return res;
+    // app.get = router.get.bind(router);
+    app.routes2 = () => {
+      router.routes(app);
+      this.startView(app);
     };
     app.useGlobalInterceptors = router.useGlobalInterceptors.bind(router);
     app.useStaticAssets = this.useStaticAssets.bind(this);
-    app.disableGetComputeEtag = router.disableGetComputeEtag.bind(router);
-    app.router = router;
 
     this.app = app;
 
@@ -168,42 +163,6 @@ export class NestFactory {
     };
   }
 
-  private static serveStaticAssets(context: Context) {
-    const options = this.staticOptions;
-    if (!options) {
-      return;
-    }
-    const {
-      baseDir,
-      prefix = "/",
-      ...otherOptions
-    } = options;
-    const prefixWithoutSlash = join(prefix);
-    const root = resolve(Deno.cwd(), baseDir!);
-    const index = options?.index || "index.html";
-    if (!prefixWithoutSlash) {
-      return send(context, "", {
-        ...otherOptions,
-        index,
-        root,
-      });
-    }
-    const pathname = context.request.url.pathname;
-    const formattedPath = pathname.replace(prefixWithoutSlash, "");
-    const sendFile = async () => {
-      try {
-        await send(context, formattedPath, {
-          ...otherOptions,
-          index,
-          root,
-        });
-      } catch {
-        context.response.status = 404;
-      }
-    };
-    return sendFile();
-  }
-
   /**
    * start serve view and static assets.
    *
@@ -213,19 +172,20 @@ export class NestFactory {
    *
    * But if there is index.html in the static assets, it will be served first before the view.
    */
-  private static startView() {
+  private static startView(app: Application) {
     if (!this.staticOptions) {
       return;
     }
-    this.app.use(async (context, next) => {
-      if (context.request.method !== "GET") {
-        return next();
-      }
-      await next();
-      if (context.response.status !== 404) {
-        return;
-      }
-      await this.serveStaticAssets(context);
-    });
+    const path = this.staticOptions.path ? `${this.staticOptions.path}/*` : "*";
+    app.use(
+      path,
+      serveStatic({
+        root: this.staticOptions.baseDir,
+        rewriteRequestPath: (path) =>
+          this.staticOptions!.prefix
+            ? path.replace(this.staticOptions!.prefix, "")
+            : path,
+      }),
+    );
   }
 }

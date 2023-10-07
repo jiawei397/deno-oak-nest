@@ -91,7 +91,7 @@ export class UserController {
     @Query("age") age: string,
   ) {
     console.log(params, age);
-    context.response.body = "role info " + name + " - " +
+    context.res.body = "role info " + name + " - " +
       JSON.stringify(params);
   }
 
@@ -105,7 +105,7 @@ export class UserController {
   list(context: Context) {
     console.log("---list----");
     this.testInnerCall();
-    context.response.body = "list";
+    context.res.body = "list";
   }
 
   testInnerCall() {
@@ -218,7 +218,7 @@ export class User2Controller {
   }
   @Get("/user2")
   info(context: Context) {
-    context.response.body = this.userService.info() + this.roleService.info();
+    context.res.body = this.userService.info() + this.roleService.info();
   }
 }
 ```
@@ -535,7 +535,7 @@ Here is a controller file named `user.controller.ts`:
 export class UserController {
   @Get("/info")
   info(context: Context) {
-    context.response.body = "info";
+    context.res.body = "info";
   }
 }
 ```

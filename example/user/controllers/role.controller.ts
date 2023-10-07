@@ -4,19 +4,17 @@ import {
   Controller,
   Get,
   Headers,
+  NestResponse as Response,
   Params,
   Post,
   Query,
   Res,
-  Response,
   UseInterceptors,
 } from "../../../mod.ts";
-import type { Context } from "../../../mod.ts";
 import { RoleService } from "../services/role.service.ts";
 import { Add } from "../../decorators/add.ts";
 import { RoleInfoDto } from "../dtos/role.dto.ts";
 import { AsyncService } from "../../asyncModule/async.service.ts";
-// import { LoggingInterceptor } from "../../interceptor/log.interceptor.ts";
 import { TransformInterceptor } from "../../interceptor/transform.interceptor.ts";
 import { ErrorsInterceptor } from "../../interceptor/errors.interceptor.ts";
 import { CacheInterceptor } from "../../../modules/cache/mod.ts";
@@ -43,14 +41,13 @@ export class RoleController {
 
   @Get("/info/:id")
   test(
-    context: Context,
     @Add() name: string,
     @Query() params: any,
     @Query("age") age: number,
   ) {
     this.loggerService.info("info test", name, params, age);
     console.log(params, age, typeof age);
-    context.response.body = "role info " + name + " - " +
+    return "role info " + name + " - " +
       JSON.stringify(params);
   }
 

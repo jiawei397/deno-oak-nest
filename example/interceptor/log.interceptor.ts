@@ -8,7 +8,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const result = await next();
     // console.log("LoggingInterceptor", `After...`);
     const ms = Date.now() - start;
-    ctx.response.headers.set("X-Response-Time", `${ms}ms`);
+    ctx.res.headers.set("X-Response-Time", `${ms}ms`);
     return result; // must return result
   }
 }

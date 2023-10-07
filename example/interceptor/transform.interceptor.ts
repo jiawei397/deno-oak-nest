@@ -12,8 +12,8 @@ export class TransformInterceptor implements NestInterceptor {
     console.info("TransformInterceptor", "After ...");
 
     // also can change response data or status code
-    // context.response.status = 400;
-    // context.response.body = { haha: "aha" };
+    // context.res.status = 400;
+    // context.res.body = { haha: "aha" };
     return {
       data,
     };
