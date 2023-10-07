@@ -233,16 +233,9 @@ export const Req = createParamDecorator((ctx: Context) => {
   return ctx.req;
 });
 
-const nestResponseKey = Symbol("nestResponse");
 export const Res = createParamDecorator((ctx: Context) => {
-  const res = new NestResponse();
-  ctx.set(nestResponseKey, res);
-  return res;
+  return NestResponse.init(ctx);
 });
-
-export const getNestResponse = (ctx: Context): NestResponse | null => {
-  return ctx.get(nestResponseKey);
-};
 
 export const Ip = createParamDecorator((ctx: Context) => {
   return ctx.req.header("x-real-ip") || ctx.req.header("x-forwarded-for");
@@ -254,7 +247,7 @@ export const Host = createParamDecorator((ctx: Context) => {
 
 export function Cookies(key?: string) {
   return createParamDecoratorWithLowLevel(
-    async (ctx: Context, target: any, methodName: string, index: number) => {
+    (ctx: Context, target: any, methodName: string, index: number) => {
       if (key) {
         const val = getCookie(ctx, key);
         return parseNumOrBool(

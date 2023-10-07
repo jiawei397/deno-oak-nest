@@ -1,12 +1,20 @@
 // deno-lint-ignore-file no-unused-vars no-explicit-any
-import { Context, HTTPException, NestFactory, Status } from "../mod.ts";
+import {
+  Context,
+  HTTPException,
+  NestFactory,
+  NestRequest,
+  NestResponse,
+  NextFunction,
+  Status,
+} from "../mod.ts";
 import { AppModule } from "./app.module.ts";
 import { LoggingInterceptor } from "./interceptor/log.interceptor.ts";
 
 const app = await NestFactory.create(AppModule);
 
-app.get("/", (ctx: Context) => {
-  return ctx.body("hello world");
+app.get("/", (req: NestRequest, res: NestResponse) => {
+  res.body = "hello world";
 });
 app.setGlobalPrefix("/api", {
   exclude: ["^/?v\\d{1,3}/"],
@@ -32,14 +40,13 @@ app.useStaticAssets("example/static", {
 });
 
 // Logger
-app.use("*", async (ctx: Context, next) => {
-  console.log(ctx.req, ctx.res);
-  console.log("logger----", ctx.req.url);
+app.use(async (req: NestRequest, res: NestResponse, next: NextFunction) => {
+  console.log("logger----", req.url);
   const start = Date.now();
   await next();
   const rt = `${Date.now() - start}ms`;
   console.log(
-    `${ctx.req.method} ${ctx.req.url} - ${ctx.res.status} - ${rt}`,
+    `${req.method} ${req.url} - ${res.status} - ${rt}`,
   );
 });
 
@@ -84,36 +91,22 @@ app.use("*", async (ctx: Context, next) => {
 //   return ctx.body("hello");
 // });
 
-app.routes2();
+const port = Number(Deno.env.get("PORT") || 2000);
 
-const port = 8000; // Number(Deno.env.get("PORT") || 2000);
-
-// // app.addEventListener("error", (evt) => {
-// //   // Will log the thrown error to the console.
-// //   console.log("------error---", evt.error);
-// // });
-
-// addEventListener("unhandledrejection", (evt) => {
-//   evt.preventDefault();
-//   console.error(`unhandledrejection`, evt.reason);
-// });
-
-// addEventListener("error", (evt) => {
-//   evt.preventDefault(); // 这句很重要
-//   console.error(`global error`, evt.error);
-// });
-
-app.onError((err, ctx) => {
-  console.error("error", err);
-  return ctx.body(err.message, 500);
+app.notFound((req, res) => {
+  res.body = "not found";
+  res.status = 404;
 });
 
-// app.addEventListener("listen", ({ hostname, port, secure }) => {
-//   console.log(
-//     `Listening on: ${secure ? "https://" : "http://"}${"localhost"}:${port}`,
-//   );
-//   // console.log(Deno.memoryUsage());
-// });
+app.onError((err, req, res) => {
+  // console.error("error", err);
+  res.body = err.message;
+  res.status = 500;
+});
 
-// await app.listen({ port });
-Deno.serve({ port }, app.fetch);
+app.listen({
+  port,
+  onListen({ port, hostname }) {
+    console.log(`Server started at http://${hostname}:${port}`);
+  },
+});

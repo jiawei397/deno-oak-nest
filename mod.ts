@@ -1,4 +1,4 @@
-export { Router } from "./src/router.ts";
+export { Application } from "./src/application.ts";
 
 export * from "./src/params.ts";
 

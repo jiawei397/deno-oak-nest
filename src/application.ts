@@ -1,24 +1,18 @@
 // deno-lint-ignore-file no-explicit-any
 import {
-  Application,
   blue,
+  Context,
   format,
   green,
+  Hono,
   red,
   Reflect,
+  serveStatic,
   Status,
   STATUS_TEXT,
   yellow,
 } from "../deps.ts";
-import { checkByGuard } from "./guard.ts";
-import type {
-  Constructor,
-  ControllerMethod,
-  NestUseInterceptors,
-  RouteItem,
-  RouteMap,
-  Type,
-} from "./interfaces/mod.ts";
+import { ControllerMethod } from "../mod.ts";
 import {
   META_ALIAS_KEY,
   META_HEADER_KEY,
@@ -27,11 +21,24 @@ import {
   META_PATH_KEY,
 } from "./decorators/controller.ts";
 import { Factory } from "./factorys/class.factory.ts";
-import { transferParam } from "./params.ts";
-import { Context } from "../deps.ts";
+import { checkByGuard } from "./guard.ts";
 import { checkByInterceptors } from "./interceptor.ts";
-import type { AliasOptions } from "./interfaces/controller.interface.ts";
-import { getNestResponse } from "./decorators/oak.ts";
+import {
+  ApiPrefixOptions,
+  ListenOptions,
+} from "./interfaces/application.interface.ts";
+import { AliasOptions } from "./interfaces/controller.interface.ts";
+import { StaticOptions } from "./interfaces/factory.interface.ts";
+import { NestUseInterceptors } from "./interfaces/interceptor.interface.ts";
+import {
+  ErrorHandler,
+  NestMiddleware,
+  NotFoundHandler,
+} from "./interfaces/middleware.interface.ts";
+import { RouteItem, RouteMap } from "./interfaces/route.interface.ts";
+import { Constructor, Type } from "./interfaces/type.interface.ts";
+import { transferParam } from "./params.ts";
+import { NestResponse } from "./response.ts";
 
 export function join(...paths: string[]) {
   if (paths.length === 0) {
@@ -112,28 +119,41 @@ export async function mapRoute(
   return result;
 }
 
-type ApiPrefixOptions = {
-  /**
-   * The controller path will check by exclude regExp
-   * @example
-   * ["^/?v\\d{1,3}/", /^\/?v\d{1,3}\//]
-   */
-  exclude?: (string | RegExp)[];
-};
-
-export class Router {
-  [x: string]: any;
+export class Application {
   apiPrefix = "";
   apiPrefixOptions: ApiPrefixOptions = {};
+  private globalInterceptors: NestUseInterceptors = [];
+  staticOptions: StaticOptions;
+  app: Hono;
+  defaultCache: Map<any, any> | undefined;
+
   private routerArr: RouteItem[] = [];
 
-  private globalInterceptors: NestUseInterceptors = [];
+  constructor() {
+    this.app = new Hono();
+  }
 
-  defaultCache: Map<any, any> | undefined;
+  get(path: string, middleware: NestMiddleware) {
+    this.app.get(path, async (ctx: Context, next) => {
+      const response = NestResponse.getNestResponseWithInit(ctx);
+      const result = await middleware(ctx.req, response!, next);
+      return this.renderResponse(ctx, result);
+    });
+  }
 
   setGlobalPrefix(apiPrefix: string, options: ApiPrefixOptions = {}) {
     this.apiPrefix = apiPrefix;
     this.apiPrefixOptions = options;
+  }
+
+  use(...middlewares: NestMiddleware[]) {
+    middlewares.forEach((middleware) => {
+      this.app.use("*", async (ctx: Context, next) => {
+        const response = NestResponse.getNestResponseWithInit(ctx);
+        const result = await middleware(ctx.req, response!, next);
+        return this.renderResponse(ctx, result);
+      });
+    });
   }
 
   useGlobalInterceptors(...interceptors: NestUseInterceptors) {
@@ -141,11 +161,71 @@ export class Router {
   }
 
   /**
-   * register controller
-   * @description not recommend to use alone
+   * Sets a base directory for public assets.
+   * @example
+   * app.useStaticAssets('public')
+   */
+  useStaticAssets(
+    path: string,
+    options: StaticOptions = {},
+  ) {
+    this.staticOptions = {
+      baseDir: path,
+      ...options,
+    };
+  }
+
+  listen(options?: ListenOptions) {
+    this.routes();
+    this.startView();
+    return Deno.serve(options || { port: 8000 }, this.app.fetch);
+  }
+
+  onError(handler: ErrorHandler) {
+    this.app.onError(async (err, ctx) => {
+      const res = NestResponse.getNestResponseWithInit(ctx);
+      const result = await handler(err, ctx.req, res);
+      return this.renderResponse(ctx, result);
+    });
+  }
+
+  notFound(handler: NotFoundHandler) {
+    this.app.notFound(async (ctx) => {
+      const res = NestResponse.getNestResponseWithInit(ctx);
+      const result = await handler(ctx.req, res);
+      return this.renderResponse(ctx, result);
+    });
+  }
+
+  /**
+   * start serve view and static assets.
+   *
+   * If has prefix either api or view of static assets, it will be served self without other check, so it`s a good idea to set prefix if you want to have a good performance.
+   *
+   * Then it will check the extension of the pathname, if it`s optioned such as `ejs`, it will be served view, otherwise it will be served static assets.
+   *
+   * But if there is index.html in the static assets, it will be served first before the view.
+   */
+  private startView() {
+    if (!this.staticOptions) {
+      return;
+    }
+    const prefix = this.staticOptions.prefix;
+    const path = this.staticOptions.path ? `${this.staticOptions.path}/*` : "*";
+    this.app.get(
+      path,
+      serveStatic({
+        root: this.staticOptions.baseDir,
+        rewriteRequestPath: (path) => prefix ? path.replace(prefix, "") : path,
+      }),
+    );
+  }
+
+  /**
+   * add controller
    * @protected
    */
-  async register(...clsArr: Type[]) {
+  async add(...clsArr: Type[]) {
     await Promise.all(clsArr.map(async (Cls) => {
       const find = this.routerArr.find(({ cls }) => cls === Cls);
       if (find) {
@@ -204,7 +284,7 @@ export class Router {
     }
   }
 
-  routes(app: Application) {
+  private routes() {
     const routeStart = Date.now();
     // const result = super.routes();
     const apiPrefixReg = this.apiPrefixOptions?.exclude;
@@ -289,39 +369,9 @@ export class Router {
               },
             );
             // console.log(context.res.body, result);
-            if (result instanceof Response) {
-              return result;
-            }
-            if (result instanceof ReadableStream) {
-              return new Response(result);
-            }
-            const render = (body: any) => {
-              const contextType = context.res.headers.get("content-type");
-              if (
-                (contextType && contextType.includes("application/json")) ||
-                (body && typeof body !== "string")
-              ) {
-                return context.json(body);
-              }
-              if (contextType && contextType.includes("text/html")) {
-                return context.html(body);
-              }
-              return context.text(body);
-            };
-
-            const nestResponse = getNestResponse(context);
-            if (nestResponse) {
-              context.status(nestResponse.status ?? 200);
-              nestResponse.headers.forEach((key, value) => {
-                context.header(key, value);
-              });
-              // console.log(nestResponse.body);
-              return render(nestResponse.body);
-            } else {
-              return render(result);
-            }
+            return this.renderResponse(context, result);
           };
-          (app as any)[methodType](originPath, callback);
+          (this.app as any)[methodType](originPath, callback);
 
           if (aliasPath) {
             aliasPath = replacePrefixAndSuffix(
@@ -330,8 +380,7 @@ export class Router {
               methodPath,
               controllerPath,
             );
-            console.log(methodType);
-            (app as any)[methodType](aliasPath, callback);
+            (this.app as any)[methodType](aliasPath, callback);
           }
           const funcEnd = Date.now();
           this.log(
@@ -364,5 +413,39 @@ export class Router {
       green(`successfully started ${Date.now() - routeStart}ms`),
     );
     // return result;
+  }
+
+  private renderResponse(context: Context, result: unknown) {
+    if (result instanceof Response) {
+      return result;
+    }
+    if (result instanceof ReadableStream) {
+      return new Response(result);
+    }
+    const render = (body: any) => {
+      const contextType = context.res.headers.get("content-type");
+      if (
+        (contextType && contextType.includes("application/json")) ||
+        (body && typeof body !== "string")
+      ) {
+        return context.json(body);
+      }
+      if (contextType && contextType.includes("text/html")) {
+        return context.html(body);
+      }
+      return context.text(body);
+    };
+
+    const nestResponse = NestResponse.getNestResponse(context);
+    if (nestResponse) {
+      context.status(nestResponse.status ?? 200);
+      nestResponse.headers.forEach((key, value) => {
+        context.header(key, value);
+      });
+      // console.log(nestResponse.body);
+      return render(nestResponse.body ?? result);
+    } else {
+      return render(result);
+    }
   }
 }

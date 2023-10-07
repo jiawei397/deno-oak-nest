@@ -16,7 +16,7 @@
 
 export {
   type Context,
-  Hono as Application,
+  Hono,
   type HonoRequest as Request,
   HTTPException,
   type MiddlewareHandler,

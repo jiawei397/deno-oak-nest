@@ -7,3 +7,5 @@ export * from "./scope-options.interface.ts";
 export * from "./type.interface.ts";
 export * from "./interceptor.interface.ts";
 export * from "./param.interface.ts";
+export * from "./application.interface.ts";
+export * from "./middleware.interface.ts";
