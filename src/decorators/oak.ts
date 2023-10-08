@@ -12,7 +12,6 @@ import {
   createParamDecorator,
   createParamDecoratorWithLowLevel,
 } from "../params.ts";
-import { parseSearch } from "../utils.ts";
 import type { Constructor } from "../interfaces/type.interface.ts";
 import type {
   ArrayItemType,
@@ -88,7 +87,7 @@ export function Body(key?: string) {
 }
 
 function parseNumOrBool(
-  val: string | null | undefined,
+  val: string | string[] | null | undefined,
   target: any,
   methodName: string,
   index: number,
@@ -111,7 +110,7 @@ function transAndValidateParams(
   target: any,
   methodName: string,
   index: number,
-  map: Record<string, string | File>,
+  map: Record<string, string | string[] | File>,
 ) {
   const providers = Reflect.getMetadata( // get the params providers
     "design:paramtypes",
@@ -127,7 +126,7 @@ function transAndValidateParams(
 
 export function getTransNumOrBoolOrArray(
   type: Constructor,
-  val: string,
+  val: string | string[],
   arrayItemType?: ArrayItemType,
 ): boolean | number | string | (boolean | number | string)[] {
   if (type === Boolean) {
@@ -136,8 +135,8 @@ export function getTransNumOrBoolOrArray(
   if (type === Number) {
     return Number(val);
   }
-  if (type === Array) {
-    return val.split(",").map((str) => {
+  const transArray = (arr: string[]) => {
+    return arr.map((str) => {
       const result = str.trim();
       if (result && arrayItemType) {
         if (arrayItemType === "number") {
@@ -148,6 +147,12 @@ export function getTransNumOrBoolOrArray(
       }
       return result;
     });
+  };
+  if (Array.isArray(val)) {
+    return transArray(val);
+  }
+  if (type === Array) {
+    return transArray(val.split(","));
   }
   return val;
 }
@@ -187,8 +192,7 @@ export async function transAndValidateByCls(
 export function Query(key?: string) {
   return createParamDecoratorWithLowLevel(
     (ctx: Context, target: any, methodName: string, index: number) => {
-      const { search } = new URL(ctx.req.url);
-      const map = parseSearch(search);
+      const map = ctx.req.query();
       if (!key) {
         return transAndValidateParams(target, methodName, index, map);
       }
@@ -204,7 +208,7 @@ export function Query(key?: string) {
 export function Params(key?: string) {
   return createParamDecoratorWithLowLevel(
     (ctx: Context, target: any, methodName: string, index: number) => {
-      const { params } = ctx as any;
+      const params = ctx.req.param();
       if (!key) {
         return transAndValidateParams(target, methodName, index, params);
       }
