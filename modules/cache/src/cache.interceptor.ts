@@ -6,6 +6,7 @@ import {
   isDebug,
   NestInterceptor,
   NestInterceptorOptions,
+  NestResponse,
   Next,
   Reflect,
 } from "../../../mod.ts";
@@ -174,10 +175,12 @@ export class CacheInterceptor implements NestInterceptor {
     const ttl: number = Reflect.getOwnMetadata(META_CACHE_TTL_KEY, func) ||
       this.ttl;
     let isCached = false;
-    let lastResult: any = context.res.body ?? result;
+    let lastResult: any = NestResponse.getNestResponse(context)?.body ?? result;
     if (result && (result instanceof Promise || !caches)) {
       if (result instanceof Promise) {
-        lastResult = result.then((val) => context.res.body ?? val);
+        lastResult = result.then((val) =>
+          NestResponse.getNestResponse(context)?.body ?? val
+        );
       }
       this.lruCache.set(key, lastResult, { ttl: ttl * 1000 }); // LRU is in milliseconds
     } else {
