@@ -12,7 +12,6 @@ import {
   STATUS_TEXT,
   yellow,
 } from "../deps.ts";
-import { ControllerMethod } from "../mod.ts";
 import {
   META_ALIAS_KEY,
   META_HEADER_KEY,
@@ -29,6 +28,7 @@ import {
 } from "./interfaces/application.interface.ts";
 import { AliasOptions } from "./interfaces/controller.interface.ts";
 import { StaticOptions } from "./interfaces/factory.interface.ts";
+import { ControllerMethod } from "./interfaces/guard.interface.ts";
 import { NestUseInterceptors } from "./interfaces/interceptor.interface.ts";
 import {
   ErrorHandler,
@@ -253,7 +253,7 @@ export class Application {
     );
   }
 
-  private transResponseResult(
+  private formatResponse(
     context: Context,
     options: {
       target: InstanceType<Constructor>;
@@ -335,16 +335,26 @@ export class Application {
               join(controllerAliasPath, methodPath));
           const funcStart = Date.now();
           const callback = async (context: Context) => {
-            const originStatus = context.res.status; // 404
-            const guardResult = await checkByGuard(instance, fn, context);
-            if (!guardResult) {
-              if (context.res.status === originStatus) {
+            // TODO: deal with useFilter
+            try {
+              const guardResult = await checkByGuard(instance, fn, context);
+              if (!guardResult) {
                 context.status(Status.Forbidden);
-                return context.text(STATUS_TEXT.get(Status.Forbidden)!);
+                return context.json({
+                  message: STATUS_TEXT.get(Status.Forbidden),
+                  statusCode: Status.Forbidden,
+                });
               }
-              // TODO: check the return
-              return;
+            } catch (error) {
+              const status = typeof error.status === "number"
+                ? error.status
+                : Status.InternalServerError; // If the error is not HttpException, it will be 500
+              return context.json({
+                message: error.message || error,
+                statusCode: status,
+              });
             }
+
             const args = await transferParam(instance, methodName, context);
             const result = await checkByInterceptors(
               context,
@@ -358,7 +368,7 @@ export class Application {
                 fn,
               },
             );
-            this.transResponseResult(
+            this.formatResponse(
               context,
               {
                 fn,
