@@ -11,9 +11,21 @@ export function parseSearch(search: string) {
     return {};
   }
   const arr = str.split("&");
-  const map: any = {};
+  const map: Record<string, string | string[]> = {};
   arr.forEach((item) => {
     const [k, v] = item.split("=");
+    if (map[k]) {
+      map[k] = [...map[k], v];
+    } else {
+      map[k] = v;
+    }
+  });
+  return map;
+}
+
+export function parseSearchParams(search: URLSearchParams) {
+  const map: Record<string, string | string[]> = {};
+  search.forEach((v, k) => {
     if (map[k]) {
       map[k] = [...map[k], v];
     } else {
