@@ -24,7 +24,6 @@ export function isModule(module: any) {
   return "module" in module || Reflect.getOwnMetadata(MODULE_KEY, module);
 }
 
-// deno-lint-ignore ban-types
 export function defineModuleMetadata(target: object) {
   Reflect.defineMetadata(MODULE_KEY, true, target);
 }

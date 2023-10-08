@@ -4,6 +4,7 @@ import {
   getMetadataForGuard,
   Injectable,
   Reflector,
+  // deno-lint-ignore no-unused-vars
   UnauthorizedException,
 } from "../../mod.ts";
 import { delay } from "../deps.ts";
