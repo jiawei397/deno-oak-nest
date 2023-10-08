@@ -31,7 +31,7 @@ export async function findControllers(
     : getModuleMetadata("providers", module);
   // const exports = isDynamicModule
   //   ? module.exports
-  //   : getModuleMetadata("exports", module); // TODO donnot think well how to use exports
+  //   : getModuleMetadata("exports", module); // TODO don't think well how to use exports
   if (controllers) {
     controllerArr.push(...controllers);
   }
