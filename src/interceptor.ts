@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Context, Reflect } from "../deps.ts";
-import { Factory } from "./factorys/class.factory.ts";
+import { Factory, getMergedMetas } from "./factorys/class.factory.ts";
 import type { ControllerMethod } from "./interfaces/guard.interface.ts";
 import type {
   NestInterceptor,
@@ -25,26 +25,17 @@ export function UseInterceptors(...interceptors: NestUseInterceptors) {
   };
 }
 
-export async function getInterceptors(
+export function getInterceptors(
   target: InstanceType<Constructor>,
   fn: ControllerMethod,
   globalInterceptors: NestUseInterceptors,
 ): Promise<NestInterceptor[]> {
-  const classInterceptors = Reflect.getMetadata(META_INTERCEPTOR_KEY, target) ||
-    [];
-  const fnInterceptors = Reflect.getOwnMetadata(META_INTERCEPTOR_KEY, fn) || [];
-  const interceptors = [
-    ...globalInterceptors,
-    ...classInterceptors,
-    ...fnInterceptors,
-  ];
-  const arr = await Promise.all(interceptors.map((interceptor) => {
-    if (typeof interceptor === "function") {
-      return Factory(interceptor);
-    }
-    return interceptor;
-  }));
-  return [...new Set(arr)];
+  return getMergedMetas<NestInterceptor>(
+    target,
+    fn,
+    globalInterceptors,
+    META_INTERCEPTOR_KEY,
+  );
 }
 
 export async function checkByInterceptors(

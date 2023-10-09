@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Context, Reflect } from "../deps.ts";
-import { Factory } from "./factorys/class.factory.ts";
+import { getMergedMetas } from "./factorys/class.factory.ts";
 import type {
   CanActivate,
   Constructor,
@@ -25,22 +25,12 @@ export function UseGuards(...guards: NestGuards) {
   };
 }
 
-export async function getAllGuards(
+export function getAllGuards(
   target: InstanceType<Constructor>,
   fn: ControllerMethod,
   globalGuards: NestGuards,
 ): Promise<CanActivate[]> {
-  const classGuards = Reflect.getMetadata(META_GUARD_KEY, target) ||
-    []; // defined on prototye, so must use getMetadata instead of getOwnMetadata
-  const fnGuards = Reflect.getOwnMetadata(META_GUARD_KEY, fn) || [];
-  const guards = [...globalGuards, ...classGuards, ...fnGuards];
-  const arr = await Promise.all(guards.map((guard) => {
-    if (typeof guard === "function") {
-      return Factory(guard);
-    }
-    return guard;
-  }));
-  return [...new Set(arr)];
+  return getMergedMetas<CanActivate>(target, fn, globalGuards, META_GUARD_KEY);
 }
 
 export async function checkByGuard(

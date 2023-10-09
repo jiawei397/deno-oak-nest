@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { Context, Reflect } from "../deps.ts";
-import { ControllerMethod, Factory } from "../mod.ts";
+import { ControllerMethod } from "./interfaces/guard.interface.ts";
+import { getMergedMetas } from "./factorys/class.factory.ts";
 import {
   ExceptionFilter,
   ExceptionFilters,
@@ -77,26 +78,17 @@ export function Catch(
   };
 }
 
-export async function getExceptionFilters(
+export function getExceptionFilters(
   target: InstanceType<Constructor>,
   fn: ControllerMethod,
   globalFilters: ExceptionFilters,
 ): Promise<ExceptionFilter[]> {
-  const classFilters = Reflect.getMetadata(META_EXCEPTION_FILTER_KEY, target) ||
-    [];
-  const fnFilters = Reflect.getOwnMetadata(META_EXCEPTION_FILTER_KEY, fn) || [];
-  const filters = [
-    ...fnFilters,
-    ...classFilters,
-    ...globalFilters,
-  ];
-  const arr = await Promise.all(filters.map((filter) => {
-    if (typeof filter === "function") {
-      return Factory(filter);
-    }
-    return filter;
-  }));
-  return [...new Set(arr)];
+  return getMergedMetas<ExceptionFilter>(
+    target,
+    fn,
+    globalFilters,
+    META_EXCEPTION_FILTER_KEY,
+  );
 }
 
 export async function checkByFilters(
@@ -108,7 +100,7 @@ export async function checkByFilters(
 ): Promise<any> {
   const filters = await getExceptionFilters(target, fn, globalFilters);
   let tempError = error;
-  for (let i = 0; i < filters.length; i++) {
+  for (let len = filters.length, i = len - 1; i >= 0; i--) {
     const filter = filters[i];
     const catchedExceptions: Array<Type<any> | Abstract<any>> = Reflect
       .getMetadata(META_EXCEPTION_CATCH_KEY, filter);

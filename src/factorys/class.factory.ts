@@ -3,8 +3,13 @@ import { Reflect } from "../../deps.ts";
 import { getInjectData, isSingleton } from "../decorators/inject.ts";
 import type {
   ClassProvider,
+  Constructor,
+  ControllerMethod,
+  ExceptionFilters,
   ExistingProvider,
   FactoryProvider,
+  NestGuards,
+  NestUseInterceptors,
   Provider,
   Type,
   ValueProvider,
@@ -144,4 +149,28 @@ export async function initProvider(
       return result;
     }
   }
+}
+
+export async function getMergedMetas<T>(
+  target: InstanceType<Constructor>,
+  fn: ControllerMethod,
+  globalMetas: ExceptionFilters | NestGuards | NestUseInterceptors,
+  metaKey: string | symbol,
+): Promise<T[]> {
+  const classes = Reflect.getMetadata(metaKey, target) ||
+    [];
+  const fns = Reflect.getOwnMetadata(metaKey, fn) || [];
+  const filters = [
+    ...fns,
+    ...classes,
+    ...globalMetas,
+  ];
+  const arr = await Promise.all(filters.map((filter) => {
+    if (typeof filter === "function") {
+      return Factory(filter);
+    }
+    return filter;
+  }));
+  // return [...new Set(arr)]; // No need to remove duplicates, it may be controlled by the user
+  return arr;
 }
