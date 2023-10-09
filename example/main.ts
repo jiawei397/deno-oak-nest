@@ -1,14 +1,11 @@
-// deno-lint-ignore-file no-unused-vars no-explicit-any
 import {
-  Context,
-  HTTPException,
   NestFactory,
   NestRequest,
   NestResponse,
   NextFunction,
-  Status,
 } from "../mod.ts";
 import { AppModule } from "./app.module.ts";
+import { HttpExceptionFilter } from "./exception.ts";
 import { LoggingInterceptor } from "./interceptor/log.interceptor.ts";
 
 const app = await NestFactory.create(AppModule);
@@ -91,6 +88,8 @@ app.use(async (req: NestRequest, res: NestResponse, next: NextFunction) => {
 //   return ctx.body("hello");
 // });
 
+app.useGlobalFilters(HttpExceptionFilter);
+
 const port = Number(Deno.env.get("PORT") || 2000);
 
 app.notFound((req, res) => {
@@ -99,8 +98,11 @@ app.notFound((req, res) => {
 });
 
 app.onError((err, req, res) => {
-  // console.error("error", err);
-  res.body = err.message;
+  console.error("error", err);
+  res.body = {
+    statusCode: 500,
+    message: err.message,
+  };
   res.status = 500;
 });
 

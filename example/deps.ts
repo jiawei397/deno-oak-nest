@@ -38,6 +38,7 @@ export {
   BadGatewayException,
   BadRequestException,
   BodyParamValidationException,
+  HttpException,
   IternalServerException,
   UnauthorizedException,
 } from "https://deno.land/x/oak_exception@v0.0.7/mod.ts";

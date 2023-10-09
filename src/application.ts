@@ -20,6 +20,7 @@ import {
   META_PATH_KEY,
 } from "./decorators/controller.ts";
 import { Factory } from "./factorys/class.factory.ts";
+import { checkByFilters } from "./filter.ts";
 import { checkByGuard } from "./guard.ts";
 import { checkByInterceptors } from "./interceptor.ts";
 import {
@@ -28,6 +29,7 @@ import {
 } from "./interfaces/application.interface.ts";
 import { AliasOptions } from "./interfaces/controller.interface.ts";
 import { StaticOptions } from "./interfaces/factory.interface.ts";
+import { ExceptionFilters } from "./interfaces/filter.interface.ts";
 import { ControllerMethod } from "./interfaces/guard.interface.ts";
 import { NestUseInterceptors } from "./interfaces/interceptor.interface.ts";
 import {
@@ -123,6 +125,7 @@ export class Application {
   apiPrefix = "";
   apiPrefixOptions: ApiPrefixOptions = {};
   private globalInterceptors: NestUseInterceptors = [];
+  private globalExceptionFilters: ExceptionFilters = [];
   staticOptions: StaticOptions;
   app: Hono;
   defaultCache: Map<any, any> | undefined;
@@ -158,6 +161,10 @@ export class Application {
 
   useGlobalInterceptors(...interceptors: NestUseInterceptors) {
     this.globalInterceptors.push(...interceptors);
+  }
+
+  useGlobalFilters(...filters: ExceptionFilters) {
+    this.globalExceptionFilters.push(...filters);
   }
 
   /**
@@ -356,18 +363,30 @@ export class Application {
             }
 
             const args = await transferParam(instance, methodName, context);
-            const result = await checkByInterceptors(
-              context,
-              this.globalInterceptors,
-              fn,
-              {
-                target: instance,
-                methodName,
-                methodType,
-                args,
+            let result;
+            try {
+              result = await checkByInterceptors(
+                context,
+                this.globalInterceptors,
                 fn,
-              },
-            );
+                {
+                  target: instance,
+                  methodName,
+                  methodType,
+                  args,
+                  fn,
+                },
+              );
+            } catch (error) {
+              return await checkByFilters(
+                context,
+                instance,
+                this.globalExceptionFilters,
+                fn,
+                error,
+              ); // If has filters, it will be handled by filters
+            }
+
             this.formatResponse(
               context,
               {

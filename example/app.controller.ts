@@ -1,7 +1,12 @@
+// deno-lint-ignore-file no-unused-vars
 import { Controller, Get, getReadableStream, Header } from "../mod.ts";
+import { BadRequestException } from "./deps.ts";
+import { HttpExceptionFilter } from "./exception.ts";
 import { UserService } from "./user/services/user.service.ts";
 
 @Controller("")
+// @UseFilters(HttpExceptionFilter)
+// @UseFilters(new HttpExceptionFilter())
 export class AppController {
   constructor(private readonly userService: UserService) {}
   @Get("/", {
@@ -10,6 +15,13 @@ export class AppController {
   version() {
     console.log(this.userService.info());
     return "0.0.1";
+  }
+
+  // @UseFilters(HttpExceptionFilter)
+  @Get("/error")
+  error() {
+    throw new BadRequestException("bad request");
+    // throw new Error("error");
   }
 
   /**

@@ -9,3 +9,4 @@ export * from "./interceptor.interface.ts";
 export * from "./param.interface.ts";
 export * from "./application.interface.ts";
 export * from "./middleware.interface.ts";
+export * from "./filter.interface.ts";

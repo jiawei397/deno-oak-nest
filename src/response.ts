@@ -1,6 +1,6 @@
 import { type Context } from "../deps.ts";
 
-const nestResponseKey = Symbol("nestResponse");
+export const nestResponseKey = Symbol("nestResponse");
 
 export class NestResponse {
   body: string | object | number | boolean | null;
