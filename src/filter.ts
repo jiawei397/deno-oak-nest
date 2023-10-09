@@ -77,7 +77,7 @@ export function Catch(
   };
 }
 
-export function getExceptionFilters(
+export async function getExceptionFilters(
   target: InstanceType<Constructor>,
   fn: ControllerMethod,
   globalFilters: ExceptionFilters,
@@ -86,18 +86,17 @@ export function getExceptionFilters(
     [];
   const fnFilters = Reflect.getOwnMetadata(META_EXCEPTION_FILTER_KEY, fn) || [];
   const filters = [
-    ...new Set([
-      ...fnFilters,
-      ...classFilters,
-      ...globalFilters,
-    ]),
+    ...fnFilters,
+    ...classFilters,
+    ...globalFilters,
   ];
-  return Promise.all(filters.map((filter) => {
+  const arr = await Promise.all(filters.map((filter) => {
     if (typeof filter === "function") {
       return Factory(filter);
     }
     return filter;
   }));
+  return [...new Set(arr)];
 }
 
 export async function checkByFilters(
