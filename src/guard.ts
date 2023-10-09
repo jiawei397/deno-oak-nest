@@ -25,7 +25,7 @@ export function UseGuards(...guards: NestGuards) {
   };
 }
 
-export function getAllGuards(
+export async function getAllGuards(
   target: InstanceType<Constructor>,
   fn: ControllerMethod,
   globalGuards: NestGuards,
@@ -34,12 +34,13 @@ export function getAllGuards(
     []; // defined on prototye, so must use getMetadata instead of getOwnMetadata
   const fnGuards = Reflect.getOwnMetadata(META_GUARD_KEY, fn) || [];
   const guards = [...globalGuards, ...classGuards, ...fnGuards];
-  return Promise.all(guards.map((guard) => {
+  const arr = await Promise.all(guards.map((guard) => {
     if (typeof guard === "function") {
       return Factory(guard);
     }
     return guard;
   }));
+  return [...new Set(arr)];
 }
 
 export async function checkByGuard(
