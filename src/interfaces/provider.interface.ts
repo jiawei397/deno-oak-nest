@@ -17,6 +17,14 @@ export type Provider<T = any> =
   | ValueProvider<T>
   | FactoryProvider<T>
   | ExistingProvider<T>;
+
+export type RegisteredProvider<T = any> = Type<T>;
+
+export type SpecialProvider<T = any> =
+  | ClassProvider<T>
+  | ValueProvider<T>
+  | FactoryProvider<T>
+  | ExistingProvider<T>;
 /**
  * Interface defining a *Class* type provider.
  *

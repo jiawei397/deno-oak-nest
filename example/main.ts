@@ -29,7 +29,8 @@ app.setGlobalPrefix("/api", {
 //   return next();
 // });
 
-app.useGlobalInterceptors(new LoggingInterceptor());
+app.useGlobalInterceptors(LoggingInterceptor);
+// app.useGlobalInterceptors(new LoggingInterceptor());
 
 // must before routes
 app.useStaticAssets("example/static", {

@@ -30,7 +30,7 @@ import {
 import { AliasOptions } from "./interfaces/controller.interface.ts";
 import { StaticOptions } from "./interfaces/factory.interface.ts";
 import { ExceptionFilters } from "./interfaces/filter.interface.ts";
-import { ControllerMethod } from "./interfaces/guard.interface.ts";
+import { ControllerMethod, NestGuards } from "./interfaces/guard.interface.ts";
 import { NestUseInterceptors } from "./interfaces/interceptor.interface.ts";
 import {
   ErrorHandler,
@@ -126,6 +126,7 @@ export class Application {
   apiPrefixOptions: ApiPrefixOptions = {};
   private globalInterceptors: NestUseInterceptors = [];
   private globalExceptionFilters: ExceptionFilters = [];
+  private globalGuards: NestGuards = [];
   staticOptions: StaticOptions;
   app: Hono;
   defaultCache: Map<any, any> | undefined;
@@ -165,6 +166,10 @@ export class Application {
 
   useGlobalFilters(...filters: ExceptionFilters) {
     this.globalExceptionFilters.push(...filters);
+  }
+
+  useGlobalGuards(...guards: NestGuards) {
+    this.globalGuards.push(...guards);
   }
 
   /**
@@ -342,9 +347,13 @@ export class Application {
               join(controllerAliasPath, methodPath));
           const funcStart = Date.now();
           const callback = async (context: Context) => {
-            // TODO: deal with useFilter
             try {
-              const guardResult = await checkByGuard(instance, fn, context);
+              const guardResult = await checkByGuard(
+                instance,
+                fn,
+                context,
+                this.globalGuards,
+              );
               if (!guardResult) {
                 context.status(Status.Forbidden);
                 return context.json({

@@ -1,8 +1,15 @@
 // deno-lint-ignore-file no-explicit-any
 import { Reflect } from "../../deps.ts";
 import { Application } from "../application.ts";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "../constants.ts";
 import { getModuleMetadata, isModule } from "../decorators/module.ts";
-import type { ModuleType, Provider, Type } from "../interfaces/mod.ts";
+import type {
+  ModuleType,
+  Provider,
+  RegisteredProvider,
+  SpecialProvider,
+  Type,
+} from "../interfaces/mod.ts";
 import { Scope } from "../interfaces/mod.ts";
 import { globalFactoryCaches, initProvider } from "./class.factory.ts";
 
@@ -11,9 +18,9 @@ const onModuleInitedKey = Symbol("onModuleInited");
 export async function findControllers(
   module: ModuleType,
   controllerArr: Type<any>[],
-  registeredProviders: Provider[],
+  registeredProviders: RegisteredProvider[],
   dynamicProviders: Provider[],
-  specialProviders: Provider[],
+  specialProviders: SpecialProvider[],
 ) {
   if (!isModule(module)) {
     return;
@@ -68,6 +75,7 @@ export async function findControllers(
 
 export async function initProviders(
   providers: Provider[],
+  app: Application,
   cache = globalFactoryCaches,
 ) {
   const arr = [];
@@ -80,7 +88,20 @@ export async function initProviders(
       });
     }
   }
-  return Promise.all(arr.map(({ instance, provider }) => {
+  await Promise.all(arr.map(({ instance, provider }) => {
+    // register global interceptor, filter, guard
+    if ("provide" in provider) {
+      const provide = provider.provide;
+      if (provide === APP_INTERCEPTOR) {
+        app.useGlobalInterceptors(instance);
+      } else if (provide === APP_FILTER) {
+        app.useGlobalFilters(instance);
+      } else if (provide === APP_GUARD) {
+        app.useGlobalGuards(instance);
+      }
+    }
+
+    // init module
     if (typeof instance.onModuleInit === "function") {
       if (Reflect.hasOwnMetadata(onModuleInitedKey, provider)) {
         return;
@@ -89,15 +110,16 @@ export async function initProviders(
       return instance.onModuleInit();
     }
   }));
+  return arr;
 }
 
 export class NestFactory {
   static async create(module: ModuleType, cache = globalFactoryCaches) {
     const app = new Application();
     const controllers: Type<any>[] = [];
-    const registeredProviders: Provider<any>[] = [];
-    const dynamicProviders: Provider<any>[] = [];
-    const specialProviders: Provider<any>[] = [];
+    const registeredProviders: RegisteredProvider[] = [];
+    const dynamicProviders: Provider[] = [];
+    const specialProviders: SpecialProvider[] = [];
     await findControllers(
       module,
       controllers,
@@ -105,9 +127,9 @@ export class NestFactory {
       dynamicProviders,
       specialProviders,
     );
-    await initProviders(specialProviders, cache);
-    await initProviders(dynamicProviders, cache); // init dynamic providers first to avoid it be inited first by other providers
-    await initProviders(registeredProviders, cache);
+    await initProviders(specialProviders, app, cache);
+    await initProviders(dynamicProviders, app, cache); // init dynamic providers first to avoid it be inited first by other providers
+    await initProviders(registeredProviders, app, cache);
 
     if (controllers.length) {
       app.defaultCache = cache;

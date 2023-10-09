@@ -25,7 +25,7 @@ export function UseInterceptors(...interceptors: NestUseInterceptors) {
   };
 }
 
-export function getInterceptors(
+export async function getInterceptors(
   target: InstanceType<Constructor>,
   fn: ControllerMethod,
   globalInterceptors: NestUseInterceptors,
@@ -38,12 +38,13 @@ export function getInterceptors(
     ...classInterceptors,
     ...fnInterceptors,
   ];
-  return Promise.all(interceptors.map((interceptor) => {
+  const arr = await Promise.all(interceptors.map((interceptor) => {
     if (typeof interceptor === "function") {
       return Factory(interceptor);
     }
     return interceptor;
   }));
+  return [...new Set(arr)];
 }
 
 export async function checkByInterceptors(

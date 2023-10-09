@@ -5,13 +5,13 @@ import type {
   CanActivate,
   Constructor,
   ControllerMethod,
-  Guard,
+  NestGuards,
 } from "./interfaces/mod.ts";
 
 export const META_FUNCTION_KEY = Symbol("meta:fn");
 export const META_GUARD_KEY = Symbol("meta:guard");
 
-export function UseGuards(...guards: (CanActivate | Guard)[]) {
+export function UseGuards(...guards: NestGuards) {
   return function (
     target: any,
     property?: string,
@@ -28,11 +28,12 @@ export function UseGuards(...guards: (CanActivate | Guard)[]) {
 export function getAllGuards(
   target: InstanceType<Constructor>,
   fn: ControllerMethod,
+  globalGuards: NestGuards,
 ): Promise<CanActivate[]> {
   const classGuards = Reflect.getMetadata(META_GUARD_KEY, target) ||
     []; // defined on prototye, so must use getMetadata instead of getOwnMetadata
   const fnGuards = Reflect.getOwnMetadata(META_GUARD_KEY, fn) || [];
-  const guards = [...classGuards, ...fnGuards];
+  const guards = [...globalGuards, ...classGuards, ...fnGuards];
   return Promise.all(guards.map((guard) => {
     if (typeof guard === "function") {
       return Factory(guard);
@@ -45,8 +46,9 @@ export async function checkByGuard(
   target: InstanceType<Constructor>,
   fn: ControllerMethod,
   context: Context,
+  globalGuards: NestGuards,
 ) {
-  const guards = await getAllGuards(target, fn);
+  const guards = await getAllGuards(target, fn, globalGuards);
   if (guards.length > 0) {
     Reflect.defineMetadata(META_FUNCTION_KEY, fn, context); // record the function to context
     for (let i = 0; i < guards.length; i++) {
