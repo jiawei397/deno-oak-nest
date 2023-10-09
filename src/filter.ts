@@ -114,9 +114,11 @@ export async function checkByFilters(
     const catchedExceptions: Array<Type<any> | Abstract<any>> = Reflect
       .getMetadata(META_EXCEPTION_CATCH_KEY, filter);
     if (catchedExceptions) {
-      const isOne = catchedExceptions.some((exceptionCls) =>
-        tempError instanceof exceptionCls
-      );
+      const isOne = catchedExceptions.length === 0
+        ? true
+        : catchedExceptions.some((exceptionCls) =>
+          tempError instanceof exceptionCls
+        );
       if (isOne) {
         try {
           return await filter.catch(tempError, context);

@@ -10,6 +10,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
       statusCode: exception.status,
       timestamp: new Date().toISOString(),
       path: context.req.url,
+      type: "HttpExceptionFilter",
+    });
+  }
+}
+
+@Catch()
+export class AllExceptionsFilter implements ExceptionFilter {
+  catch(exception: unknown, context: Context) {
+    // console.log("AllExceptionsFilter-----", exception);
+    return context.json({
+      statusCode: 500,
+      timestamp: new Date().toISOString(),
+      path: context.req.url,
+      type: "AllExceptionsFilter",
+      error: (exception as Error).message,
     });
   }
 }

@@ -1,7 +1,13 @@
 // deno-lint-ignore-file no-unused-vars
-import { Controller, Get, getReadableStream, Header } from "../mod.ts";
+import {
+  Controller,
+  Get,
+  getReadableStream,
+  Header,
+  UseFilters,
+} from "../mod.ts";
 import { BadRequestException } from "./deps.ts";
-import { HttpExceptionFilter } from "./exception.ts";
+import { AllExceptionsFilter, HttpExceptionFilter } from "./exception.ts";
 import { UserService } from "./user/services/user.service.ts";
 
 @Controller("")
@@ -18,6 +24,7 @@ export class AppController {
   }
 
   // @UseFilters(HttpExceptionFilter)
+  @UseFilters(AllExceptionsFilter)
   @Get("/error")
   error() {
     throw new BadRequestException("bad request");
