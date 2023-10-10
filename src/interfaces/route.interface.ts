@@ -1,10 +1,17 @@
+// deno-lint-ignore-file no-explicit-any
+import { ListenOptions } from "./application.interface.ts";
+import { Context } from "./context.interface.ts";
 import { AliasOptions } from "./controller.interface.ts";
+import { StaticOptions } from "./factory.interface.ts";
 import { ControllerMethod } from "./guard.interface.ts";
+import { Next } from "./middleware.interface.ts";
 import { Type } from "./type.interface.ts";
+
+export type MethodType = "get" | "post" | "put" | "delete";
 
 export interface RouteMap {
   methodPath: string;
-  methodType: string;
+  methodType: MethodType;
   fn: ControllerMethod;
   methodName: string;
   instance: InstanceType<Type>;
@@ -18,3 +25,18 @@ export type RouteItem = {
   cls: Type;
   aliasOptions?: AliasOptions;
 };
+
+export type MiddlewareHandler = (
+  context: Context,
+  next: Next,
+) => Promise<any>;
+
+export abstract class IRouter {
+  abstract use(fn: MiddlewareHandler): void;
+  abstract get(path: string, fn: MiddlewareHandler): any;
+  abstract post(path: string, fn: MiddlewareHandler): any;
+  abstract put(path: string, fn: MiddlewareHandler): any;
+  abstract delete(path: string, fn: MiddlewareHandler): any;
+  abstract startServer(options?: ListenOptions): any;
+  abstract serveForStatic(staticOptions?: StaticOptions): void;
+}

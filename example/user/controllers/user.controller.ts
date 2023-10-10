@@ -8,14 +8,13 @@ import {
   Get,
   Ip,
   MethodName,
-  NestResponse as Response,
   Post,
   Query,
   Res,
   UploadedFile,
   UseGuards,
 } from "../../../mod.ts";
-import type { Context, FormDataFormattedBody } from "../../../mod.ts";
+import type { Context, FormDataFormattedBody, Response } from "../../../mod.ts";
 import { BadRequestException, mockjs, nanoid } from "../../deps.ts";
 import { AuthGuard } from "../../guards/auth.guard.ts";
 import { AuthGuard2 } from "../../guards/auth2.guard.ts";
@@ -58,8 +57,8 @@ export class UserController {
   }
 
   @Get("html")
-  getHtml(context: Context) {
-    return context.html("<h1>Hello World</h1>");
+  getHtml() {
+    return "<h1>Hello World</h1>";
   }
 
   @UseGuards(AuthGuard2, AuthGuard3)
@@ -72,11 +71,11 @@ export class UserController {
     context: Context,
   ) {
     console.log("methodName", methodName, "controllerName", controllerName);
-    return context.json(mockjs.mock({
+    context.response.body = mockjs.mock({
       name: "@name",
       "age|1-100": 50,
       "val|0-2": 1,
-    }));
+    });
     // return mockjs.mock({
     //   name: "@name",
     //   "age|1-100": 50,
@@ -118,9 +117,9 @@ export class UserController {
   @Roles(RoleAction.read)
   list(context: Context) {
     this.testInnerCall();
-    return context.json(mockjs.mock({
+    context.response.body = mockjs.mock({
       "citys|100": [{ name: "@city", "value|1-100": 50, "type|0-2": 1 }],
-    }));
+    });
   }
 
   testInnerCall() {
@@ -136,29 +135,28 @@ export class UserController {
       "citys|100": [{ name: "@city", "value|1-100": 50, "type|0-2": 1 }],
     });
     // console.log(result);
-    // ctx.response.body = result;
-    return ctx.json(result);
+    ctx.response.body = result;
   }
 
   @Post("form")
   async form(ctx: Context) {
-    const data = await ctx.req.formData();
+    const data = await ctx.request.formData();
     const age = data.get("age");
     console.log("---form----", data, age, typeof age); // age is string
-    return ctx.json({
+    return {
       name: data.get("name"),
       age,
-    });
+    };
   }
 
   @Post("upload")
   async upload(ctx: Context) {
-    const data = await ctx.req.formData();
+    const data = await ctx.request.formData();
     // const result = await data.value.read({
     //   maxFileSize: 10 * 1024 * 1024 * 1024,
     // });
     console.log("---upload----", data.getAll("files"));
-    return ctx.text("upload ok");
+    return "upload ok";
   }
 
   @Post("upload2")

@@ -1,9 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
-import { Context } from "../../deps.ts";
+import { Context } from "./context.interface.ts";
 import { ControllerMethod } from "./guard.interface.ts";
+import { Next } from "./middleware.interface.ts";
 import { Constructor } from "./type.interface.ts";
-
-export type Next = () => Promise<unknown>;
 
 export interface NestInterceptorOptions {
   target: InstanceType<Constructor>;
@@ -21,7 +20,7 @@ export interface NestInterceptor {
     context: Context,
     next: Next,
     options?: NestInterceptorOptions,
-  ): Promise<any>;
+  ): Promise<void>;
 }
 
 export type NestUseInterceptors =

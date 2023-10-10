@@ -4,6 +4,7 @@ import { Application } from "../application.ts";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "../constants.ts";
 import { getModuleMetadata, isModule } from "../decorators/module.ts";
 import type {
+  IRouter,
   ModuleType,
   Provider,
   RegisteredProvider,
@@ -114,8 +115,12 @@ export async function initProviders(
 }
 
 export class NestFactory {
-  static async create(module: ModuleType, cache = globalFactoryCaches) {
-    const app = new Application();
+  static async create(
+    module: ModuleType,
+    router: IRouter,
+    cache = globalFactoryCaches,
+  ) {
+    const app = new Application(router);
     const controllers: Type<any>[] = [];
     const registeredProviders: RegisteredProvider[] = [];
     const dynamicProviders: Provider[] = [];

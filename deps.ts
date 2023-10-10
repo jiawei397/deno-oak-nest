@@ -1,35 +1,3 @@
-// export {
-//   Application,
-//   Context,
-//   Cookies as OakCookie,
-//   createHttpError,
-//   isHttpError,
-//   proxy,
-//   REDIRECT_BACK,
-//   Request,
-//   Response,
-//   Router as OriginRouter,
-//   send,
-//   Status,
-//   STATUS_TEXT,
-// } from "https://deno.land/x/oak@v12.6.1/mod.ts";
-
-export {
-  type Context,
-  Hono,
-  type HonoRequest as Request,
-  HTTPException,
-  type MiddlewareHandler,
-} from "https://deno.land/x/hono@v3.7.2/mod.ts";
-
-export {
-  etag,
-  getCookie,
-  serveStatic,
-  type ServeStaticOptions,
-  setCookie,
-} from "https://deno.land/x/hono@v3.7.2/middleware.ts";
-
 export {
   Status,
   STATUS_TEXT,

@@ -1,13 +1,14 @@
 // deno-lint-ignore-file no-explicit-any
-import { Context, Reflect } from "../deps.ts";
-import { Factory, getMergedMetas } from "./factorys/class.factory.ts";
+import { Reflect } from "../deps.ts";
+import { getMergedMetas } from "./factorys/class.factory.ts";
+import { Context } from "./interfaces/context.interface.ts";
 import type { ControllerMethod } from "./interfaces/guard.interface.ts";
 import type {
   NestInterceptor,
   NestInterceptorOptions,
   NestUseInterceptors,
-  Next,
 } from "./interfaces/interceptor.interface.ts";
+import { Next } from "./interfaces/middleware.interface.ts";
 import type { Constructor } from "./interfaces/type.interface.ts";
 export const META_INTERCEPTOR_KEY = Symbol("meta:interceptor");
 
@@ -46,7 +47,13 @@ export async function checkByInterceptors(
 ) {
   const { target, args } = options;
   const interceptors = await getInterceptors(target, fn, globalInterceptors);
-  const next = () => fn.apply(target, args);
+  const next = async () => {
+    const res = await fn.apply(target, args);
+    if (res !== undefined && context.response.body === undefined) {
+      context.response.body = res;
+    }
+    return res;
+  };
   if (interceptors.length > 0) {
     return compose(interceptors)(context, next, options);
   } else {

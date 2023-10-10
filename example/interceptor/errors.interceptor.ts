@@ -1,7 +1,6 @@
-import { Context, Injectable } from "../../mod.ts";
+import { type Context, Injectable, Next } from "../../mod.ts";
 import type {
   NestInterceptor,
-  Next,
 } from "../../src/interfaces/interceptor.interface.ts";
 import { BadGatewayException } from "../deps.ts";
 import { RoleService } from "../user/services/role.service.ts";
@@ -16,7 +15,7 @@ export class ErrorsInterceptor implements NestInterceptor {
   async intercept(_context: Context, next: Next) {
     try {
       console.log(`roleService`, this.roleService.getRole());
-      return await next();
+      await next();
     } catch (err) {
       throw new BadGatewayException(err);
     }

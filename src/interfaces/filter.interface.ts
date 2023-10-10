@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 
-import { Context } from "../../deps.ts";
+import { Context } from "./context.interface.ts";
 import { Constructor } from "./type.interface.ts";
 
 /**

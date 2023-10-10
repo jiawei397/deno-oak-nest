@@ -1,6 +1,6 @@
 import {
   CanActivate,
-  Context,
+  type Context,
   getMetadataForGuard,
   Injectable,
   Reflector,

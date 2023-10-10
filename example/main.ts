@@ -1,18 +1,16 @@
-import {
-  NestFactory,
-  NestRequest,
-  NestResponse,
-  NextFunction,
-} from "../mod.ts";
+import { NestFactory } from "../mod.ts";
+import { HonoRouter } from "../modules/hono/mod.ts";
 import { AppModule } from "./app.module.ts";
 import { HttpExceptionFilter } from "./exception.ts";
 import { LoggingInterceptor } from "./interceptor/log.interceptor.ts";
+import { TransformInterceptor } from "./interceptor/transform.interceptor.ts";
 
-const app = await NestFactory.create(AppModule);
+const router = new HonoRouter();
+const app = await NestFactory.create(AppModule, router);
 
-app.get("/", (req: NestRequest, res: NestResponse) => {
-  res.body = "hello world";
-});
+// app.get("/", (req, res) => {
+//   res.body = "hello world";
+// });
 app.setGlobalPrefix("/api", {
   exclude: ["^/?v\\d{1,3}/"],
 });
@@ -29,7 +27,7 @@ app.setGlobalPrefix("/api", {
 //   return next();
 // });
 
-app.useGlobalInterceptors(LoggingInterceptor);
+app.useGlobalInterceptors(TransformInterceptor);
 // app.useGlobalInterceptors(new LoggingInterceptor());
 
 // must before routes
@@ -38,7 +36,7 @@ app.useStaticAssets("example/static", {
 });
 
 // Logger
-app.use(async (req: NestRequest, res: NestResponse, next: NextFunction) => {
+app.use(async (req, res, next) => {
   console.log("logger----", req.url);
   const start = Date.now();
   await next();
@@ -93,19 +91,19 @@ app.useGlobalFilters(HttpExceptionFilter);
 
 const port = Number(Deno.env.get("PORT") || 2000);
 
-app.notFound((req, res) => {
-  res.body = "not found";
-  res.status = 404;
-});
+// app.notFound((req, res) => {
+//   res.body = "not found";
+//   res.status = 404;
+// });
 
-app.onError((err, req, res) => {
-  console.error("error", err);
-  res.body = {
-    statusCode: 500,
-    message: err.message,
-  };
-  res.status = 500;
-});
+// app.onError((err, req, res) => {
+//   console.error("error", err);
+//   res.body = {
+//     statusCode: 500,
+//     message: err.message,
+//   };
+//   res.status = 500;
+// });
 
 app.listen({
   port,

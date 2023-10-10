@@ -15,11 +15,12 @@ import { UserService } from "./user/services/user.service.ts";
 // @UseFilters(new HttpExceptionFilter())
 export class AppController {
   constructor(private readonly userService: UserService) {}
+
   @Get("/", {
     alias: "/v1/version", // this will make an extra route
   })
-  version() {
-    console.log(this.userService.info());
+  async version() {
+    console.log(await this.userService.info());
     return "0.0.1";
   }
 

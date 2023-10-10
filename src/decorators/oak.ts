@@ -2,8 +2,6 @@
 import {
   assert,
   BodyParamValidationException,
-  type Context,
-  getCookie,
   Reflect,
   validateOrReject,
   ValidationError,
@@ -18,7 +16,7 @@ import type {
   FormDataFormattedBody,
   FormDataOptions,
 } from "../interfaces/param.interface.ts";
-import { NestResponse } from "../response.ts";
+import { Context } from "../interfaces/context.interface.ts";
 
 const typePreKey = "oaktype:";
 
@@ -64,14 +62,17 @@ export async function validateParams(Cls: Constructor, value: object) {
 export function Body(key?: string) {
   return createParamDecoratorWithLowLevel(
     async (ctx: Context, target: any, methodName: string, index: number) => {
-      const result = ctx.req.raw.body; // content type automatically detected
-      const contentType = ctx.req.header("content-type");
+      const request = ctx.request;
+      const contentType = request.header("content-type");
       if (
-        !result || !contentType || !contentType.includes("application/json")
+        !contentType || !contentType.includes("application/json")
       ) {
-        return result;
+        throw new BodyParamValidationException("content-type must be json");
       }
-      const value = await ctx.req.json();
+      const value = await request.json();
+      if (!value || typeof value !== "object") {
+        throw new BodyParamValidationException("body must be json object");
+      }
       const providers = Reflect.getMetadata( // get the params providers
         "design:paramtypes",
         target,
@@ -192,11 +193,13 @@ export async function transAndValidateByCls(
 export function Query(key?: string) {
   return createParamDecoratorWithLowLevel(
     (ctx: Context, target: any, methodName: string, index: number) => {
-      const map = ctx.req.query();
       if (!key) {
+        const map = ctx.request.queries();
         return transAndValidateParams(target, methodName, index, map);
+      } else {
+        const val = ctx.request.query(key);
+        return parseNumOrBool(val, target, methodName, index);
       }
-      return parseNumOrBool(map[key], target, methodName, index);
     },
   );
 }
@@ -208,11 +211,11 @@ export function Query(key?: string) {
 export function Params(key?: string) {
   return createParamDecoratorWithLowLevel(
     (ctx: Context, target: any, methodName: string, index: number) => {
-      const params = ctx.req.param();
       if (!key) {
+        const params = ctx.request.params();
         return transAndValidateParams(target, methodName, index, params);
       }
-      return parseNumOrBool(params[key], target, methodName, index);
+      return parseNumOrBool(ctx.request.param(key), target, methodName, index);
     },
   );
 }
@@ -222,38 +225,39 @@ export function Headers(key?: string) {
     (ctx: Context, target: any, methodName: string, index: number) => {
       if (key) {
         return parseNumOrBool(
-          ctx.req.header(key),
+          ctx.request.header(key),
           target,
           methodName,
           index,
         );
       }
-      return ctx.req.header();
+      return ctx.request.headers();
     },
   );
 }
 
 export const Req = createParamDecorator((ctx: Context) => {
-  return ctx.req;
+  return ctx.request;
 });
 
 export const Res = createParamDecorator((ctx: Context) => {
-  return NestResponse.init(ctx);
+  return ctx.response;
 });
 
 export const Ip = createParamDecorator((ctx: Context) => {
-  return ctx.req.header("x-real-ip") || ctx.req.header("x-forwarded-for");
+  return ctx.request.header("x-real-ip") ||
+    ctx.request.header("x-forwarded-for");
 });
 
 export const Host = createParamDecorator((ctx: Context) => {
-  return ctx.req.header("host");
+  return ctx.request.header("host");
 });
 
 export function Cookies(key?: string) {
   return createParamDecoratorWithLowLevel(
     (ctx: Context, target: any, methodName: string, index: number) => {
       if (key) {
-        const val = getCookie(ctx, key);
+        const val = ctx.request.cookie(key);
         return parseNumOrBool(
           val,
           target,
@@ -261,7 +265,7 @@ export function Cookies(key?: string) {
           index,
         );
       }
-      return getCookie(ctx);
+      return ctx.request.cookies();
     },
   );
 }
@@ -269,7 +273,7 @@ export function Cookies(key?: string) {
 export const Cookie = Cookies;
 
 // export function Session() {
-//   return createParamDecoratorWithLowLevel((ctx: Context) => {
+//   return createParamDecoratorWithLowLevel((ctx: IContext) => {
 //     return ctx.request.session;
 //   });
 // }
@@ -289,7 +293,7 @@ export const ControllerName = createParamDecorator(
 export function UploadedFile(options: FormDataOptions = {}) {
   return createParamDecoratorWithLowLevel(
     async (ctx: Context) => {
-      const result = await ctx.req.formData();
+      const result = await ctx.request.formData();
       // console.log(result);
       const fields: Record<string, any> = {};
       result.forEach((value, key) => {
@@ -321,7 +325,7 @@ export const FormData = UploadedFile;
 export function Form() {
   return createParamDecoratorWithLowLevel(
     async (ctx: Context, target: any, methodName: string, index: number) => {
-      const result = await ctx.req.formData();
+      const result = await ctx.request.formData();
       const map: Record<string, string | File> = {};
       result.forEach((value, key) => {
         map[key] = value;

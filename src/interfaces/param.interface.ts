@@ -1,4 +1,4 @@
-import { Context } from "../../deps.ts";
+import { Context } from "./context.interface.ts";
 import { Constructor, Instance } from "./type.interface.ts";
 
 export type ParamDecoratorCallback = (

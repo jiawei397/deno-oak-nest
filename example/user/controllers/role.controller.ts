@@ -4,11 +4,11 @@ import {
   Controller,
   Get,
   Headers,
-  NestResponse as Response,
   Params,
   Post,
   Query,
   Res,
+  type Response,
   UseInterceptors,
 } from "../../../mod.ts";
 import { RoleService } from "../services/role.service.ts";

@@ -1,5 +1,4 @@
-// deno-lint-ignore-file no-explicit-any
-import { type Context } from "../deps.ts";
+import { Context } from "./interfaces/context.interface.ts";
 
 export function isDebug() {
   return Deno.env.get("DEBUG") === "true";
@@ -45,8 +44,8 @@ export interface ReadableStreamResult {
 
 export function setCacheControl(context: Context) {
   // cache-control see https://cloud.tencent.com/developer/section/1189911
-  const requestCacheControl = context.req.header("Cache-Control");
-  let responseCacheControl = context.res.headers.get("Cache-Control");
+  const requestCacheControl = context.request.header("Cache-Control");
+  let responseCacheControl = context.response.headers.get("Cache-Control");
   if (!responseCacheControl) {
     if (requestCacheControl) {
       const cacheArr = requestCacheControl.split(",");
@@ -63,7 +62,7 @@ export function setCacheControl(context: Context) {
     } else {
       responseCacheControl = "no-cache";
     }
-    context.res.headers.set("Cache-Control", responseCacheControl);
+    context.response.headers.set("Cache-Control", responseCacheControl);
   }
 }
 

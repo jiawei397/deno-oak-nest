@@ -16,11 +16,11 @@ import { UserModule } from "./user/user.module.ts";
   ],
   controllers: [AppController],
   providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: LoggingInterceptor,
-      // useValue: new LoggingInterceptor(),
-    },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: LoggingInterceptor,
+    //   // useValue: new LoggingInterceptor(),
+    // },
   ],
 })
 export class AppModule {}

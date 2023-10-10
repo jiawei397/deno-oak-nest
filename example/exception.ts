@@ -1,17 +1,16 @@
 import { HttpException } from "./deps.ts";
-import { Catch, ExceptionFilter } from "../mod.ts";
-import { Context } from "../deps.ts";
+import { Catch, Context, ExceptionFilter } from "../mod.ts";
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, context: Context) {
     // console.log("exception-----", exception);
-    return context.json({
+    context.response.body = {
       statusCode: exception.status,
       timestamp: new Date().toISOString(),
-      path: context.req.url,
+      path: context.request.url,
       type: "HttpExceptionFilter",
-    });
+    };
   }
 }
 
@@ -19,12 +18,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
 export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, context: Context) {
     // console.log("AllExceptionsFilter-----", exception);
-    return context.json({
+    context.response.body = {
       statusCode: 500,
       timestamp: new Date().toISOString(),
-      path: context.req.url,
+      path: context.request.url,
       type: "AllExceptionsFilter",
       error: (exception as Error).message,
-    });
+    };
   }
 }

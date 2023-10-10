@@ -11,7 +11,7 @@ export class User2Controller {
   }
   @Get("/info")
   info(context: Context) {
-    return context.json(this.userService.info());
+    context.response.body = this.userService.info();
   }
 
   @Get("/info2", {
@@ -19,6 +19,6 @@ export class User2Controller {
     alias: "${controller}/info2",
   })
   info2(context: Context) {
-    return context.text("info2");
+    context.response.body = "info2";
   }
 }

@@ -1,13 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
 import {
   blue,
-  Context,
   format,
   green,
-  Hono,
   red,
   Reflect,
-  serveStatic,
   Status,
   STATUS_TEXT,
   yellow,
@@ -27,20 +24,16 @@ import {
   ApiPrefixOptions,
   ListenOptions,
 } from "./interfaces/application.interface.ts";
+import { Context } from "./interfaces/context.interface.ts";
 import { AliasOptions } from "./interfaces/controller.interface.ts";
 import { StaticOptions } from "./interfaces/factory.interface.ts";
 import { ExceptionFilters } from "./interfaces/filter.interface.ts";
 import { ControllerMethod, NestGuards } from "./interfaces/guard.interface.ts";
 import { NestUseInterceptors } from "./interfaces/interceptor.interface.ts";
-import {
-  ErrorHandler,
-  NestMiddleware,
-  NotFoundHandler,
-} from "./interfaces/middleware.interface.ts";
-import { RouteItem, RouteMap } from "./interfaces/route.interface.ts";
+import { NestMiddleware } from "./interfaces/middleware.interface.ts";
+import { IRouter, RouteItem, RouteMap } from "./interfaces/route.interface.ts";
 import { Constructor, Type } from "./interfaces/type.interface.ts";
 import { transferParam } from "./params.ts";
-import { NestResponse } from "./response.ts";
 
 export function join(...paths: string[]) {
   if (paths.length === 0) {
@@ -128,36 +121,35 @@ export class Application {
   private globalExceptionFilters: ExceptionFilters = [];
   private globalGuards: NestGuards = [];
   staticOptions: StaticOptions;
-  app: Hono;
   defaultCache: Map<any, any> | undefined;
 
   private routerArr: RouteItem[] = [];
 
-  constructor() {
-    this.app = new Hono();
-  }
-
-  get(path: string, middleware: NestMiddleware) {
-    this.app.get(path, async (ctx: Context, next) => {
-      const response = NestResponse.getNestResponseWithInit(ctx);
-      const result = await middleware(ctx.req, response!, next);
-      return this.renderResponse(ctx, result);
-    });
-  }
+  constructor(protected router: IRouter) {}
 
   setGlobalPrefix(apiPrefix: string, options: ApiPrefixOptions = {}) {
     this.apiPrefix = apiPrefix;
     this.apiPrefixOptions = options;
   }
 
-  use(...middlewares: NestMiddleware[]) {
+  get(path: string, middleware: NestMiddleware) {
+    this.router.get(path, async (ctx, next) => {
+      await middleware(ctx.request, ctx.response, next);
+    });
+  }
+
+  use(...middlewares: NestMiddleware[]): void {
     middlewares.forEach((middleware) => {
-      this.app.use("*", async (ctx: Context, next) => {
-        const response = NestResponse.getNestResponseWithInit(ctx);
-        const result = await middleware(ctx.req, response!, next);
-        return this.renderResponse(ctx, result);
+      this.router.use(async (ctx, next) => {
+        await middleware(ctx.request, ctx.response, next);
       });
     });
+  }
+
+  listen(options?: ListenOptions) {
+    this.routes();
+    this.router.serveForStatic(this.staticOptions);
+    return this.router.startServer(options);
   }
 
   useGlobalInterceptors(...interceptors: NestUseInterceptors) {
@@ -185,52 +177,6 @@ export class Application {
       baseDir: path,
       ...options,
     };
-  }
-
-  listen(options?: ListenOptions) {
-    this.routes();
-    this.startView();
-    return Deno.serve(options || { port: 8000 }, this.app.fetch);
-  }
-
-  onError(handler: ErrorHandler) {
-    this.app.onError(async (err, ctx) => {
-      const res = NestResponse.getNestResponseWithInit(ctx);
-      const result = await handler(err, ctx.req, res);
-      return this.renderResponse(ctx, result);
-    });
-  }
-
-  notFound(handler: NotFoundHandler) {
-    this.app.notFound(async (ctx) => {
-      const res = NestResponse.getNestResponseWithInit(ctx);
-      const result = await handler(ctx.req, res);
-      return this.renderResponse(ctx, result);
-    });
-  }
-
-  /**
-   * start serve view and static assets.
-   *
-   * If has prefix either api or view of static assets, it will be served self without other check, so it`s a good idea to set prefix if you want to have a good performance.
-   *
-   * Then it will check the extension of the pathname, if it`s optioned such as `ejs`, it will be served view, otherwise it will be served static assets.
-   *
-   * But if there is index.html in the static assets, it will be served first before the view.
-   */
-  private startView() {
-    if (!this.staticOptions) {
-      return;
-    }
-    const prefix = this.staticOptions.prefix;
-    const path = this.staticOptions.path ? `${this.staticOptions.path}/*` : "*";
-    this.app.get(
-      path,
-      serveStatic({
-        root: this.staticOptions.baseDir,
-        rewriteRequestPath: (path) => prefix ? path.replace(prefix, "") : path,
-      }),
-    );
   }
 
   /**
@@ -267,6 +213,7 @@ export class Application {
 
   private formatResponse(
     context: Context,
+    result: any,
     options: {
       target: InstanceType<Constructor>;
       args: any[];
@@ -275,6 +222,13 @@ export class Application {
       fn: ControllerMethod;
     },
   ) {
+    // format response body
+    if (context.response.status === 304) {
+      context.response.body = null;
+    } else if (result !== undefined) {
+      context.response.body = result;
+    }
+
     // response headers
     const headers: Record<string, string> = Reflect.getMetadata(
       META_HEADER_KEY,
@@ -282,7 +236,7 @@ export class Application {
     );
     if (headers) {
       Object.keys(headers).forEach((key) => {
-        context.res.headers.set(key, headers[key]);
+        context.response.headers.set(key, headers[key]);
       });
     }
 
@@ -292,13 +246,12 @@ export class Application {
       options.fn,
     );
     if (code) {
-      context.status(code);
+      context.response.status = code;
     }
   }
 
-  private routes() {
+  protected routes() {
     const routeStart = Date.now();
-    // const result = super.routes();
     const apiPrefixReg = this.apiPrefixOptions?.exclude;
 
     this.routerArr.forEach(
@@ -355,20 +308,23 @@ export class Application {
                 this.globalGuards,
               );
               if (!guardResult) {
-                context.status(Status.Forbidden);
-                return context.json({
+                context.response.status = Status.Forbidden;
+                context.response.body = {
                   message: STATUS_TEXT.get(Status.Forbidden),
                   statusCode: Status.Forbidden,
-                });
+                };
+                return context.render();
               }
             } catch (error) {
               const status = typeof error.status === "number"
                 ? error.status
                 : Status.InternalServerError; // If the error is not HttpException, it will be 500
-              return context.json({
+              context.response.status = status;
+              context.response.body = {
                 message: error.message || error,
                 statusCode: status,
-              });
+              };
+              return context.render();
             }
 
             const args = await transferParam(instance, methodName, context);
@@ -398,6 +354,7 @@ export class Application {
 
             this.formatResponse(
               context,
+              result,
               {
                 fn,
                 target: instance,
@@ -407,9 +364,9 @@ export class Application {
               },
             );
             // console.log(context.res.body, result);
-            return this.renderResponse(context, result);
+            return context.render();
           };
-          (this.app as any)[methodType](originPath, callback);
+          this.router[methodType](originPath, callback);
 
           if (aliasPath) {
             aliasPath = replacePrefixAndSuffix(
@@ -418,7 +375,7 @@ export class Application {
               methodPath,
               controllerPath,
             );
-            (this.app as any)[methodType](aliasPath, callback);
+            this.router[methodType](aliasPath, callback);
           }
           const funcEnd = Date.now();
           this.log(
@@ -450,40 +407,5 @@ export class Application {
       yellow("[Routes application]"),
       green(`successfully started ${Date.now() - routeStart}ms`),
     );
-    // return result;
-  }
-
-  private renderResponse(context: Context, result: unknown) {
-    if (result instanceof Response) {
-      return result;
-    }
-    if (result instanceof ReadableStream) {
-      return new Response(result);
-    }
-    const render = (body: any) => {
-      const contextType = context.res.headers.get("content-type");
-      if (
-        (contextType && contextType.includes("application/json")) ||
-        (body && typeof body !== "string")
-      ) {
-        return context.json(body);
-      }
-      if (contextType && contextType.includes("text/html")) {
-        return context.html(body);
-      }
-      return context.text(body);
-    };
-
-    const nestResponse = NestResponse.getNestResponse(context);
-    if (nestResponse) {
-      context.status(nestResponse.status ?? 200);
-      nestResponse.headers.forEach((key, value) => {
-        context.header(key, value);
-      });
-      // console.log(nestResponse.body);
-      return render(nestResponse.body ?? result);
-    } else {
-      return render(result);
-    }
   }
 }

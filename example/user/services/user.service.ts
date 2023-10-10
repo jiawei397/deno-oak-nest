@@ -11,13 +11,13 @@ export class UserService {
     private readonly userService2: UserService2,
     private readonly loggerService: LoggerService,
   ) {}
-  info() {
+  async info() {
     this.loggerService.warn("----user info");
     return mockjs.mock({
       name: "@name",
       "age|1-100": 50,
       "val|0-2": 1,
-      role: this.roleService.info(),
+      role: await this.roleService.info(),
       user2: this.userService2.info(),
     });
   }

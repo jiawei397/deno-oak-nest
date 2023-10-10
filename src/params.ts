@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import { Context, Reflect } from "../deps.ts";
-import type { Instance } from "./interfaces/mod.ts";
+import { Reflect } from "../deps.ts";
+import type { Context, Instance } from "./interfaces/mod.ts";
 import type { ParamDecoratorCallback } from "./interfaces/param.interface.ts";
 
 export const paramMetadataKey = Symbol("meta:param");

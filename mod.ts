@@ -9,7 +9,6 @@ export {
 } from "./src/guard.ts";
 export { UseInterceptors } from "./src/interceptor.ts";
 export * from "./src/params.ts";
-export * from "./src/response.ts";
 export * from "./src/utils.ts";
 
 export * from "./src/factorys/mod.ts";

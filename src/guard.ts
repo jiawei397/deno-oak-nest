@@ -1,9 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
-import { Context, Reflect } from "../deps.ts";
+import { Reflect } from "../deps.ts";
 import { getMergedMetas } from "./factorys/class.factory.ts";
 import type {
   CanActivate,
   Constructor,
+  Context,
   ControllerMethod,
   NestGuards,
 } from "./interfaces/mod.ts";
