@@ -5,9 +5,11 @@ import {
   getReadableStream,
   Header,
   UseFilters,
+  UseInterceptors,
 } from "../mod.ts";
 import { BadRequestException } from "./deps.ts";
 import { AllExceptionsFilter, HttpExceptionFilter } from "./exception.ts";
+import { ErrorsInterceptor } from "./interceptor/errors.interceptor.ts";
 import { UserService } from "./user/services/user.service.ts";
 
 @Controller("")
@@ -25,7 +27,8 @@ export class AppController {
   }
 
   // @UseFilters(HttpExceptionFilter)
-  @UseFilters(AllExceptionsFilter)
+  // @UseFilters(AllExceptionsFilter)
+  @UseInterceptors(ErrorsInterceptor)
   @Get("/error")
   error() {
     throw new BadRequestException("bad request");

@@ -10,6 +10,7 @@ export interface NestInterceptorOptions {
   methodName: string;
   methodType: string; // get/post/put/delete
   fn: ControllerMethod;
+  next: Next;
 }
 
 /**

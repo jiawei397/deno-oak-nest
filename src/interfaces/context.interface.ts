@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 export interface Request {
   get url(): string;
   get method(): string;
@@ -24,6 +25,5 @@ export interface Context {
   request: Request;
   response: Response;
 
-  // deno-lint-ignore no-explicit-any
   render(): any;
 }

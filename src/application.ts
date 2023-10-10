@@ -213,7 +213,6 @@ export class Application {
 
   private formatResponse(
     context: Context,
-    result: any,
     options: {
       target: InstanceType<Constructor>;
       args: any[];
@@ -225,8 +224,6 @@ export class Application {
     // format response body
     if (context.response.status === 304) {
       context.response.body = null;
-    } else if (result !== undefined) {
-      context.response.body = result;
     }
 
     // response headers
@@ -328,9 +325,17 @@ export class Application {
             }
 
             const args = await transferParam(instance, methodName, context);
-            let result;
+            const next = async () => {
+              const result = await fn.apply(instance, args);
+              if (
+                result !== undefined && context.response.body === undefined
+              ) {
+                context.response.body = result;
+              }
+              return result;
+            };
             try {
-              result = await checkByInterceptors(
+              await checkByInterceptors(
                 context,
                 this.globalInterceptors,
                 fn,
@@ -340,10 +345,11 @@ export class Application {
                   methodType,
                   args,
                   fn,
+                  next,
                 },
               );
             } catch (error) {
-              return await checkByFilters(
+              await checkByFilters(
                 context,
                 instance,
                 this.globalExceptionFilters,
@@ -354,7 +360,6 @@ export class Application {
 
             this.formatResponse(
               context,
-              result,
               {
                 fn,
                 target: instance,

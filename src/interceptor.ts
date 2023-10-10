@@ -45,15 +45,8 @@ export async function checkByInterceptors(
   fn: ControllerMethod,
   options: NestInterceptorOptions,
 ) {
-  const { target, args } = options;
+  const { target, next } = options;
   const interceptors = await getInterceptors(target, fn, globalInterceptors);
-  const next = async () => {
-    const res = await fn.apply(target, args);
-    if (res !== undefined && context.response.body === undefined) {
-      context.response.body = res;
-    }
-    return res;
-  };
   if (interceptors.length > 0) {
     return compose(interceptors)(context, next, options);
   } else {
