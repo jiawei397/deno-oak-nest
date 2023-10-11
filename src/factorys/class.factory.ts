@@ -161,9 +161,9 @@ export async function getMergedMetas<T>(
     [];
   const fns = Reflect.getOwnMetadata(metaKey, fn) || [];
   const filters = [
-    ...fns,
-    ...classes,
     ...globalMetas,
+    ...classes,
+    ...fns,
   ];
   const arr = await Promise.all(filters.map((filter) => {
     if (typeof filter === "function") {
