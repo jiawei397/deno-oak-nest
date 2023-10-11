@@ -1,5 +1,5 @@
-import { ElasticsearchService } from "../mod.ts";
-import { Controller, Get } from "./deps.ts";
+import { ElasticsearchService } from "@nest/elasticsearch";
+import { Controller, Get } from "@nest";
 
 @Controller("")
 export class AppController {
@@ -7,8 +7,8 @@ export class AppController {
   @Get("/")
   getById() {
     return this.elasticSearchService.get({
-      index: "blog",
-      id: "60f69db67cd836379015f256",
+      index: "document_doc_api2",
+      id: "thingjs-api10_62b80206cd02b2892ff4ee8f",
     });
   }
 }

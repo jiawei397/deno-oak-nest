@@ -3,7 +3,6 @@
     "THIS FILE EXISTS ONLY FOR VSCODE! IT IS NOT USED AT RUNTIME": {}
   },
   "imports": {
-    "@nest/": "../",
     "@nest": "../mod.ts",
     "@nest/cors": "../modules/cors/mod.ts",
     "@nest/hono": "../modules/hono/mod.ts",

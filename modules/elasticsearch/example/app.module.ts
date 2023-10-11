@@ -1,11 +1,12 @@
-import { Module } from "./deps.ts";
+import { Module } from "@nest";
+import { ElasticsearchModule } from "@nest/elasticsearch";
 import { AppController } from "./app.controller.ts";
-import { ElasticsearchModule } from "../mod.ts";
 
 @Module({
   imports: [
     ElasticsearchModule.forRoot({
-      db: "http://elastic:369258@192.168.21.176:9200",
+      db: "http://10.100.30.65:9200",
+      // db: "http://elastic:369258@192.168.21.176:9200",
     }),
   ],
   controllers: [AppController],
