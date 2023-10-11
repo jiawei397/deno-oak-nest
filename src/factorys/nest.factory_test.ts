@@ -1,7 +1,13 @@
 // deno-lint-ignore-file no-unused-vars no-explicit-any
-import { Application, assert, assertEquals } from "../../test_deps.ts";
+import { assert, assertEquals } from "../../test_deps.ts";
+import { createMockApp, MockRouter } from "../../tests/common_test.ts";
+import { Application } from "../application.ts";
 import { Module } from "../decorators/module.ts";
-import type { Provider } from "../interfaces/provider.interface.ts";
+import type {
+  Provider,
+  RegisteredProvider,
+  SpecialProvider,
+} from "../interfaces/provider.interface.ts";
 import type { Type } from "../interfaces/type.interface.ts";
 import { findControllers, initProviders, NestFactory } from "./nest.factory.ts";
 
@@ -12,10 +18,9 @@ Deno.test("NestFactory", async () => {
   })
   class AppModule {}
 
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, MockRouter);
   assert(app instanceof Application);
   assert(app.setGlobalPrefix);
-  assert(app.routes);
   assert(app.useGlobalInterceptors);
   assert(app.use);
   assert(app.get);
@@ -25,9 +30,9 @@ Deno.test("findControllers", async () => {
   const callStack: number[] = [];
 
   const controllerArr: Type<any>[] = [];
-  const registeredProviderArr: Provider[] = [];
+  const registeredProviderArr: RegisteredProvider[] = [];
   const dynamicProviders: Provider[] = [];
-  const specialProviders: Provider[] = [];
+  const specialProviders: SpecialProvider[] = [];
   const Controller = (): ClassDecorator => () => {};
 
   class ChildService {}
@@ -86,9 +91,10 @@ Deno.test("findControllers", async () => {
 
   assertEquals(specialProviders.length, 0);
 
-  await initProviders(registeredProviderArr);
+  const app = createMockApp();
+  await initProviders(registeredProviderArr, app);
   assertEquals(callStack, [1]);
 
-  await initProviders(registeredProviderArr);
+  await initProviders(registeredProviderArr, app);
   assertEquals(callStack, [1], "should not call onModuleInit twice");
 });
