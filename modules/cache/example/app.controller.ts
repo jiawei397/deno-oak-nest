@@ -1,16 +1,18 @@
-import {
-  Controller,
-  Get,
-  Params,
-  Query,
-  UseInterceptors,
-} from "../../../mod.ts";
-import { CacheInterceptor, CacheTTL, SetCachePolicy } from "../mod.ts";
+import { Controller, Get, Params, Query, UseInterceptors } from "@nest";
+import { CacheInterceptor, CacheTTL, SetCachePolicy } from "@nest/cache";
 
 @Controller("")
 @UseInterceptors(CacheInterceptor)
 export class AppController {
-  constructor() {}
+  @Get("/")
+  hello() {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve("hello world");
+      }, 500);
+    });
+  }
+
   @Get("/delay")
   // @CacheKey("test")
   // @UseInterceptors(CacheInterceptor)

@@ -211,7 +211,7 @@ export class Application {
     );
   }
 
-  private formatResponse(
+  private async formatResponse(
     context: Context,
     options: {
       target: InstanceType<Constructor>;
@@ -224,6 +224,11 @@ export class Application {
     // format response body
     if (context.response.status === 304) {
       context.response.body = null;
+    } else if (context.response.body !== undefined) {
+      const body = context.response.body;
+      if (body instanceof Promise) {
+        context.response.body = await body;
+      }
     }
 
     // response headers
@@ -358,7 +363,7 @@ export class Application {
               ); // If has filters, it will be handled by filters
             }
 
-            this.formatResponse(
+            await this.formatResponse(
               context,
               {
                 fn,

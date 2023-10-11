@@ -6,6 +6,13 @@
     "@nest/": "../",
     "@nest": "../mod.ts",
     "@nest/cors": "../modules/cors/mod.ts",
-    "@nest/hono": "../modules/hono/mod.ts"
+    "@nest/hono": "../modules/hono/mod.ts",
+    "@nest/cache": "../modules/cache/mod.ts",
+    "@nest/elasticsearch": "../modules/elasticsearch/mod.ts",
+    "@nest/mysql": "../modules/mysql/mod.ts",
+    "@nest/postgres": "../modules/postgres/mod.ts",
+    "@nest/redis": "../modules/redis/mod.ts",
+    "@nest/scheduler": "../modules/scheduler/mod.ts",
+    "@nest/uinv": "../modules/uinv/mod.ts"
   }
 }

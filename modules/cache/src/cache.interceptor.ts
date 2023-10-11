@@ -130,6 +130,7 @@ export class CacheInterceptor implements NestInterceptor {
     if (context.request.method !== "GET") { // only deal get request
       return next();
     }
+    const response = context.response;
     const constructorName = options.target.constructor.name;
     const func = options.target[options.methodName];
 
@@ -168,7 +169,8 @@ export class CacheInterceptor implements NestInterceptor {
       if (this.isDebug) {
         console.debug("cache hit", key, cacheValue);
       }
-      return cacheValue;
+      response.body = cacheValue;
+      return;
     }
     const result = next();
     const ttl: number = Reflect.getOwnMetadata(META_CACHE_TTL_KEY, func) ||
@@ -190,7 +192,8 @@ export class CacheInterceptor implements NestInterceptor {
         if (!this.cacheModuleOptions.isCacheableValue(val)) {
           this.lruCache.delete(key);
           await caches?.delete(key);
-          return val;
+          response.body = val;
+          return;
         }
       }
       if (!isCached && caches) {
@@ -203,7 +206,7 @@ export class CacheInterceptor implements NestInterceptor {
           policy === "public" ? `max-age=${ttl}` : `${policy}, max-age=${ttl}`,
         );
       }
-      return val;
+      response.body = val;
     } catch (error) {
       this.lruCache.delete(key);
       await caches?.delete(key);

@@ -7,7 +7,7 @@
     {
       "request": "launch",
       "name": "deno",
-      "type": "pwa-node",
+      "type": "node",
       "program": "${workspaceFolder}/example/main.ts",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "deno",
@@ -17,6 +17,23 @@
         "-A",
         "--config",
         "deno.json",
+        "--unstable"
+      ],
+      "attachSimplePort": 9229
+    },
+    {
+      "request": "launch",
+      "name": "cache",
+      "type": "node",
+      "program": "${workspaceFolder}/modules/cache/example/main.ts",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--inspect-brk",
+        "-A",
+        "--config",
+        "modules/cache/deno.json",
         "--unstable"
       ],
       "attachSimplePort": 9229
