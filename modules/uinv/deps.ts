@@ -20,15 +20,13 @@ export {
 
 export {
   Ajax,
+  type AjaxConfig,
+  type AjaxData,
   FetchError,
+  type ICacheStore,
   md5,
-} from "https://deno.land/x/jw_fetch@v0.5.0/mod.ts";
-export type {
-  AjaxConfig,
-  AjaxData,
-  ICacheStore,
-  Method,
-} from "https://deno.land/x/jw_fetch@v0.5.0/mod.ts";
+  type Method,
+} from "https://deno.land/x/jwfetch@v1.2.0/mod.ts";
 
 export { createParamDecorator } from "../../mod.ts";
 export type { CanActivate, Context, Request } from "../../mod.ts";

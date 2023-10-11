@@ -2,7 +2,8 @@
 import { BadRequestException } from "../../deps.ts";
 
 export function isDist(): boolean {
-  return Deno.env.get("NODE_ENV") === "production";
+  return Deno.env.get("NODE_ENV") === "production" ||
+    Deno.env.get("DENO_ENV") === "production";
 }
 
 export function isDebug(): boolean {
