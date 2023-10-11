@@ -159,3 +159,41 @@ Deno.test("Reflector", async () => {
 
   assertEquals(callStack, [1]);
 });
+
+Deno.test("application guard can change body and status in canActive", async () => {
+  const app = createMockApp();
+  const changedBody = "changed body";
+  const changedStatus = 500;
+
+  class AuthGuard implements CanActivate {
+    async canActivate(context: Context): Promise<boolean> {
+      context.response.status = changedStatus;
+      context.response.body = changedBody;
+      return false;
+    }
+  }
+
+  const callStack: number[] = [];
+
+  @UseGuards(AuthGuard)
+  @Controller("user")
+  class A {
+    @Get("/a")
+    method1() {
+      callStack.push(1);
+      return "a";
+    }
+  }
+  await app.add(A);
+
+  const ctx = createMockContext({
+    path: "/user/a",
+    method: "GET",
+  });
+
+  await mockCallMethod(app, ctx);
+
+  assertEquals(ctx.response.body, changedBody);
+  assertEquals(ctx.response.status, changedStatus);
+  assertEquals(callStack, []);
+});

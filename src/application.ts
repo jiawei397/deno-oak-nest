@@ -303,6 +303,7 @@ export class Application {
           const funcStart = Date.now();
           const callback = async (context: Context) => {
             try {
+              const originStatus = context.response.status;
               const guardResult = await checkByGuard(
                 instance,
                 fn,
@@ -310,11 +311,15 @@ export class Application {
                 this.globalGuards,
               );
               if (!guardResult) {
-                context.response.status = Status.Forbidden;
-                context.response.body = {
-                  message: STATUS_TEXT.get(Status.Forbidden),
-                  statusCode: Status.Forbidden,
-                };
+                if (context.response.status === originStatus) {
+                  context.response.status = Status.Forbidden;
+                }
+                if (!context.response.body) {
+                  context.response.body = {
+                    message: STATUS_TEXT.get(Status.Forbidden),
+                    statusCode: Status.Forbidden,
+                  };
+                }
                 return context.render();
               }
             } catch (error) {
