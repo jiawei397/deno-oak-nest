@@ -11,9 +11,11 @@ import { NestContext } from "./context.ts";
 
 export class HonoRouter implements IRouter {
   private app: Hono;
-  constructor() {
-    this.app = new Hono();
+
+  constructor(options?: { strict?: boolean }) {
+    this.app = new Hono({ strict: options?.strict ?? false });
   }
+
   get(
     path: string,
     fn: MiddlewareHandler,

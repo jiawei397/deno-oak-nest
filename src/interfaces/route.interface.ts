@@ -40,3 +40,7 @@ export abstract class IRouter {
   abstract startServer(options?: ListenOptions): any;
   abstract serveForStatic(staticOptions?: StaticOptions): void;
 }
+
+export interface IRouterConstructor extends Function {
+  new (options?: { strict?: boolean }): IRouter;
+}

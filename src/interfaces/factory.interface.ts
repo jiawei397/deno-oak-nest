@@ -24,3 +24,8 @@ export interface StaticOptions {
   path?: string;
   rewriteRequestPath?: (path: string) => string;
 }
+
+export type FactoryCreateOptions = {
+  strict?: boolean;
+  cache?: Map<any, any>;
+};
