@@ -1,6 +1,10 @@
 // deno-lint-ignore-file require-await
-import { Context } from "../deps.ts";
-import { assert, assertEquals, testing } from "../test_deps.ts";
+import { assert, assertEquals } from "../test_deps.ts";
+import {
+  createMockApp,
+  createMockContext,
+  mockCallMethod,
+} from "../tests/common_test.ts";
 import { Controller, Get } from "./decorators/controller.ts";
 import { Injectable } from "./decorators/inject.ts";
 import {
@@ -12,8 +16,7 @@ import {
   SetMetadata,
   UseGuards,
 } from "./guard.ts";
-import type { CanActivate } from "./interfaces/mod.ts";
-import { Router } from "./router.ts";
+import type { CanActivate, Context } from "./interfaces/mod.ts";
 
 Deno.test("getAllGuards and checkByGuard", async (t) => {
   class AuthGuard implements CanActivate {
@@ -48,14 +51,14 @@ Deno.test("getAllGuards and checkByGuard", async (t) => {
   const test = new TestController();
 
   await t.step("test a", async () => {
-    const guards = await getAllGuards(test, test.a);
+    const guards = await getAllGuards(test, test.a, []);
     assertEquals(guards.length, 2);
     assert(guards[0] instanceof AuthGuard);
     assert(guards[1] instanceof AuthGuard2);
   });
 
   await t.step("test b", async () => {
-    const guards2 = await getAllGuards(test, test.b);
+    const guards2 = await getAllGuards(test, test.b, []);
     assertEquals(guards2.length, 3);
     assert(guards2[0] instanceof AuthGuard);
     assert(guards2[1] instanceof AuthGuard2);
@@ -63,20 +66,20 @@ Deno.test("getAllGuards and checkByGuard", async (t) => {
   });
 
   await t.step("get a", async () => {
-    const ctx = testing.createMockContext({
+    const ctx = createMockContext({
       path: "/a",
       method: "GET",
     });
-    const result = await checkByGuard(test, test.a, ctx);
+    const result = await checkByGuard(test, test.a, ctx, []);
     assertEquals(result, true);
   });
 
   await t.step("get b", async () => {
-    const ctx = testing.createMockContext({
+    const ctx = createMockContext({
       path: "/b",
       method: "GET",
     });
-    const result = await checkByGuard(test, test.b, ctx);
+    const result = await checkByGuard(test, test.b, ctx, []);
     assertEquals(result, false);
   });
 });
@@ -110,11 +113,11 @@ Deno.test("getMetadataForGuard", async () => {
   }
 
   const test = new TestController();
-  const ctx = testing.createMockContext({
+  const ctx = createMockContext({
     path: "/a",
     method: "GET",
   });
-  await checkByGuard(test, test.a, ctx);
+  await checkByGuard(test, test.a, ctx, []);
   const result = getMetadataForGuard("roles", ctx);
   assertEquals(result, ["user"]);
 });
@@ -145,16 +148,14 @@ Deno.test("Reflector", async () => {
 
   assertEquals(callStack, []);
 
-  const router = new Router();
-  const ctx = testing.createMockContext({
+  const app = createMockApp();
+  const ctx = createMockContext({
     path: "/a",
     method: "GET",
   });
-  await router.register(TestController);
-  const mw = router.routes();
-  const next = testing.createMockNext();
+  await app.add(TestController);
 
-  await mw(ctx, next);
+  await mockCallMethod(app, ctx);
 
   assertEquals(callStack, [1]);
 });
