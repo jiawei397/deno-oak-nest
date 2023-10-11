@@ -1,6 +1,5 @@
-import { Inject } from "../deps.ts";
-import { Client, MYSQL_KEY } from "../mod.ts";
-import { Controller, Get, Query } from "./deps.ts";
+import { Client, MYSQL_KEY } from "@nest/mysql";
+import { Controller, Get, Inject, Query } from "@nest";
 
 @Controller("")
 export class AppController {

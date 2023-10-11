@@ -5,19 +5,34 @@ used MySQL client is <https://deno.land/x/mysql@v2.11.0/mod.ts>.
 
 ## example
 
+Add import map in `deno.json`:
+
+```json
+{
+  "imports": {
+    "@nest": "https://deno.land/x/oak_nest@v2.0.1/mod.ts",
+    "@nest/hono": "https://deno.land/x/oak_nest@v2.0.1/modules/hono/mod.ts",
+    "@nest/mysql": "https://deno.land/x/oak_nest@v2.0.1/modules/mysql/mod.ts"
+  }
+}
+```
+
+Here is `app.module.ts`:
+
 ```typescript
-import { Module } from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+import { Module } from "@nest";
+import { MysqlModule } from "@nest/mysql";
 import { AppController } from "./app.controller.ts";
-import { MysqlModule } from "https://deno.land/x/oak_nest@v2.0.1/modules/mysql/mod.ts";
 
 @Module({
   imports: [
     MysqlModule.forRoot({
       hostname: "localhost",
       username: "root",
+      port: 3306,
       db: "test",
       poolSize: 3, // connection limit
-      password: "yourpassword",
+      password: "123456",
     }),
   ],
   controllers: [AppController],
@@ -25,19 +40,11 @@ import { MysqlModule } from "https://deno.land/x/oak_nest@v2.0.1/modules/mysql/m
 export class AppModule {}
 ```
 
-Then can be used in AppController:
+Then can be used in `AppController`:
 
 ```ts
-import {
-  Client,
-  MYSQL_KEY,
-} from "https://deno.land/x/oak_nest@v2.0.1/modules/mysql/mod.ts";
-import {
-  Controller,
-  Get,
-  Inject,
-  Query,
-} from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+import { Client, MYSQL_KEY } from "@nest/mysql";
+import { Controller, Get, Inject, Query } from "@nest";
 
 @Controller("")
 export class AppController {
@@ -45,6 +52,8 @@ export class AppController {
 
   @Get("/createUserTable")
   async createUserTable() {
+    // await this.client.execute(`CREATE DATABASE IF NOT EXISTS wiki`);
+    // await this.client.execute(`USE wiki`);
     await this.client.execute(`DROP TABLE IF EXISTS users`);
     await this.client.execute(`
       CREATE TABLE users (
