@@ -1,6 +1,6 @@
-import { Module } from "./deps.ts";
+import { Module } from "@nest";
+import { PostgresModule } from "@nest/postgres";
 import { AppController } from "./app.controller.ts";
-import { PostgresModule } from "../mod.ts";
 
 @Module({
   imports: [

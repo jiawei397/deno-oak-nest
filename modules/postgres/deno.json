@@ -1,0 +1,17 @@
+{
+  "lock": false,
+  "tasks": {
+    "dev": "deno run --watch -A example/main.ts"
+  },
+  "compilerOptions": {
+    "removeComments": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false
+  },
+  "imports": {
+    "@nest": "../../mod.ts",
+    "@nest/hono": "../hono/mod.ts",
+    "@nest/postgres": "./mod.ts"
+  }
+}

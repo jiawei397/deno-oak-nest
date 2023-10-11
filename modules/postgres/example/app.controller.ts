@@ -1,6 +1,5 @@
-import { Inject } from "../deps.ts";
-import { Client, POSTGRES_KEY } from "../mod.ts";
-import { Controller, Get, Query } from "./deps.ts";
+import { Controller, Get, Inject, Query } from "@nest";
+import { Client, POSTGRES_KEY } from "@nest/postgres";
 
 @Controller("")
 export class AppController {

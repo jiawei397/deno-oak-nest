@@ -9,10 +9,24 @@ module, there are not many lines.
 
 ## example
 
+Add import map in `deno.json`:
+
+```json
+{
+  "imports": {
+    "@nest": "https://deno.land/x/oak_nest@v2.0.1/mod.ts",
+    "@nest/hono": "https://deno.land/x/oak_nest@v2.0.1/modules/hono/mod.ts",
+    "@nest/postgres": "https://deno.land/x/oak_nest@v2.0.1/modules/postgres/mod.ts"
+  }
+}
+```
+
+Then `app.modules.ts`:
+
 ```typescript
-import { Module } from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+import { Module } from "@nest";
+import { PostgresModule } from "@nest/postgres";
 import { AppController } from "./app.controller.ts";
-import { PostgresModule } from "https://deno.land/x/oak_nest@v2.0.1/modules/postgres/mod.ts";
 
 @Module({
   imports: [
@@ -32,16 +46,8 @@ export class AppModule {}
 Then can be used in AppController:
 
 ```ts
-import {
-  Client,
-  POSTGRES_KEY,
-} from "https://deno.land/x/oak_nest@v2.0.1/modules/postgres/mod.ts";
-import {
-  Controller,
-  Get,
-  Inject,
-  Query,
-} from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+import { Controller, Get, Inject, Query } from "@nest";
+import { Client, POSTGRES_KEY } from "@nest/postgres";
 
 @Controller("")
 export class AppController {
