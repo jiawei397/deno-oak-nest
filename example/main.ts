@@ -1,12 +1,12 @@
 import { NestFactory } from "../mod.ts";
+import { CORS } from "../modules/cors/mod.ts";
 import { HonoRouter } from "../modules/hono/mod.ts";
 import { AppModule } from "./app.module.ts";
 import { HttpExceptionFilter } from "./exception.ts";
 import { LoggingInterceptor } from "./interceptor/log.interceptor.ts";
 import { TransformInterceptor } from "./interceptor/transform.interceptor.ts";
 
-const router = new HonoRouter();
-const app = await NestFactory.create(AppModule, router);
+const app = await NestFactory.create(AppModule, HonoRouter);
 
 // app.get("/", (req, res) => {
 //   res.body = "hello world";
@@ -14,6 +14,8 @@ const app = await NestFactory.create(AppModule, router);
 app.setGlobalPrefix("/api", {
   exclude: ["^/?v\\d{1,3}/"],
 });
+
+app.use(CORS());
 
 // app.use((context, next) => {
 //   (context.req as any).locals = {
