@@ -44,7 +44,7 @@ export async function checkByInterceptors(
   globalInterceptors: NestUseInterceptors,
   fn: ControllerMethod,
   options: NestInterceptorOptions,
-) {
+): Promise<void> {
   const { target, next } = options;
   const interceptors = await getInterceptors(target, fn, globalInterceptors);
   if (interceptors.length > 0) {
@@ -63,7 +63,7 @@ export function compose(interceptors: NestInterceptor[]) {
   ) {
     let index = -1;
 
-    async function dispatch(i: number): Promise<any> {
+    async function dispatch(i: number): Promise<void> {
       if (i <= index) {
         throw new Error("next() called multiple times.");
       }
