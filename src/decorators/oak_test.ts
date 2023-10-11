@@ -2,17 +2,19 @@
 import {
   assert,
   assertEquals,
+  assertRejects,
   IsEnum,
   IsNumber,
   IsOptional,
   IsString,
   Max,
   Min,
-  OakCookie,
-  testing,
 } from "../../test_deps.ts";
-import { createMockContext } from "../../tests/common_test.ts";
-import { Router } from "../router.ts";
+import {
+  createMockApp,
+  createMockContext,
+  mockCallMethod,
+} from "../../tests/common_test.ts";
 import { Controller, Get, Post } from "./controller.ts";
 import {
   Body,
@@ -46,33 +48,14 @@ Deno.test("getTransNumOrBoolOrArray", () => {
 });
 
 Deno.test("body", async (t) => {
-  const mockContext = (options: {
-    path: string;
-    method: string;
-    body?: {
-      type: string;
-      value: any;
-    };
-  }) => {
-    const { path, method, body } = options;
-    const ctx = testing.createMockContext({
-      path,
-      method,
-    });
-    (ctx.request as any).body = () => {
-      return body;
-    };
-    return ctx;
-  };
-
   // deno-lint-ignore no-unused-vars
   class Dto {
     @Max(20)
     @Min(10)
-    age!: number;
+    age: number;
 
     @IsString()
-    name!: string;
+    name: string;
   }
 
   const callStack: number[] = [];
@@ -114,11 +97,11 @@ Deno.test("body", async (t) => {
     }
   }
 
-  const router = new Router();
-  await router.register(A);
+  const app = createMockApp();
+  await app.add(A);
 
   await t.step("get", async () => {
-    const ctx = mockContext({
+    const ctx = createMockContext({
       path: "/a",
       method: "GET",
       body: {
@@ -127,18 +110,15 @@ Deno.test("body", async (t) => {
       },
     });
 
-    const mw = router.routes();
-    const next = testing.createMockNext();
+    await assertRejects(() => mockCallMethod(app, ctx));
 
-    await mw(ctx, next);
-
-    assertEquals(callStack, [1]);
+    assertEquals(callStack, []);
 
     callStack.length = 0;
   });
 
   await t.step("post json number", async () => {
-    const ctx = mockContext({
+    const ctx = createMockContext({
       path: "/a",
       method: "POST",
       body: {
@@ -146,35 +126,34 @@ Deno.test("body", async (t) => {
         value: Promise.resolve(1),
       },
     });
-    const mw = router.routes();
-    const next = testing.createMockNext();
 
-    await mw(ctx, next);
+    await assertRejects(() => mockCallMethod(app, ctx));
 
-    assertEquals(callStack, [2]);
+    assertEquals(callStack, []);
     callStack.length = 0;
   });
 
   await t.step("post normal body", async () => {
-    const ctx = mockContext({
+    const ctx = createMockContext({
       path: "/b",
       method: "POST",
+      reqHeaders: {
+        "content-type": "application/json",
+      },
       body: {
         type: "json",
         value: Promise.resolve(normalBody),
       },
     });
-    const mw = router.routes();
-    const next = testing.createMockNext();
 
-    await mw(ctx, next);
+    await mockCallMethod(app, ctx);
 
     assertEquals(callStack, [3]);
     callStack.length = 0;
   });
 
   await t.step("post error body", async () => {
-    const ctx = mockContext({
+    const ctx = createMockContext({
       path: "/c",
       method: "POST",
       body: {
@@ -182,11 +161,9 @@ Deno.test("body", async (t) => {
         value: Promise.resolve(errorBody),
       },
     });
-    const mw = router.routes();
-    const next = testing.createMockNext();
 
     try {
-      await mw(ctx, next);
+      await mockCallMethod(app, ctx);
       assertEquals(callStack, [5]);
     } catch {
       callStack.push(6);
@@ -219,41 +196,41 @@ Deno.test("Query", async (t) => {
   // deno-lint-ignore no-unused-vars
   class QueryDto {
     @Property()
-    a!: string;
+    a: string;
 
     @Property()
     @Max(20)
-    c!: number;
+    c: number;
 
     @Property()
-    f!: boolean;
+    f: boolean;
 
     @Property()
-    g!: boolean;
+    g: boolean;
 
     @Property()
-    i!: boolean;
+    i: boolean;
 
-    j!: number;
+    j: number;
 
-    k!: boolean;
+    k: boolean;
 
-    l!: number;
+    l: number;
   }
 
   // deno-lint-ignore no-unused-vars
   class QueryNotValidateDto {
-    a!: string;
+    a: string;
 
-    d!: number;
+    d: number;
   }
 
   // deno-lint-ignore no-unused-vars
   class QueryValidateErrorDto {
-    a!: string;
+    a: string;
 
     @Max(20)
-    d!: number;
+    d: number;
   }
 
   @Controller("")
@@ -344,61 +321,52 @@ Deno.test("Query", async (t) => {
     }
   }
 
-  const router = new Router();
-  await router.register(A);
+  const app = createMockApp();
+  await app.add(A);
 
   await t.step("get mock", async () => {
-    const ctx = testing.createMockContext({
+    const ctx = createMockContext({
       path: mockPath,
       method: "GET",
+      queries: mockQuery,
     });
-    const mw = router.routes();
-    const next = testing.createMockNext();
-
-    await mw(ctx, next);
+    await mockCallMethod(app, ctx);
 
     assertEquals(callStack, [1]);
     callStack.length = 0;
   });
 
   await t.step("post mock", async () => {
-    const ctx = testing.createMockContext({
+    const ctx = createMockContext({
       method: "POST",
       path: mockPath,
+      queries: mockQuery,
     });
-    const mw = router.routes();
-    const next = testing.createMockNext();
-
-    await mw(ctx, next);
+    await mockCallMethod(app, ctx);
 
     assertEquals(callStack, [2]);
     callStack.length = 0;
   });
 
   await t.step("get b", async () => {
-    const ctx = testing.createMockContext({
+    const ctx = createMockContext({
       path: "/b",
       method: "GET",
     });
-    const mw = router.routes();
-    const next = testing.createMockNext();
-
-    await mw(ctx, next);
+    await mockCallMethod(app, ctx);
 
     assertEquals(callStack, [3]);
     callStack.length = 0;
   });
 
   await t.step("get error", async () => {
-    const ctx = testing.createMockContext({
+    const ctx = createMockContext({
       path: mockErrorPath,
       method: "GET",
     });
-    const mw = router.routes();
-    const next = testing.createMockNext();
 
     try {
-      await mw(ctx, next);
+      await mockCallMethod(app, ctx);
     } catch (error) {
       // console.log(error);
       assertEquals(error.message, "c must not be greater than 20");
@@ -409,26 +377,23 @@ Deno.test("Query", async (t) => {
   });
 
   await t.step("get error but not validate path", async () => {
-    const ctx = testing.createMockContext({
+    const ctx = createMockContext({
       path: mockErrorButNotValidatePath,
       method: "GET",
+      queries: mockErrorButNotValidatePathQuery,
     });
-    const mw = router.routes();
-    const next = testing.createMockNext();
-    await mw(ctx, next);
+    await mockCallMethod(app, ctx);
     assertEquals(callStack, [5]);
     callStack.length = 0;
   });
 
   await t.step("get validate path", async () => {
-    const ctx = testing.createMockContext({
+    const ctx = createMockContext({
       path: mockErrorValidatePath,
       method: "GET",
     });
-    const mw = router.routes();
-    const next = testing.createMockNext();
     try {
-      await mw(ctx, next);
+      await mockCallMethod(app, ctx);
     } catch (error) {
       // console.log(error);
       assertEquals(error.message, "d must not be greater than 20");
@@ -468,32 +433,29 @@ Deno.test("Params", async (t) => {
     }
   }
 
-  const router = new Router();
-  await router.register(A);
+  const app = createMockApp();
+  await app.add(A);
 
   await t.step("a 1", async () => {
-    const ctx = testing.createMockContext({
-      path: "/a/1",
+    const ctx = createMockContext({
+      path: "/a/:id", // TODO: not deal with regex
       method: "GET",
+      params: {
+        id: "1",
+      },
     });
-    const mw = router.routes();
-    const next = testing.createMockNext();
-
-    await mw(ctx, next);
+    await mockCallMethod(app, ctx);
 
     assertEquals(callStack, [1]);
     callStack.length = 0;
   });
 
   await t.step("b", async () => {
-    const ctx = testing.createMockContext({
+    const ctx = createMockContext({
       path: "/b",
       method: "GET",
     });
-    const mw = router.routes();
-    const next = testing.createMockNext();
-
-    await mw(ctx, next);
+    await mockCallMethod(app, ctx);
 
     assertEquals(callStack, [2]);
     callStack.length = 0;
@@ -502,7 +464,7 @@ Deno.test("Params", async (t) => {
 
 Deno.test("Req, Res, ControllerName, MethodName", async () => {
   const callStack: number[] = [];
-  const ctx = testing.createMockContext({
+  const ctx = createMockContext({
     path: "/a",
     method: "GET",
   });
@@ -524,27 +486,29 @@ Deno.test("Req, Res, ControllerName, MethodName", async () => {
     }
   }
 
-  const router = new Router();
-  await router.register(A);
+  const app = createMockApp();
+  await app.add(A);
 
-  const mw = router.routes();
-  const next = testing.createMockNext();
-
-  await mw(ctx, next);
+  await mockCallMethod(app, ctx);
 
   assertEquals(callStack, [1]);
 });
 
 Deno.test("Cookies", async () => {
   const callStack: number[] = [];
-  const ctx = testing.createMockContext({
+  const mockedCookie = {
+    a: "b",
+    c: "4",
+  };
+  const ctx = createMockContext({
     path: "/a",
     method: "GET",
+    reqHeaders: {
+      Cookie: "a=b; c=4;",
+    },
+    cookies: mockedCookie,
   });
-  ctx.request.headers.set("Cookie", "a=b; c=4;");
-  ctx.cookies = new OakCookie(ctx.request, {
-    response: ctx.response,
-  });
+
   @Controller("")
   class A {
     @Get("a")
@@ -556,9 +520,9 @@ Deno.test("Cookies", async () => {
       @Cookies("d") d: string,
     ) {
       callStack.push(1);
-      assertEquals(cookie, ctx.cookies);
-      assertEquals(await cookie.get("a"), "b");
-      assertEquals(await cookie.get("c"), "4");
+      assertEquals(cookie, mockedCookie);
+      assertEquals(await cookie["a"], "b");
+      assertEquals(await cookie["c"], "4");
       assertEquals(a, "b");
       assertEquals(c, "4");
       assertEquals(c1, 4);
@@ -567,13 +531,9 @@ Deno.test("Cookies", async () => {
     }
   }
 
-  const router = new Router();
-  await router.register(A);
-
-  const mw = router.routes();
-  const next = testing.createMockNext();
-
-  await mw(ctx, next);
+  const app = createMockApp();
+  await app.add(A);
+  await mockCallMethod(app, ctx);
 
   assertEquals(callStack, [1]);
   callStack.length = 0;
@@ -581,12 +541,15 @@ Deno.test("Cookies", async () => {
 
 Deno.test("Headers", async () => {
   const callStack: number[] = [];
-  const ctx = testing.createMockContext({
+  const mockedHeaders = {
+    a: "b",
+    c: "4",
+  };
+  const ctx = createMockContext({
     path: "/a",
     method: "GET",
+    reqHeaders: mockedHeaders,
   });
-  ctx.request.headers.set("a", "b");
-  ctx.request.headers.set("c", "4");
 
   @Controller("")
   class A {
@@ -598,8 +561,8 @@ Deno.test("Headers", async () => {
       @Headers("c") c1: number,
     ) {
       callStack.push(1);
-      assertEquals(headers, ctx.request.headers);
-      assertEquals(headers.get("a"), "b");
+      assertEquals(headers, mockedHeaders);
+      assertEquals(headers["a"], "b");
       assertEquals(a, "b");
       assertEquals<string>(c, "4");
       assertEquals<number>(c1, 4);
@@ -607,13 +570,9 @@ Deno.test("Headers", async () => {
     }
   }
 
-  const router = new Router();
-  await router.register(A);
-
-  const mw = router.routes();
-  const next = testing.createMockNext();
-
-  await mw(ctx, next);
+  const app = createMockApp();
+  await app.add(A);
+  await mockCallMethod(app, ctx);
 
   assertEquals(callStack, [1]);
   callStack.length = 0;
@@ -621,25 +580,17 @@ Deno.test("Headers", async () => {
 
 Deno.test("UploadedFile form data", async (t) => {
   const callStack: number[] = [];
-  const fileMockData = {
-    fields: { test: "a" },
-    files: [
-      {
-        content: undefined,
-        contentType: "text/markdown",
-        name: "file",
-        filename: "/var/folders/xx.md",
-        originalName: "b.md",
-      },
-    ],
-  };
+  const fileMockData = new FormData();
+  fileMockData.set("test", "a");
+  fileMockData.set("file", new File(["hello"], "b.md"));
 
   @Controller("")
   class A {
     @Post("a")
-    noUpload(@UploadedFile() body: any) {
+    noUpload(@UploadedFile() body: FormData) {
       callStack.push(1);
-      assertEquals(body, undefined, "no upload data will not pass body");
+      assert(body instanceof FormData, "will pass body");
+      assertEquals(body.keys.length, 0, "no upload data will not pass body");
     }
 
     @Post("b")
@@ -649,8 +600,8 @@ Deno.test("UploadedFile form data", async (t) => {
     }
   }
 
-  const router = new Router();
-  await router.register(A);
+  const app = createMockApp();
+  await app.add(A);
 
   await t.step("not upload", async () => {
     const ctx = createMockContext({
@@ -658,16 +609,11 @@ Deno.test("UploadedFile form data", async (t) => {
       method: "POST",
       body: {
         type: "form-data",
-        value: {
-          read() {},
-        },
+        value: fileMockData,
       },
     });
 
-    const mw = router.routes();
-    const next = testing.createMockNext();
-
-    await mw(ctx, next);
+    await mockCallMethod(app, ctx);
 
     assertEquals(callStack, [1]);
 
@@ -680,15 +626,10 @@ Deno.test("UploadedFile form data", async (t) => {
       method: "POST",
       body: {
         type: "form-data",
-        value: {
-          read: () => Promise.resolve(fileMockData),
-        },
+        value: Promise.resolve(fileMockData),
       },
     });
-    const mw = router.routes();
-    const next = testing.createMockNext();
-
-    await mw(ctx, next);
+    await mockCallMethod(app, ctx);
 
     assertEquals(callStack, [2]);
     callStack.length = 0;

@@ -16,47 +16,52 @@ export const createMockContext = (options: {
   body?: {
     type: string;
     value: any;
+    headers?: Record<string, string>;
   };
+  reqHeaders?: Record<string, string>;
+  cookies?: Record<string, string>;
+  params?: Record<string, string>;
+  queries?: Record<string, string>;
 }): Context => {
   const mockRequest: Request = {
     method: options.method,
     url: options.path,
     header(key: string) {
-      return "";
+      return options.reqHeaders?.[key];
     },
     headers() {
-      return {};
+      return { ...options.reqHeaders };
     },
     cookies() {
-      return {};
+      return { ...options.cookies };
     },
     cookie(name: string) {
-      return "";
+      return options.cookies?.[name];
     },
     params() {
-      return {};
+      return { ...options.params };
     },
     param(name: string) {
-      return "";
+      return options.params?.[name];
     },
     queries() {
-      return {};
+      return { ...options.queries };
     },
     query(name: string) {
-      return "";
+      return options.queries?.[name];
     },
     // deno-lint-ignore require-await
     async json() {
-      return {};
+      return options.body?.value;
     },
     // deno-lint-ignore require-await
     async formData() {
-      return new FormData();
+      return options.body?.value;
     },
   };
   const mockResponse: Response = {
     body: options.body?.value,
-    headers: new Headers(),
+    headers: new Headers(options.body?.headers),
     status: 200,
     statusText: "",
   };
@@ -67,6 +72,10 @@ export const createMockContext = (options: {
     render() {},
   };
 };
+
+function getFormattedPath(path: string) {
+  return path.split("?")[0];
+}
 
 export class MockRouter implements IRouter {
   map: Map<"GET" | "POST" | "PUT" | "DELETE", Map<string, MiddlewareHandler>> =
@@ -156,5 +165,9 @@ export function mockCallMethod(
   const path = ctx.request.url;
   const method = ctx.request.method as "GET" | "POST" | "PUT" | "DELETE";
   const router = (app as any).router as MockRouter;
-  return router.map.get(method)!.get(path)?.(ctx, createMockNext());
+  const func = router.map.get(method)!.get(getFormattedPath(path));
+  if (!func) {
+    throw new Error(`can not find ${method} ${path}`);
+  }
+  return func(ctx, createMockNext());
 }
