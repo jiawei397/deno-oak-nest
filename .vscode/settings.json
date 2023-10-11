@@ -4,6 +4,7 @@
     "https://deno.land": true
   },
   "deno.config": "deno.json",
+  "deno.importMap": ".vscode/import_map.json",
   "deno.lint": true,
   "deno.suggest.autoImports": true,
   "code-runner.executorMap": {

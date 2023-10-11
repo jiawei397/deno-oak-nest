@@ -8,5 +8,10 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false
+  },
+  "imports": {
+    "@nest": "../../mod.ts",
+    "@nest/hono": "../hono/mod.ts",
+    "@nest/cors": "./mod.ts"
   }
 }

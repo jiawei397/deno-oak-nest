@@ -1,4 +1,4 @@
-import { Module } from "./deps.ts";
+import { Module } from "@nest";
 import { AppController } from "./app.controller.ts";
 
 @Module({

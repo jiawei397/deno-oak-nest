@@ -1,4 +1,4 @@
-import { Controller, Get } from "./deps.ts";
+import { Controller, Get } from "@nest";
 
 @Controller("")
 export class AppController {
