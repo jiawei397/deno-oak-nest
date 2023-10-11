@@ -18,7 +18,7 @@ import type {
 } from "../interfaces/param.interface.ts";
 import { Context } from "../interfaces/context.interface.ts";
 
-const typePreKey = "oaktype:";
+const typePreKey = "nesttype:";
 
 export function Property(arrayItemType?: ArrayItemType): PropertyDecorator {
   return (target: any, propertyKey: any) => {

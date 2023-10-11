@@ -30,7 +30,7 @@ import {
   Res,
   transAndValidateByCls,
   UploadedFile,
-} from "./oak.ts";
+} from "./method.ts";
 
 Deno.test("getTransNumOrBoolOrArray", () => {
   assertEquals(getTransNumOrBoolOrArray(Number, "1"), 1);
