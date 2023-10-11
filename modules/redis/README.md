@@ -4,10 +4,25 @@ This is a redis module for [`oak_nest`](https://deno.land/x/oak_nest).
 
 ## example
 
+Add import map in `deno.json`:
+
+```json
+{
+  "imports": {
+    "@nest": "https://deno.land/x/oak_nest@v2.0.1/mod.ts",
+    "@nest/hono": "https://deno.land/x/oak_nest@v2.0.1/modules/hono/mod.ts",
+    "@nest/redis": "https://deno.land/x/oak_nest@v2.0.1/modules/redis/mod.ts"
+  }
+}
+```
+
+app.module.ts:
+
 ```typescript
-import { Module } from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+import { Module } from "@nest";
+import { createStore, RedisModule } from "@nest/redis";
+import { CacheModule } from "@nest/cache";
 import { AppController } from "./app.controller.ts";
-import { RedisModule } from "https://deno.land/x/oak_nest@v2.0.1/modules/redis/mod.ts";
 
 @Module({
   imports: [
@@ -25,8 +40,9 @@ export class AppModule {}
 Then can be used in AppController:
 
 ```ts
-import { RedisService } from "https://deno.land/x/oak_nest@v2.0.1/modules/redis/mod.ts";
-import { Controller, Get } from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+import { Controller, Get, Inject, UseInterceptors } from "@nest";
+import { CacheInterceptor, SetCacheStore } from "@nest/cache";
+import { type Redis, REDIS_KEY, RedisService } from "@nest/redis";
 
 @Controller("")
 export class AppController {

@@ -1,9 +1,6 @@
-import { UseInterceptors } from "../../../mod.ts";
-import { CacheInterceptor, SetCacheStore } from "../../cache/mod.ts";
-import { Inject } from "../deps.ts";
-import type { Redis } from "../deps.ts";
-import { REDIS_KEY, RedisService } from "../mod.ts";
-import { Controller, Get } from "./deps.ts";
+import { Controller, Get, Inject, UseInterceptors } from "@nest";
+import { CacheInterceptor, SetCacheStore } from "@nest/cache";
+import { type Redis, REDIS_KEY, RedisService } from "@nest/redis";
 
 @Controller("")
 export class AppController {

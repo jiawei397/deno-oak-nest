@@ -1,7 +1,7 @@
-import { Module } from "./deps.ts";
+import { Module } from "@nest";
+import { createStore, RedisModule } from "@nest/redis";
+import { CacheModule } from "@nest/cache";
 import { AppController } from "./app.controller.ts";
-import { createStore, RedisModule } from "../mod.ts";
-import { CacheModule } from "../../cache/mod.ts";
 
 @Module({
   imports: [
