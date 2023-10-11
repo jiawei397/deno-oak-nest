@@ -20,24 +20,6 @@ export {
 export { delay } from "https://deno.land/std@0.194.0/async/mod.ts";
 
 export {
-  Application,
-  Context,
-  Cookies as OakCookie,
-  isHttpError,
-  Request,
-  Response,
-  Router as OriginRouter,
-  send,
-  Status,
-  testing,
-} from "https://deno.land/x/oak@v12.6.1/mod.ts";
-
-export type {
-  Middleware,
-  RouterMiddleware,
-} from "https://deno.land/x/oak@v12.6.1/mod.ts";
-
-export {
   IsEnum,
   IsNumber,
   IsOptional,

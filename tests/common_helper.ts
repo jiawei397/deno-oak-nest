@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any no-unused-vars
+// deno-lint-ignore-file no-explicit-any
 import {
   type Context,
   type Request,

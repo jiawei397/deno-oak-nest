@@ -3,7 +3,7 @@ import { assert, assertEquals } from "../../test_deps.ts";
 import { Factory, initProvider } from "../factorys/class.factory.ts";
 import { Scope } from "../interfaces/scope-options.interface.ts";
 import { Controller } from "./controller.ts";
-import { createMockApp } from "../../tests/common_test.ts";
+import { createMockApp } from "../../tests/common_helper.ts";
 
 Deno.test("Inject alone", () => {
   const injectKey = "injectKey";

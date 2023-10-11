@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-unused-vars no-explicit-any
 import { assert, assertEquals } from "../../test_deps.ts";
-import { createMockApp, MockRouter } from "../../tests/common_test.ts";
+import { createMockApp, MockRouter } from "../../tests/common_helper.ts";
 import { Application } from "../application.ts";
 import { Module } from "../decorators/module.ts";
 import type {

@@ -1,4 +1,4 @@
-import { createTestingModule } from "../src/factorys/test.module.ts";
+import { createTestingModule } from "../tests/test.module.ts";
 import { assertEquals } from "../test_deps.ts";
 import { UserService } from "./user/services/user.service.ts";
 import { AppController } from "./app.controller.ts";

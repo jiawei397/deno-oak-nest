@@ -14,7 +14,7 @@ import {
   createMockApp,
   createMockContext,
   mockCallMethod,
-} from "../../tests/common_test.ts";
+} from "../../tests/common_helper.ts";
 import { Controller, Get, Post } from "./controller.ts";
 import {
   Body,

@@ -1,14 +1,15 @@
 // deno-lint-ignore-file no-explicit-any
-import { Module } from "../decorators/module.ts";
-import type { ModuleMetadata } from "../interfaces/module.interface.ts";
-import type { Provide } from "../interfaces/provider.interface.ts";
+import { MockRouter } from "./common_helper.ts";
+import { Module } from "../src/decorators/module.ts";
+import type { ModuleMetadata } from "../src/interfaces/module.interface.ts";
+import type { Provide } from "../src/interfaces/provider.interface.ts";
 import type {
   Constructor,
   Instance,
   Type,
-} from "../interfaces/type.interface.ts";
-import { Factory, getInstance } from "./class.factory.ts";
-import { NestFactory } from "./nest.factory.ts";
+} from "../src/interfaces/type.interface.ts";
+import { Factory, getInstance } from "../src/factorys/class.factory.ts";
+import { NestFactory } from "../src/factorys/nest.factory.ts";
 
 export class TestModule {
   factoryCaches = new Map();
@@ -45,7 +46,9 @@ export class TestModule {
     })
     class AppModule {}
 
-    await NestFactory.create(AppModule, this.factoryCaches);
+    await NestFactory.create(AppModule, MockRouter, {
+      cache: this.factoryCaches,
+    });
     return this;
   }
 }

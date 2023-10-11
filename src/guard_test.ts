@@ -4,7 +4,7 @@ import {
   createMockApp,
   createMockContext,
   mockCallMethod,
-} from "../tests/common_test.ts";
+} from "../tests/common_helper.ts";
 import { Controller, Get } from "./decorators/controller.ts";
 import { Injectable } from "./decorators/inject.ts";
 import {
@@ -148,11 +148,11 @@ Deno.test("Reflector", async () => {
 
   assertEquals(callStack, []);
 
-  const app = createMockApp();
   const ctx = createMockContext({
     path: "/a",
     method: "GET",
   });
+  const app = createMockApp();
   await app.add(TestController);
 
   await mockCallMethod(app, ctx);
