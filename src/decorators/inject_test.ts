@@ -3,7 +3,7 @@ import { assert, assertEquals } from "../../test_deps.ts";
 import { Factory, initProvider } from "../factorys/class.factory.ts";
 import { Scope } from "../interfaces/scope-options.interface.ts";
 import { Controller } from "./controller.ts";
-import { Router } from "../router.ts";
+import { createMockApp } from "../../tests/common_test.ts";
 
 Deno.test("Inject alone", () => {
   const injectKey = "injectKey";
@@ -52,8 +52,8 @@ Deno.test("Inject with controller", async () => {
     }
   }
 
-  const router = new Router();
-  await router.register(A);
+  const app = createMockApp();
+  await app.add(A);
   assertEquals(callStack, [1]);
 });
 

@@ -41,7 +41,7 @@
     {
       "request": "launch",
       "name": "test",
-      "type": "pwa-node",
+      "type": "node",
       "program": "${workspaceFolder}/src/decorators/oak_test.ts",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "deno",
