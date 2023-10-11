@@ -1,11 +1,15 @@
-import { Context } from "../deps.ts";
-import { assertEquals, testing } from "../test_deps.ts";
+import { assertEquals } from "../test_deps.ts";
+import {
+  createMockApp,
+  createMockContext,
+  mockCallMethod,
+} from "../tests/common_helper.ts";
 import { Controller, Get } from "./decorators/controller.ts";
+import { type Context } from "./interfaces/context.interface.ts";
 import {
   createParamDecorator,
   createParamDecoratorWithLowLevel,
 } from "./params.ts";
-import { Router } from "./router.ts";
 
 Deno.test("createParamDecorator", async () => {
   const callStack: number[] = [];
@@ -25,17 +29,16 @@ Deno.test("createParamDecorator", async () => {
     }
   }
 
-  const router = new Router();
-  await router.register(A);
-  const ctx = testing.createMockContext({
+  const app = createMockApp();
+  await app.add(A);
+
+  const ctx = createMockContext({
     path: "/user/a",
     method: "GET",
   });
 
-  const mw = router.routes();
-  const next = testing.createMockNext();
+  await mockCallMethod(app, ctx);
 
-  await mw(ctx, next);
   assertEquals(ctx.response.body, aResult);
   assertEquals(callStack, [1, 2, 3]);
 });
@@ -60,17 +63,15 @@ Deno.test("createParamDecoratorWithLowLevel", async () => {
     }
   }
 
-  const router = new Router();
-  await router.register(A);
-  const ctx = testing.createMockContext({
+  const app = createMockApp();
+  await app.add(A);
+  const ctx = createMockContext({
     path: "/user/a",
     method: "GET",
   });
 
-  const mw = router.routes();
-  const next = testing.createMockNext();
+  await mockCallMethod(app, ctx);
 
-  await mw(ctx, next);
   assertEquals(ctx.response.body, aResult);
   assertEquals(callStack, [1, 2, 3]);
 });
@@ -89,7 +90,7 @@ Deno.test("transferParam", async () => {
     callStack.push(3);
     return 4;
   });
-  const ctx = testing.createMockContext({
+  const ctx = createMockContext({
     path: "/user/a",
     method: "GET",
   });
@@ -112,13 +113,10 @@ Deno.test("transferParam", async () => {
     }
   }
 
-  const router = new Router();
-  await router.register(A);
+  const app = createMockApp();
+  await app.add(A);
+  await mockCallMethod(app, ctx);
 
-  const mw = router.routes();
-  const next = testing.createMockNext();
-
-  await mw(ctx, next);
   assertEquals(ctx.response.body, aResult);
   assertEquals(callStack, [1, 3, 2, 4, 5]);
 });
