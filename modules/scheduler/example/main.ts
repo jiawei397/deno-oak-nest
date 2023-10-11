@@ -1,15 +1,19 @@
-import { Context, NestFactory } from "../../../mod.ts";
+import { NestFactory } from "@nest";
+import { HonoRouter } from "@nest/hono";
 import { AppModule } from "./app.module.ts";
 
-const app = await NestFactory.create(AppModule);
+const app = await NestFactory.create(AppModule, HonoRouter);
 app.setGlobalPrefix("/api");
 
-app.get("/hello", (ctx: Context) => {
-  ctx.response.body = "hello";
+addEventListener("error", (event) => {
+  event.preventDefault();
+  console.log("Global error:", event.message);
 });
 
-app.use(app.routes());
+addEventListener("unhandledrejection", (event) => {
+  event.preventDefault();
+  console.log("unhandledrejection:", event.reason);
+});
 
-const port = Number(Deno.env.get("PORT") || 1000);
-console.log(`app will start with: http://localhost:${port}`);
-await app.listen({ port });
+const port = Number(Deno.env.get("PORT") || 2000);
+app.listen({ port });

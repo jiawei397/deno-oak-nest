@@ -1,4 +1,4 @@
-import { Injectable } from "../../../../mod.ts";
+import { Injectable } from "@nest";
 import { TestService } from "./test.service.ts";
 
 @Injectable()

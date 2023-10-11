@@ -1,6 +1,6 @@
-import { assert, Injectable } from "../../../../mod.ts";
+import { assert, Injectable } from "@nest";
+import { Cron, Interval, Timeout } from "@nest/scheduler";
 import { TestService } from "./test.service.ts";
-import { Cron, Interval, Timeout } from "../../mod.ts";
 
 @Injectable()
 export class ScheduleService {
@@ -10,9 +10,17 @@ export class ScheduleService {
   onceJob() {
     assert(this.testService, "testService is not defined");
     console.log("-----once---", this.testService.info());
-    // setTimeout(() => { // cannot catch timeout error, must in promise
-    throw new Error("once job error");
-    // }, 0);
+    setTimeout(() => { // this error only be catched by global error event listener
+      throw new Error("once job error");
+    }, 0);
+  }
+
+  @Timeout(1000)
+  promiseError() {
+    console.log("-----promise error---");
+    new Promise((_resolve, reject) => { // this error only be catched by unhandledrejection event listener
+      reject(new Error("promise error"));
+    });
   }
 
   @Interval(5000)

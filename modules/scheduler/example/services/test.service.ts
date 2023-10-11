@@ -1,4 +1,4 @@
-import { assert, Inject, Injectable } from "../../../../mod.ts";
+import { assert, Inject, Injectable } from "@nest";
 
 let num = 0;
 

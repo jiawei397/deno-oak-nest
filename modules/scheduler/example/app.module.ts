@@ -1,5 +1,5 @@
-import { Module } from "../../../mod.ts";
-import { ScheduleModule } from "../mod.ts";
+import { Module } from "@nest";
+import { ScheduleModule } from "@nest/scheduler";
 import { ScheduleService } from "./services/schedule.service.ts";
 import { Test2Service } from "./services/test2.service.ts";
 
