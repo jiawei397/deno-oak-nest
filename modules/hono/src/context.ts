@@ -33,8 +33,8 @@ export class NestContext implements Context {
     if (this.response.status) {
       context.status(this.response.status);
     }
-    this.response.headers.forEach((key, value) => {
-      context.header(key, value);
+    this.response.headers.forEach((val, key) => {
+      context.header(key, val);
     });
 
     // deal with body
