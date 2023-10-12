@@ -1,6 +1,11 @@
 import { assert, assertEquals } from "../test_deps.ts";
 import { createMockContext } from "../tests/common_helper.ts";
-import { parseSearch, parseSearchParams, setCacheControl } from "./utils.ts";
+import {
+  getReadableStream,
+  parseSearch,
+  parseSearchParams,
+  setCacheControl,
+} from "./utils.ts";
 
 const test = Deno.test;
 
@@ -142,4 +147,18 @@ test("setCacheControl", async (t) => {
       );
     },
   );
+});
+
+Deno.test("getReadableStream should return a readable stream with the given message", async () => {
+  const message = "Hello, world!";
+  const { body, write, end } = getReadableStream();
+  write(message);
+  end();
+
+  const reader = body.getReader();
+  const result = await reader.read();
+  const decoder = new TextDecoder();
+  const text = decoder.decode(result.value);
+
+  assertEquals(text, message);
 });
