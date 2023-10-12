@@ -1,13 +1,24 @@
 // deno-lint-ignore-file no-unused-vars no-explicit-any require-await
+import { Controller, Get } from "./decorators/controller.ts";
 import { assert, assertEquals } from "../test_deps.ts";
-import { createMockContext } from "../tests/common_helper.ts";
+import {
+  createMockApp,
+  createMockContext,
+  mockCallMethod,
+} from "../tests/common_helper.ts";
 import {
   Catch,
   checkByFilters,
   getExceptionFilters,
   UseFilters,
 } from "./filter.ts";
-import type { Context, ExceptionFilter } from "./interfaces/mod.ts";
+import { UseGuards } from "./guard.ts";
+import type {
+  CanActivate,
+  Context,
+  ExceptionFilter,
+} from "./interfaces/mod.ts";
+import { Injectable } from "./decorators/inject.ts";
 
 Deno.test("UseFilter sort", async (t) => {
   const callStack: number[] = [];
@@ -108,5 +119,46 @@ Deno.test("UseFilter sort", async (t) => {
     );
     assertEquals(callStack, [2]);
     callStack.length = 0;
+  });
+});
+
+Deno.test("filter not work when guard return false", async (t) => {
+  const callStack: number[] = [];
+
+  @Catch()
+  class GlobalFilter implements ExceptionFilter {
+    async catch(exception: any, context: Context): Promise<void> {
+      callStack.push(1);
+    }
+  }
+
+  @Injectable()
+  class AuthGuard implements CanActivate {
+    async canActivate(_context: Context): Promise<boolean> {
+      callStack.push(2);
+      return false;
+    }
+  }
+
+  @UseFilters(GlobalFilter)
+  @UseGuards(AuthGuard)
+  @Controller("")
+  class A {
+    @Get("/a")
+    a() {
+      throw new Error("a error");
+    }
+  }
+
+  await t.step("guard work and not into filter", async () => {
+    const ctx = createMockContext({
+      path: "/a",
+      method: "GET",
+    });
+    const app = createMockApp();
+    await app.add(A);
+    await mockCallMethod(app, ctx);
+
+    assertEquals(callStack, [2]);
   });
 });
