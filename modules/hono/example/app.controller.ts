@@ -22,6 +22,11 @@ export class AppController {
     return `Hello ${name}!`;
   }
 
+  @Get("/error")
+  error() {
+    throw new Error("this is my error");
+  }
+
   /**
    * This example will auto validate the body, because the SaveDto used the `class_validator` decorators.
    *
