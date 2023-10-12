@@ -72,25 +72,19 @@ export class HonoRouter implements IRouter {
     return Deno.serve(options || { port: 8000 }, this.app.fetch);
   }
 
-  /**
-   * start serve view and static assets.
-   *
-   * If has prefix either api or view of static assets, it will be served self without other check, so it`s a good idea to set prefix if you want to have a good performance.
-   *
-   * Then it will check the extension of the pathname, if it`s optioned such as `ejs`, it will be served view, otherwise it will be served static assets.
-   *
-   * But if there is index.html in the static assets, it will be served first before the view.
-   */
   serveForStatic(staticOptions: StaticOptions) {
     if (!staticOptions) {
       return;
     }
     const prefix = staticOptions.prefix;
-    const path = staticOptions.path ? `${staticOptions.path}/*` : "*";
     const callback = serveStatic({
       root: staticOptions.baseDir,
-      rewriteRequestPath: (path) => prefix ? path.replace(prefix, "") : path,
+      rewriteRequestPath: (path) => {
+        // console.log("rewriteRequestPath", path);
+        return prefix ? path.replace(prefix, "") : path;
+      },
     });
+    const path = prefix ? `${prefix}/*` : "*";
     this.app.get(path, callback);
   }
 }

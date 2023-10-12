@@ -21,10 +21,10 @@ export interface StaticOptions {
    */
   prefix?: string;
 
-  path?: string;
-  rewriteRequestPath?: (path: string) => string;
+  // path?: string;
+  // rewriteRequestPath?: (path: string) => string;
 
-  index?: string;
+  // index?: string;
 }
 
 export type FactoryCreateOptions = {
