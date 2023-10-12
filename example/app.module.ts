@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-unused-vars
 import { APP_INTERCEPTOR, Module } from "../mod.ts";
 import { CacheModule } from "../modules/cache/mod.ts";
 import { AppController } from "./app.controller.ts";

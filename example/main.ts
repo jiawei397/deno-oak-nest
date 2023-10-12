@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-unused-vars
 import { NestFactory } from "../mod.ts";
 import { CORS } from "../modules/cors/mod.ts";
 import { HonoRouter } from "../modules/hono/mod.ts";
