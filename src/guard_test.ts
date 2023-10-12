@@ -57,6 +57,14 @@ Deno.test("getAllGuards and checkByGuard", async (t) => {
     assert(guards[1] instanceof AuthGuard2);
   });
 
+  await t.step("test a with global guards", async () => {
+    const guards = await getAllGuards(test, test.a, [AuthGuard3]);
+    assertEquals(guards.length, 3);
+    assert(guards[0] instanceof AuthGuard3);
+    assert(guards[1] instanceof AuthGuard);
+    assert(guards[2] instanceof AuthGuard2);
+  });
+
   await t.step("test b", async () => {
     const guards2 = await getAllGuards(test, test.b, []);
     assertEquals(guards2.length, 3);
