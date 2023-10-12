@@ -17,8 +17,11 @@ import type {
   CanActivate,
   Context,
   ExceptionFilter,
+  NestInterceptor,
+  Next,
 } from "./interfaces/mod.ts";
 import { Injectable } from "./decorators/inject.ts";
+import { UseInterceptors } from "./interceptor.ts";
 
 Deno.test("UseFilter sort", async (t) => {
   const callStack: number[] = [];
@@ -122,7 +125,7 @@ Deno.test("UseFilter sort", async (t) => {
   });
 });
 
-Deno.test("filter not work when guard return false", async (t) => {
+Deno.test("filter and guard", async (t) => {
   const callStack: number[] = [];
 
   @Catch()
@@ -195,5 +198,70 @@ Deno.test("filter not work when guard return false", async (t) => {
     await app.add(A);
     await mockCallMethod(app, ctx);
     assertEquals(callStack, []);
+  });
+});
+
+Deno.test("filter and interceptor", async (t) => {
+  const callStack: number[] = [];
+
+  @Injectable()
+  class GlobalInterceptor implements NestInterceptor {
+    async intercept(_ctx: Context, next: Next) {
+      callStack.push(1);
+      await next();
+      callStack.push(2);
+    }
+  }
+
+  @Catch()
+  class GlobalFilter implements ExceptionFilter {
+    async catch(exception: any, context: Context): Promise<void> {
+      callStack.push(3);
+      context.response.body = "catched";
+    }
+  }
+
+  @UseFilters(GlobalFilter)
+  @UseInterceptors(GlobalInterceptor)
+  @Controller("")
+  class A {
+    @Get("/a")
+    a() {
+      throw new Error("a error");
+    }
+
+    @Get("/b")
+    b() {
+      return "b";
+    }
+  }
+
+  await t.step("filter and interceptor work together", async () => {
+    const ctx = createMockContext({
+      path: "/a",
+      method: "GET",
+    });
+    const app = createMockApp();
+    await app.add(A);
+    await mockCallMethod(app, ctx);
+    assertEquals(callStack, [1, 3]);
+    assertEquals(ctx.response.body, "catched");
+    // assertEquals(ctx.response.status, 200);
+
+    callStack.length = 0;
+  });
+
+  await t.step("only interceptor", async () => {
+    const ctx = createMockContext({
+      path: "/b",
+      method: "GET",
+    });
+    const app = createMockApp();
+    await app.add(A);
+    await mockCallMethod(app, ctx);
+    assertEquals(callStack, [1, 2]);
+    assertEquals(ctx.response.body, "b");
+
+    callStack.length = 0;
   });
 });
