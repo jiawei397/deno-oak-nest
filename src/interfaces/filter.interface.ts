@@ -17,7 +17,7 @@ export interface ExceptionFilter<T = any> {
    * @param exception the class of the exception being handled
    * the in-flight request
    */
-  catch(exception: T, context: Context): any;
+  catch(exception: T, context: Context): void | Promise<void>;
 }
 
 export type ExceptionFilters =

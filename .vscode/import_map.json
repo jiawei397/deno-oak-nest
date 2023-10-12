@@ -13,6 +13,8 @@
     "@nest/postgres": "../modules/postgres/mod.ts",
     "@nest/redis": "../modules/redis/mod.ts",
     "@nest/scheduler": "../modules/scheduler/mod.ts",
-    "@nest/uinv": "../modules/uinv/mod.ts"
+    "@nest/uinv": "../modules/uinv/mod.ts",
+    "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts",
+    "nest_exception": "https://deno.land/x/oak_exception@v0.0.7/mod.ts"
   }
 }

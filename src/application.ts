@@ -257,6 +257,45 @@ export class Application {
     }
   }
 
+  private async validateGuard(
+    target: InstanceType<Constructor>,
+    fn: ControllerMethod,
+    context: Context,
+  ): Promise<boolean> {
+    try {
+      const originStatus = context.response.status;
+      const passed = await checkByGuard(
+        target,
+        fn,
+        context,
+        this.globalGuards,
+      );
+      if (!passed) {
+        if (context.response.status === originStatus) {
+          context.response.status = Status.Forbidden;
+        }
+        if (!context.response.body) {
+          context.response.body = {
+            message: STATUS_TEXT.get(Status.Forbidden),
+            statusCode: Status.Forbidden,
+          };
+        }
+        return false;
+      }
+      return true;
+    } catch (error) {
+      const status = typeof error.status === "number"
+        ? error.status
+        : Status.InternalServerError; // If the error is not HttpException, it will be 500
+      context.response.status = status;
+      context.response.body = {
+        message: error.message || error,
+        statusCode: status,
+      };
+      return false;
+    }
+  }
+
   protected routes() {
     const routeStart = Date.now();
     const apiPrefixReg = this.apiPrefixOptions?.exclude;
@@ -307,49 +346,37 @@ export class Application {
               join(controllerAliasPath, methodPath));
           const funcStart = Date.now();
           const callback = async (context: Context) => {
-            try {
-              const originStatus = context.response.status;
-              const guardResult = await checkByGuard(
-                instance,
-                fn,
-                context,
-                this.globalGuards,
-              );
-              if (!guardResult) {
-                if (context.response.status === originStatus) {
-                  context.response.status = Status.Forbidden;
-                }
-                if (!context.response.body) {
-                  context.response.body = {
-                    message: STATUS_TEXT.get(Status.Forbidden),
-                    statusCode: Status.Forbidden,
-                  };
-                }
-                return context.render();
-              }
-            } catch (error) {
-              const status = typeof error.status === "number"
-                ? error.status
-                : Status.InternalServerError; // If the error is not HttpException, it will be 500
-              context.response.status = status;
-              context.response.body = {
-                message: error.message || error,
-                statusCode: status,
-              };
-              return context.render();
+            // validate guard
+            if (await this.validateGuard(instance, fn, context) === false) {
+              return;
             }
 
-            const args = await transferParam(instance, methodName, context);
-            const next = async () => {
-              const result = await fn.apply(instance, args);
-              if (
-                result !== undefined && context.response.body === undefined
-              ) {
-                context.response.body = result;
-              }
-              return result;
-            };
+            // transfer params
+            let args: any[];
             try {
+              args = await transferParam(instance, methodName, context);
+            } catch (error) {
+              await checkByFilters(
+                context,
+                instance,
+                this.globalExceptionFilters,
+                fn,
+                error,
+              );
+              return;
+            }
+
+            // call controller method
+            try {
+              const next = async () => {
+                const result = await fn.apply(instance, args);
+                if (
+                  result !== undefined && context.response.body === undefined
+                ) {
+                  context.response.body = result;
+                }
+                return result;
+              };
               await checkByInterceptors(
                 context,
                 this.globalInterceptors,
@@ -370,7 +397,7 @@ export class Application {
                 this.globalExceptionFilters,
                 fn,
                 error,
-              ); // If has filters, it will be handled by filters
+              );
             }
 
             await this.formatResponse(
@@ -384,7 +411,6 @@ export class Application {
               },
             );
             // console.log(context.res.body, result);
-            return context.render();
           };
           this.router[methodType](originPath, callback);
 

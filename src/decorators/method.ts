@@ -56,7 +56,7 @@ export async function validateParams(Cls: Constructor, value: object) {
         JSON.stringify(errors)
       }`,
     );
-    throw new BodyParamValidationException(msgs.join(","));
+    throw new BodyParamValidationException(msgs.join(", "));
   }
 }
 

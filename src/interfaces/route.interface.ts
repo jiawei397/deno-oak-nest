@@ -29,7 +29,7 @@ export type RouteItem = {
 export type MiddlewareHandler = (
   context: Context,
   next: Next,
-) => Promise<any>;
+) => Promise<void>;
 
 export abstract class IRouter {
   abstract use(fn: MiddlewareHandler): void;
