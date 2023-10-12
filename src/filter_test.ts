@@ -141,12 +141,22 @@ Deno.test("filter not work when guard return false", async (t) => {
   }
 
   @UseFilters(GlobalFilter)
-  @UseGuards(AuthGuard)
   @Controller("")
   class A {
+    @UseGuards(AuthGuard)
     @Get("/a")
     a() {
       throw new Error("a error");
+    }
+
+    @Get("/b")
+    b() {
+      throw new Error("b error");
+    }
+
+    @Get("/c")
+    c() {
+      return "success";
     }
   }
 
@@ -160,5 +170,30 @@ Deno.test("filter not work when guard return false", async (t) => {
     await mockCallMethod(app, ctx);
 
     assertEquals(callStack, [2]);
+    callStack.length = 0;
+  });
+
+  await t.step("guard not work and error into filter", async () => {
+    const ctx = createMockContext({
+      path: "/b",
+      method: "GET",
+    });
+    const app = createMockApp();
+    await app.add(A);
+    await mockCallMethod(app, ctx);
+
+    assertEquals(callStack, [1]);
+    callStack.length = 0;
+  });
+
+  await t.step("guard not work and not into filter", async () => {
+    const ctx = createMockContext({
+      path: "/c",
+      method: "GET",
+    });
+    const app = createMockApp();
+    await app.add(A);
+    await mockCallMethod(app, ctx);
+    assertEquals(callStack, []);
   });
 });
