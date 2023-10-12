@@ -1,6 +1,12 @@
 // deno-lint-ignore-file
-import { assert, assertEquals } from "../test_deps.ts";
-import { createMockContext } from "../tests/common_helper.ts";
+import { assert, assertEquals, assertRejects } from "../test_deps.ts";
+import {
+  createMockApp,
+  createMockContext,
+  mockCallMethod,
+} from "../tests/common_helper.ts";
+import { Controller, Get } from "./decorators/controller.ts";
+import { Injectable } from "./decorators/inject.ts";
 import {
   checkByInterceptors,
   getInterceptors,
@@ -247,4 +253,61 @@ Deno.test("UseInterceptors intercept", async () => {
   assertEquals(callStack, [1]);
 
   callStack.length = 0;
+});
+
+Deno.test("interceptors with controller", async (t) => {
+  const callStack: number[] = [];
+
+  @Injectable()
+  class GlobalInterceptor implements NestInterceptor {
+    async intercept(_ctx: Context, next: Next) {
+      callStack.push(1);
+      await next();
+      callStack.push(2);
+    }
+  }
+
+  @UseInterceptors(GlobalInterceptor)
+  @Controller("")
+  class A {
+    @Get("/a")
+    a() {
+      throw new Error("a error");
+    }
+
+    @Get("/b")
+    b() {
+      return "b";
+    }
+  }
+
+  await t.step("with error", async () => {
+    const ctx = createMockContext({
+      path: "/a",
+      method: "GET",
+    });
+    const app = createMockApp();
+    await app.add(A);
+
+    await assertRejects(() => {
+      return mockCallMethod(app, ctx);
+    });
+    assertEquals(callStack, [1]);
+
+    callStack.length = 0;
+  });
+
+  await t.step("normal", async () => {
+    const ctx = createMockContext({
+      path: "/b",
+      method: "GET",
+    });
+    const app = createMockApp();
+    await app.add(A);
+    await mockCallMethod(app, ctx);
+    assertEquals(callStack, [1, 2]);
+    assertEquals(ctx.response.body, "b");
+
+    callStack.length = 0;
+  });
 });
