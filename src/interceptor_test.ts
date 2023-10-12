@@ -273,6 +273,19 @@ Deno.test("interceptors with controller", async (t) => {
     }
   }
 
+  @Injectable()
+  class ErrorInterceptor implements NestInterceptor {
+    async intercept(ctx: Context, next: Next) {
+      callStack.push(3);
+      try {
+        await next();
+      } catch (error) {
+        callStack.push(4);
+        ctx.response.body = "catched";
+      }
+    }
+  }
+
   @UseInterceptors(GlobalInterceptor)
   @Controller("")
   class A {
@@ -282,8 +295,9 @@ Deno.test("interceptors with controller", async (t) => {
     }
 
     @Get("/b")
+    @UseInterceptors(ErrorInterceptor)
     b() {
-      return "b";
+      throw new Error("b error");
     }
   }
 
@@ -299,6 +313,21 @@ Deno.test("interceptors with controller", async (t) => {
       return mockCallMethod(app, ctx);
     });
     assertEquals(callStack, [1]);
+
+    callStack.length = 0;
+  });
+
+  await t.step("with error and catch", async () => {
+    const ctx = createMockContext({
+      path: "/b",
+      method: "GET",
+    });
+    const app = createMockApp();
+    await app.add(A);
+    await mockCallMethod(app, ctx);
+
+    assertEquals(callStack, [1, 3, 4, 2]);
+    assertEquals(ctx.response.body, "catched");
 
     callStack.length = 0;
   });
