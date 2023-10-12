@@ -8,6 +8,7 @@
     "dev:cors": "deno task --cwd=modules/cors dev",
     "dev:es": "deno task --cwd=modules/elasticsearch dev",
     "dev:mysql": "deno task --cwd=modules/mysql dev",
+    "dev:oak": "deno task --cwd=modules/oak dev",
     "dev:postgres": "deno task --cwd=modules/postgres dev",
     "dev:redis": "deno task --cwd=modules/redis dev",
     "dev:scheduler": "deno task --cwd=modules/scheduler dev",

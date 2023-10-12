@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 import { Request } from "../../../src/interfaces/context.interface.ts";
 import { getCookie, HonoContext, HonoRequest } from "../deps.ts";
 
@@ -8,6 +9,10 @@ export class NestRequest implements Request {
   constructor(context: HonoContext) {
     this.originalContext = context;
     this.originalRequest = context.req;
+  }
+
+  getOriginalRequest<T>(): T {
+    return this.originalRequest as T;
   }
 
   get url() {
@@ -27,6 +32,10 @@ export class NestRequest implements Request {
     return this.originalRequest.formData();
   }
 
+  text(): Promise<string> {
+    return this.originalRequest.text();
+  }
+
   /**
    * Get all headers as a key-value object
    */
@@ -41,14 +50,14 @@ export class NestRequest implements Request {
     return this.originalRequest.header(name);
   }
 
-  cookies(): Record<string, string> {
+  async cookies(): Promise<Record<string, string>> {
     return getCookie(this.originalContext);
   }
 
   /**
    * Get a specific cookie value
    */
-  cookie(name: string): string | undefined {
+  async cookie(name: string): Promise<string | undefined> {
     return getCookie(this.originalContext, name);
   }
 
@@ -70,8 +79,8 @@ export class NestRequest implements Request {
   /**
    * Get all query params as a key-value object
    */
-  queries(): Record<string, string> {
-    return this.originalRequest.query();
+  queries(name: string): string[] {
+    return this.originalRequest.queries(name) || [];
   }
 
   /**

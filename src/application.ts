@@ -146,8 +146,13 @@ export class Application {
     });
   }
 
-  listen(options?: ListenOptions) {
+  /**
+   * @param options
+   * @returns
+   */
+  listen(options?: ListenOptions): void {
     this.routes();
+    this.router.routes();
     this.router.serveForStatic(this.staticOptions);
     return this.router.startServer(options);
   }

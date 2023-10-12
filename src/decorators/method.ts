@@ -17,6 +17,7 @@ import type {
   FormDataOptions,
 } from "../interfaces/param.interface.ts";
 import { Context } from "../interfaces/context.interface.ts";
+import { parseSearchParams } from "../utils.ts";
 
 const typePreKey = "nesttype:";
 
@@ -194,7 +195,9 @@ export function Query(key?: string) {
   return createParamDecoratorWithLowLevel(
     (ctx: Context, target: any, methodName: string, index: number) => {
       if (!key) {
-        const map = ctx.request.queries();
+        const url = ctx.request.url;
+        const searchParams = new URLSearchParams(new URL(url).search);
+        const map = parseSearchParams(searchParams);
         return transAndValidateParams(target, methodName, index, map);
       } else {
         const val = ctx.request.query(key);
@@ -255,9 +258,9 @@ export const Host = createParamDecorator((ctx: Context) => {
 
 export function Cookies(key?: string) {
   return createParamDecoratorWithLowLevel(
-    (ctx: Context, target: any, methodName: string, index: number) => {
+    async (ctx: Context, target: any, methodName: string, index: number) => {
       if (key) {
-        const val = ctx.request.cookie(key);
+        const val = await ctx.request.cookie(key);
         return parseNumOrBool(
           val,
           target,

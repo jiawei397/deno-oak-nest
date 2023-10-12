@@ -23,6 +23,8 @@ export interface StaticOptions {
 
   path?: string;
   rewriteRequestPath?: (path: string) => string;
+
+  index?: string;
 }
 
 export type FactoryCreateOptions = {

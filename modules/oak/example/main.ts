@@ -1,8 +1,8 @@
 import { NestFactory } from "@nest";
-import { HonoRouter } from "@nest/hono";
+import { OakRouter } from "@nest/oak";
 import { AppModule } from "./app.module.ts";
 
-const app = await NestFactory.create(AppModule, HonoRouter, { strict: true });
+const app = await NestFactory.create(AppModule, OakRouter);
 app.setGlobalPrefix("/api");
 app.useStaticAssets("example/static", {
   prefix: "static",

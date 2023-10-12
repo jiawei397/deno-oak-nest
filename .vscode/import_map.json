@@ -8,6 +8,7 @@
     "@nest/hono": "../modules/hono/mod.ts",
     "@nest/cache": "../modules/cache/mod.ts",
     "@nest/elasticsearch": "../modules/elasticsearch/mod.ts",
+    "@nest/oak": "../modules/oak/mod.ts",
     "@nest/mysql": "../modules/mysql/mod.ts",
     "@nest/postgres": "../modules/postgres/mod.ts",
     "@nest/redis": "../modules/redis/mod.ts",

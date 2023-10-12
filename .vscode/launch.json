@@ -23,6 +23,23 @@
     },
     {
       "request": "launch",
+      "name": "oak",
+      "type": "node",
+      "program": "${workspaceFolder}/modules/oak/example/main.ts",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--inspect-brk",
+        "-A",
+        "--config",
+        "modules/oak/deno.json",
+        "--unstable"
+      ],
+      "attachSimplePort": 9229
+    },
+    {
+      "request": "launch",
       "name": "cache",
       "type": "node",
       "program": "${workspaceFolder}/modules/cache/example/main.ts",

@@ -1,20 +1,30 @@
 // deno-lint-ignore-file no-explicit-any
 export interface Request {
+  getOriginalRequest<T>(): T;
   get url(): string;
   get method(): string;
   headers(): Record<string, string>;
   header(name: string): string | undefined;
-  cookies(): Record<string, string>;
-  cookie(name: string): string | undefined;
+  cookies(): Promise<Record<string, string>>;
+  cookie(name: string): Promise<string | undefined>;
   params(): Record<string, string>;
   param(name: string): string | undefined;
-  queries(): Record<string, string>;
+  /**
+   * Get multiple query param values
+   */
+  queries(name: string): string[];
+  /**
+   * Get a specific query param value
+   */
   query(name: string): string | undefined;
   json(): Promise<any>;
+  text(): Promise<string>;
   formData(): Promise<FormData>;
+  // form(): Promise<URLSearchParams>;
 }
 
 export interface Response {
+  getOriginalResponse<T>(): T;
   body: string | object | number | boolean | null;
   headers: Headers;
   status: number;

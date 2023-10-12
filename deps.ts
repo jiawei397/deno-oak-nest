@@ -2,20 +2,6 @@ export {
   Status,
   STATUS_TEXT,
 } from "https://deno.land/std@0.115.1/http/http_status.ts";
-// export {
-//   calculate,
-//   ifMatch,
-//   ifNoneMatch,
-// } from "https://deno.land/x/oak@v12.6.1/etag.ts";
-
-// export type {
-//   FormDataBody,
-//   FormDataReadOptions,
-//   Middleware,
-//   RouterMiddleware,
-//   SendOptions,
-//   State,
-// } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 
 export { extname, resolve } from "https://deno.land/std@0.194.0/path/mod.ts";
 

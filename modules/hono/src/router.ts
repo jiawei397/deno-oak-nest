@@ -64,6 +64,10 @@ export class HonoRouter implements IRouter {
     });
   }
 
+  routes(): void {
+    // empty
+  }
+
   startServer(options?: ListenOptions) {
     return Deno.serve(options || { port: 8000 }, this.app.fetch);
   }

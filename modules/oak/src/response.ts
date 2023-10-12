@@ -1,18 +1,18 @@
 import { Response } from "../../../src/interfaces/context.interface.ts";
-import { type HonoContext } from "../deps.ts";
+import { type OakContext } from "../deps.ts";
 
 export class NestResponse implements Response {
   body: string | object | number | boolean | null;
   headers: Headers = new Headers();
   status = 200;
   statusText = "OK";
-  originContext: HonoContext;
+  originContext: OakContext;
 
-  constructor(context: HonoContext) {
+  constructor(context: OakContext) {
     this.originContext = context;
   }
 
   getOriginalResponse<T>(): T {
-    return this.originContext.res as T;
+    return this.originContext.response as T;
   }
 }

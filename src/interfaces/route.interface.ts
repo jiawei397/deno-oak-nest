@@ -39,8 +39,15 @@ export abstract class IRouter {
   abstract delete(path: string, fn: MiddlewareHandler): any;
   abstract startServer(options?: ListenOptions): any;
   abstract serveForStatic(staticOptions?: StaticOptions): void;
+  abstract routes(): void;
 }
 
 export interface IRouterConstructor extends Function {
-  new (options?: { strict?: boolean }): IRouter;
+  new (options?: RouterOptions): IRouter;
+}
+
+export interface RouterOptions {
+  /** Determines if routes are matched strictly, where the trailing `/` is not
+   * optional.  Defaults to `false`. */
+  strict?: boolean;
 }

@@ -5,7 +5,6 @@ export {
 } from "https://deno.land/x/hono@v3.7.2/mod.ts";
 
 export {
-  etag,
   getCookie,
   serveStatic,
   type ServeStaticOptions,
