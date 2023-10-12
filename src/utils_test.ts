@@ -1,5 +1,6 @@
 import { assert, assertEquals } from "../test_deps.ts";
-import { parseSearch, parseSearchParams } from "./utils.ts";
+import { createMockContext } from "../tests/common_helper.ts";
+import { parseSearch, parseSearchParams, setCacheControl } from "./utils.ts";
 
 const test = Deno.test;
 
@@ -82,4 +83,63 @@ test("parseSearchParams", async (t) => {
       key2: decodeURIComponent("%3F"),
     });
   });
+});
+
+test("setCacheControl", async (t) => {
+  await t.step("should set cache-control", () => {
+    const context = createMockContext({
+      path: "/",
+      method: "GET",
+    });
+    setCacheControl(context);
+    assertEquals(context.response.headers.get("Cache-Control"), "no-cache");
+  });
+
+  await t.step("request cache-control", () => {
+    const context = createMockContext({
+      path: "/",
+      method: "GET",
+      reqHeaders: {
+        "Cache-Control": "max-age=100",
+      },
+    });
+    setCacheControl(context);
+    assertEquals(context.response.headers.get("Cache-Control"), "max-age=100");
+  });
+
+  await t.step("request cache-control multi", () => {
+    const context = createMockContext({
+      path: "/",
+      method: "GET",
+      reqHeaders: {
+        "Cache-Control": "max-age=100, no-cache",
+      },
+    });
+    setCacheControl(context);
+    assertEquals(
+      context.response.headers.get("Cache-Control"),
+      "max-age=100, no-cache",
+    );
+  });
+
+  await t.step(
+    "should not modify responseCacheControl if it is already set",
+    () => {
+      const context = createMockContext({
+        path: "/",
+        method: "GET",
+      });
+      context.response.headers.set(
+        "Cache-Control",
+        "max-age=3600, no-transform",
+      );
+
+      setCacheControl(context);
+
+      assertEquals(
+        context.response.headers.get("Cache-Control"),
+        "max-age=3600, no-transform",
+      );
+    },
+  );
 });
