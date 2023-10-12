@@ -13,8 +13,13 @@ export function parseSearch(search: string) {
   const map: Record<string, string | string[]> = {};
   arr.forEach((item) => {
     const [k, v] = item.split("=");
-    if (map[k]) {
-      map[k] = [...map[k], v];
+    const value = map[k];
+    if (value) {
+      if (Array.isArray(value)) {
+        map[k] = [...value, v];
+      } else {
+        map[k] = [value, v];
+      }
     } else {
       map[k] = v;
     }
@@ -25,8 +30,13 @@ export function parseSearch(search: string) {
 export function parseSearchParams(search: URLSearchParams) {
   const map: Record<string, string | string[]> = {};
   search.forEach((v, k) => {
-    if (map[k]) {
-      map[k] = [...map[k], v];
+    const value = map[k];
+    if (value) {
+      if (Array.isArray(value)) {
+        map[k] = [...value, v];
+      } else {
+        map[k] = [value, v];
+      }
     } else {
       map[k] = v;
     }
