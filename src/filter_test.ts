@@ -213,6 +213,34 @@ Deno.test("filter and interceptor", async (t) => {
     }
   }
 
+  @Injectable()
+  class ErrorInterceptor implements NestInterceptor {
+    async intercept(ctx: Context, next: Next) {
+      callStack.push(4);
+      try {
+        await next();
+      } catch (error) {
+        callStack.push(5);
+        ctx.response.status = 404;
+        throw error;
+      }
+    }
+  }
+
+  @Injectable()
+  class ErrorCatchInterceptor implements NestInterceptor {
+    async intercept(ctx: Context, next: Next) {
+      callStack.push(6);
+      try {
+        await next();
+      } catch (error) {
+        callStack.push(7);
+        ctx.response.status = 404;
+        ctx.response.body = "catched by interceptor";
+      }
+    }
+  }
+
   @Catch()
   class GlobalFilter implements ExceptionFilter {
     async catch(exception: any, context: Context): Promise<void> {
@@ -233,6 +261,18 @@ Deno.test("filter and interceptor", async (t) => {
     @Get("/b")
     b() {
       return "b";
+    }
+
+    @Get("/c")
+    @UseInterceptors(ErrorInterceptor)
+    c() {
+      throw new Error("c error");
+    }
+
+    @Get("/d")
+    @UseInterceptors(ErrorCatchInterceptor)
+    d() {
+      throw new Error("d error");
     }
   }
 
@@ -264,4 +304,40 @@ Deno.test("filter and interceptor", async (t) => {
 
     callStack.length = 0;
   });
+
+  await t.step(
+    "filter and interceptor work together, and catch error, change status",
+    async () => {
+      const ctx = createMockContext({
+        path: "/c",
+        method: "GET",
+      });
+      const app = createMockApp();
+      await app.add(A);
+      await mockCallMethod(app, ctx);
+      assertEquals(callStack, [1, 4, 5, 3]);
+      assertEquals(ctx.response.body, "catched");
+      assertEquals(ctx.response.status, 404);
+
+      callStack.length = 0;
+    },
+  );
+
+  await t.step(
+    "interceptor catch error, will not to filter",
+    async () => {
+      const ctx = createMockContext({
+        path: "/d",
+        method: "GET",
+      });
+      const app = createMockApp();
+      await app.add(A);
+      await mockCallMethod(app, ctx);
+      assertEquals(callStack, [1, 6, 7, 2]);
+      assertEquals(ctx.response.body, "catched by interceptor");
+      assertEquals(ctx.response.status, 404);
+
+      callStack.length = 0;
+    },
+  );
 });
