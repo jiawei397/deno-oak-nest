@@ -4,6 +4,7 @@ import {
 } from "../../../src/interfaces/context.interface.ts";
 import { Next } from "../../../src/interfaces/middleware.interface.ts";
 import { assertEquals, beforeEach, describe, it } from "../../../test_deps.ts";
+import { createMockContext } from "../../../tests/common_helper.ts";
 import { CORS, defaults } from "./main.ts";
 
 describe("cors", () => {
@@ -11,50 +12,15 @@ describe("cors", () => {
   const origin = "https://www.baidu.com";
   let mockRequest: Request, mockResponse: Response;
   beforeEach(() => {
-    mockRequest = {
+    const context = createMockContext({
       method: "OPTIONS",
-      url: "https://pan.baidu.com/options",
-      header(key: string) {
-        if (key === "origin") {
-          return origin;
-        }
-        return "else";
+      path: "https://pan.baidu.com/options",
+      reqHeaders: {
+        origin,
       },
-      headers() {
-        return {};
-      },
-      cookies() {
-        return {};
-      },
-      cookie(name: string) {
-        return "";
-      },
-      params() {
-        return {};
-      },
-      param(name: string) {
-        return "";
-      },
-      queries() {
-        return {};
-      },
-      query(name: string) {
-        return "";
-      },
-      // deno-lint-ignore require-await
-      async json() {
-        return {};
-      },
-      async formData() {
-        return new FormData();
-      },
-    };
-    mockResponse = {
-      body: "",
-      headers: new Headers(),
-      status: 200,
-      statusText: "",
-    };
+    });
+    mockRequest = context.request;
+    mockResponse = context.response;
     mockNext = () => {
       return new Promise<void>((resolve) => {
         setTimeout(() => {

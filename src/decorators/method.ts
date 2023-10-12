@@ -196,7 +196,7 @@ export function Query(key?: string) {
     (ctx: Context, target: any, methodName: string, index: number) => {
       if (!key) {
         const url = ctx.request.url;
-        const searchParams = new URLSearchParams(new URL(url).search);
+        const searchParams = new URL(url).searchParams;
         const map = parseSearchParams(searchParams);
         return transAndValidateParams(target, methodName, index, map);
       } else {

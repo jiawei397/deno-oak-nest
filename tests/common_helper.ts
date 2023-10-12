@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any require-await
 import {
   type Context,
   type Request,
@@ -21,21 +21,23 @@ export const createMockContext = (options: {
   reqHeaders?: Record<string, string>;
   cookies?: Record<string, string>;
   params?: Record<string, string>;
-  queries?: Record<string, string>;
+  queries?: Record<string, string | string[]>;
 }): Context => {
   const mockRequest: Request = {
     method: options.method,
-    url: options.path,
+    url: options.path.startsWith("http")
+      ? options.path
+      : `http://localhost/${options.path.replace(/^\//, "")}`,
     header(key: string) {
       return options.reqHeaders?.[key];
     },
     headers() {
       return { ...options.reqHeaders };
     },
-    cookies() {
+    async cookies() {
       return { ...options.cookies };
     },
-    cookie(name: string) {
+    async cookie(name: string) {
       return options.cookies?.[name];
     },
     params() {
@@ -44,19 +46,23 @@ export const createMockContext = (options: {
     param(name: string) {
       return options.params?.[name];
     },
-    queries() {
-      return { ...options.queries };
+    queries(name: string) {
+      return options.queries?.[name] as string[];
     },
     query(name: string) {
-      return options.queries?.[name];
+      return options.queries?.[name] as string;
     },
-    // deno-lint-ignore require-await
     async json() {
       return options.body?.value;
     },
-    // deno-lint-ignore require-await
     async formData() {
       return options.body?.value;
+    },
+    text: function (): Promise<string> {
+      return options.body?.value;
+    },
+    getOriginalRequest: function <T>(): T {
+      throw new Error("Function not implemented.");
     },
   };
   const mockResponse: Response = {
@@ -64,6 +70,10 @@ export const createMockContext = (options: {
     headers: new Headers(options.body?.headers),
     status: 200,
     statusText: "",
+
+    getOriginalResponse: function <T>(): T {
+      throw new Error("Function not implemented.");
+    },
   };
 
   return {
@@ -73,13 +83,13 @@ export const createMockContext = (options: {
   };
 };
 
-function getFormattedPath(path: string) {
-  return path.split("?")[0];
-}
-
 export class MockRouter implements IRouter {
   map: Map<"GET" | "POST" | "PUT" | "DELETE", Map<string, MiddlewareHandler>> =
     new Map();
+
+  routes(): void {
+    // empty
+  }
   get(
     path: string,
     fn: MiddlewareHandler,
@@ -162,12 +172,13 @@ export function mockCallMethod(
 ) {
   (app as any).routes();
 
-  const path = ctx.request.url;
+  const url = ctx.request.url;
   const method = ctx.request.method as "GET" | "POST" | "PUT" | "DELETE";
   const router = (app as any).router as MockRouter;
-  const func = router.map.get(method)!.get(getFormattedPath(path));
+  const pathname = new URL(url).pathname;
+  const func = router.map.get(method)!.get(pathname);
   if (!func) {
-    throw new Error(`can not find ${method} ${path}`);
+    throw new Error(`can not find ${method} ${url}`);
   }
   return func(ctx, createMockNext());
 }
