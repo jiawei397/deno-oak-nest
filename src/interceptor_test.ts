@@ -7,12 +7,18 @@ import {
 } from "../tests/common_helper.ts";
 import { Controller, Get } from "./decorators/controller.ts";
 import { Injectable } from "./decorators/inject.ts";
+import { UseGuards } from "./guard.ts";
 import {
   checkByInterceptors,
   getInterceptors,
   UseInterceptors,
 } from "./interceptor.ts";
-import type { Context, NestInterceptor, Next } from "./interfaces/mod.ts";
+import type {
+  CanActivate,
+  Context,
+  NestInterceptor,
+  Next,
+} from "./interfaces/mod.ts";
 
 Deno.test("UseInterceptors sort", async (t) => {
   const callStack: number[] = [];
@@ -296,17 +302,98 @@ Deno.test("interceptors with controller", async (t) => {
 
     callStack.length = 0;
   });
+});
 
-  await t.step("normal", async () => {
+Deno.test("interceptors and guard", async (t) => {
+  const callStack: number[] = [];
+
+  @Injectable()
+  class GlobalInterceptor implements NestInterceptor {
+    async intercept(_ctx: Context, next: Next) {
+      callStack.push(1);
+      await next();
+      callStack.push(2);
+    }
+  }
+
+  @Injectable()
+  class AuthGuard implements CanActivate {
+    async canActivate(_context: Context): Promise<boolean> {
+      callStack.push(3);
+      return false;
+    }
+  }
+
+  @Injectable()
+  class AuthGuard2 implements CanActivate {
+    async canActivate(_context: Context): Promise<boolean> {
+      callStack.push(4);
+      return true;
+    }
+  }
+
+  @UseInterceptors(GlobalInterceptor)
+  @Controller("")
+  class A {
+    @Get("/a")
+    @UseGuards(AuthGuard)
+    a() {
+      throw new Error("a error");
+    }
+
+    @UseGuards(AuthGuard2)
+    @Get("/b")
+    b() {
+      return "b";
+    }
+
+    @Get("/c")
+    @UseGuards(AuthGuard2)
+    c() {
+      throw new Error("c error");
+    }
+  }
+
+  await t.step("guard not pass", async () => {
+    const ctx = createMockContext({
+      path: "/a",
+      method: "GET",
+    });
+    const app = createMockApp();
+    await app.add(A);
+
+    await mockCallMethod(app, ctx);
+    assertEquals(callStack, [3]);
+
+    callStack.length = 0;
+  });
+
+  await t.step("guard pass", async () => {
     const ctx = createMockContext({
       path: "/b",
       method: "GET",
     });
     const app = createMockApp();
     await app.add(A);
+
     await mockCallMethod(app, ctx);
-    assertEquals(callStack, [1, 2]);
-    assertEquals(ctx.response.body, "b");
+    assertEquals(callStack, [4, 1, 2]);
+
+    callStack.length = 0;
+  });
+
+  await t.step("guard pass but throw error", async () => {
+    const ctx = createMockContext({
+      path: "/c",
+      method: "GET",
+    });
+    const app = createMockApp();
+    await app.add(A);
+
+    await assertRejects(() => {
+      return mockCallMethod(app, ctx);
+    });
+    assertEquals(callStack, [4, 1]);
 
     callStack.length = 0;
   });
