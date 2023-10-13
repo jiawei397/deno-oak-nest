@@ -13,4 +13,8 @@ export class AppModule implements OnModuleInit {
   onApplicationBootstrap() {
     console.log("onApplicationBootstrap AppModule");
   }
+
+  onApplicationShutdown() {
+    console.log("onApplicationShutdown AppModule");
+  }
 }

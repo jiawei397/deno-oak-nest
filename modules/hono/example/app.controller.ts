@@ -3,6 +3,8 @@ import {
   Body,
   Controller,
   Get,
+  OnApplicationBootstrap,
+  OnApplicationShutdown,
   OnModuleInit,
   Params,
   Post,
@@ -12,7 +14,8 @@ import { AppService } from "./app.service.ts";
 import { QueryDto, QueryWithoutPropDto, SaveDto } from "./app.dto.ts";
 
 @Controller("")
-export class AppController implements OnModuleInit {
+export class AppController
+  implements OnModuleInit, OnApplicationBootstrap, OnApplicationShutdown {
   constructor(private readonly appService: AppService) {
   }
 
@@ -22,6 +25,10 @@ export class AppController implements OnModuleInit {
 
   onApplicationBootstrap() {
     console.log("onApplicationBootstrap AppController");
+  }
+
+  onApplicationShutdown() {
+    console.log("onApplicationShutdown AppController");
   }
 
   @Get("/")

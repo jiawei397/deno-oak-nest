@@ -49,8 +49,6 @@ import { Scope } from "./interfaces/scope-options.interface.ts";
 import { Constructor, Type } from "./interfaces/type.interface.ts";
 import { transferParam } from "./params.ts";
 
-const onApplicationBootstrapKey = Symbol("onApplicationBootstrap");
-
 export function join(...paths: string[]) {
   if (paths.length === 0) {
     return "";
@@ -220,8 +218,8 @@ export class Application {
   staticOptions: StaticOptions;
   cache: Map<any, any> = globalFactoryCaches;
 
-  private routerArr: RouteItem[] = [];
-  private instances: any[] = [];
+  private abortController: AbortController = new AbortController();
+  private instances = new Set<any>();
   private controllers: Type<any>[] = [];
 
   constructor(protected router: IRouter) {}
@@ -250,7 +248,15 @@ export class Application {
     this.router.routes();
     this.router.serveForStatic(this.staticOptions);
     await this.onApplicationBootstrap();
-    this.router.startServer(options);
+    this.router.startServer({
+      signal: this.abortController.signal,
+      ...options,
+    });
+  }
+
+  async close() {
+    this.abortController.abort();
+    await this.onApplicationShutdown();
   }
 
   useGlobalInterceptors(...interceptors: NestUseInterceptors) {
@@ -559,7 +565,7 @@ export class Application {
     const arr = [];
     for (const provider of providers) {
       const instance = await initProvider(provider, Scope.DEFAULT, this.cache);
-      this.instances.push(instance);
+      this.instances.add(instance);
       if (instance) {
         arr.push({
           instance,
@@ -607,25 +613,35 @@ export class Application {
     if (controllers.length) {
       await Promise.all(controllers.map(async (controller) => {
         const instance = await this.initController(controller);
-        this.instances.push(instance);
+        this.instances.add(instance);
       }));
     }
 
     // init modules
     await Promise.all(modules.map(async (module) => {
       const instance = await this.initModule(module);
-      this.instances.push(instance);
+      this.instances.add(instance);
     }));
   }
 
+  /**
+   * TODO: think about whether to use Promise.all or a for loop
+   */
   private async onApplicationBootstrap(): Promise<void> {
-    await Promise.all(this.instances.map((instance) => {
+    await Promise.all([...this.instances].map((instance) => {
       if (typeof instance.onApplicationBootstrap === "function") {
-        if (Reflect.hasOwnMetadata(onApplicationBootstrapKey, instance)) {
-          return;
-        }
-        Reflect.defineMetadata(onApplicationBootstrapKey, true, instance);
         return instance.onApplicationBootstrap();
+      }
+    }));
+  }
+
+  /**
+   * TODO: think about whether to use Promise.all or a for loop
+   */
+  private async onApplicationShutdown(): Promise<void> {
+    await Promise.all([...this.instances].map((instance) => {
+      if (typeof instance.onApplicationShutdown === "function") {
+        return instance.onApplicationShutdown();
       }
     }));
   }
