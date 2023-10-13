@@ -282,6 +282,7 @@ export class Application {
 
   /**
    * add controller
+   * @protected not recommend to alone use
    */
   addController(...clsArr: Type[]) {
     this.controllers.push(...clsArr);
