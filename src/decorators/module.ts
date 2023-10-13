@@ -17,11 +17,11 @@ export function Module(metadata: ModuleMetadata): ClassDecorator {
   };
 }
 
-export function isModule(module: any) {
+export function isModule(module: unknown): boolean {
   if (!module || (typeof module !== "function" && typeof module !== "object")) {
     return false;
   }
-  return "module" in module || Reflect.getOwnMetadata(MODULE_KEY, module);
+  return "module" in module || Reflect.hasOwnMetadata(MODULE_KEY, module);
 }
 
 export function defineModuleMetadata(target: object) {
