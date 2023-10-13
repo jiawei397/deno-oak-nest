@@ -5,7 +5,7 @@ const isString = (fn: any) => typeof fn === "string";
 const isObject = (fn: any) => fn && typeof fn === "object";
 
 export class HttpException extends Error {
-  private response: any;
+  public response: any;
   public status: number;
 
   constructor(response: any, status: number) {
@@ -14,6 +14,7 @@ export class HttpException extends Error {
     this.status = status;
     this.initMessage();
   }
+
   initMessage() {
     if (isString(this.response)) {
       this.message = this.response;

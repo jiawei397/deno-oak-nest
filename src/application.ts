@@ -16,6 +16,11 @@ import {
   META_METHOD_KEY,
   META_PATH_KEY,
 } from "./decorators/controller.ts";
+import {
+  ForbiddenException,
+  HttpException,
+  InternalServerErrorException,
+} from "./exceptions.ts";
 import { Factory } from "./factorys/class.factory.ts";
 import { checkByFilters } from "./filter.ts";
 import { checkByGuard } from "./guard.ts";
@@ -275,25 +280,38 @@ export class Application {
           context.response.status = Status.Forbidden;
         }
         if (!context.response.body) {
-          context.response.body = {
-            message: STATUS_TEXT.get(Status.Forbidden),
-            statusCode: Status.Forbidden,
-          };
+          context.response.body = new ForbiddenException("").response;
         }
         return false;
       }
       return true;
     } catch (error) {
-      const status = typeof error.status === "number"
-        ? error.status
-        : Status.InternalServerError; // If the error is not HttpException, it will be 500
-      context.response.status = status;
-      context.response.body = {
-        message: error.message || error,
-        statusCode: status,
-      };
+      this.catchError(context, error);
       return false;
     }
+  }
+
+  private async catchFilter(
+    target: InstanceType<Constructor>,
+    fn: ControllerMethod,
+    context: Context,
+    error: any,
+  ) {
+    await checkByFilters(
+      context,
+      target,
+      this.globalExceptionFilters,
+      fn,
+      error,
+    ).catch((err) => this.catchError(context, err));
+  }
+
+  private catchError(context: Context, error: any) {
+    const err = error instanceof HttpException
+      ? error
+      : new InternalServerErrorException(error.message || error);
+    context.response.status = err.status;
+    context.response.body = err.response;
   }
 
   protected routes() {
@@ -356,13 +374,7 @@ export class Application {
             try {
               args = await transferParam(instance, methodName, context);
             } catch (error) {
-              await checkByFilters(
-                context,
-                instance,
-                this.globalExceptionFilters,
-                fn,
-                error,
-              );
+              await this.catchFilter(instance, fn, context, error);
               return;
             }
 
@@ -391,13 +403,7 @@ export class Application {
                 },
               );
             } catch (error) {
-              await checkByFilters(
-                context,
-                instance,
-                this.globalExceptionFilters,
-                fn,
-                error,
-              );
+              await this.catchFilter(instance, fn, context, error);
             }
 
             await this.formatResponse(
