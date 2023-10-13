@@ -29,8 +29,3 @@ export {
   validateOrReject,
   ValidationError,
 } from "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts";
-
-export {
-  BodyParamValidationException,
-  UnauthorizedException,
-} from "https://deno.land/x/oak_exception@v0.0.7/mod.ts";

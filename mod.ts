@@ -1,5 +1,6 @@
 export { Application } from "./src/application.ts";
 export * from "./src/constants.ts";
+export * from "./src/exceptions.ts";
 export { Catch, UseFilters } from "./src/filter.ts";
 export {
   getMetadataForGuard,

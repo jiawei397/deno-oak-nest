@@ -1,6 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { HttpException } from "./deps.ts";
-import { Catch, Context, ExceptionFilter } from "../mod.ts";
+import { Catch, Context, ExceptionFilter, HttpException } from "../mod.ts";
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {

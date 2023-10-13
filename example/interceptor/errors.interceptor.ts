@@ -1,8 +1,12 @@
-import { type Context, Injectable, Next } from "../../mod.ts";
+import {
+  BadGatewayException,
+  type Context,
+  Injectable,
+  Next,
+} from "../../mod.ts";
 import type {
   NestInterceptor,
 } from "../../src/interfaces/interceptor.interface.ts";
-import { BadGatewayException } from "../deps.ts";
 import { RoleService } from "../user/services/role.service.ts";
 
 @Injectable()

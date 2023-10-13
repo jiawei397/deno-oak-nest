@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import {
+  BadRequestException,
   Body,
   Cache,
   Controller,
@@ -15,7 +16,7 @@ import {
   UseGuards,
 } from "../../../mod.ts";
 import type { Context, FormDataFormattedBody, Response } from "../../../mod.ts";
-import { BadRequestException, mockjs, nanoid } from "../../deps.ts";
+import { mockjs, nanoid } from "../../deps.ts";
 import { AuthGuard } from "../../guards/auth.guard.ts";
 import { AuthGuard2 } from "../../guards/auth2.guard.ts";
 import { AuthGuard3, SSOGuard } from "../../guards/auth3.guard.ts";

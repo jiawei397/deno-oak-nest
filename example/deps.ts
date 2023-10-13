@@ -35,15 +35,6 @@ export {
 } from "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts";
 
 export {
-  BadGatewayException,
-  BadRequestException,
-  BodyParamValidationException,
-  HttpException,
-  IternalServerException,
-  UnauthorizedException,
-} from "https://deno.land/x/oak_exception@v0.0.7/mod.ts";
-
-export {
   Status,
   STATUS_TEXT,
 } from "https://deno.land/std@0.194.0/http/http_status.ts";

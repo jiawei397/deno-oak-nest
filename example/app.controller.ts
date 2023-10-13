@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-unused-vars
 import {
+  BadRequestException,
   Controller,
   Get,
   getReadableStream,
@@ -7,7 +8,6 @@ import {
   UseFilters,
   UseInterceptors,
 } from "../mod.ts";
-import { BadRequestException } from "./deps.ts";
 import { AllExceptionsFilter, HttpExceptionFilter } from "./exception.ts";
 import { ErrorsInterceptor } from "./interceptor/errors.interceptor.ts";
 import { UserService } from "./user/services/user.service.ts";

@@ -12,7 +12,6 @@
   "imports": {
     "@nest": "../../mod.ts",
     "@nest/hono": "./mod.ts",
-    "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts",
-    "nest_exception": "https://deno.land/x/oak_exception@v0.0.7/mod.ts"
+    "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts"
   }
 }

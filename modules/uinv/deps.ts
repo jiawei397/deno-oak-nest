@@ -13,12 +13,6 @@ export {
 } from "https://deno.land/std@0.194.0/fmt/colors.ts";
 
 export {
-  BadRequestException,
-  ForbiddenException,
-  UnauthorizedException,
-} from "https://deno.land/x/oak_exception@v0.0.9/mod.ts";
-
-export {
   Ajax,
   type AjaxConfig,
   type AjaxData,

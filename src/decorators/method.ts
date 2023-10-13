@@ -1,7 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import {
   assert,
-  BodyParamValidationException,
   Reflect,
   validateOrReject,
   ValidationError,
@@ -18,6 +17,7 @@ import type {
 } from "../interfaces/param.interface.ts";
 import { Context } from "../interfaces/context.interface.ts";
 import { parseSearchParams } from "../utils.ts";
+import { BodyParamValidationException } from "../exceptions.ts";
 
 const typePreKey = "nesttype:";
 
