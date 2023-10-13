@@ -20,7 +20,7 @@ export interface ModuleMetadata {
    */
   providers?: Provider[];
 
-  exports?: Provider[];
+  // exports?: Provider[];
 }
 
 export type ModuleMetadataKey = keyof ModuleMetadata;
