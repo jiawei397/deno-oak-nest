@@ -110,7 +110,8 @@ Deno.test("body", async (t) => {
       },
     });
 
-    await assertRejects(() => mockCallMethod(app, ctx));
+    await mockCallMethod(app, ctx);
+    assertEquals(ctx.response.status, 400);
 
     assertEquals(callStack, []);
 
@@ -127,7 +128,8 @@ Deno.test("body", async (t) => {
       },
     });
 
-    await assertRejects(() => mockCallMethod(app, ctx));
+    await mockCallMethod(app, ctx);
+    assertEquals(ctx.response.status, 400);
 
     assertEquals(callStack, []);
     callStack.length = 0;
@@ -365,15 +367,8 @@ Deno.test("Query", async (t) => {
       method: "GET",
     });
 
-    try {
-      await mockCallMethod(app, ctx);
-    } catch (error) {
-      // console.log(error);
-      assertEquals(error.message, "c must not be greater than 20");
-      callStack.push(6);
-    }
-    assertEquals(callStack, [6]);
-    callStack.length = 0;
+    await mockCallMethod(app, ctx);
+    assertEquals(ctx.response.status, 400);
   });
 
   await t.step("get error but not validate path", async () => {
@@ -392,15 +387,8 @@ Deno.test("Query", async (t) => {
       path: mockErrorValidatePath,
       method: "GET",
     });
-    try {
-      await mockCallMethod(app, ctx);
-    } catch (error) {
-      // console.log(error);
-      assertEquals(error.message, "d must not be greater than 20");
-      callStack.push(7);
-    }
-    assertEquals(callStack, [7]);
-    callStack.length = 0;
+    await mockCallMethod(app, ctx);
+    assertEquals(ctx.response.status, 400);
   });
 });
 

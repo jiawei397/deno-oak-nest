@@ -309,9 +309,7 @@ Deno.test("interceptors with controller", async (t) => {
     const app = createMockApp();
     await app.add(A);
 
-    await assertRejects(() => {
-      return mockCallMethod(app, ctx);
-    });
+    await mockCallMethod(app, ctx);
     assertEquals(callStack, [1]);
 
     callStack.length = 0;
@@ -419,9 +417,7 @@ Deno.test("interceptors and guard", async (t) => {
     const app = createMockApp();
     await app.add(A);
 
-    await assertRejects(() => {
-      return mockCallMethod(app, ctx);
-    });
+    await mockCallMethod(app, ctx);
     assertEquals(callStack, [4, 1]);
 
     callStack.length = 0;

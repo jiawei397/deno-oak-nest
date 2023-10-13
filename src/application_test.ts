@@ -17,6 +17,12 @@ import {
 } from "../tests/common_helper.ts";
 import { type Context } from "./interfaces/context.interface.ts";
 import { Status } from "../deps.ts";
+import {
+  BadRequestException,
+  ForbiddenException,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from "./exceptions.ts";
 
 Deno.test("join", () => {
   assertEquals(join(), "");
@@ -296,6 +302,16 @@ Deno.test("routes check result", async (t) => {
       ctx.response.status = 400;
       ctx.response.body = new Error("d");
     }
+
+    @Get("/e")
+    e() {
+      throw Error("e error");
+    }
+
+    @Get("/f")
+    f() {
+      throw new BadRequestException("f exception");
+    }
   }
   await app.add(A);
 
@@ -336,6 +352,35 @@ Deno.test("routes check result", async (t) => {
     assert(ctx.response.body instanceof Error);
     assertEquals(ctx.response.status, 400);
   });
+
+  await t.step("throw error self", async () => {
+    const ctx = createMockContext({
+      path: "/user/e",
+      method: "GET",
+    });
+    await mockCallMethod(app, ctx);
+
+    assertEquals(ctx.response.status, 500);
+    assertEquals(
+      ctx.response.body,
+      new InternalServerErrorException("e error").response,
+    );
+  });
+
+  await t.step("throw exception self", async () => {
+    const ctx = createMockContext({
+      path: "/user/f",
+      method: "GET",
+    });
+    await mockCallMethod(app, ctx);
+
+    const exception = new BadRequestException("f exception");
+    assertEquals(ctx.response.status, exception.status);
+    assertEquals(
+      ctx.response.body,
+      exception.response,
+    );
+  });
 });
 
 Deno.test("routes with guard success", async () => {
@@ -372,9 +417,7 @@ Deno.test("routes with guard success", async () => {
   assertEquals(callStack, [1]);
 });
 
-Deno.test("routes with guard forbidden", async () => {
-  const app = createMockApp();
-
+Deno.test("routes with guard false", async (t) => {
   @Injectable()
   class AuthGuard implements CanActivate {
     // deno-lint-ignore require-await
@@ -383,25 +426,86 @@ Deno.test("routes with guard forbidden", async () => {
     }
   }
 
+  @Injectable()
+  class AuthGuard2 implements CanActivate {
+    // deno-lint-ignore require-await
+    async canActivate(_context: Context): Promise<boolean> {
+      throw new UnauthorizedException("");
+    }
+  }
+
+  @Injectable()
+  class AuthGuard3 implements CanActivate {
+    // deno-lint-ignore require-await
+    async canActivate(_context: Context): Promise<boolean> {
+      throw new Error("AuthGuard3 error");
+    }
+  }
+
   const callStack: number[] = [];
 
-  @UseGuards(AuthGuard)
-  @Controller("user")
+  @Controller("")
   class A {
+    @UseGuards(AuthGuard)
     @Get("/a")
-    method1() {
+    a() {
       callStack.push(1);
       return "a";
     }
+
+    @UseGuards(AuthGuard2)
+    @Get("/b")
+    b() {
+      callStack.push(2);
+      return "b";
+    }
+
+    @UseGuards(AuthGuard3)
+    @Get("/c")
+    c() {
+      callStack.push(3);
+      return "c";
+    }
   }
+  const app = createMockApp();
   await app.add(A);
 
-  const ctx = createMockContext({
-    path: "/user/a",
-    method: "GET",
-  });
-  await mockCallMethod(app, ctx);
+  await t.step("guard return false", async () => {
+    const ctx = createMockContext({
+      path: "/a",
+      method: "GET",
+    });
+    await mockCallMethod(app, ctx);
 
-  assertEquals(ctx.response.status, Status.Forbidden);
-  assertEquals(callStack, []);
+    assertEquals(ctx.response.status, Status.Forbidden);
+    assertEquals(ctx.response.body, new ForbiddenException("").response);
+    assertEquals(callStack, []);
+  });
+
+  await t.step("guard throw Http Exception", async () => {
+    const ctx = createMockContext({
+      path: "/b",
+      method: "GET",
+    });
+    await mockCallMethod(app, ctx);
+
+    assertEquals(ctx.response.status, Status.Unauthorized);
+    assertEquals(ctx.response.body, new UnauthorizedException("").response);
+    assertEquals(callStack, []);
+  });
+
+  await t.step("guard throw Error", async () => {
+    const ctx = createMockContext({
+      path: "/c",
+      method: "GET",
+    });
+    await mockCallMethod(app, ctx);
+
+    assertEquals(ctx.response.status, Status.InternalServerError);
+    assertEquals(
+      ctx.response.body,
+      new InternalServerErrorException("AuthGuard3 error").response,
+    );
+    assertEquals(callStack, []);
+  });
 });
