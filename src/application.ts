@@ -1,14 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import {
-  blue,
-  format,
-  green,
-  red,
-  Reflect,
-  Status,
-  STATUS_TEXT,
-  yellow,
-} from "../deps.ts";
+import { blue, format, green, red, Reflect, Status, yellow } from "../deps.ts";
 import {
   META_ALIAS_KEY,
   META_HEADER_KEY,
@@ -21,7 +12,7 @@ import {
   HttpException,
   InternalServerErrorException,
 } from "./exceptions.ts";
-import { Factory } from "./factorys/class.factory.ts";
+import { initController } from "./factorys/nest.factory.ts";
 import { checkByFilters } from "./filter.ts";
 import { checkByGuard } from "./guard.ts";
 import { checkByInterceptors } from "./interceptor.ts";
@@ -85,7 +76,7 @@ export async function mapRoute(
   Cls: Type,
   cache?: Map<any, any>,
 ): Promise<RouteMap[]> {
-  const instance = await Factory(Cls, undefined, cache);
+  const instance = await initController(Cls, cache);
   const prototype = Cls.prototype;
   const result: RouteMap[] = [];
   Object.getOwnPropertyNames(prototype)

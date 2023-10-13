@@ -1,8 +1,12 @@
-import { Module } from "../../../mod.ts";
+import { Module, OnModuleInit } from "@nest";
 import { AppController } from "./app.controller.ts";
 
 @Module({
   imports: [],
   controllers: [AppController],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  onModuleInit() {
+    console.log("onModuleInit AppModule");
+  }
+}

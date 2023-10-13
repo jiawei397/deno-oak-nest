@@ -1,10 +1,23 @@
-import { Body, Controller, Get, Params, Post, Query } from "@nest";
+import {
+  BadGatewayException,
+  Body,
+  Controller,
+  Get,
+  OnModuleInit,
+  Params,
+  Post,
+  Query,
+} from "@nest";
 import { AppService } from "./app.service.ts";
 import { QueryDto, QueryWithoutPropDto, SaveDto } from "./app.dto.ts";
 
 @Controller("")
-export class AppController {
+export class AppController implements OnModuleInit {
   constructor(private readonly appService: AppService) {
+  }
+
+  onModuleInit(): void | Promise<void> {
+    console.log("onModuleInit AppController");
   }
 
   @Get("/")
@@ -25,6 +38,33 @@ export class AppController {
   @Get("/error")
   error() {
     throw new Error("this is my error");
+  }
+
+  @Get("/exception")
+  exception() {
+    // {
+    //   "statusCode": 502,
+    //   "message": "this is my bad exception",
+    //   "error": "Bad Gateway"
+    //   }
+    throw new BadGatewayException("this is my bad exception");
+  }
+
+  @Get("/exceptionWithSelfDefine")
+  exceptionWithSelfDefine() {
+    // {
+    //   "code": 1001,
+    //   "message": "this is my bad exception"
+    // }
+    throw new BadGatewayException(
+      // {
+      //   code: 1001,
+      //   message: "this is my bad exception",
+      // },
+      "this is my bad exception",
+      "this is my bad exception description",
+      // "this is my error",
+    );
   }
 
   /**

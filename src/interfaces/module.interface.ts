@@ -51,3 +51,23 @@ export interface DynamicModule extends ModuleMetadata {
 }
 
 export type ModuleType = Type<any> | DynamicModule;
+
+export interface OnApplicationBootstrap {
+  onApplicationBootstrap(): void | Promise<void>;
+}
+
+export interface BeforeApplicationShutdown {
+  beforeApplicationShutdown(): void | Promise<void>;
+}
+
+export interface OnModuleDestroy {
+  onModuleDestroy(): void | Promise<void>;
+}
+
+export interface OnApplicationShutdown {
+  onApplicationShutdown(): void | Promise<void>;
+}
+
+export interface OnModuleInit {
+  onModuleInit(): void | Promise<void>;
+}

@@ -2,7 +2,11 @@
 import { Reflect } from "../../deps.ts";
 import { Application } from "../application.ts";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "../constants.ts";
-import { getModuleMetadata, isModule } from "../decorators/module.ts";
+import {
+  getModuleMetadata,
+  isDynamicModule,
+  isModule,
+} from "../decorators/module.ts";
 import type {
   FactoryCreateOptions,
   IRouterConstructor,
@@ -13,31 +17,33 @@ import type {
   Type,
 } from "../interfaces/mod.ts";
 import { Scope } from "../interfaces/mod.ts";
-import { globalFactoryCaches, initProvider } from "./class.factory.ts";
+import { Factory, globalFactoryCaches, initProvider } from "./class.factory.ts";
 
 const onModuleInitedKey = Symbol("onModuleInited");
 
 export async function findControllers(
-  module: ModuleType,
+  rootModule: ModuleType,
+  moduleArr: ModuleType[],
   controllerArr: Type<any>[],
   registeredProviders: RegisteredProvider[],
   dynamicProviders: Provider[],
   specialProviders: SpecialProvider[],
 ) {
-  if (!isModule(module)) {
+  if (!isModule(rootModule)) {
     return;
   }
-  const isDynamicModule = "module" in module;
-  const imports = isDynamicModule
-    ? module.imports
-    : getModuleMetadata("imports", module);
+  moduleArr.push(rootModule);
+  const isDynamic = isDynamicModule(rootModule);
+  const imports = isDynamic
+    ? rootModule.imports
+    : getModuleMetadata("imports", rootModule);
 
-  const controllers = isDynamicModule
-    ? module.controllers
-    : getModuleMetadata("controllers", module);
-  const providers: Provider[] = isDynamicModule
-    ? module.providers
-    : getModuleMetadata("providers", module);
+  const controllers = isDynamic
+    ? rootModule.controllers
+    : getModuleMetadata("controllers", rootModule);
+  const providers: Provider[] = isDynamic
+    ? rootModule.providers
+    : getModuleMetadata("providers", rootModule);
   // const exports = isDynamicModule
   //   ? module.exports
   //   : getModuleMetadata("exports", module); // TODO don't think well how to use exports
@@ -45,7 +51,7 @@ export async function findControllers(
     controllerArr.push(...controllers);
   }
   if (providers) {
-    if (isDynamicModule) {
+    if (isDynamic) {
       dynamicProviders.push(...providers);
     } else {
       providers.forEach((provider) => {
@@ -67,6 +73,7 @@ export async function findControllers(
     const module = await item;
     return findControllers(
       module,
+      moduleArr,
       controllerArr,
       registeredProviders,
       dynamicProviders,
@@ -102,34 +109,59 @@ export async function initProviders(
         app.useGlobalGuards(instance);
       }
     }
-
-    // init module
-    if (typeof instance.onModuleInit === "function") {
-      if (Reflect.hasOwnMetadata(onModuleInitedKey, provider)) {
-        return;
-      }
-      Reflect.defineMetadata(onModuleInitedKey, true, provider);
-      return instance.onModuleInit();
-    }
+    return onModuleInit(instance);
   }));
   return arr;
 }
 
+function onModuleInit(instance: any) {
+  if (typeof instance.onModuleInit === "function") {
+    if (Reflect.hasOwnMetadata(onModuleInitedKey, instance)) {
+      return;
+    }
+    Reflect.defineMetadata(onModuleInitedKey, true, instance);
+    return instance.onModuleInit();
+  }
+}
+
+export async function initController(Cls: Type, cache?: Map<any, any>) {
+  const instance = await Factory(Cls, undefined, cache);
+  await onModuleInit(instance);
+  return instance;
+}
+
+export async function initModule(
+  module: ModuleType,
+  cache?: Map<any, any>,
+) {
+  const isDynamic = isDynamicModule(module);
+  if (isDynamic) {
+    await onModuleInit(module);
+    return module;
+  } else {
+    const instance = await Factory(module, undefined, cache);
+    await onModuleInit(instance);
+    return instance;
+  }
+}
+
 export class NestFactory {
   static async create(
-    module: ModuleType,
+    rootModule: ModuleType,
     Router: IRouterConstructor,
     options?: FactoryCreateOptions,
   ) {
     const router = new Router({ strict: options?.strict });
     const app = new Application(router);
     const cache = options?.cache ?? globalFactoryCaches;
+    const modules: ModuleType[] = [];
     const controllers: Type<any>[] = [];
     const registeredProviders: RegisteredProvider[] = [];
     const dynamicProviders: Provider[] = [];
     const specialProviders: SpecialProvider[] = [];
     await findControllers(
-      module,
+      rootModule,
+      modules,
       controllers,
       registeredProviders,
       dynamicProviders,
@@ -143,6 +175,11 @@ export class NestFactory {
       app.defaultCache = cache;
       await app.add(...controllers);
     }
+
+    // init modules
+    await Promise.all(modules.map((module) => {
+      return initModule(module, cache);
+    }));
 
     return app;
   }

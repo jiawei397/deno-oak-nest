@@ -1,8 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
 import { Reflect } from "../../deps.ts";
 import type {
+  DynamicModule,
   ModuleMetadata,
   ModuleMetadataKey,
+  ModuleType,
 } from "../interfaces/module.interface.ts";
 
 export const MODULE_KEY = Symbol("module:isModule");
@@ -22,6 +24,10 @@ export function isModule(module: unknown): boolean {
     return false;
   }
   return "module" in module || Reflect.hasOwnMetadata(MODULE_KEY, module);
+}
+
+export function isDynamicModule(module: ModuleType): module is DynamicModule {
+  return "module" in module;
 }
 
 export function defineModuleMetadata(target: object) {
