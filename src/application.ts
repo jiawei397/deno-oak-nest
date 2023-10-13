@@ -221,6 +221,7 @@ export class Application {
   private abortController: AbortController = new AbortController();
   private instances = new Set<any>();
   private controllers: Type<any>[] = [];
+  private SIGNAL: Deno.Signal | "" = "";
 
   constructor(protected router: IRouter) {}
 
@@ -248,6 +249,10 @@ export class Application {
     this.router.routes();
     this.router.serveForStatic(this.staticOptions);
     await this.onApplicationBootstrap();
+    Deno.addSignalListener("SIGINT", () => {
+      this.SIGNAL = "SIGINT";
+      this.close();
+    });
     this.router.startServer({
       signal: this.abortController.signal,
       ...options,
@@ -255,8 +260,12 @@ export class Application {
   }
 
   async close() {
+    await this.onModuleDestroy().catch((err) => {
+      console.error(err); // TODO: log format
+    });
+    await this.beforeApplicationShutdown(this.SIGNAL);
     this.abortController.abort();
-    await this.onApplicationShutdown();
+    await this.onApplicationShutdown(this.SIGNAL);
   }
 
   useGlobalInterceptors(...interceptors: NestUseInterceptors) {
@@ -638,10 +647,26 @@ export class Application {
   /**
    * TODO: think about whether to use Promise.all or a for loop
    */
-  private async onApplicationShutdown(): Promise<void> {
+  private async onApplicationShutdown(signal: string): Promise<void> {
     await Promise.all([...this.instances].map((instance) => {
       if (typeof instance.onApplicationShutdown === "function") {
-        return instance.onApplicationShutdown();
+        return instance.onApplicationShutdown(signal);
+      }
+    }));
+  }
+
+  private async beforeApplicationShutdown(signal?: string): Promise<void> {
+    await Promise.all([...this.instances].map((instance) => {
+      if (typeof instance.beforeApplicationShutdown === "function") {
+        return instance.beforeApplicationShutdown(signal);
+      }
+    }));
+  }
+
+  private async onModuleDestroy(): Promise<void> {
+    await Promise.all([...this.instances].map((instance) => {
+      if (typeof instance.onModuleDestroy === "function") {
+        return instance.onModuleDestroy();
       }
     }));
   }

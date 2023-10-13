@@ -1,11 +1,24 @@
-import { Module, OnModuleInit } from "@nest";
+import {
+  BeforeApplicationShutdown,
+  Module,
+  OnApplicationBootstrap,
+  OnApplicationShutdown,
+  OnModuleDestroy,
+  OnModuleInit,
+} from "@nest";
 import { AppController } from "./app.controller.ts";
 
 @Module({
   imports: [],
   controllers: [AppController],
 })
-export class AppModule implements OnModuleInit {
+export class AppModule
+  implements
+    OnModuleInit,
+    OnApplicationBootstrap,
+    OnApplicationShutdown,
+    BeforeApplicationShutdown,
+    OnModuleDestroy {
   onModuleInit() {
     console.log("onModuleInit AppModule");
   }
@@ -16,5 +29,13 @@ export class AppModule implements OnModuleInit {
 
   onApplicationShutdown() {
     console.log("onApplicationShutdown AppModule");
+  }
+
+  beforeApplicationShutdown() {
+    console.log("beforeApplicationShutdown AppModule");
+  }
+
+  onModuleDestroy() {
+    console.log("onModuleDestroy AppModule");
   }
 }

@@ -57,7 +57,7 @@ export interface OnApplicationBootstrap {
 }
 
 export interface BeforeApplicationShutdown {
-  beforeApplicationShutdown(): void | Promise<void>;
+  beforeApplicationShutdown(signal?: string): void | Promise<void>;
 }
 
 export interface OnModuleDestroy {
@@ -65,7 +65,7 @@ export interface OnModuleDestroy {
 }
 
 export interface OnApplicationShutdown {
-  onApplicationShutdown(): void | Promise<void>;
+  onApplicationShutdown(signal: string): void | Promise<void>;
 }
 
 export interface OnModuleInit {

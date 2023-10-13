@@ -1,10 +1,12 @@
 import {
   BadGatewayException,
+  BeforeApplicationShutdown,
   Body,
   Controller,
   Get,
   OnApplicationBootstrap,
   OnApplicationShutdown,
+  OnModuleDestroy,
   OnModuleInit,
   Params,
   Post,
@@ -15,8 +17,19 @@ import { QueryDto, QueryWithoutPropDto, SaveDto } from "./app.dto.ts";
 
 @Controller("")
 export class AppController
-  implements OnModuleInit, OnApplicationBootstrap, OnApplicationShutdown {
+  implements
+    OnModuleInit,
+    OnApplicationBootstrap,
+    OnApplicationShutdown,
+    BeforeApplicationShutdown,
+    OnModuleDestroy {
   constructor(private readonly appService: AppService) {
+  }
+  beforeApplicationShutdown(signal?: string | undefined): void | Promise<void> {
+    console.log("beforeApplicationShutdown AppController", signal);
+  }
+  onModuleDestroy(): void | Promise<void> {
+    console.log("onModuleDestroy AppController");
   }
 
   onModuleInit(): void | Promise<void> {
