@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { blue, format, green, red, Reflect, Status, yellow } from "../deps.ts";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "./constants.ts";
 import {
   META_ALIAS_KEY,
   META_HEADER_KEY,
@@ -8,11 +9,21 @@ import {
   META_PATH_KEY,
 } from "./decorators/controller.ts";
 import {
+  getModuleMetadata,
+  isDynamicModule,
+  isModule,
+  onModuleInit,
+} from "./decorators/module.ts";
+import {
   ForbiddenException,
   HttpException,
   InternalServerErrorException,
 } from "./exceptions.ts";
-import { initController } from "./factorys/nest.factory.ts";
+import {
+  Factory,
+  globalFactoryCaches,
+  initProvider,
+} from "./factorys/class.factory.ts";
 import { checkByFilters } from "./filter.ts";
 import { checkByGuard } from "./guard.ts";
 import { checkByInterceptors } from "./interceptor.ts";
@@ -27,9 +38,18 @@ import { ExceptionFilters } from "./interfaces/filter.interface.ts";
 import { ControllerMethod, NestGuards } from "./interfaces/guard.interface.ts";
 import { NestUseInterceptors } from "./interfaces/interceptor.interface.ts";
 import { NestMiddleware } from "./interfaces/middleware.interface.ts";
+import { ModuleType } from "./interfaces/module.interface.ts";
+import {
+  Provider,
+  RegisteredProvider,
+  SpecialProvider,
+} from "./interfaces/provider.interface.ts";
 import { IRouter, RouteItem, RouteMap } from "./interfaces/route.interface.ts";
+import { Scope } from "./interfaces/scope-options.interface.ts";
 import { Constructor, Type } from "./interfaces/type.interface.ts";
 import { transferParam } from "./params.ts";
+
+const onApplicationBootstrapKey = Symbol("onApplicationBootstrap");
 
 export function join(...paths: string[]) {
   if (paths.length === 0) {
@@ -76,7 +96,7 @@ export async function mapRoute(
   Cls: Type,
   cache?: Map<any, any>,
 ): Promise<RouteMap[]> {
-  const instance = await initController(Cls, cache);
+  const instance = await Factory(Cls, undefined, cache);
   const prototype = Cls.prototype;
   const result: RouteMap[] = [];
   Object.getOwnPropertyNames(prototype)
@@ -110,6 +130,87 @@ export async function mapRoute(
   return result;
 }
 
+export async function collect(
+  rootModule: ModuleType,
+  moduleArr: ModuleType[],
+  controllerArr: Type<any>[],
+  registeredProviders: RegisteredProvider[],
+  dynamicProviders: Provider[],
+  specialProviders: SpecialProvider[],
+) {
+  if (!isModule(rootModule)) {
+    return;
+  }
+  moduleArr.push(rootModule);
+  const isDynamic = isDynamicModule(rootModule);
+  const imports = isDynamic
+    ? rootModule.imports
+    : getModuleMetadata("imports", rootModule);
+
+  const controllers = isDynamic
+    ? rootModule.controllers
+    : getModuleMetadata("controllers", rootModule);
+  const providers: Provider[] = isDynamic
+    ? rootModule.providers
+    : getModuleMetadata("providers", rootModule);
+  // const exports = isDynamicModule
+  //   ? module.exports
+  //   : getModuleMetadata("exports", module); // TODO don't think well how to use exports
+  if (controllers) {
+    controllerArr.push(...controllers);
+  }
+  if (providers) {
+    if (isDynamic) {
+      dynamicProviders.push(...providers);
+    } else {
+      providers.forEach((provider) => {
+        if ("provide" in provider) {
+          specialProviders.push(provider);
+        } else {
+          registeredProviders.push(provider);
+        }
+      });
+    }
+  }
+  if (!imports || !imports.length) {
+    return;
+  }
+  await Promise.all(imports.map(async (item: any) => {
+    if (!item) {
+      return;
+    }
+    const module = await item;
+    return collect(
+      module,
+      moduleArr,
+      controllerArr,
+      registeredProviders,
+      dynamicProviders,
+      specialProviders,
+    );
+  }));
+}
+
+export async function getRouterArr(
+  controllers: Type<any>[],
+  cache: Map<any, any>,
+) {
+  const routerArr: RouteItem[] = [];
+  await Promise.all(controllers.map(async (Cls) => {
+    const arr = await mapRoute(Cls, cache);
+    const path = Reflect.getMetadata(META_PATH_KEY, Cls);
+    const aliasOptions = Reflect.getMetadata(META_ALIAS_KEY, Cls);
+    const controllerPath = join(path);
+    routerArr.push({
+      controllerPath,
+      arr,
+      cls: Cls,
+      aliasOptions,
+    });
+  }));
+  return routerArr;
+}
+
 export class Application {
   apiPrefix = "";
   apiPrefixOptions: ApiPrefixOptions = {};
@@ -117,9 +218,11 @@ export class Application {
   private globalExceptionFilters: ExceptionFilters = [];
   private globalGuards: NestGuards = [];
   staticOptions: StaticOptions;
-  defaultCache: Map<any, any> | undefined;
+  cache: Map<any, any> = globalFactoryCaches;
 
   private routerArr: RouteItem[] = [];
+  private instances: any[] = [];
+  private controllers: Type<any>[] = [];
 
   constructor(protected router: IRouter) {}
 
@@ -142,15 +245,12 @@ export class Application {
     });
   }
 
-  /**
-   * @param options
-   * @returns
-   */
-  listen(options?: ListenOptions): void {
-    this.routes();
+  async listen(options?: ListenOptions): Promise<void> {
+    await this.routes();
     this.router.routes();
     this.router.serveForStatic(this.staticOptions);
-    return this.router.startServer(options);
+    await this.onApplicationBootstrap();
+    this.router.startServer(options);
   }
 
   useGlobalInterceptors(...interceptors: NestUseInterceptors) {
@@ -182,26 +282,9 @@ export class Application {
 
   /**
    * add controller
-   * @protected
    */
-  async add(...clsArr: Type[]) {
-    await Promise.all(clsArr.map(async (Cls) => {
-      const find = this.routerArr.find(({ cls }) => cls === Cls);
-      if (find) {
-        return;
-      }
-      const arr = await mapRoute(Cls, this.defaultCache);
-      const path = Reflect.getMetadata(META_PATH_KEY, Cls);
-      const aliasOptions = Reflect.getMetadata(META_ALIAS_KEY, Cls);
-      const controllerPath = join(path);
-      this.routerArr.push({
-        controllerPath,
-        arr,
-        cls: Cls,
-        aliasOptions,
-      });
-    }));
-    return this.routerArr;
+  addController(...clsArr: Type[]) {
+    this.controllers.push(...clsArr);
   }
 
   private log(...message: string[]) {
@@ -305,11 +388,12 @@ export class Application {
     context.response.body = err.response;
   }
 
-  protected routes() {
+  protected async routes() {
     const routeStart = Date.now();
     const apiPrefixReg = this.apiPrefixOptions?.exclude;
 
-    this.routerArr.forEach(
+    const routerArr = await getRouterArr(this.controllers, this.cache);
+    routerArr.forEach(
       ({ controllerPath, arr, aliasOptions: controllerAliasOptions }) => {
         let isAbsolute = controllerAliasOptions?.isAbsolute;
         if (!isAbsolute && apiPrefixReg) {
@@ -450,5 +534,98 @@ export class Application {
       yellow("[Routes application]"),
       green(`successfully started ${Date.now() - routeStart}ms`),
     );
+  }
+
+  private async initModule(module: ModuleType) {
+    const isDynamic = isDynamicModule(module);
+    if (isDynamic) {
+      await onModuleInit(module);
+      return module;
+    } else {
+      const instance = await Factory(module, undefined, this.cache);
+      await onModuleInit(instance);
+      return instance;
+    }
+  }
+
+  private async initController(Cls: Type) {
+    const instance = await Factory(Cls, undefined, this.cache);
+    await onModuleInit(instance);
+    return instance;
+  }
+
+  private async initProviders(providers: Provider[]) {
+    const arr = [];
+    for (const provider of providers) {
+      const instance = await initProvider(provider, Scope.DEFAULT, this.cache);
+      this.instances.push(instance);
+      if (instance) {
+        arr.push({
+          instance,
+          provider,
+        });
+      }
+    }
+    await Promise.all(arr.map(({ instance, provider }) => {
+      // register global interceptor, filter, guard
+      if ("provide" in provider) {
+        const provide = provider.provide;
+        if (provide === APP_INTERCEPTOR) {
+          this.useGlobalInterceptors(instance);
+        } else if (provide === APP_FILTER) {
+          this.useGlobalFilters(instance);
+        } else if (provide === APP_GUARD) {
+          this.useGlobalGuards(instance);
+        }
+      }
+      return onModuleInit(instance);
+    }));
+    return arr;
+  }
+
+  async init(rootModule: ModuleType, cache: Map<any, any>) {
+    this.cache = cache;
+
+    const modules: ModuleType[] = [];
+    const controllers: Type<any>[] = this.controllers;
+    const registeredProviders: RegisteredProvider[] = [];
+    const dynamicProviders: Provider[] = [];
+    const specialProviders: SpecialProvider[] = [];
+    await collect(
+      rootModule,
+      modules,
+      controllers,
+      registeredProviders,
+      dynamicProviders,
+      specialProviders,
+    );
+    await this.initProviders(specialProviders);
+    await this.initProviders(dynamicProviders); // init dynamic providers first to avoid it be inited first by other providers
+    await this.initProviders(registeredProviders);
+
+    if (controllers.length) {
+      await Promise.all(controllers.map(async (controller) => {
+        const instance = await this.initController(controller);
+        this.instances.push(instance);
+      }));
+    }
+
+    // init modules
+    await Promise.all(modules.map(async (module) => {
+      const instance = await this.initModule(module);
+      this.instances.push(instance);
+    }));
+  }
+
+  private async onApplicationBootstrap(): Promise<void> {
+    await Promise.all(this.instances.map((instance) => {
+      if (typeof instance.onApplicationBootstrap === "function") {
+        if (Reflect.hasOwnMetadata(onApplicationBootstrapKey, instance)) {
+          return;
+        }
+        Reflect.defineMetadata(onApplicationBootstrapKey, true, instance);
+        return instance.onApplicationBootstrap();
+      }
+    }));
   }
 }

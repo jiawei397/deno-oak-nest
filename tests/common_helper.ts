@@ -166,11 +166,11 @@ export function createMockApp() {
   return app;
 }
 
-export function mockCallMethod(
+export async function mockCallMethod(
   app: Application,
   ctx: Context,
 ) {
-  (app as any).routes();
+  await (app as any).routes();
 
   const url = ctx.request.url;
   const method = ctx.request.method as "GET" | "POST" | "PUT" | "DELETE";

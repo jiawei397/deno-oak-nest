@@ -4,6 +4,7 @@ import {
   getModuleMetadata,
   isModule,
   Module,
+  onModuleInit,
 } from "./module.ts";
 
 Deno.test("isModule", () => {
@@ -49,4 +50,20 @@ Deno.test("Module", () => {
   assertEquals(getModuleMetadata("imports", ModuleA), ["a", "b"]);
   assertEquals(getModuleMetadata("controllers", ModuleA), [A]);
   assertEquals(getModuleMetadata("providers", ModuleA), providers);
+});
+
+Deno.test("onModuleInit", () => {
+  const callStack: number[] = [];
+  class AppService {
+    onModuleInit() {
+      callStack.push(1);
+    }
+  }
+
+  const appService = new AppService();
+  onModuleInit(appService);
+  assertEquals(callStack, [1]);
+
+  onModuleInit(appService);
+  assertEquals(callStack, [1], "should not call onModuleInit twice");
 });

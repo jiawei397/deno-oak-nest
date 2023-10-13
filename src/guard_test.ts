@@ -161,7 +161,7 @@ Deno.test("Reflector", async () => {
     method: "GET",
   });
   const app = createMockApp();
-  await app.add(TestController);
+  app.addController(TestController);
 
   await mockCallMethod(app, ctx);
 
@@ -192,7 +192,7 @@ Deno.test("application guard can change body and status in canActive", async () 
       return "a";
     }
   }
-  await app.add(A);
+  app.addController(A);
 
   const ctx = createMockContext({
     path: "/user/a",

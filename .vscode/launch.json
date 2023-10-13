@@ -76,7 +76,7 @@
       "request": "launch",
       "name": "test",
       "type": "node",
-      "program": "${workspaceFolder}/src/interceptor_test.ts",
+      "program": "${workspaceFolder}/src/factorys/nest.factory_test.ts",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "deno",
       "runtimeArgs": [

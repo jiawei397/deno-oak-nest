@@ -307,7 +307,7 @@ Deno.test("interceptors with controller", async (t) => {
       method: "GET",
     });
     const app = createMockApp();
-    await app.add(A);
+    app.addController(A);
 
     await mockCallMethod(app, ctx);
     assertEquals(callStack, [1]);
@@ -321,7 +321,7 @@ Deno.test("interceptors with controller", async (t) => {
       method: "GET",
     });
     const app = createMockApp();
-    await app.add(A);
+    app.addController(A);
     await mockCallMethod(app, ctx);
 
     assertEquals(callStack, [1, 3, 4, 2]);
@@ -387,7 +387,7 @@ Deno.test("interceptors and guard", async (t) => {
       method: "GET",
     });
     const app = createMockApp();
-    await app.add(A);
+    app.addController(A);
 
     await mockCallMethod(app, ctx);
     assertEquals(callStack, [3]);
@@ -401,7 +401,7 @@ Deno.test("interceptors and guard", async (t) => {
       method: "GET",
     });
     const app = createMockApp();
-    await app.add(A);
+    app.addController(A);
 
     await mockCallMethod(app, ctx);
     assertEquals(callStack, [4, 1, 2]);
@@ -415,7 +415,7 @@ Deno.test("interceptors and guard", async (t) => {
       method: "GET",
     });
     const app = createMockApp();
-    await app.add(A);
+    app.addController(A);
 
     await mockCallMethod(app, ctx);
     assertEquals(callStack, [4, 1]);

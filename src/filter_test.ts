@@ -169,7 +169,7 @@ Deno.test("filter and guard", async (t) => {
       method: "GET",
     });
     const app = createMockApp();
-    await app.add(A);
+    app.addController(A);
     await mockCallMethod(app, ctx);
 
     assertEquals(callStack, [2]);
@@ -182,7 +182,7 @@ Deno.test("filter and guard", async (t) => {
       method: "GET",
     });
     const app = createMockApp();
-    await app.add(A);
+    app.addController(A);
     await mockCallMethod(app, ctx);
 
     assertEquals(callStack, [1]);
@@ -195,7 +195,7 @@ Deno.test("filter and guard", async (t) => {
       method: "GET",
     });
     const app = createMockApp();
-    await app.add(A);
+    app.addController(A);
     await mockCallMethod(app, ctx);
     assertEquals(callStack, []);
   });
@@ -282,7 +282,7 @@ Deno.test("filter and interceptor", async (t) => {
       method: "GET",
     });
     const app = createMockApp();
-    await app.add(A);
+    app.addController(A);
     await mockCallMethod(app, ctx);
     assertEquals(callStack, [1, 3]);
     assertEquals(ctx.response.body, "catched");
@@ -297,7 +297,7 @@ Deno.test("filter and interceptor", async (t) => {
       method: "GET",
     });
     const app = createMockApp();
-    await app.add(A);
+    app.addController(A);
     await mockCallMethod(app, ctx);
     assertEquals(callStack, [1, 2]);
     assertEquals(ctx.response.body, "b");
@@ -313,7 +313,7 @@ Deno.test("filter and interceptor", async (t) => {
         method: "GET",
       });
       const app = createMockApp();
-      await app.add(A);
+      app.addController(A);
       await mockCallMethod(app, ctx);
       assertEquals(callStack, [1, 4, 5, 3]);
       assertEquals(ctx.response.body, "catched");
@@ -331,7 +331,7 @@ Deno.test("filter and interceptor", async (t) => {
         method: "GET",
       });
       const app = createMockApp();
-      await app.add(A);
+      app.addController(A);
       await mockCallMethod(app, ctx);
       assertEquals(callStack, [1, 6, 7, 2]);
       assertEquals(ctx.response.body, "catched by interceptor");

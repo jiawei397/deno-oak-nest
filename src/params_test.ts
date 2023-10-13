@@ -30,7 +30,7 @@ Deno.test("createParamDecorator", async () => {
   }
 
   const app = createMockApp();
-  await app.add(A);
+  app.addController(A);
 
   const ctx = createMockContext({
     path: "/user/a",
@@ -64,7 +64,7 @@ Deno.test("createParamDecoratorWithLowLevel", async () => {
   }
 
   const app = createMockApp();
-  await app.add(A);
+  app.addController(A);
   const ctx = createMockContext({
     path: "/user/a",
     method: "GET",
@@ -114,7 +114,7 @@ Deno.test("transferParam", async () => {
   }
 
   const app = createMockApp();
-  await app.add(A);
+  app.addController(A);
   await mockCallMethod(app, ctx);
 
   assertEquals(ctx.response.body, aResult);

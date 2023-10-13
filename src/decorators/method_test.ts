@@ -98,7 +98,7 @@ Deno.test("body", async (t) => {
   }
 
   const app = createMockApp();
-  await app.add(A);
+  app.addController(A);
 
   await t.step("get", async () => {
     const ctx = createMockContext({
@@ -324,7 +324,7 @@ Deno.test("Query", async (t) => {
   }
 
   const app = createMockApp();
-  await app.add(A);
+  app.addController(A);
 
   await t.step("get mock", async () => {
     const ctx = createMockContext({
@@ -422,7 +422,7 @@ Deno.test("Params", async (t) => {
   }
 
   const app = createMockApp();
-  await app.add(A);
+  app.addController(A);
 
   await t.step("a 1", async () => {
     const ctx = createMockContext({
@@ -475,7 +475,7 @@ Deno.test("Req, Res, ControllerName, MethodName", async () => {
   }
 
   const app = createMockApp();
-  await app.add(A);
+  app.addController(A);
 
   await mockCallMethod(app, ctx);
 
@@ -520,7 +520,7 @@ Deno.test("Cookies", async () => {
   }
 
   const app = createMockApp();
-  await app.add(A);
+  app.addController(A);
   await mockCallMethod(app, ctx);
 
   assertEquals(callStack, [1]);
@@ -559,7 +559,7 @@ Deno.test("Headers", async () => {
   }
 
   const app = createMockApp();
-  await app.add(A);
+  app.addController(A);
   await mockCallMethod(app, ctx);
 
   assertEquals(callStack, [1]);
@@ -589,7 +589,7 @@ Deno.test("UploadedFile form data", async (t) => {
   }
 
   const app = createMockApp();
-  await app.add(A);
+  app.addController(A);
 
   await t.step("not upload", async () => {
     const ctx = createMockContext({

@@ -8,6 +8,7 @@ import type {
 } from "../interfaces/module.interface.ts";
 
 export const MODULE_KEY = Symbol("module:isModule");
+export const onModuleInitedKey = Symbol("onModuleInited");
 
 export function Module(metadata: ModuleMetadata): ClassDecorator {
   return (target: any) => {
@@ -36,4 +37,14 @@ export function defineModuleMetadata(target: object) {
 
 export function getModuleMetadata(key: ModuleMetadataKey, module: any) {
   return Reflect.getOwnMetadata(key, module);
+}
+
+export function onModuleInit(instance: any) {
+  if (typeof instance.onModuleInit === "function") {
+    if (Reflect.hasOwnMetadata(onModuleInitedKey, instance)) {
+      return;
+    }
+    Reflect.defineMetadata(onModuleInitedKey, true, instance);
+    return instance.onModuleInit();
+  }
 }

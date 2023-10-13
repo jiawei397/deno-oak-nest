@@ -20,6 +20,10 @@ export class AppController implements OnModuleInit {
     console.log("onModuleInit AppController");
   }
 
+  onApplicationBootstrap() {
+    console.log("onApplicationBootstrap AppController");
+  }
+
   @Get("/")
   hello() {
     return this.appService.hello();

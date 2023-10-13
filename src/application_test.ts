@@ -1,5 +1,8 @@
+// deno-lint-ignore-file no-unused-vars no-explicit-any
 import { assert, assertEquals } from "../test_deps.ts";
 import {
+  collect,
+  getRouterArr,
   join,
   mapRoute,
   replacePrefix,
@@ -23,6 +26,15 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from "./exceptions.ts";
+import { ModuleType, OnModuleInit } from "./interfaces/module.interface.ts";
+import { Module } from "./decorators/module.ts";
+import {
+  Provider,
+  RegisteredProvider,
+  SpecialProvider,
+} from "./interfaces/provider.interface.ts";
+import { Type } from "./interfaces/type.interface.ts";
+import { NestFactory } from "./factorys/nest.factory.ts";
 
 Deno.test("join", () => {
   assertEquals(join(), "");
@@ -233,50 +245,226 @@ Deno.test("mapRoute with controller route", async () => {
   });
 });
 
-Deno.test("add", async () => {
-  const app = createMockApp();
-  class A {
-    @Get("/a")
-    method1() {}
-  }
-  const result = await app.add(A);
-  assert(Array.isArray(result));
-  assertEquals(result.length, 1);
-  assert(result[0]);
-  assertEquals(result[0].controllerPath, "");
+Deno.test("collect", async () => {
+  const callStack: number[] = [];
 
-  const arr = result[0].arr;
-  assert(Array.isArray(arr));
-  assertEquals(arr.length, 1);
-  assertEquals(arr[0].methodPath, "/a");
-  assertEquals(arr[0].methodName, "method1");
+  const moduleArr: ModuleType[] = [];
+  const controllerArr: Type<any>[] = [];
+  const registeredProviderArr: RegisteredProvider[] = [];
+  const dynamicProviders: Provider[] = [];
+  const specialProviders: SpecialProvider[] = [];
 
-  const result2 = await app.add(A);
-  assertEquals(result2.length, 1, "should not add same controller");
+  const Controller = (): ClassDecorator => () => {};
 
-  class B {
-    @Get("/b")
-    method2() {}
+  class ChildService {}
 
-    @Get("/c")
-    method3() {}
+  @Controller()
+  class ChildController {
+    constructor(private readonly childService: ChildService) {}
   }
 
-  const result3 = await app.add(B);
-  assertEquals(result3.length, 2, "should add new controller");
-  assertEquals(result3[1].arr.length, 2);
+  @Module({
+    imports: [],
+    controllers: [
+      ChildController,
+    ],
+  })
+  class ChildModule {}
+
+  class AppService {}
+
+  class SchedulerService {
+    onModuleInit() {
+      callStack.push(1);
+    }
+  }
+
+  @Controller()
+  class AppController {
+    constructor(private readonly appService: AppService) {}
+  }
+
+  @Module({
+    imports: [ChildModule],
+    controllers: [
+      AppController,
+    ],
+    providers: [SchedulerService],
+  })
+  class AppModule {}
+
+  await collect(
+    AppModule,
+    moduleArr,
+    controllerArr,
+    registeredProviderArr,
+    dynamicProviders,
+    specialProviders,
+  );
+
+  assertEquals(moduleArr.length, 2);
+  assertEquals(controllerArr.length, 2);
+  assertEquals(controllerArr[0], AppController);
+  assertEquals(controllerArr[1], ChildController);
+
+  assertEquals(registeredProviderArr.length, 1);
+  assertEquals(registeredProviderArr[0], SchedulerService);
+
+  assertEquals(dynamicProviders.length, 0);
+
+  assertEquals(specialProviders.length, 0);
 });
 
-Deno.test("add with prefix", async () => {
-  const app = createMockApp();
-  app.setGlobalPrefix("api");
+Deno.test("module init", async (t) => {
+  const callStack: number[] = [];
+
+  const Controller = (): ClassDecorator => () => {};
+  const Injectable = (): ClassDecorator => () => {};
+
+  @Injectable()
+  class ChildService implements OnModuleInit {
+    onModuleInit() {
+      callStack.push(1);
+    }
+  }
+
+  @Controller()
+  class ChildController {
+    constructor(private readonly childService: ChildService) {
+    }
+
+    onModuleInit() {
+      callStack.push(2);
+    }
+  }
+
+  @Injectable()
+  class AppService {
+    onModuleInit() {
+      callStack.push(4);
+    }
+  }
+
+  @Injectable()
+  class SchedulerService {
+    onModuleInit() {
+      callStack.push(5);
+    }
+  }
+
+  @Controller()
+  class AppController {
+    constructor(private readonly appService: AppService) {}
+    onModuleInit() {
+      callStack.push(6);
+    }
+  }
+
+  await t.step("module without providers", async () => {
+    @Module({
+      imports: [],
+      controllers: [
+        ChildController,
+      ],
+    })
+    class ChildModule {
+      onModuleInit() {
+        callStack.push(3);
+      }
+    }
+
+    @Module({
+      imports: [ChildModule],
+      controllers: [
+        AppController,
+      ],
+      providers: [SchedulerService],
+    })
+    class AppModule {}
+
+    const app = createMockApp();
+    await app.init(AppModule, new Map());
+
+    assertEquals(
+      callStack,
+      [5, 6, 2, 3],
+      "because no provider, so no call 1, 4",
+    );
+
+    callStack.length = 0;
+  });
+
+  await t.step("module with providers", async () => {
+    @Module({
+      imports: [],
+      controllers: [
+        ChildController,
+      ],
+      providers: [
+        ChildService,
+      ],
+    })
+    class ChildModule {
+      onModuleInit() {
+        callStack.push(3);
+      }
+    }
+
+    @Module({
+      imports: [ChildModule],
+      controllers: [
+        AppController,
+      ],
+      providers: [SchedulerService, AppService],
+    })
+    class AppModule {}
+
+    const app = createMockApp();
+    await app.init(AppModule, new Map());
+
+    console.log("module inited", callStack);
+    assertEquals(
+      callStack,
+      [5, 4, 1, 6, 2, 3],
+    );
+
+    callStack.length = 0;
+  });
+});
+
+Deno.test("getRouterArr", async (t) => {
   class A {
     @Get("/a")
     method1() {}
   }
-  const result = await app.add(A);
-  assert(Array.isArray(result));
-  assertEquals(result[0].controllerPath, "", "will not deal prefix now");
+
+  await t.step("one Class", async () => {
+    const result = await getRouterArr([A], new Map());
+    assert(Array.isArray(result));
+    assertEquals(result.length, 1);
+    assert(result[0]);
+    assertEquals(result[0].controllerPath, "");
+
+    const arr = result[0].arr;
+    assert(Array.isArray(arr));
+    assertEquals(arr.length, 1);
+    assertEquals(arr[0].methodPath, "/a");
+    assertEquals(arr[0].methodName, "method1");
+  });
+
+  await t.step("multi Class", async () => {
+    class B {
+      @Get("/b")
+      method2() {}
+
+      @Get("/c")
+      method3() {}
+    }
+
+    const result = await getRouterArr([A, B], new Map());
+    assertEquals(result.length, 2, "should add new controller");
+    assertEquals(result[1].arr.length, 2);
+  });
 });
 
 Deno.test("routes check result", async (t) => {
@@ -313,7 +501,7 @@ Deno.test("routes check result", async (t) => {
       throw new BadRequestException("f exception");
     }
   }
-  await app.add(A);
+  app.addController(A);
 
   await t.step("get a ", async () => {
     const ctx = createMockContext({
@@ -404,7 +592,7 @@ Deno.test("routes with guard success", async () => {
       return "a";
     }
   }
-  await app.add(A);
+  app.addController(A);
 
   const ctx = createMockContext({
     path: "/user/a",
@@ -468,7 +656,7 @@ Deno.test("routes with guard false", async (t) => {
     }
   }
   const app = createMockApp();
-  await app.add(A);
+  app.addController(A);
 
   await t.step("guard return false", async () => {
     const ctx = createMockContext({
