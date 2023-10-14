@@ -215,7 +215,6 @@ export class Application {
   private apiPrefix = "";
   private apiPrefixOptions: ApiPrefixOptions = {};
   private staticOptions: StaticOptions;
-
   private globalInterceptors: NestUseInterceptors = [];
   private globalExceptionFilters: ExceptionFilters = [];
   private globalGuards: NestGuards = [];
