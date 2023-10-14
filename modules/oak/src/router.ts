@@ -21,45 +21,28 @@ export class OakRouter implements IRouter {
     this.app = new OakApplication();
   }
 
-  get(
-    path: string,
-    fn: MiddlewareHandler,
-  ) {
-    return this.router.get(path, async (ctx, next) => {
+  private handle(fn: MiddlewareHandler) {
+    return async (ctx: OakContext, next: () => Promise<unknown>) => {
       const nestCtx = NestContext.getInstance(ctx);
       await fn(nestCtx, next as Next);
       return nestCtx.render();
-    });
+    };
   }
-  post(
-    path: string,
-    fn: MiddlewareHandler,
-  ) {
-    return this.router.post(path, async (ctx, next) => {
-      const nestCtx = NestContext.getInstance(ctx);
-      await fn(nestCtx, next as Next);
-      return nestCtx.render();
-    });
+
+  get(path: string, fn: MiddlewareHandler) {
+    return this.router.get(path, this.handle(fn));
   }
-  put(
-    path: string,
-    fn: MiddlewareHandler,
-  ) {
-    return this.router.put(path, async (ctx, next) => {
-      const nestCtx = NestContext.getInstance(ctx);
-      await fn(nestCtx, next as Next);
-      return nestCtx.render();
-    });
+  post(path: string, fn: MiddlewareHandler) {
+    return this.router.post(path, this.handle(fn));
   }
-  delete(
-    path: string,
-    fn: MiddlewareHandler,
-  ) {
-    return this.router.delete(path, async (ctx, next) => {
-      const nestCtx = NestContext.getInstance(ctx);
-      await fn(nestCtx, next as Next);
-      return nestCtx.render();
-    });
+  put(path: string, fn: MiddlewareHandler) {
+    return this.router.put(path, this.handle(fn));
+  }
+  delete(path: string, fn: MiddlewareHandler) {
+    return this.router.delete(path, this.handle(fn));
+  }
+  patch(path: string, fn: MiddlewareHandler) {
+    return this.router.patch(path, this.handle(fn));
   }
 
   use(fn: MiddlewareHandler) {
