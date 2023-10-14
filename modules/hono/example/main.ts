@@ -9,6 +9,7 @@ app.useStaticAssets("example/static", {
   prefix: "static",
 });
 app.useGlobalFilters(HttpExceptionFilter);
+app.enableShutdownHooks(["SIGINT"]);
 
 const port = Number(Deno.env.get("PORT") || 2000);
 app.listen({ port });

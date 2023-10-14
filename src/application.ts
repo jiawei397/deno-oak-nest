@@ -30,6 +30,7 @@ import { checkByInterceptors } from "./interceptor.ts";
 import {
   ApiPrefixOptions,
   ListenOptions,
+  ShutdownSignal,
 } from "./interfaces/application.interface.ts";
 import { Context } from "./interfaces/context.interface.ts";
 import { AliasOptions } from "./interfaces/controller.interface.ts";
@@ -249,23 +250,48 @@ export class Application {
     this.router.routes();
     this.router.serveForStatic(this.staticOptions);
     await this.onApplicationBootstrap();
-    Deno.addSignalListener("SIGINT", () => {
-      this.SIGNAL = "SIGINT";
-      this.close();
-    });
     this.router.startServer({
       signal: this.abortController.signal,
       ...options,
     });
   }
 
-  async close() {
+  /**
+   * Close the application.
+   * @param [signal] The signal which caused the shutdown.
+   */
+  async close(signal?: ShutdownSignal) {
     await this.onModuleDestroy().catch((err) => {
       console.error(err); // TODO: log format
     });
-    await this.beforeApplicationShutdown(this.SIGNAL);
+    await this.beforeApplicationShutdown(signal);
     this.abortController.abort();
-    await this.onApplicationShutdown(this.SIGNAL);
+    await this.onApplicationShutdown(signal);
+  }
+
+  /**
+   * Enables the usage of shutdown hooks. Will call the
+   * `onApplicationShutdown` function of a provider if the
+   * process receives a shutdown signal.
+   *
+   * @param {ShutdownSignal[]} [signals=[]] The system signals it should listen to
+   *
+   * @returns {this} The Nest application context instance
+   */
+  public enableShutdownHooks(signals: ShutdownSignal[] = []): this {
+    let currentSignal: ShutdownSignal | "" = "";
+    new Set(signals).forEach((signal) => {
+      const callback = () => {
+        if (currentSignal) {
+          return;
+        }
+        currentSignal = signal;
+        Deno.removeSignalListener(signal, callback);
+        this.close(signal);
+      };
+      Deno.addSignalListener(signal, callback);
+    });
+    return this;
   }
 
   useGlobalInterceptors(...interceptors: NestUseInterceptors) {
@@ -647,7 +673,7 @@ export class Application {
   /**
    * TODO: think about whether to use Promise.all or a for loop
    */
-  private async onApplicationShutdown(signal: string): Promise<void> {
+  private async onApplicationShutdown(signal?: string): Promise<void> {
     await Promise.all([...this.instances].map((instance) => {
       if (typeof instance.onApplicationShutdown === "function") {
         return instance.onApplicationShutdown(signal);
