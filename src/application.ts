@@ -38,6 +38,7 @@ import { StaticOptions } from "./interfaces/factory.interface.ts";
 import { ExceptionFilters } from "./interfaces/filter.interface.ts";
 import { ControllerMethod, NestGuards } from "./interfaces/guard.interface.ts";
 import { NestUseInterceptors } from "./interfaces/interceptor.interface.ts";
+import { LoggerService } from "./interfaces/log.interface.ts";
 import { NestMiddleware } from "./interfaces/middleware.interface.ts";
 import { ModuleType } from "./interfaces/module.interface.ts";
 import {
@@ -211,18 +212,21 @@ export async function getRouterArr(
 }
 
 export class Application {
-  apiPrefix = "";
-  apiPrefixOptions: ApiPrefixOptions = {};
+  private apiPrefix = "";
+  private apiPrefixOptions: ApiPrefixOptions = {};
+  private staticOptions: StaticOptions;
+  
   private globalInterceptors: NestUseInterceptors = [];
   private globalExceptionFilters: ExceptionFilters = [];
   private globalGuards: NestGuards = [];
-  staticOptions: StaticOptions;
-  cache: Map<any, any> = globalFactoryCaches;
+  private cache: Map<any, any> = globalFactoryCaches;
 
   private abortController: AbortController = new AbortController();
   private instances = new Set<any>();
   private controllers: Type<any>[] = [];
-  private SIGNAL: Deno.Signal | "" = "";
+
+  private logger: LoggerService = console;
+  private startTime = Date.now();
 
   constructor(protected router: IRouter) {}
 
@@ -254,6 +258,14 @@ export class Application {
       signal: this.abortController.signal,
       ...options,
     });
+    this.log(
+      yellow("[NestApplication]"),
+      green(
+        `Nest application successfully started ${
+          Date.now() - this.startTime
+        }ms`,
+      ),
+    );
   }
 
   /**
@@ -262,7 +274,7 @@ export class Application {
    */
   async close(signal?: ShutdownSignal) {
     await this.onModuleDestroy().catch((err) => {
-      console.error(err); // TODO: log format
+      this.logger.error(err); // TODO: log format
     });
     await this.beforeApplicationShutdown(signal);
     this.abortController.abort();
@@ -307,6 +319,15 @@ export class Application {
   }
 
   /**
+   * Sets custom logger service.
+   * Flushes buffered logs if auto flush is on.
+   * @returns {void}
+   */
+  useLogger(logger: LoggerService): void {
+    this.logger = logger;
+  }
+
+  /**
    * Sets a base directory for public assets.
    * @example
    * app.useStaticAssets('public')
@@ -330,8 +351,8 @@ export class Application {
   }
 
   private log(...message: string[]) {
-    console.log(
-      yellow("[router]"),
+    this.logger.info(
+      yellow("[Nest]"),
       green(format(new Date(), "yyyy-MM-dd HH:mm:ss")),
       ...message,
     );
@@ -572,10 +593,6 @@ export class Application {
         );
       },
     );
-    this.log(
-      yellow("[Routes application]"),
-      green(`successfully started ${Date.now() - routeStart}ms`),
-    );
   }
 
   private async initModule(module: ModuleType) {
@@ -625,22 +642,35 @@ export class Application {
     return arr;
   }
 
-  async init(rootModule: ModuleType, cache: Map<any, any>) {
+  async init(appModule: ModuleType, cache: Map<any, any>) {
     this.cache = cache;
 
+    this.log(
+      yellow("[NestFactory]"),
+      green(`Starting Nest application...`),
+    );
+    const start = Date.now();
     const modules: ModuleType[] = [];
     const controllers: Type<any>[] = this.controllers;
     const registeredProviders: RegisteredProvider[] = [];
     const dynamicProviders: Provider[] = [];
     const specialProviders: SpecialProvider[] = [];
     await collect(
-      rootModule,
+      appModule,
       modules,
       controllers,
       registeredProviders,
       dynamicProviders,
       specialProviders,
     );
+    this.log(
+      yellow("[NestApplication]"),
+      green(
+        `AppModule dependencies collected ${Date.now() - start}ms`,
+      ),
+    );
+
+    const startInit = Date.now();
     await this.initProviders(specialProviders);
     await this.initProviders(dynamicProviders); // init dynamic providers first to avoid it be inited first by other providers
     await this.initProviders(registeredProviders);
@@ -657,6 +687,13 @@ export class Application {
       const instance = await this.initModule(module);
       this.instances.add(instance);
     }));
+
+    this.log(
+      yellow("[NestApplication]"),
+      green(
+        `AppModule dependencies initialized ${Date.now() - startInit}ms`,
+      ),
+    );
   }
 
   /**
