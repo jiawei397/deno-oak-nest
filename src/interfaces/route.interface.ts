@@ -37,6 +37,7 @@ export abstract class IRouter {
   abstract post(path: string, fn: MiddlewareHandler): any;
   abstract put(path: string, fn: MiddlewareHandler): any;
   abstract delete(path: string, fn: MiddlewareHandler): any;
+  abstract patch(path: string, fn: MiddlewareHandler): any;
   abstract startServer(options?: ListenOptions): any;
   abstract serveForStatic(staticOptions?: StaticOptions): void;
   abstract routes(): void;

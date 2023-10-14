@@ -6,7 +6,7 @@ import {
   IRouter,
   MiddlewareHandler,
 } from "../../../src/interfaces/route.interface.ts";
-import { Hono, serveStatic } from "../deps.ts";
+import { Hono, HonoContext, HonoNext, serveStatic } from "../deps.ts";
 import { NestContext } from "./context.ts";
 
 export class HonoRouter implements IRouter {
@@ -16,45 +16,43 @@ export class HonoRouter implements IRouter {
     this.app = new Hono({ strict: options?.strict ?? false });
   }
 
+  private handle(fn: MiddlewareHandler) {
+    return async (ctx: HonoContext, next: HonoNext) => {
+      const nestCtx = NestContext.getInstance(ctx);
+      await fn(nestCtx, next);
+      return nestCtx.render();
+    };
+  }
+
   get(
     path: string,
     fn: MiddlewareHandler,
   ) {
-    return this.app.get(path, async (ctx, next) => {
-      const nestCtx = NestContext.getInstance(ctx);
-      await fn(nestCtx, next);
-      return nestCtx.render();
-    });
+    return this.app.get(path, this.handle(fn));
   }
   post(
     path: string,
     fn: MiddlewareHandler,
   ) {
-    return this.app.post(path, async (ctx, next) => {
-      const nestCtx = NestContext.getInstance(ctx);
-      await fn(nestCtx, next);
-      return nestCtx.render();
-    });
+    return this.app.post(path, this.handle(fn));
   }
   put(
     path: string,
     fn: MiddlewareHandler,
   ) {
-    return this.app.put(path, async (ctx, next) => {
-      const nestCtx = NestContext.getInstance(ctx);
-      await fn(nestCtx, next);
-      return nestCtx.render();
-    });
+    return this.app.put(path, this.handle(fn));
   }
   delete(
     path: string,
     fn: MiddlewareHandler,
   ) {
-    return this.app.delete(path, async (ctx, next) => {
-      const nestCtx = NestContext.getInstance(ctx);
-      await fn(nestCtx, next);
-      return nestCtx.render();
-    });
+    return this.app.delete(path, this.handle(fn));
+  }
+  patch(
+    path: string,
+    fn: MiddlewareHandler,
+  ) {
+    return this.app.patch(path, this.handle(fn));
   }
 
   use(fn: MiddlewareHandler) {
