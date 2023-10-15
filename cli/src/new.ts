@@ -2,8 +2,8 @@ import { applyEdits, modify, parse as parseJson } from "jsonc";
 import { decompress } from "zip";
 import { join } from "std/path/mod.ts";
 
-const projectName = "deno_template";
-const branchName = "master";
+const projectName = "deno_nest_template";
+const branchName = "main";
 const githubUrl =
   `https://github.com/jiawei397/${projectName}/archive/refs/heads/${branchName}.zip`;
 const githubGit = `git@github.com:jiawei397/${projectName}.git`;
@@ -84,7 +84,7 @@ function modifyText(text: string, map: Record<string, string>) {
 }
 
 async function writeDenoJson(name: string, denoJsonPath: string) {
-//   console.log(`[${denoJsonPath}] will be changed`);
+  //   console.log(`[${denoJsonPath}] will be changed`);
   const realPath = join(name, denoJsonPath);
   let text = await Deno.readTextFile(realPath);
   text = text.replace(templateName, name);
@@ -122,5 +122,5 @@ export async function createProject(
   await writeReadme(name);
   await writeDenoJson(name, "deno.jsonc");
 
-//   console.log(`init project ${projectName} end`);
+  //   console.log(`init project ${projectName} end`);
 }
