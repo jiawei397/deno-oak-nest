@@ -12,6 +12,7 @@
     "dev:postgres": "deno task --cwd=modules/postgres dev",
     "dev:redis": "deno task --cwd=modules/redis dev",
     "dev:scheduler": "deno task --cwd=modules/scheduler dev",
+    "cli": "deno task --cwd=cli install",
     "pm2": "pm2 start --name oak_nest example/main.ts --interpreter='deno' --interpreter-args='run --allow-net --allow-env --allow-write --allow-read --unstable'",
     "test": "deno test --allow-env --parallel --ignore=example --coverage=cov_profile",
     "cache": "deno cache --lock deno.lock --unstable --lock-write deps.ts",
