@@ -12,7 +12,7 @@ function createNewProject() {
       console.log(info("We will scaffold your app in a few seconds.."));
       const name: string = await Input.prompt({
         message: `What name would you like to use for the new project?`,
-        default: "nest-app",
+        default: "deno_nest_app",
       });
       const platform: string = await Select.prompt({
         message:
