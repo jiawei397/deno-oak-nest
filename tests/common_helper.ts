@@ -28,6 +28,7 @@ export const createMockContext = (options: {
     url: options.path.startsWith("http")
       ? options.path
       : `http://localhost/${options.path.replace(/^\//, "")}`,
+    states: {},
     header(key: string) {
       return options.reqHeaders?.[key];
     },
