@@ -2,7 +2,6 @@
 import {
   assert,
   assertEquals,
-  assertRejects,
   IsEnum,
   IsNumber,
   IsOptional,
