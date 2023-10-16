@@ -14,9 +14,25 @@ I will update the `oak` or `Hono` version if need.
 > 
 > It is recommended to use `Hono` as the underlying layer because its performance is better.
 
-## config
+## start
 
-Before start your app, you may set `deno.json` or `deno.jsonc` before:
+You can use CLI to init:
+
+```bash
+deno run --allow-env --allow-run --allow-net --allow-read --allow-write --import-map https://deno.land/x/deno_nest@v3.0.1/cli/import_map.json https://deno.land/x/deno_nest@v3.0.1/cli/main.ts
+```
+
+Or you can install CLI by:
+
+```bash
+deno install --allow-env --allow-run --allow-net --allow-read --allow-write --import-map https://deno.land/x/deno_nest@v3.0.1/cli/import_map.json  -n nest -f https://deno.land/x/deno_nest@v3.0.1/cli/main.ts
+```
+
+Then use as `nest` or `nest new`.
+
+### config
+
+If you not use CLI create project, then efore start your app, you may set `deno.json` or `deno.jsonc` before:
 
 ```json
 "compilerOptions": {
@@ -33,9 +49,9 @@ Before start your app, you may set `deno.json` or `deno.jsonc` before:
 
 The `@nest/hono` and `@nest/oak` only need one.
 
-## run
+### run
 
-You can see the current Demo by:
+You can see the current App by:
 
 ```bash
 deno task dev
