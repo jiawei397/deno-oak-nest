@@ -17,5 +17,9 @@ app.use(async (req, res, next) => {
   console.log(`${req.method} ${req.url} - ${ms}ms`);
 });
 
+app.get("/", (_req, res) => {
+  res.body = "Hello World!";
+});
+
 const port = Number(Deno.env.get("PORT") || 2000);
 app.listen({ port });
