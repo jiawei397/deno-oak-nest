@@ -1,25 +1,37 @@
-# oak_nest
+# deno_nest
 
-[![deno version](https://img.shields.io/badge/deno-^1.30.0-blue?logo=deno)](https://github.com/denoland/deno)
+[![deno version](https://img.shields.io/badge/deno-^1.37.0-blue?logo=deno)](https://github.com/denoland/deno)
 [![Deno](https://github.com/jiawei397/deno-oak-nest/actions/workflows/deno.yml/badge.svg)](https://github.com/jiawei397/deno-oak-nest/actions/workflows/deno.yml)
 [![codecov](https://codecov.io/gh/jiawei397/deno-oak-nest/branch/master/graph/badge.svg?token=NKP41TU4SL)](https://codecov.io/gh/jiawei397/deno-oak-nest)
 
-Rely on [oak@v12.6.1](https://deno.land/x/oak@v12.6.1/mod.ts) to simulate some
-annotation functions of [NestJS](https://docs.nestjs.com/) which is a frame for
+Rely on [oak@v12.6.1](https://deno.land/x/oak@v12.6.1/mod.ts) and [hono@v3.7.6](https://deno.land/x/hono@v3.7.6/mod.ts) to simulate some
+annotation functions of [NestJS](https://docs.nestjs.com/) which is a great frame for
 Node.js.
 
-I will update the `oak` version if need.
+I will update the `oak` or `Hono` version if need.
+
+> The previous framework name was `oak_nest`, now renamed `deno_nest`.
+> 
+> It is recommended to use `Hono` as the underlying layer because its performance is better.
 
 ## config
 
-Before start your app, you may set `deno.json` before:
+Before start your app, you may set `deno.json` or `deno.jsonc` before:
 
 ```json
 "compilerOptions": {
   "emitDecoratorMetadata": true,
   "strictPropertyInitialization": false
+},
+"imports": {
+  "@nest": "https://deno.land/x/deno_nest@3.0.0/mod.ts",
+  "@nest/hono": "https://deno.land/x/deno_nest@3.0.0/modules/hono/mod.ts",
+  "@nest/oak": "https://deno.land/x/deno_nest@3.0.0/modules/oak/mod.ts",
+  "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts"
 }
 ```
+
+The `@nest/hono` and `@nest/oak` only need one.
 
 ## run
 
@@ -51,8 +63,8 @@ import {
   Query,
   Res,
   UseGuards,
-} from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
-import type { CanActivate } from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+  type CanActivate,
+} from "@nest";
 import mockjs from "https://deno.land/x/deno_mock@v2.0.0/mod.ts";
 import { delay } from "https://deno.land/std@0.194.0/async/mod.ts";
 
@@ -85,13 +97,12 @@ export class UserController {
   @UseGuards(AuthGuard2, AuthGuard3)
   @Get("/info/:id")
   test(
-    context: Context,
     @add() name: string,
     @Query() params: any,
     @Query("age") age: string,
   ) {
     console.log(params, age);
-    context.res.body = "role info " + name + " - " +
+    return "role info " + name + " - " +
       JSON.stringify(params);
   }
 
@@ -105,7 +116,7 @@ export class UserController {
   list(context: Context) {
     console.log("---list----");
     this.testInnerCall();
-    context.res.body = "list";
+    context.response.body = "list";
   }
 
   testInnerCall() {
@@ -175,7 +186,7 @@ info(
 
 The `Body` decorator is using
 [deno_class_validator](https://deno.land/x/deno_class_validator@v0.0.1) for
-validator, which is forked from `class-validator` which is using in nodejs, if
+validator, which is forked from `class-validator` which is using in Node.js, if
 it fails, then will throw an `400` Error.
 
 ### Controller use Service
@@ -184,7 +195,7 @@ You can use `Injectable` to flag the service can be injectable, and it can be
 used by your Controller or other Service.
 
 ```ts
-import { Injectable } from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+import { Injectable } from "@nest";
 
 @Injectable()
 export class RoleService {
@@ -217,8 +228,8 @@ export class User2Controller {
   ) {
   }
   @Get("/user2")
-  info(context: Context) {
-    context.res.body = this.userService.info() + this.roleService.info();
+  info() {
+    return this.userService.info() + this.roleService.info();
   }
 }
 ```
@@ -227,65 +238,16 @@ If you like to use the `Service` alone in anywhere, you can with `Factory` like
 this:
 
 ```ts
-import { Factory } from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+import { Factory } from "@nest";
 Factory(UserService).info();
 ```
-
-### Router add Controller
-
-```ts
-import { UserController } from "./user.controller.ts";
-import { User2Controller } from "./user2.controller.ts";
-import { RoleController } from "./role.controller.ts";
-import { Router } from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
-
-const router = new Router();
-await router.register(UserController);
-router.setGlobalPrefix("api");
-await router.register(RoleController, User2Controller);
-```
-
-> Note that the `router.add` API has been used by the `oak router` when `12.6`, so I have to change to `router.register`.
-> Of course, I now recommend the following way `use Module`.
-
-### use Router in app
-
-```ts
-import {
-  Application,
-  isHttpError,
-  Router,
-  send,
-  Status,
-} from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
-
-const app = new Application();
-
-// Timing
-app.use(async (ctx, next) => {
-  const start = Date.now();
-  await next();
-  const ms = Date.now() - start;
-  ctx.response.headers.set("X-Response-Time", `${ms}ms`);
-});
-
-const router = new Router();
-app.use(router.routes());
-
-const port = Number(Deno.env.get("PORT") || 1000);
-console.log(`app will start with: http://localhost:${port}`);
-await app.listen({ port });
-```
-
-now you can visit
-`http://localhost:1000/api/user/info`,`http://localhost:1000/api/user/list`.
 
 ## use Module
 
 First is the AppModule:
 
 ```ts
-import { Module } from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+import { Module } from "@nest";
 import { AppController } from "./app.controller.ts";
 import { UserModule } from "./user/user.module.ts";
 
@@ -302,7 +264,7 @@ Then is `UserModule`, and the `providers` can contain the services which are not
 used by controllers.
 
 ```ts
-import { Module } from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+import { Module } from "@nest";
 import { RoleController } from "./controllers/role.controller.ts";
 import { UserController } from "./controllers/user.controller.ts";
 import { User2Controller } from "./controllers/user2.controller.ts";
@@ -331,29 +293,36 @@ import {
   isHttpError,
   NestFactory,
   Status,
-} from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+} from "@nest";
+import { HonoRouter } from "@nest/hono";
 import { AppModule } from "./app.module.ts";
 
-const app = await NestFactory.create(AppModule);
+const app = await NestFactory.create(AppModule, HonoRouter);
 app.setGlobalPrefix("api");
 
 // Timing
-app.use(async (ctx: Context, next) => {
+app.use(async (req, res, next) => {
   const start = Date.now();
   await next();
   const ms = Date.now() - start;
-  ctx.response.headers.set("X-Response-Time", `${ms}ms`);
+  res.headers.set("X-Response-Time", `${ms}ms`);
 });
 
-app.get("/hello", (ctx: Context) => {
-  ctx.response.body = "hello";
+app.get("/", (_req, res) => {
+  res.body = "Hello World!";
 });
-
-app.use(app.routes());
 
 const port = Number(Deno.env.get("PORT") || 1000);
 console.log(`app will start with: http://localhost:${port}`);
 await app.listen({ port });
+```
+
+If you want to use `oak` instead of `Hono`, you can change like this:
+
+```ts
+import { OakRouter } from "@nest/oak";
+
+const app = await NestFactory.create(AppModule, OakRouter);
 ```
 
 ### use static files
@@ -373,7 +342,7 @@ It must be used before the routes (`app.use(app.routes())`).
 If you want to connect db such as Mongodb, you can do like this:
 
 ```ts
-import { Module } from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+import { Module } from "@nest";
 import { AppController } from "./app.controller.ts";
 import { UserModule } from "./user/user.module.ts";
 
@@ -418,7 +387,7 @@ async function getModel<T>(
 You can also use the `Inject` decorator to help you:
 
 ```ts
-import { Inject } from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+import { Inject } from "@nest";
 export const InjectModel = (Cls: Constructor) => Inject(() => getModel(Cls));
 ```
 
@@ -448,7 +417,7 @@ In the above code, `this.model` is the `getModel` result.
 You can also register a Dynamic Module like this:
 
 ```ts
-import { DynamicModule } from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+import { DynamicModule } from "@nest";
 import { ASYNC_KEY } from "./async.constant.ts";
 import { AsyncService } from "./async.service.ts";
 
@@ -474,7 +443,7 @@ And the `AsyncService` like this:
 import {
   Inject,
   Injectable,
-} from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+} from "@nest";
 import { ASYNC_KEY } from "./async.constant.ts";
 
 @Injectable()
@@ -534,8 +503,8 @@ Here is a controller file named `user.controller.ts`:
 })
 export class UserController {
   @Get("/info")
-  info(context: Context) {
-    context.res.body = "info";
+  info() {
+    return "info";
   }
 }
 ```
@@ -687,7 +656,7 @@ class A {
 Then use `createTestingModule`:
 
 ```ts
-import { createTestingModule } from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
+import { createTestingModule } from "@nest";
 
 Deno.test("test origin only with controller", async () => {
   const moduleRef = await createTestingModule({
@@ -771,8 +740,18 @@ Deno.test("resolve will return not same", async () => {
 
 ## TODO
 
+- [x] support Guard
+- [x] support Interceptor
+- [x] support ExceptionFilter
 - [x] unit test self
 - [x] provide API to help unit
+- [x] support oak
+- [x] support hono
+- [x] static assets
+- [x] support lifecycle
+- [ ] Nest CLI
+- [ ] Nest Doc
+- [ ] unit Hono and Oak self
 
 ---
 

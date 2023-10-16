@@ -1,4 +1,4 @@
-FROM denoland/deno:alpine-1.30.1
+FROM denoland/deno:alpine-1.37.0
 
 EXPOSE 2000
 
