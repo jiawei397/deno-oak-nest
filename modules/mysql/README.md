@@ -1,6 +1,6 @@
 # oak_nest_mysql_module
 
-This is a mysql module for [`oak_nest`](https://deno.land/x/oak_nest). Currently
+This is a mysql module for [`deno_nest`](https://deno.land/x/deno_nest). Currently
 used MySQL client is <https://deno.land/x/mysql@v2.11.0/mod.ts>.
 
 ## example
@@ -10,9 +10,9 @@ Add import map in `deno.json`:
 ```json
 {
   "imports": {
-    "@nest": "https://deno.land/x/oak_nest@v2.0.1/mod.ts",
-    "@nest/hono": "https://deno.land/x/oak_nest@v2.0.1/modules/hono/mod.ts",
-    "@nest/mysql": "https://deno.land/x/oak_nest@v2.0.1/modules/mysql/mod.ts"
+    "@nest": "https://deno.land/x/deno_nest@v3.0.1/mod.ts",
+    "@nest/hono": "https://deno.land/x/deno_nest@v3.0.1/modules/hono/mod.ts",
+    "@nest/mysql": "https://deno.land/x/deno_nest@v3.0.1/modules/mysql/mod.ts"
   }
 }
 ```

@@ -5,9 +5,9 @@ Forked from the Node.js package `expressjs cors`. Now it is just a simple and op
 Example
 
 ```ts
-import { NestFactory } from "https://deno.land/x/oak_nest@v2.0.1/mod.ts";
-import { HonoRouter } from "https://deno.land/x/oak_nest@v2.0.1/modules/hono/mod.ts";
-import { CORS } from "https://deno.land/x/oak_nest@v2.0.1/modules/cors/mod.ts";
+import { NestFactory } from "https://deno.land/x/deno_nest@v3.0.1/mod.ts";
+import { HonoRouter } from "https://deno.land/x/deno_nest@v3.0.1/modules/hono/mod.ts";
+import { CORS } from "https://deno.land/x/deno_nest@v3.0.1/modules/cors/mod.ts";
 import { AppModule } from "./app.module.ts";
 
 const app = await NestFactory.create(AppModule, HonoRouter);

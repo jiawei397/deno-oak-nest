@@ -1,6 +1,6 @@
 # oak_nest_redis_module
 
-This is a redis module for [`oak_nest`](https://deno.land/x/oak_nest).
+This is a redis module for [`deno_nest`](https://deno.land/x/deno_nest).
 
 ## example
 
@@ -9,9 +9,9 @@ Add import map in `deno.json`:
 ```json
 {
   "imports": {
-    "@nest": "https://deno.land/x/oak_nest@v2.0.1/mod.ts",
-    "@nest/hono": "https://deno.land/x/oak_nest@v2.0.1/modules/hono/mod.ts",
-    "@nest/redis": "https://deno.land/x/oak_nest@v2.0.1/modules/redis/mod.ts"
+    "@nest": "https://deno.land/x/deno_nest@v3.0.1/mod.ts",
+    "@nest/hono": "https://deno.land/x/deno_nest@v3.0.1/modules/hono/mod.ts",
+    "@nest/redis": "https://deno.land/x/deno_nest@v3.0.1/modules/redis/mod.ts"
   }
 }
 ```
