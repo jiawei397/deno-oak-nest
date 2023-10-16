@@ -4,6 +4,7 @@ import {
   Body,
   Controller,
   Get,
+  HeaderJSON,
   OnApplicationBootstrap,
   OnApplicationShutdown,
   OnModuleDestroy,
@@ -47,6 +48,12 @@ export class AppController
   @Get("/")
   hello() {
     return this.appService.hello();
+  }
+
+  @Get("/bool")
+  @HeaderJSON()
+  bool() {
+    return true;
   }
 
   @Get("/hello/:name")
