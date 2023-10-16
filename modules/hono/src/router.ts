@@ -5,6 +5,7 @@ import { StaticOptions } from "../../../src/interfaces/factory.interface.ts";
 import {
   IRouter,
   MiddlewareHandler,
+  NotFoundHandler,
 } from "../../../src/interfaces/route.interface.ts";
 import { Hono, HonoContext, HonoNext, serveStatic } from "../deps.ts";
 import { NestContext } from "./context.ts";
@@ -56,11 +57,23 @@ export class HonoRouter implements IRouter {
   }
 
   use(fn: MiddlewareHandler) {
-    return this.app.use("*", this.handle(fn));
+    return this.app.use("*", async (ctx: HonoContext, next: HonoNext) => {
+      const nestCtx = NestContext.getInstance(ctx);
+      await fn(nestCtx, next);
+      // return nestCtx.render();
+    });
   }
 
   routes(): void {
     // empty
+  }
+
+  notFound(fn: NotFoundHandler): void {
+    this.app.notFound(async (ctx) => {
+      const nestCtx = NestContext.getInstance(ctx);
+      await fn(nestCtx);
+      return nestCtx.render();
+    });
   }
 
   startServer(options?: ListenOptions) {

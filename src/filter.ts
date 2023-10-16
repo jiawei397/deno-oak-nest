@@ -80,8 +80,8 @@ export function Catch(
 }
 
 export function getExceptionFilters(
-  target: InstanceType<Constructor>,
-  fn: ControllerMethod,
+  target: InstanceType<Constructor> | null,
+  fn: ControllerMethod | null,
   globalFilters: ExceptionFilters,
 ): Promise<ExceptionFilter[]> {
   return getMergedMetas<ExceptionFilter>(
@@ -96,7 +96,7 @@ export async function checkByFilters(
   context: Context,
   target: InstanceType<Constructor>,
   globalFilters: ExceptionFilters,
-  fn: ControllerMethod,
+  fn: ControllerMethod | null,
   error: Error,
 ): Promise<any> {
   const filters = await getExceptionFilters(target, fn, globalFilters);

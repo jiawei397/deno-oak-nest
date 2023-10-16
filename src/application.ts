@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { blue, format, green, red, Reflect, Status, yellow } from "../deps.ts";
+import { blue, format, green, red, Reflect, yellow } from "../deps.ts";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "./constants.ts";
 import {
   META_ALIAS_KEY,
@@ -18,6 +18,7 @@ import {
   ForbiddenException,
   HttpException,
   InternalServerErrorException,
+  NotFoundException,
 } from "./exceptions.ts";
 import {
   Factory,
@@ -243,7 +244,7 @@ export class Application {
   use(...middlewares: NestMiddleware[]): void {
     middlewares.forEach((middleware) => {
       this.router.use(async (ctx, next) => {
-        await middleware(ctx.request, ctx.response, next);
+        await middleware(ctx.request, ctx.response, next); // TODO: is need return?
       });
     });
   }
@@ -421,8 +422,8 @@ export class Application {
   }
 
   private async catchFilter(
-    target: InstanceType<Constructor>,
-    fn: ControllerMethod,
+    target: InstanceType<Constructor> | null,
+    fn: ControllerMethod | null,
     context: Context,
     error: any,
   ) {
@@ -584,6 +585,16 @@ export class Application {
         );
       },
     );
+
+    // deal global not found
+    this.router.notFound(async (ctx) => {
+      await this.catchFilter(
+        null,
+        null,
+        ctx,
+        new NotFoundException(""),
+      );
+    });
   }
 
   private async initModule(module: ModuleType) {

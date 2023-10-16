@@ -34,7 +34,6 @@ import {
   SpecialProvider,
 } from "./interfaces/provider.interface.ts";
 import { Type } from "./interfaces/type.interface.ts";
-import { NestFactory } from "./factorys/nest.factory.ts";
 
 Deno.test("join", () => {
   assertEquals(join(), "");

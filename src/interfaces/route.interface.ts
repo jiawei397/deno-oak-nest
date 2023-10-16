@@ -31,6 +31,8 @@ export type MiddlewareHandler = (
   next: Next,
 ) => Promise<void>;
 
+export type NotFoundHandler = (context: Context) => Promise<void>;
+
 export abstract class IRouter {
   abstract use(fn: MiddlewareHandler): void;
   abstract get(path: string, fn: MiddlewareHandler): any;
@@ -41,6 +43,7 @@ export abstract class IRouter {
   abstract startServer(options?: ListenOptions): any;
   abstract serveForStatic(staticOptions?: StaticOptions): void;
   abstract routes(): void;
+  abstract notFound(fn: NotFoundHandler): void;
 }
 
 export interface IRouterConstructor extends Function {

@@ -8,6 +8,7 @@ import { Next } from "../../../src/interfaces/middleware.interface.ts";
 import {
   IRouter,
   MiddlewareHandler,
+  NotFoundHandler,
 } from "../../../src/interfaces/route.interface.ts";
 import { OakApplication, OakContext, OakOriginRouter, send } from "../deps.ts";
 import { NestContext } from "./context.ts";
@@ -19,6 +20,17 @@ export class OakRouter implements IRouter {
   constructor(options?: { strict?: boolean }) {
     this.router = new OakOriginRouter({ strict: options?.strict ?? false });
     this.app = new OakApplication();
+  }
+
+  notFound(fn: NotFoundHandler): void {
+    this.app.use(async (ctx, next) => {
+      await next();
+      if (ctx.response.status !== 404) {
+        return;
+      }
+      const nestCtx = NestContext.getInstance(ctx);
+      await fn(nestCtx);
+    });
   }
 
   private handle(fn: MiddlewareHandler) {

@@ -152,14 +152,13 @@ export async function initProvider(
 }
 
 export async function getMergedMetas<T>(
-  target: InstanceType<Constructor>,
-  fn: ControllerMethod,
+  target: InstanceType<Constructor> | null,
+  fn: ControllerMethod | null,
   globalMetas: ExceptionFilters | NestGuards | NestUseInterceptors,
   metaKey: string | symbol,
 ): Promise<T[]> {
-  const classes = Reflect.getMetadata(metaKey, target) ||
-    [];
-  const fns = Reflect.getOwnMetadata(metaKey, fn) || [];
+  const classes = (target && Reflect.getMetadata(metaKey, target)) || [];
+  const fns = (fn && Reflect.getOwnMetadata(metaKey, fn)) || [];
   const filters = [
     ...globalMetas,
     ...classes,

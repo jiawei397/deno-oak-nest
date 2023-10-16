@@ -7,6 +7,7 @@ import {
 import {
   IRouter,
   MiddlewareHandler,
+  NotFoundHandler,
 } from "../src/interfaces/route.interface.ts";
 import { Application } from "../src/application.ts";
 
@@ -137,6 +138,10 @@ export class MockRouter implements IRouter {
     this.put("*", fn);
     this.delete("*", fn);
     this.patch("*", fn);
+  }
+
+  notFound(_fn: NotFoundHandler): void {
+    // empty
   }
 
   startServer() {
