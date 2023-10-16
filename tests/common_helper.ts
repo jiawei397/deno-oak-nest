@@ -83,56 +83,51 @@ export const createMockContext = (options: {
   };
 };
 
+type MethodType = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 export class MockRouter implements IRouter {
-  map: Map<"GET" | "POST" | "PUT" | "DELETE", Map<string, MiddlewareHandler>> =
-    new Map();
+  map: Map<MethodType, Map<string, MiddlewareHandler>> = new Map();
 
   routes(): void {
     // empty
+  }
+  private handle(path: string, fn: MiddlewareHandler, method: MethodType) {
+    let getMap = this.map.get(method);
+    if (!getMap) {
+      getMap = new Map<string, MiddlewareHandler>();
+      this.map.set(method, getMap);
+    }
+    getMap.set(path, fn);
   }
   get(
     path: string,
     fn: MiddlewareHandler,
   ) {
-    let getMap = this.map.get("GET");
-    if (!getMap) {
-      getMap = new Map<string, MiddlewareHandler>();
-      this.map.set("GET", getMap);
-    }
-    getMap.set(path, fn);
+    this.handle(path, fn, "GET");
   }
   post(
     path: string,
     fn: MiddlewareHandler,
   ) {
-    let postMap = this.map.get("POST");
-    if (!postMap) {
-      postMap = new Map<string, MiddlewareHandler>();
-      this.map.set("POST", postMap);
-    }
-    postMap.set(path, fn);
+    this.handle(path, fn, "POST");
   }
   put(
     path: string,
     fn: MiddlewareHandler,
   ) {
-    let putMap = this.map.get("PUT");
-    if (!putMap) {
-      putMap = new Map<string, MiddlewareHandler>();
-      this.map.set("PUT", putMap);
-    }
-    putMap.set(path, fn);
+    this.handle(path, fn, "PUT");
   }
   delete(
     path: string,
     fn: MiddlewareHandler,
   ) {
-    let deleteMap = this.map.get("DELETE");
-    if (!deleteMap) {
-      deleteMap = new Map<string, MiddlewareHandler>();
-      this.map.set("DELETE", deleteMap);
-    }
-    deleteMap.set(path, fn);
+    this.handle(path, fn, "DELETE");
+  }
+
+  patch(
+    path: string,
+    fn: MiddlewareHandler,
+  ) {
+    this.handle(path, fn, "PATCH");
   }
 
   use(fn: MiddlewareHandler) {
@@ -140,6 +135,7 @@ export class MockRouter implements IRouter {
     this.post("*", fn);
     this.put("*", fn);
     this.delete("*", fn);
+    this.patch("*", fn);
   }
 
   startServer() {
