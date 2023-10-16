@@ -10,6 +10,8 @@ export class NestResponse implements Response {
 
   constructor(context: HonoContext) {
     this.originContext = context;
+    this.status = context.res.status;
+    this.statusText = context.res.statusText;
   }
 
   getOriginalResponse<T>(): T {

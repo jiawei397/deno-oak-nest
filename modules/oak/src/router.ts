@@ -46,7 +46,7 @@ export class OakRouter implements IRouter {
   }
 
   use(fn: MiddlewareHandler) {
-    return this.router.use(this.handle(fn));
+    return this.app.use(this.handle(fn));
   }
 
   routes(): void {
