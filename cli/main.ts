@@ -3,6 +3,7 @@ import { Input, Select } from "cliffy/prompt/mod.ts";
 import { Command } from "cliffy/command/mod.ts";
 import { colors } from "cliffy/ansi/colors.ts";
 import { createProject } from "./src/new.ts";
+import { generateCommand } from "./src/generate.ts";
 
 const info = colors.bold.blue;
 
@@ -39,5 +40,6 @@ if (import.meta.main) {
     .meta("typescript", Deno.version.typescript)
     .default("new")
     .command("new n", createNewProject())
+    .command("generate g", generateCommand())
     .parse(Deno.args);
 }
