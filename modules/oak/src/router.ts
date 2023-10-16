@@ -46,10 +46,7 @@ export class OakRouter implements IRouter {
   }
 
   use(fn: MiddlewareHandler) {
-    return this.router.use(async (ctx, next) => {
-      const nestCtx = NestContext.getInstance(ctx);
-      await fn(nestCtx, next as Next);
-    });
+    return this.router.use(this.handle(fn));
   }
 
   routes(): void {

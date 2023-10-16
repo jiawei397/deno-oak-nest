@@ -39,26 +39,5 @@ export class NestContext implements Context {
     });
 
     context.response.body = body;
-    // // deal with body
-    // if (
-    //   body === null || body === undefined || body instanceof ReadableStream ||
-    //   body instanceof ArrayBuffer
-    // ) {
-    //   return context.body(body);
-    // }
-    // const contextType = this.response.headers.get("content-type");
-    // if (contextType && contextType.includes("application/json")) {
-    //   return context.json(body);
-    // }
-    // if (typeof body === "object") {
-    //   return context.json(body);
-    // }
-    // if (
-    //   contextType && contextType.includes("text/plain") &&
-    //   typeof body === "string"
-    // ) {
-    //   return context.text(body);
-    // }
-    // return context.html(body.toString()); // If want to return a number, boolean, it must set content-type to application/json self
   }
 }
