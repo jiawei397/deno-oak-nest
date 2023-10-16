@@ -24,9 +24,9 @@ Before start your app, you may set `deno.json` or `deno.jsonc` before:
   "strictPropertyInitialization": false
 },
 "imports": {
-  "@nest": "https://deno.land/x/deno_nest@3.0.0/mod.ts",
-  "@nest/hono": "https://deno.land/x/deno_nest@3.0.0/modules/hono/mod.ts",
-  "@nest/oak": "https://deno.land/x/deno_nest@3.0.0/modules/oak/mod.ts",
+  "@nest": "https://deno.land/x/deno_nest@v3.0.0/mod.ts",
+  "@nest/hono": "https://deno.land/x/deno_nest@v3.0.0/modules/hono/mod.ts",
+  "@nest/oak": "https://deno.land/x/deno_nest@v3.0.0/modules/oak/mod.ts",
   "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts"
 }
 ```
