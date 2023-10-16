@@ -6,6 +6,8 @@ export class NestRequest implements Request {
   originalRequest: OakRequest;
   originalContext: OakContext;
 
+  states: Record<string, any> = {};
+
   constructor(context: OakContext) {
     this.originalContext = context;
     this.originalRequest = context.request;

@@ -3,6 +3,7 @@ export interface Request {
   getOriginalRequest<T>(): T;
   get url(): string;
   get method(): string;
+  states: Record<string, any>;
   headers(): Record<string, string>;
   header(name: string): string | undefined;
   cookies(): Promise<Record<string, string>>;
