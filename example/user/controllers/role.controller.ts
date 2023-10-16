@@ -12,18 +12,21 @@ import {
   UseInterceptors,
 } from "../../../mod.ts";
 import { RoleService } from "../services/role.service.ts";
-import { Add } from "../../decorators/add.ts";
+import { UserId } from "../../decorators/user.ts";
 import { RoleInfoDto } from "../dtos/role.dto.ts";
 import { AsyncService } from "../../asyncModule/async.service.ts";
 import { TransformInterceptor } from "../../interceptor/transform.interceptor.ts";
 import { ErrorsInterceptor } from "../../interceptor/errors.interceptor.ts";
 import { CacheInterceptor } from "../../../modules/cache/mod.ts";
 import { LoggerService } from "../services/logger.service.ts";
+import { UseGuards } from "../../../src/guard.ts";
+import { AuthGuard } from "../../guards/auth.guard.ts";
 
 @Controller("/role", {
   alias: "/v1/role",
 })
 @UseInterceptors(CacheInterceptor)
+@UseGuards(AuthGuard)
 export class RoleController {
   constructor(
     private readonly roleService: RoleService,
@@ -41,13 +44,13 @@ export class RoleController {
 
   @Get("/info/:id")
   test(
-    @Add() name: string,
+    @UserId() userId: string,
     @Query() params: any,
     @Query("age") age: number,
   ) {
-    this.loggerService.info("info test", name, params, age);
+    this.loggerService.info("info test", userId, params, age);
     console.log(params, age, typeof age);
-    return "role info " + name + " - " +
+    return "role info " + userId + " - " +
       JSON.stringify(params);
   }
 
@@ -82,13 +85,11 @@ export class RoleController {
 
   @Post("/info")
   info(
-    @Add() name: string,
     @Body() params: RoleInfoDto,
     @Headers() headers: any,
     @Headers("host") host: any,
   ) {
-    console.log("ctx", name, params, headers, host);
-    // res.body = "role info old " + name;
-    return "role info " + name;
+    console.log("ctx", params, headers, host);
+    return "role info ";
   }
 }

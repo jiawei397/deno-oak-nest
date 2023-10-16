@@ -25,6 +25,7 @@ export class AuthGuard implements CanActivate {
       this.reflector.get<string[]>("roles", context),
     );
     await delay(10);
+    context.request.states.userId = "123"; // add userId to request state, then be used in decorator
     // throw new UnauthorizedException("Unauthorized");
     // throw new ForbiddenException("this is AuthGuard error message");
     return true;
