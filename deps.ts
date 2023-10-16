@@ -1,7 +1,7 @@
 export {
   Status,
   STATUS_TEXT,
-} from "https://deno.land/std@0.115.1/http/http_status.ts";
+} from "https://deno.land/std@0.194.0/http/http_status.ts";
 
 export { extname, resolve } from "https://deno.land/std@0.194.0/path/mod.ts";
 
