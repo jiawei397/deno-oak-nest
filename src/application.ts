@@ -404,7 +404,6 @@ export class Application {
     context: Context,
   ): Promise<boolean> {
     try {
-      const originStatus = context.response.status;
       const passed = await checkByGuard(
         target,
         fn,
@@ -412,17 +411,11 @@ export class Application {
         this.globalGuards,
       );
       if (!passed) {
-        if (context.response.status === originStatus) {
-          context.response.status = Status.Forbidden;
-        }
-        if (!context.response.body) {
-          context.response.body = new ForbiddenException("").response;
-        }
-        return false;
+        throw new ForbiddenException("");
       }
       return true;
     } catch (error) {
-      this.catchError(context, error);
+      await this.catchFilter(target, fn, context, error);
       return false;
     }
   }

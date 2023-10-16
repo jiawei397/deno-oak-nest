@@ -132,6 +132,7 @@ Deno.test("filter and guard", async (t) => {
   class GlobalFilter implements ExceptionFilter {
     async catch(exception: any, context: Context): Promise<void> {
       callStack.push(1);
+      context.response.body = "catched error";
     }
   }
 
@@ -163,7 +164,7 @@ Deno.test("filter and guard", async (t) => {
     }
   }
 
-  await t.step("guard work and not into filter", async () => {
+  await t.step("guard not pass and should into filter", async () => {
     const ctx = createMockContext({
       path: "/a",
       method: "GET",
@@ -172,11 +173,13 @@ Deno.test("filter and guard", async (t) => {
     app.addController(A);
     await mockCallMethod(app, ctx);
 
-    assertEquals(callStack, [2]);
+    assertEquals(callStack, [2, 1]);
+
+    assertEquals(ctx.response.body, "catched error");
     callStack.length = 0;
   });
 
-  await t.step("guard not work and error into filter", async () => {
+  await t.step("no guard and error into filter", async () => {
     const ctx = createMockContext({
       path: "/b",
       method: "GET",
