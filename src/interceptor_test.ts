@@ -286,6 +286,21 @@ Deno.test("interceptors with controller", async (t) => {
     }
   }
 
+  @Injectable()
+  class LogInterceptor implements NestInterceptor {
+    async intercept(ctx: Context, next: Next) {
+      callStack.push(5);
+      try {
+        await next();
+      } catch (error) {
+        callStack.push(6);
+        throw error;
+      } finally {
+        callStack.push(7);
+      }
+    }
+  }
+
   @UseInterceptors(GlobalInterceptor)
   @Controller("")
   class A {
@@ -299,6 +314,12 @@ Deno.test("interceptors with controller", async (t) => {
     b() {
       throw new Error("b error");
     }
+
+    @Get("/c")
+    @UseInterceptors(LogInterceptor)
+    c() {
+      throw new Error("c error");
+    }
   }
 
   await t.step("with error", async () => {
@@ -311,6 +332,12 @@ Deno.test("interceptors with controller", async (t) => {
 
     await mockCallMethod(app, ctx);
     assertEquals(callStack, [1]);
+    assertEquals(ctx.response.status, 500);
+    assertEquals(ctx.response.body, {
+      statusCode: 500,
+      message: "a error",
+      error: "Internal Server Error",
+    });
 
     callStack.length = 0;
   });
@@ -326,6 +353,26 @@ Deno.test("interceptors with controller", async (t) => {
 
     assertEquals(callStack, [1, 3, 4, 2]);
     assertEquals(ctx.response.body, "catched");
+
+    callStack.length = 0;
+  });
+
+  await t.step("with error and no catch, only log", async () => {
+    const ctx = createMockContext({
+      path: "/c",
+      method: "GET",
+    });
+    const app = createMockApp();
+    app.addController(A);
+    await mockCallMethod(app, ctx);
+
+    assertEquals(callStack, [1, 5, 6, 7]);
+    assertEquals(ctx.response.status, 500);
+    assertEquals(ctx.response.body, {
+      statusCode: 500,
+      message: "c error",
+      error: "Internal Server Error",
+    });
 
     callStack.length = 0;
   });
