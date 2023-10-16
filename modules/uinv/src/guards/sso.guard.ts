@@ -1,8 +1,8 @@
-// deno-lint-ignore-file no-explicit-any
 import { ajax } from "../tools/ajax.ts";
 import {
   Context,
   ForbiddenException,
+  Request,
   UnauthorizedException,
 } from "../../deps.ts";
 import type { CanActivate } from "../../deps.ts";
@@ -57,23 +57,23 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
     }
 
     private async getSSO(request: Request) {
-      const headers = request.headers;
+      const headers = request.headers();
       let userInfo: SSOUserInfo | undefined;
       const store = typeof cacheStore === "function"
         ? await cacheStore()
         : cacheStore;
-      if (headers.get("app") === "1") { // 这是服务端调用的
+      if (request.header("app") === "1") { // 这是服务端调用的
         const userInfos = await ajax.post<SSOUserInfo[]>(ssoUserInfosUrl, {
           user_ids: [1],
         }, {
           baseURL: ssoApi,
           headers: {
-            "user-agent": headers.get("user-agent") || "",
-            referer: headers.get("referer") || "",
-            "Authorization": headers.get("Authorization") || "",
+            "user-agent": request.header("user-agent") || "",
+            referer: request.header("referer") || "",
+            "Authorization": request.header("Authorization") || "",
           },
           cacheTimeout,
-          originHeaders: headers,
+          originHeaders: new Headers(headers),
           cacheStore: store,
           isDebug,
         });
@@ -84,12 +84,12 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
         userInfo = await ajax.get<SSOUserInfo>(ssoUserInfoUrl, null, {
           baseURL: ssoApi,
           headers: {
-            cookie: headers.get("cookie") || "",
-            "user-agent": headers.get("user-agent") || "",
-            referer: headers.get("referer") || "",
+            cookie: request.header("cookie") || "",
+            "user-agent": request.header("user-agent") || "",
+            referer: request.header("referer") || "",
           },
           cacheTimeout,
-          originHeaders: headers,
+          originHeaders: new Headers(headers),
           cacheStore: store,
           isDebug,
         });
@@ -103,14 +103,14 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
     }
 
     async validateRequest(context: Context) {
-      const request: any = context.request;
-      let userInfo: SSOUserInfo | undefined = request.userInfo;
+      const request = context.request;
+      let userInfo: SSOUserInfo | undefined = request.states.userInfo;
       if (userInfo && userInfo.internal) {
         options.formatUserInfo?.(userInfo, context); // 格式化用户信息，可以增加或修改用户信息
         logger.debug(
           "SSOGuard",
           `上一个guard中已经有用户信息：${
-            stringify(this.getSimpleUserInfo(request.userInfo))
+            stringify(this.getSimpleUserInfo(userInfo))
           }`,
         );
         return true;
@@ -158,7 +158,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
         "SSOGuard",
         `校验通过，得到用户信息为：${stringify(simpleInfo)}`,
       );
-      request.userInfo = userInfo;
+      request.states.userInfo = userInfo;
       return true;
     }
   }

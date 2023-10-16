@@ -1,7 +1,11 @@
 // deno-lint-ignore-file no-explicit-any
 import { ajax } from "../tools/ajax.ts";
-import type { CanActivate } from "../../deps.ts";
-import { Context, Request, UnauthorizedException } from "../../deps.ts";
+import {
+  type CanActivate,
+  type Context,
+  type Request,
+  UnauthorizedException,
+} from "../../deps.ts";
 import type { AuthGuardOptions, Token, User } from "../types.ts";
 import { getFirstOriginByHost, isDist } from "../tools/utils.ts";
 
@@ -31,9 +35,9 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
 
     async validateRequest(context: Context) {
       const request = context.request;
-      const headers = request.headers;
+      const headers = new Headers(request.headers());
       let b;
-      if (headers.get(isPrivateTokenField)) {
+      if (headers.has(isPrivateTokenField)) {
         logger.debug(
           "AuthGuard",
           `正在使用private_token校验，headers中${isPrivateTokenField}值为${
@@ -53,9 +57,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
 
     private async checkPrivateToken(
       headers: Headers,
-      req: Request & {
-        userInfo?: User;
-      },
+      req: Request,
     ): Promise<boolean | User> {
       const userVal = headers.get(checkUserField);
       if (!userVal) {
@@ -80,7 +82,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
             logger.info(
               `${userVal}使用private_token校验通过！[user-agent]是${userAgent}`,
             );
-            req.userInfo = result;
+            req.states.userInfo = result;
             return true;
           } else {
             logger.warn(
@@ -117,11 +119,11 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
     }
 
     async findToken(context: Context) {
-      let token: string | null | undefined = await context.cookies.get(
+      let token: string | null | undefined = await context.request.cookie(
         tokenField,
       );
       if (isDebug && !token) { //开发时，找不到再到headers中找
-        token = context.request.headers.get(tokenField);
+        token = context.request.header(tokenField);
       }
       if (token) {
         token = decodeURIComponent(token);
@@ -167,7 +169,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
         }
         const find = await this.getTokenInfoInDb(
           token,
-          context.request.headers,
+          headers,
         );
         if (!find) {
           throw new Error("checkExtTokenInfo返回错误");
