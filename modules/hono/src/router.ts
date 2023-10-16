@@ -56,10 +56,7 @@ export class HonoRouter implements IRouter {
   }
 
   use(fn: MiddlewareHandler) {
-    return this.app.use("*", async (ctx, next) => {
-      const nestCtx = NestContext.getInstance(ctx);
-      await fn(nestCtx, next);
-    });
+    return this.app.use("*", this.handle(fn));
   }
 
   routes(): void {
