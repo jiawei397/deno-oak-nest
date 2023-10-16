@@ -1,4 +1,4 @@
-import { applyEdits, modify, parse as parseJson } from "jsonc";
+import { applyEdits, modify } from "jsonc";
 import { decompress } from "zip";
 import { join } from "std/path/mod.ts";
 
@@ -88,11 +88,8 @@ async function writeDenoJson(name: string, denoJsonPath: string) {
   const realPath = join(name, denoJsonPath);
   let text = await Deno.readTextFile(realPath);
   text = text.replace(templateName, name);
-  const pkg: { version: string } = parseJson(text);
   const result = modifyText(text, {
     name,
-    "version": "1.0.0",
-    "template_version": pkg.version,
   });
   await Deno.writeTextFile(realPath, result);
 }
