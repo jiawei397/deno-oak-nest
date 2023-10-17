@@ -30,6 +30,7 @@ export class OakRouter implements IRouter {
       }
       const nestCtx = NestContext.getInstance(ctx);
       await fn(nestCtx);
+      return nestCtx.render();
     });
   }
 

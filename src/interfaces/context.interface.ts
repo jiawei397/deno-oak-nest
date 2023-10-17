@@ -1,4 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
+import { Status } from "../../deps.ts";
+
 export interface Request {
   getOriginalRequest<T>(): T;
   get url(): string;
@@ -28,8 +30,8 @@ export interface Response {
   getOriginalResponse<T>(): T;
   body: string | object | number | boolean | null;
   headers: Headers;
-  status: number;
-  statusText: string;
+  status: Status;
+  readonly statusText: string;
 }
 
 export interface Context {
