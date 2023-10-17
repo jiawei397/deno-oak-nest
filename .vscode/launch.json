@@ -6,6 +6,23 @@
   "configurations": [
     {
       "request": "launch",
+      "name": "dev",
+      "type": "node",
+      "program": "${workspaceFolder}/example/main.ts",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--inspect-brk",
+        "-A",
+        "--config",
+        "deno.json",
+        "--unstable"
+      ],
+      "attachSimplePort": 9229
+    },
+    {
+      "request": "launch",
       "name": "cli",
       "type": "node",
       "program": "${workspaceFolder}/cli/mod.ts",
@@ -17,23 +34,6 @@
         "-A",
         "--config",
         "cli/deno.json",
-        "--unstable"
-      ],
-      "attachSimplePort": 9229
-    },
-    {
-      "request": "launch",
-      "name": "deno",
-      "type": "node",
-      "program": "${workspaceFolder}/example/main.ts",
-      "cwd": "${workspaceFolder}",
-      "runtimeExecutable": "deno",
-      "runtimeArgs": [
-        "run",
-        "--inspect-brk",
-        "-A",
-        "--config",
-        "deno.json",
         "--unstable"
       ],
       "attachSimplePort": 9229
