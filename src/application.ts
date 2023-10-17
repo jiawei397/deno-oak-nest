@@ -237,7 +237,11 @@ export class Application {
 
   get(path: string, middleware: NestMiddleware) {
     this.router.get(path, async (ctx, next) => {
-      await middleware(ctx.request, ctx.response, next);
+      try {
+        await middleware(ctx.request, ctx.response, next);
+      } catch (error) {
+        await this.catchFilter(null, null, ctx, error);
+      }
     });
   }
 

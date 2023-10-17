@@ -1,7 +1,8 @@
 {
   "lock": false,
   "tasks": {
-    "dev": "deno run --watch -A example/main.ts"
+    "dev": "deno run --watch -A example/main.ts",
+    "start": "deno run -A example/main.ts"
   },
   "compilerOptions": {
     "removeComments": true,
@@ -11,6 +12,8 @@
   },
   "imports": {
     "@nest": "../../mod.ts",
-    "@nest/oak": "./mod.ts"
+    "@nest/oak": "./mod.ts",
+    "@nest/uinv": "../uinv/mod.ts",
+    "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts"
   }
 }

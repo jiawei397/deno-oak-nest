@@ -1,3 +1,4 @@
+import { Status } from "../../../deps.ts";
 import { Context } from "../../../src/interfaces/context.interface.ts";
 import { OakContext } from "../deps.ts";
 import { NestRequest } from "./request.ts";
@@ -17,13 +18,16 @@ export class NestContext implements Context {
     this.response = new NestResponse(context);
   }
 
-  static getInstance(context: OakContext): NestContext {
+  static getInstance(context: OakContext, status?: Status): NestContext {
     context.state;
     const nestContext = context.state[nestContextKey];
     if (nestContext) {
       return nestContext;
     }
     const newContext = new NestContext(context);
+    if (status) {
+      newContext.response.status = status;
+    }
     context.state[nestContextKey] = newContext;
     return newContext;
   }
