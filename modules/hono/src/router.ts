@@ -71,6 +71,7 @@ export class HonoRouter implements IRouter {
   notFound(fn: NotFoundHandler): void {
     this.app.notFound(async (ctx) => {
       const nestCtx = NestContext.getInstance(ctx);
+      nestCtx.response.status = 404;
       await fn(nestCtx);
       return nestCtx.render();
     });
