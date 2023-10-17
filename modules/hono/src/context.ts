@@ -1,3 +1,4 @@
+import { Status } from "../../../deps.ts";
 import { Context } from "../../../src/interfaces/context.interface.ts";
 import { HonoContext } from "../deps.ts";
 import { NestRequest } from "./request.ts";
@@ -17,13 +18,19 @@ export class NestContext implements Context {
     this.response = new NestResponse(context);
   }
 
-  static getInstance(context: HonoContext): NestContext {
+  static getInstance(
+    context: HonoContext,
+    defaultStatus?: Status,
+  ): NestContext {
     const nestContext = context.get(nestContextKey);
     if (nestContext) {
       return nestContext;
     }
     const newContext = new NestContext(context);
     context.set(nestContextKey, newContext);
+    if (defaultStatus) {
+      newContext.response.status = defaultStatus;
+    }
     return newContext;
   }
 

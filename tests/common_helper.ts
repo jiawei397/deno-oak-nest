@@ -11,6 +11,17 @@ import {
 } from "../src/interfaces/route.interface.ts";
 import { Application } from "../src/application.ts";
 
+export async function findUnusedPort(port: number) {
+  try {
+    const conn = await Deno.connect({ port });
+    conn.close();
+    return findUnusedPort(port + 1);
+  } catch {
+    // console.debug(`find unused port: ${port}`);
+    return port;
+  }
+}
+
 export const createMockContext = (options: {
   path: string;
   method: string;

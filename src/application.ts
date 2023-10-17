@@ -440,8 +440,8 @@ export class Application {
     const err = error instanceof HttpException
       ? error
       : new InternalServerErrorException(error.message || error);
-    context.response.status = err.status;
     context.response.body = err.response;
+    context.response.status = err.status;
   }
 
   protected async routes() {
@@ -513,7 +513,9 @@ export class Application {
               const next = async () => {
                 const result = await fn.apply(instance, args);
                 if (
-                  result !== undefined && context.response.body === undefined
+                  result !== undefined &&
+                  (context.response.body === null ||
+                    context.response.body === undefined)
                 ) {
                   context.response.body = result;
                 }
