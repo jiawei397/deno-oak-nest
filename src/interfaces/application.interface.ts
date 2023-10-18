@@ -7,6 +7,10 @@ export type ApiPrefixOptions = {
   exclude?: (string | RegExp)[];
 };
 
+/**
+ * The options of the application
+ * @param [onError] the error handler not tested ok
+ */
 export type ListenOptions = Deno.ServeOptions;
 
 /**

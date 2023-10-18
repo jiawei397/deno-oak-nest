@@ -1,4 +1,4 @@
-import { resolve } from "../../../deps.ts";
+import { format, green, resolve, yellow } from "../../../deps.ts";
 import { join } from "../../../src/application.ts";
 import {
   ListenOptions,
@@ -89,7 +89,13 @@ export class OakRouter implements IRouter {
       if (errorCallback) {
         errorCallback(err);
       } else {
-        console.error(err);
+        console.error(
+          yellow("[Nest]"),
+          green(format(new Date(), "yyyy-MM-dd HH:mm:ss")),
+          err,
+        );
+        // Deno.exit(0);
+        // Deno.kill(Deno.pid, "SIGINT");
       }
     });
   }
