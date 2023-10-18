@@ -187,6 +187,9 @@ Deno.test("Query", async (t) => {
     g: "true",
     i: "dd",
     j: "5",
+    m: "aa,bb",
+    n: "1,2",
+    o: "true,false",
   };
   const mockPath = "/a?a=b&c=4&f=false&g=true&i=dd&j=5";
   const mockErrorPath = "/d?a=b&c=30";
@@ -220,6 +223,15 @@ Deno.test("Query", async (t) => {
     k: boolean;
 
     l: number;
+
+    @Property("string")
+    m: string[];
+
+    @Property("number")
+    n: number[];
+
+    @Property("boolean")
+    o: boolean[];
   }
 
   // deno-lint-ignore no-unused-vars
@@ -249,6 +261,9 @@ Deno.test("Query", async (t) => {
       @Query("f") f: boolean,
       @Query("g") g: boolean,
       @Query("h") h: boolean,
+      @Query("m") m: string[],
+      @Query("n") n: number[],
+      @Query("o") o: boolean[],
       @Query() query2: QueryDto,
     ) {
       callStack.push(1);
@@ -265,6 +280,21 @@ Deno.test("Query", async (t) => {
         undefined,
         "if no parsed, should be undefined instead of false",
       );
+      assertEquals(m, ["aa", "bb"]);
+      assert(Array.isArray(m));
+
+      assertEquals(n, [1, 2]);
+      assert(Array.isArray(n));
+      n.forEach((item) => {
+        assert(typeof item === "number");
+      });
+
+      assertEquals(o, [true, false]);
+      assert(Array.isArray(o));
+      o.forEach((item) => {
+        assert(typeof item === "boolean");
+      });
+
       // query2 is translated
       assert(typeof query2.c === "number");
       assertEquals(query2.c, Number(mockQuery.c));
