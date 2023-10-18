@@ -103,10 +103,6 @@ export async function initProvider(
   scope = Scope.DEFAULT,
   cache = globalFactoryCaches,
 ) {
-  if (!item) {
-    return;
-  }
-
   if (item instanceof Function) {
     return Factory(item, scope, cache);
   }
