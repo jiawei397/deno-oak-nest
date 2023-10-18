@@ -935,11 +935,11 @@ export function createCommonTests(
     sanitizeOps: false,
     sanitizeResources: false,
   }, async (t) => {
-    const callStack: number[] = [];
     @Module({})
     class AppModule {}
 
     await t.step("method and url", async () => {
+      const callStack: number[] = [];
       const { app, baseUrl } = await createApp(AppModule);
       const baseURL = new URL(baseUrl);
 
@@ -963,6 +963,7 @@ export function createCommonTests(
     });
 
     await t.step("query", async () => {
+      const callStack: number[] = [];
       const { app, baseUrl } = await createApp(AppModule);
       const baseURL = new URL(baseUrl);
 
@@ -973,6 +974,7 @@ export function createCommonTests(
         assertEquals(url.pathname, baseURL.pathname);
         assertEquals(req.queries("a"), ["1", "2"]);
         assertEquals(req.queries("b"), ["2"]);
+        assertEquals(req.queries("c"), []);
         assertEquals(req.query("a"), "1");
         assertEquals(req.query("b"), "2");
 
@@ -992,6 +994,7 @@ export function createCommonTests(
     });
 
     await t.step("params", async () => {
+      const callStack: number[] = [];
       const { app, baseUrl } = await createApp(AppModule);
 
       app.get("/user/:id", (req, res) => {
@@ -1011,7 +1014,8 @@ export function createCommonTests(
       await app.close();
     });
 
-    await t.step("cookies", async () => {
+    await t.step("cookies and headers", async () => {
+      const callStack: number[] = [];
       const { app, baseUrl } = await createApp(AppModule);
 
       app.get("/", async (req, res) => {
@@ -1020,12 +1024,20 @@ export function createCommonTests(
         assertEquals(await req.cookie("a"), "1");
         assertEquals(await req.cookie("b"), "2");
 
+        const headers = req.headers();
+        assertEquals(headers.a, "3");
+        assertEquals(headers.b, "4");
+        assertEquals(req.header("a"), "3");
+        assertEquals(req.header("b"), "4");
+
         res.body = "hello world";
       });
 
       const res = await fetch(`${baseUrl}`, {
         headers: {
           cookie: "a=1;b=2",
+          a: "3",
+          b: "4",
         },
       });
       assertEquals(res.status, 200);
@@ -1037,6 +1049,8 @@ export function createCommonTests(
     });
 
     await t.step("form", async () => {
+      const callStack: number[] = [];
+
       @Controller("")
       class A {
         @Post("/")
@@ -1069,6 +1083,7 @@ export function createCommonTests(
     });
 
     await t.step("formdata", async () => {
+      const callStack: number[] = [];
       const data = new FormData();
       data.append("a", "1");
       data.append("b", "2");
@@ -1079,6 +1094,7 @@ export function createCommonTests(
         @Post("/")
         post(@Form() body: any) {
           callStack.push(1);
+          // console.log(body);
           assert(body);
           assertEquals(body.a, "1");
           assertEquals(body.b, "2");
