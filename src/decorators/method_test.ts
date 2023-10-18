@@ -21,6 +21,8 @@ import {
   Cookies,
   getTransNumOrBoolOrArray,
   Headers,
+  Host,
+  Ip,
   MethodName,
   Params,
   Property,
@@ -680,5 +682,61 @@ Deno.test("transAndValidateByCls", async (t) => {
         "status must be a valid enum value",
       );
     }
+  });
+});
+
+Deno.test("ip and host", async (t) => {
+  const callStack: number[] = [];
+  const mockedIP = "102.10.1.1";
+  const mockedHost = "baidu.com";
+
+  @Controller("")
+  class A {
+    @Get("/a")
+    test(@Ip() ip: string) {
+      callStack.push(1);
+      assertEquals(ip, mockedIP);
+    }
+
+    @Get("/b")
+    host(@Host() host: string) {
+      callStack.push(2);
+      assertEquals(host, mockedHost);
+    }
+  }
+
+  const app = createMockApp();
+  app.addController(A);
+
+  await t.step("ip", async () => {
+    const ctx = createMockContext({
+      path: "/a",
+      method: "GET",
+      reqHeaders: {
+        "x-forwarded-for": mockedIP,
+      },
+    });
+
+    await mockCallMethod(app, ctx);
+
+    assertEquals(callStack, [1]);
+
+    callStack.length = 0;
+  });
+
+  await t.step("host", async () => {
+    const ctx = createMockContext({
+      path: "/b",
+      method: "GET",
+      reqHeaders: {
+        host: mockedHost,
+      },
+    });
+
+    await mockCallMethod(app, ctx);
+
+    assertEquals(callStack, [2]);
+
+    callStack.length = 0;
   });
 });
