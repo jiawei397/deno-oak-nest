@@ -17,7 +17,7 @@
     "test": "deno test --allow-env --allow-net --parallel --ignore=example --coverage=cov_profile",
     "cache": "deno cache --lock deno.lock --unstable --lock-write deps.ts",
     "coverage": "deno coverage --unstable --lcov ./cov_profile",
-    "coverage:html": "deno task test && deno task coverage > cov.lcov && genhtml -o cov_profile/html cov.lcov",
+    "coverage:html": "rm -rf cov_profile && deno task test && deno task coverage > cov.lcov && genhtml -o cov_profile/html cov.lcov",
     "log": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
   },
   "compilerOptions": {

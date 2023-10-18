@@ -19,6 +19,7 @@ import {
   Body,
   ControllerName,
   Cookies,
+  Form,
   getTransNumOrBoolOrArray,
   Headers,
   Host,
@@ -736,6 +737,65 @@ Deno.test("ip and host", async (t) => {
     await mockCallMethod(app, ctx);
 
     assertEquals(callStack, [2]);
+
+    callStack.length = 0;
+  });
+});
+
+Deno.test("form", async (t) => {
+  const callStack: number[] = [];
+  const mockedData = new FormData();
+  mockedData.set("a", "b");
+  mockedData.set("c", "true");
+  mockedData.set("d", "true");
+  mockedData.set("e", "1");
+
+  class Dto {
+    a: string;
+
+    @Property()
+    c: boolean;
+
+    d: boolean;
+
+    @Property()
+    e: number;
+  }
+
+  @Controller("")
+  class A {
+    @Post("/a")
+    test(@Form() form: Dto) {
+      callStack.push(1);
+      assert(form instanceof Dto);
+      assertEquals(form.a, "b");
+      assertEquals(form.c, true);
+      assert(typeof form.c === "boolean");
+
+      assertEquals(form.d, true);
+      assert(typeof form.d === "string");
+
+      assertEquals(form.e, 1);
+      assert(typeof form.e === "number");
+    }
+  }
+
+  const app = createMockApp();
+  app.addController(A);
+
+  await t.step("only property can trans bool and number", async () => {
+    const ctx = createMockContext({
+      path: "/a",
+      method: "POST",
+      body: {
+        type: "form-data",
+        value: mockedData,
+      },
+    });
+
+    await mockCallMethod(app, ctx);
+
+    assertEquals(callStack, [1]);
 
     callStack.length = 0;
   });
