@@ -7,7 +7,14 @@ import {
 import { Reflect } from "../../deps.ts";
 import { Injectable } from "../decorators/inject.ts";
 import { Scope } from "../interfaces/scope-options.interface.ts";
-import { Factory, initProvider, META_CONTAINER_KEY } from "./class.factory.ts";
+import {
+  clearAllFactoryCaches,
+  Factory,
+  globalFactoryCaches,
+  initProvider,
+  META_CONTAINER_KEY,
+  setFactoryCaches,
+} from "./class.factory.ts";
 
 Deno.test("Factory without providers", async () => {
   class A {
@@ -152,4 +159,12 @@ Deno.test("initProvider", async () => {
     const b = await initProvider(provider);
     assertEquals(b, provider.useFactory());
   }
+});
+
+Deno.test("caches", () => {
+  setFactoryCaches("a", "b");
+  assertEquals(globalFactoryCaches.get("a"), "b");
+
+  clearAllFactoryCaches();
+  assertEquals(globalFactoryCaches.size, 0);
 });
