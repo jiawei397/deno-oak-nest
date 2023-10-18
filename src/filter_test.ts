@@ -22,6 +22,7 @@ import type {
 } from "./interfaces/mod.ts";
 import { Injectable } from "./decorators/inject.ts";
 import { UseInterceptors } from "./interceptor.ts";
+import { BadRequestException, HttpException } from "./exceptions.ts";
 
 Deno.test("UseFilter sort", async (t) => {
   const callStack: number[] = [];
@@ -343,4 +344,83 @@ Deno.test("filter and interceptor", async (t) => {
       callStack.length = 0;
     },
   );
+});
+
+Deno.test("multiple filter", async (t) => {
+  const callStack: number[] = [];
+
+  @Catch()
+  class GlobalFilter implements ExceptionFilter {
+    async catch(exception: any, context: Context): Promise<void> {
+      callStack.push(1);
+      assertEquals(exception.message, "http error");
+      context.response.body = "catched";
+    }
+  }
+
+  @Catch(HttpException)
+  class HttpExceptionFilter implements ExceptionFilter {
+    async catch(exception: any, context: Context): Promise<void> {
+      callStack.push(2);
+      throw new Error("http error");
+    }
+  }
+
+  @Catch(HttpException)
+  class HttpExceptionFilter2 implements ExceptionFilter {
+    async catch(exception: any, context: Context): Promise<void> {
+      callStack.push(5);
+      context.response.body = "catched2";
+    }
+  }
+
+  @UseFilters(GlobalFilter)
+  @Controller("")
+  class A {
+    @Get("/a")
+    @UseFilters(HttpExceptionFilter)
+    a() {
+      callStack.push(3);
+      throw new BadRequestException("a error");
+    }
+
+    @Get("/b")
+    @UseFilters(HttpExceptionFilter2)
+    b() {
+      callStack.push(4);
+      throw new BadRequestException("b error");
+    }
+  }
+
+  await t.step("first filter throws error", async () => {
+    const ctx = createMockContext({
+      path: "/a",
+      method: "GET",
+    });
+    const app = createMockApp();
+    app.addController(A);
+    await mockCallMethod(app, ctx);
+
+    assertEquals(callStack, [3, 2, 1]);
+    assertEquals(ctx.response.body, "catched");
+    assertEquals(ctx.response.status, 200);
+
+    callStack.length = 0;
+  });
+
+  await t.step("first filter normal catched", async () => {
+    const ctx = createMockContext({
+      path: "/b",
+      method: "GET",
+    });
+    const app = createMockApp();
+    app.addController(A);
+    await mockCallMethod(app, ctx);
+
+    assertEquals(callStack, [4, 5]);
+    assertEquals(ctx.response.body, "catched2");
+    assertEquals(ctx.response.status, 200);
+
+    callStack.length = 0;
+  });
 });
