@@ -40,6 +40,12 @@ test("parseSearch", async (t) => {
     assertEquals(obj, { a: ["1", "3"], b: "2" });
   });
 
+  await t.step("three a", () => {
+    const obj = parseSearch("a=1&b=2&a=3&a=4");
+    assert(obj);
+    assertEquals(obj, { a: ["1", "3", "4"], b: "2" });
+  });
+
   await t.step("should parse correctly", () => {
     const search = "key1=value1&key2=value2&key2=value3";
 
@@ -63,6 +69,17 @@ test("parseSearchParams", async (t) => {
     });
   });
 
+  await t.step("three key1", () => {
+    const searchParams = new URLSearchParams(
+      "key1=value1&key2=value2&key2=value3&key2=value4",
+    );
+    const result = parseSearchParams(searchParams);
+    assertEquals(result, {
+      key1: "value1",
+      key2: ["value2", "value3", "value4"],
+    });
+  });
+
   await t.step("should handle empty URLSearchParams", () => {
     const searchParams = new URLSearchParams("");
     const result = parseSearchParams(searchParams);
@@ -81,7 +98,6 @@ test("parseSearchParams", async (t) => {
   await t.step("should handle URLSearchParams with special characters", () => {
     const searchParams = new URLSearchParams("key1=%20%26%3D%2B&key2=%3F");
     const result = parseSearchParams(searchParams);
-    console.log(result);
 
     assertEquals(result, {
       key1: decodeURIComponent("%20%26%3D%2B"),
@@ -153,7 +169,7 @@ Deno.test("getReadableStream should return a readable stream with the given mess
   const message = "Hello, world!";
   const { body, write, end } = getReadableStream();
   write(message);
-  end();
+  end("end");
 
   const reader = body.getReader();
   const result = await reader.read();
