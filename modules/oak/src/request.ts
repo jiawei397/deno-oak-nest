@@ -1,4 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
+import { BodyParamValidationException } from "../../../src/exceptions.ts";
 import { Request } from "../../../src/interfaces/context.interface.ts";
 import { OakContext, OakRequest } from "../deps.ts";
 
@@ -40,19 +41,18 @@ export class NestRequest implements Request {
     const contentType = this.originalRequest.headers.get("content-type");
     if (
       !contentType ||
-      !["application/x-www-form-urlencoded", "multipart/form-data"].includes(
-        contentType,
-      )
+      (!contentType.includes("multipart/form-data") &&
+        !contentType.includes("application/x-www-form-urlencoded"))
     ) {
       throw new Error("Invalid content type");
     }
-    if (contentType === "application/x-www-form-urlencoded") {
+    if (contentType.includes("application/x-www-form-urlencoded")) {
       const body = this.originalRequest.body({ type: "form" });
       const result = await body.value;
       const form = new FormData();
-      Object.keys(result).forEach((key) => {
-        form.set(key, result.get(key)!);
-      });
+      for (const [key, value] of result.entries()) {
+        form.set(key, value);
+      }
       return form;
     }
     const body = this.originalRequest.body({ type: "form-data" }).value;
@@ -61,14 +61,27 @@ export class NestRequest implements Request {
     Object.keys(result.fields).forEach((key) => {
       formData.set(key, result.fields[key]);
     });
-    result.files &&
-      result.files.forEach((file) => {
+    //
+    // content:  undefined
+    // contentType: 'application/octet-stream'
+    // filename: '/var/folders/sq/0jfgh1js6cs8_31df82hx3jw0000gn/T/db9658e7/9b58f3ae6093b7f1a5289a9eaf1727a6e143c693.bin'
+    // name: 'c'
+    // originalName: 'hello.txt'
+    if (result.files) {
+      await Promise.all(result.files.map(async (file) => {
+        const content = file.content ||
+          (file.filename ? await Deno.readFile(file.filename) : null);
+        if (!content) {
+          throw new BodyParamValidationException("file content is null");
+        }
         formData.append(
-          "files",
-          new Blob([file.content!], { type: "application/octet-stream" }),
-          file.name, // TODO: has other filenames
+          file.name,
+          new Blob([content], { type: "application/octet-stream" }),
+          file.originalName,
         );
-      });
+      }));
+    }
+
     return formData;
   }
 

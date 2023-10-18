@@ -6,6 +6,7 @@ import {
   Controller,
   Delete,
   ExceptionFilter,
+  Form,
   Get,
   Injectable,
   IRouterConstructor,
@@ -20,7 +21,14 @@ import {
 import { Module } from "@nest";
 import { Max, Min } from "class_validator";
 import { findUnusedPort } from "./common_helper.ts";
-import { assert, assertEquals, delay, it } from "../test_deps.ts";
+import {
+  assert,
+  assertEquals,
+  assertNotEquals,
+  assertNotStrictEquals,
+  delay,
+  it,
+} from "../test_deps.ts";
 
 let firstPort = 8000;
 
@@ -919,6 +927,183 @@ export function createCommonTests(
         callStack.length = 0;
       });
 
+      await app.close();
+    });
+  });
+
+  Deno.test("request methods", {
+    sanitizeOps: false,
+    sanitizeResources: false,
+  }, async (t) => {
+    const callStack: number[] = [];
+    @Module({})
+    class AppModule {}
+
+    await t.step("method and url", async () => {
+      const { app, baseUrl } = await createApp(AppModule);
+      const baseURL = new URL(baseUrl);
+
+      app.get("/", async (req, res) => {
+        callStack.push(1);
+        assertEquals(req.method, "GET");
+        const url = new URL(req.url);
+        assertEquals(url.pathname, baseURL.pathname);
+        assert(await req.text() === "");
+        res.body = "hello world";
+      });
+
+      const res = await fetch(`${baseUrl}`);
+      assertEquals(res.status, 200);
+      assertEquals(await res.text(), "hello world");
+
+      assertEquals(callStack, [1]);
+      callStack.length = 0;
+
+      await app.close();
+    });
+
+    await t.step("query", async () => {
+      const { app, baseUrl } = await createApp(AppModule);
+      const baseURL = new URL(baseUrl);
+
+      app.get("/", async (req, res) => {
+        callStack.push(1);
+        assertEquals(req.method, "GET");
+        const url = new URL(req.url);
+        assertEquals(url.pathname, baseURL.pathname);
+        assertEquals(req.queries("a"), ["1", "2"]);
+        assertEquals(req.queries("b"), ["2"]);
+        assertEquals(req.query("a"), "1");
+        assertEquals(req.query("b"), "2");
+
+        const originalRequest = await req.getOriginalRequest();
+        assertNotStrictEquals(originalRequest, req);
+
+        res.body = "hello world";
+      });
+
+      const res = await fetch(`${baseUrl}?a=1&b=2&a=2`);
+      assertEquals(res.status, 200);
+      assertEquals(await res.text(), "hello world");
+
+      assertEquals(callStack, [1]);
+      callStack.length = 0;
+      await app.close();
+    });
+
+    await t.step("params", async () => {
+      const { app, baseUrl } = await createApp(AppModule);
+
+      app.get("/user/:id", (req, res) => {
+        callStack.push(1);
+        assertEquals(req.param("id"), "1");
+        assertEquals(req.params(), { id: "1" });
+
+        res.body = "hello world";
+      });
+
+      const res = await fetch(`${baseUrl}/user/1`);
+      assertEquals(res.status, 200);
+      assertEquals(await res.text(), "hello world");
+
+      assertEquals(callStack, [1]);
+      callStack.length = 0;
+      await app.close();
+    });
+
+    await t.step("cookies", async () => {
+      const { app, baseUrl } = await createApp(AppModule);
+
+      app.get("/", async (req, res) => {
+        callStack.push(1);
+        assertEquals(await req.cookies(), { a: "1", b: "2" });
+        assertEquals(await req.cookie("a"), "1");
+        assertEquals(await req.cookie("b"), "2");
+
+        res.body = "hello world";
+      });
+
+      const res = await fetch(`${baseUrl}`, {
+        headers: {
+          cookie: "a=1;b=2",
+        },
+      });
+      assertEquals(res.status, 200);
+      assertEquals(await res.text(), "hello world");
+
+      assertEquals(callStack, [1]);
+      callStack.length = 0;
+      await app.close();
+    });
+
+    await t.step("form", async () => {
+      @Controller("")
+      class A {
+        @Post("/")
+        post(@Form() body: any) {
+          callStack.push(1);
+          return body;
+        }
+      }
+      @Module({ controllers: [A] })
+      class AppModule {}
+
+      const app = await NestFactory.create(AppModule, Router);
+      const port = await getPort();
+      app.listen({ port });
+      await delay(100);
+
+      const res = await fetch(`http://localhost:${port}/`, {
+        method: "POST",
+        body: new URLSearchParams({ a: "1", b: "2" }),
+        headers: {
+          "content-type": "application/x-www-form-urlencoded",
+        },
+      });
+      assertEquals(callStack, [1]);
+      assertEquals(res.status, 200);
+      assertEquals(await res.json(), { a: "1", b: "2" });
+
+      callStack.length = 0;
+      await app.close();
+    });
+
+    await t.step("formdata", async () => {
+      const data = new FormData();
+      data.append("a", "1");
+      data.append("b", "2");
+      data.append("c", new Blob(["hello world"]), "hello.txt");
+
+      @Controller("")
+      class A {
+        @Post("/")
+        post(@Form() body: any) {
+          callStack.push(1);
+          assert(body);
+          assertEquals(body.a, "1");
+          assertEquals(body.b, "2");
+          assert(body.c instanceof File);
+          assertEquals(body.c.name, "hello.txt");
+          return "hello world";
+        }
+      }
+      @Module({ controllers: [A] })
+      class AppModule {}
+
+      const app = await NestFactory.create(AppModule, Router);
+      const port = await getPort();
+      app.listen({ port });
+      await delay(100);
+
+      const res = await fetch(`http://localhost:${port}/`, {
+        method: "POST",
+        body: data,
+      });
+      assertEquals(res.status, 200);
+      assertEquals(await res.text(), "hello world");
+      assertEquals(callStack, [1]);
+
+      callStack.length = 0;
       await app.close();
     });
   });
