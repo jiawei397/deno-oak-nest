@@ -88,7 +88,7 @@ Deno.test("Factory with providers", async () => {
   );
 });
 
-Deno.test("initProvider", async () => {
+Deno.test("initProvider", async (t) => {
   class A {
   }
 
@@ -101,7 +101,7 @@ Deno.test("initProvider", async () => {
   const d = await initProvider(A, Scope.TRANSIENT);
   assert(d !== a);
 
-  { // useExisting
+  await t.step("useExisting", async () => {
     const provider = {
       provide: "a",
       useExisting: A,
@@ -123,18 +123,18 @@ Deno.test("initProvider", async () => {
     await assertRejects(
       () => initProvider(provider3),
     ); // Cannot find provider for "d".
-  }
+  });
 
-  { // use value
+  await t.step("useValue", async () => {
     const provider = {
       provide: "a",
       useValue: "b",
     };
     const b = await initProvider(provider);
     assertEquals(b, provider.useValue);
-  }
+  });
 
-  { // use class
+  await t.step("useClass", async () => {
     const provider = {
       provide: "a",
       useClass: A,
@@ -149,16 +149,49 @@ Deno.test("initProvider", async () => {
     };
     const e = await initProvider(provider2);
     assert(e instanceof B);
-  }
+  });
 
-  { // use factory
+  await t.step("useFactory", async () => {
     const provider = {
       provide: "a",
       useFactory: () => "b",
     };
     const b = await initProvider(provider);
     assertEquals(b, provider.useFactory());
-  }
+  });
+
+  await t.step("useFactory with inject", async () => {
+    const callStack: number[] = [];
+    const provider = {
+      provide: "a",
+      useFactory: (b: string) => {
+        callStack.push(1);
+        assertEquals(b, "b");
+        return "c";
+      },
+      inject: ["b"],
+    };
+    const res = await initProvider(provider);
+    assertEquals(res, "c");
+    assertEquals(callStack, [1]);
+  });
+
+  await t.step("useFactory with inject class", async () => {
+    const callStack: number[] = [];
+    class B {}
+    const provider = {
+      provide: "a",
+      useFactory: (b: B) => {
+        callStack.push(1);
+        assert(b instanceof B);
+        return "c";
+      },
+      inject: [B],
+    };
+    const res = await initProvider(provider);
+    assertEquals(res, "c");
+    assertEquals(callStack, [1]);
+  });
 });
 
 Deno.test("caches", () => {
