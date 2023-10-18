@@ -235,12 +235,18 @@ export class Application {
     this.apiPrefixOptions = options;
   }
 
+  /**
+   * Only give a simple quick start example here, not recommended to use it for complex functions.
+   *
+   * Because it is not subject to the overall framework process framework and is not associated with guards, interceptors, filters, etc.
+   *
+   * Its execution order with middleware is also not guaranteed by the framework, for example, oak middleware will be executed first, but the hono may see the order `get` and middlewares.
+   */
   get(path: string, middleware: NestMiddleware) {
     this.router.get(path, async (ctx, next) => {
-      try {
-        await middleware(ctx.request, ctx.response, next);
-      } catch (error) {
-        await this.catchFilter(null, null, ctx, error);
+      const result = await middleware(ctx.request, ctx.response, next);
+      if (ctx.response.body === undefined && result !== undefined) {
+        ctx.response.body = result;
       }
     });
   }

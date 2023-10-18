@@ -19,7 +19,8 @@ export class HonoRouter implements IRouter {
 
   private handle(fn: MiddlewareHandler) {
     return async (ctx: HonoContext, next: HonoNext) => {
-      const nestCtx = NestContext.getInstance(ctx, 200);
+      const nestCtx = NestContext.getInstance(ctx);
+      nestCtx.response.status = 200;
       await fn(nestCtx, next);
       return nestCtx.render();
     };
@@ -69,7 +70,8 @@ export class HonoRouter implements IRouter {
 
   notFound(fn: NotFoundHandler): void {
     this.app.notFound(async (ctx) => {
-      const nestCtx = NestContext.getInstance(ctx, 404);
+      const nestCtx = NestContext.getInstance(ctx);
+      nestCtx.response.status = 404;
       await fn(nestCtx);
       return nestCtx.render();
     });
