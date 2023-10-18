@@ -20,7 +20,7 @@ import {
 import { Module } from "@nest";
 import { Max, Min } from "class_validator";
 import { findUnusedPort } from "./common_helper.ts";
-import { assertEquals, delay, it } from "../test_deps.ts";
+import { assert, assertEquals, delay, it } from "../test_deps.ts";
 
 let firstPort = 8000;
 
@@ -807,6 +807,118 @@ export function createCommonTests(
         assertEquals(callStack, [2, 1]);
       }
       callStack.length = 0;
+      await app.close();
+    });
+  });
+
+  Deno.test("multi types body", {
+    sanitizeOps: false,
+    sanitizeResources: false,
+  }, async (t) => {
+    await t.step("text", async (it) => {
+      const callStack: number[] = [];
+      @Module({})
+      class AppModule {}
+
+      const { app, baseUrl } = await createApp(AppModule);
+
+      app.get("/", (_, res) => {
+        callStack.push(1);
+        res.body = "hello world";
+        res.headers.set("Content-Type", "text/plain");
+        res.headers.set("a", "b");
+      });
+
+      await it.step("fetch /", async () => {
+        const res = await fetch(`${baseUrl}`);
+        assertEquals(res.status, 200);
+        assertEquals(await res.text(), "hello world");
+        assert(res.headers.get("Content-Type")?.includes("text/plain"));
+        assertEquals(res.headers.get("a"), "b");
+
+        assertEquals(callStack, [1]);
+        callStack.length = 0;
+      });
+
+      await app.close();
+    });
+
+    await t.step("json", async (it) => {
+      const callStack: number[] = [];
+      @Module({})
+      class AppModule {}
+
+      const { app, baseUrl } = await createApp(AppModule);
+
+      app.get("/", (_, res) => {
+        callStack.push(1);
+        res.body = { a: 1 };
+        res.headers.set("Content-Type", "application/json");
+      });
+
+      await it.step("fetch /", async () => {
+        const res = await fetch(`${baseUrl}`);
+        assertEquals(res.status, 200);
+        assertEquals(await res.json(), { a: 1 });
+        assert(res.headers.get("Content-Type")?.includes("application/json"));
+
+        assertEquals(callStack, [1]);
+        callStack.length = 0;
+      });
+
+      await app.close();
+    });
+
+    await t.step("json with object", async (it) => {
+      const callStack: number[] = [];
+      @Module({})
+      class AppModule {}
+
+      const { app, baseUrl } = await createApp(AppModule);
+
+      app.get("/", (_, res) => {
+        callStack.push(1);
+        res.body = { a: 1 };
+      });
+
+      await it.step("fetch /", async () => {
+        const res = await fetch(`${baseUrl}`);
+        assertEquals(res.status, 200);
+        assertEquals(await res.json(), { a: 1 });
+        assert(res.headers.get("Content-Type")?.includes("application/json"));
+
+        assertEquals(callStack, [1]);
+        callStack.length = 0;
+      });
+
+      await app.close();
+    });
+
+    await t.step("html is left", async (it) => {
+      const callStack: number[] = [];
+      @Module({})
+      class AppModule {}
+
+      const { app, baseUrl } = await createApp(AppModule);
+
+      app.get("/", (_, res) => {
+        callStack.push(1);
+        res.body = 123;
+      });
+
+      await it.step("num maybe text/html or text/plain, it not important, so not to fix this", async () => {
+        const res = await fetch(`${baseUrl}`);
+        assertEquals(res.status, 200);
+        assertEquals(await res.text(), "123");
+        assert(
+          res.headers.get("Content-Type")?.includes("text/html") || // in hono
+            res.headers.get("Content-Type")?.includes("text/plain"), // in oak
+        );
+
+        assertEquals(callStack, [1]);
+        callStack.length = 0;
+      });
+
       await app.close();
     });
   });
