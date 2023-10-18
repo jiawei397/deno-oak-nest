@@ -950,6 +950,9 @@ export function createCommonTests(
         assertEquals(url.pathname, baseURL.pathname);
         assert(await req.text() === "");
         res.body = "hello world";
+        assertEquals(res.statusText, "OK");
+        const originResponse = res.getOriginalResponse();
+        assertNotEquals(originResponse, res);
       });
 
       const res = await fetch(`${baseUrl}`);
@@ -977,6 +980,7 @@ export function createCommonTests(
         assertEquals(req.queries("c"), []);
         assertEquals(req.query("a"), "1");
         assertEquals(req.query("b"), "2");
+        assert(!req.query("c"));
 
         const originalRequest = await req.getOriginalRequest();
         assertNotStrictEquals(originalRequest, req);
@@ -1023,12 +1027,14 @@ export function createCommonTests(
         assertEquals(await req.cookies(), { a: "1", b: "2" });
         assertEquals(await req.cookie("a"), "1");
         assertEquals(await req.cookie("b"), "2");
+        assert(!await req.cookie("c"));
 
         const headers = req.headers();
         assertEquals(headers.a, "3");
         assertEquals(headers.b, "4");
         assertEquals(req.header("a"), "3");
         assertEquals(req.header("b"), "4");
+        assert(!req.header("c"));
 
         res.body = "hello world";
       });

@@ -115,7 +115,7 @@ export class NestRequest implements Request {
    * Get a specific cookie value
    */
   cookie(name: string): Promise<string | undefined> {
-    return this.originalContext.cookies.get(name) || undefined;
+    return this.originalContext.cookies.get(name);
   }
 
   /**
