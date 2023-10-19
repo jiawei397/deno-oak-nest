@@ -7,7 +7,13 @@ import {
   MiddlewareHandler,
   NotFoundHandler,
 } from "../../../src/interfaces/route.interface.ts";
-import { Hono, HonoContext, HonoNext, serveStatic } from "../deps.ts";
+import {
+  Hono,
+  HonoContext,
+  HonoMiddlewareHandler,
+  HonoNext,
+  serveStatic,
+} from "../deps.ts";
 import { NestContext } from "./context.ts";
 
 export class HonoRouter implements IRouter {
@@ -62,6 +68,10 @@ export class HonoRouter implements IRouter {
       const nestCtx = NestContext.getInstance(ctx, 404);
       await fn(nestCtx, next);
     });
+  }
+
+  useOriginMiddleware(fn: HonoMiddlewareHandler, path = "*") {
+    return this.app.use(path, fn);
   }
 
   routes(): void {

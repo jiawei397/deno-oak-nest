@@ -259,6 +259,16 @@ export class Application {
     });
   }
 
+  /**
+   * use the origin middleware, not recommend to use if you don't know what you are doing.
+   * @param originMiddleware the hono middleware or oak middleware
+   * @param [path] the path to use the middleware, this only work for hono middleware
+   */
+  // deno-lint-ignore ban-types
+  useOriginMiddleware(originMiddleware: Function, path?: string): void {
+    this.router.useOriginMiddleware(originMiddleware, path);
+  }
+
   async listen(options?: ListenOptions): Promise<void> {
     await this.routes();
     this.router.routes();

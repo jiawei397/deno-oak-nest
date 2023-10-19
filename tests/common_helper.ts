@@ -162,6 +162,11 @@ export class MockRouter implements IRouter {
   serveForStatic() {
     // empty
   }
+
+  // deno-lint-ignore ban-types
+  useOriginMiddleware(_fn: Function, _path?: string): void {
+    // empty
+  }
 }
 
 export function createMockRouter() {

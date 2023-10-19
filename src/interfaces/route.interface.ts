@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any ban-types
 import { ListenOptions } from "./application.interface.ts";
 import { Context } from "./context.interface.ts";
 import { AliasOptions } from "./controller.interface.ts";
@@ -44,6 +44,7 @@ export abstract class IRouter {
   abstract serveForStatic(staticOptions?: StaticOptions): void;
   abstract routes(): void;
   abstract notFound(fn: NotFoundHandler): void;
+  abstract useOriginMiddleware(fn: Function, path?: string): void;
 }
 
 export interface IRouterConstructor extends Function {

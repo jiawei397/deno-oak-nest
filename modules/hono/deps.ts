@@ -2,10 +2,12 @@ export {
   type Context as HonoContext,
   Hono,
   type HonoRequest,
+  type MiddlewareHandler as HonoMiddlewareHandler,
   type Next as HonoNext,
 } from "https://deno.land/x/hono@v3.8.1/mod.ts";
 
 export {
+  etag,
   getCookie,
   serveStatic,
   type ServeStaticOptions,

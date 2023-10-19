@@ -2,6 +2,7 @@ import { NestFactory } from "@nest";
 import { HonoRouter } from "@nest/hono";
 import { AppModule } from "./app.module.ts";
 import { HttpExceptionFilter } from "./exception.ts";
+import { etag } from "../deps.ts";
 
 const app = await NestFactory.create(AppModule, HonoRouter, { strict: false });
 app.setGlobalPrefix("/api");
@@ -10,6 +11,10 @@ app.useStaticAssets("example/static", {
 });
 app.useGlobalFilters(HttpExceptionFilter);
 app.enableShutdownHooks(["SIGINT"]);
+
+app.useOriginMiddleware(etag({
+  weak: true,
+}));
 
 app.use(async (req, res, next) => {
   const start = Date.now();
