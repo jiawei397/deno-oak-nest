@@ -104,9 +104,6 @@ export class OakRouter implements IRouter {
     context: OakContext,
     options: StaticOptions,
   ) {
-    if (!options) {
-      return;
-    }
     const {
       baseDir,
       prefix,

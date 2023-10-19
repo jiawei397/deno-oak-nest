@@ -1246,6 +1246,80 @@ export function createCommonTests(
 
         await app.close();
       });
+
+      await t.step("static for not GET", async (it) => {
+        @Module({ controllers: [] })
+        class AppModule {}
+
+        const app = await NestFactory.create(AppModule, Router);
+        app.useStaticAssets(`tests/static`);
+
+        const port = await getPort();
+        app.listen({ port });
+        await delay(100);
+
+        await it.step("fetch /", async () => {
+          const res = await fetch(`http://localhost:${port}/`, {
+            method: "POST",
+          });
+          assertEquals(res.status, 404);
+          await res.body?.cancel();
+        });
+
+        await app.close();
+      });
+
+      await t.step("static for has exist router", async (it) => {
+        @Controller("")
+        class A {
+          @Get("/")
+          get() {
+            return "hello world";
+          }
+        }
+
+        @Module({ controllers: [A] })
+        class AppModule {}
+
+        const app = await NestFactory.create(AppModule, Router);
+        app.useStaticAssets(`tests/static`);
+
+        const port = await getPort();
+        app.listen({ port });
+        await delay(100);
+
+        await it.step("fetch /", async () => {
+          const res = await fetch(`http://localhost:${port}/`);
+          assertEquals(res.status, 200);
+          assertEquals(await res.text(), "hello world");
+        });
+
+        await app.close();
+      });
+
+      await t.step("static for has exist app.get", async (it) => {
+        @Module({})
+        class AppModule {}
+
+        const app = await NestFactory.create(AppModule, Router);
+        app.useStaticAssets(`tests/static`);
+
+        app.get("/", (_, res) => {
+          res.body = "hello world";
+        });
+
+        const port = await getPort();
+        app.listen({ port });
+        await delay(100);
+
+        await it.step("fetch /", async () => {
+          const res = await fetch(`http://localhost:${port}/`);
+          assertEquals(res.status, 200);
+          assertEquals(await res.text(), "hello world");
+        });
+
+        await app.close();
+      });
     },
   );
 }
