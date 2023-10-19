@@ -29,6 +29,7 @@ import {
   delay,
   it,
 } from "../test_deps.ts";
+import { BadRequestException } from "../src/exceptions.ts";
 
 let firstPort = 8000;
 
@@ -819,7 +820,7 @@ export function createCommonTests(
     });
   });
 
-  Deno.test("multi types body", {
+  Deno.test(`${type} multi types body`, {
     sanitizeOps: false,
     sanitizeResources: false,
   }, async (t) => {
@@ -1320,6 +1321,43 @@ export function createCommonTests(
 
         await app.close();
       });
+
+      await t.step(
+        "static for status not 404, will not into static",
+        async (it) => {
+          @Controller("")
+          class A {
+            @Get("/")
+            get() {
+              throw new BadRequestException("error");
+            }
+          }
+
+          @Module({ controllers: [A] })
+          class AppModule {}
+
+          const app = await NestFactory.create(AppModule, Router);
+          app.useStaticAssets(`tests/static`);
+
+          const port = await getPort();
+          app.listen({ port });
+          await delay(100);
+
+          await it.step("fetch /", async () => {
+            const res = await fetch(`http://localhost:${port}/`, {
+              method: "GET",
+            });
+            assertEquals(res.status, 400);
+            assertEquals(await res.json(), {
+              error: "Bad Request",
+              message: "error",
+              statusCode: 400,
+            });
+          });
+
+          await app.close();
+        },
+      );
     },
   );
 }

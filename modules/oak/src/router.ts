@@ -157,9 +157,9 @@ export class OakRouter implements IRouter {
         return next();
       }
       await next();
-      if (context.response.status !== 404) {
-        return;
-      }
+      // if (context.response.status !== 404) { // Here status must be 404, because it will be set 404 in notFound method.
+      //   return;
+      // }
       await this.serveStaticAssets(context, staticOptions);
     });
   }
