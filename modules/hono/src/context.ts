@@ -55,15 +55,15 @@ export class NestContext implements Context {
     if (contextType && contextType.includes("application/json")) {
       return context.json(body);
     }
-    if (typeof body === "object") {
+    if (
+      typeof body === "object" || typeof body === "number" ||
+      typeof body === "boolean"
+    ) {
       return context.json(body);
     }
-    if (
-      contextType && contextType.includes("text/plain") &&
-      typeof body === "string"
-    ) {
+    if (contextType && contextType.includes("text/plain")) {
       return context.text(body);
     }
-    return context.html(body.toString()); // If want to return a number, boolean, it must set content-type to application/json self
+    return context.html(body);
   }
 }

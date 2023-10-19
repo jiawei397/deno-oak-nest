@@ -40,6 +40,20 @@ export class NestContext implements Context {
     this.response.headers.forEach((val, key) => {
       context.response.headers.set(key, val);
     });
+    const contextType = this.response.headers.get("content-type");
+    if (!contextType) {
+      if (typeof body === "number" || typeof body === "boolean") {
+        context.response.headers.set(
+          "content-type",
+          "application/json; charset=utf-8",
+        );
+      } else if (typeof body === "string") {
+        context.response.headers.set(
+          "content-type",
+          "text/html; charset=utf-8",
+        );
+      }
+    }
 
     context.response.body = body;
   }

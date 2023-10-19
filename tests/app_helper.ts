@@ -27,7 +27,6 @@ import {
   assertNotEquals,
   assertNotStrictEquals,
   delay,
-  it,
 } from "../test_deps.ts";
 import { BadRequestException } from "../src/exceptions.ts";
 
@@ -903,7 +902,7 @@ export function createCommonTests(
       await app.close();
     });
 
-    await t.step("html is left", async (it) => {
+    await t.step("bool and number be json default", async (it) => {
       const callStack: number[] = [];
       @Module({})
       class AppModule {}
@@ -915,16 +914,49 @@ export function createCommonTests(
         res.body = 123;
       });
 
-      await it.step("num maybe text/html or text/plain, it not important, so not to fix this", async () => {
+      app.get("/bool", (_, res) => {
+        callStack.push(2);
+        res.body = true;
+      });
+
+      app.get("/boolStr", (_, res) => {
+        callStack.push(3);
+        res.body = "true";
+      });
+
+      await it.step("num maybe json", async () => {
         const res = await fetch(`${baseUrl}`);
         assertEquals(res.status, 200);
-        assertEquals(await res.text(), "123");
+        assertEquals(await res.json(), 123);
         assert(
-          res.headers.get("Content-Type")?.includes("text/html") || // in hono
-            res.headers.get("Content-Type")?.includes("text/plain"), // in oak
+          res.headers.get("Content-Type")?.includes("application/json"),
         );
 
         assertEquals(callStack, [1]);
+        callStack.length = 0;
+      });
+
+      await it.step("bool maybe json", async () => {
+        const res = await fetch(`${baseUrl}/bool`);
+        assertEquals(res.status, 200);
+        assertEquals(await res.json(), true);
+        assert(
+          res.headers.get("Content-Type")?.includes("application/json"),
+        );
+
+        assertEquals(callStack, [2]);
+        callStack.length = 0;
+      });
+
+      await it.step("bool string maybe html", async () => {
+        const res = await fetch(`${baseUrl}/boolStr`);
+        assertEquals(res.status, 200);
+        assertEquals(await res.text(), "true");
+        assert(
+          res.headers.get("Content-Type")?.includes("text/html"),
+        );
+
+        assertEquals(callStack, [3]);
         callStack.length = 0;
       });
 
