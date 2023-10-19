@@ -1183,6 +1183,69 @@ export function createCommonTests(
 
         await app.close();
       });
+
+      await t.step("static with prefix", async (it) => {
+        @Module({ controllers: [] })
+        class AppModule {}
+
+        const app = await NestFactory.create(AppModule, Router);
+        app.useStaticAssets(`tests/static`, { prefix: "/static" });
+
+        const port = await getPort();
+        app.listen({ port });
+        await delay(100);
+
+        await it.step("fetch /", async () => {
+          const res = await fetch(`http://localhost:${port}/`);
+          assertEquals(res.status, 404);
+          await res.body?.cancel();
+        });
+
+        await it.step("fetch /index.html", async () => {
+          const res = await fetch(`http://localhost:${port}/index.html`);
+          assertEquals(res.status, 404);
+          await res.body?.cancel();
+        });
+
+        await it.step("fetch /favicon.ico", async () => {
+          const res = await fetch(`http://localhost:${port}/favicon.ico`);
+          assertEquals(res.status, 404);
+          await res.body?.cancel();
+        });
+
+        await it.step("fetch /static", async () => {
+          const res = await fetch(`http://localhost:${port}/static`);
+          assertEquals(res.status, 200);
+          assert(res.headers.get("content-type")?.includes("text/html"));
+          await res.body?.cancel();
+        });
+
+        await it.step("fetch /static/index.html", async () => {
+          const res = await fetch(`http://localhost:${port}/static/index.html`);
+          assertEquals(res.status, 200);
+          assert(res.headers.get("content-type")?.includes("text/html"));
+          await res.body?.cancel();
+        });
+
+        await it.step("fetch /static/child/test.js", async () => {
+          const res = await fetch(
+            `http://localhost:${port}/static/child/test.js`,
+          );
+          assertEquals(res.status, 200);
+          assert(
+            res.headers.get("content-type")?.includes("javascript"),
+          );
+          await res.body?.cancel();
+        });
+
+        await it.step("fetch not exist file", async () => {
+          const res = await fetch(`http://localhost:${port}/static/not-exist`);
+          assertEquals(res.status, 404);
+          await res.body?.cancel();
+        });
+
+        await app.close();
+      });
     },
   );
 }
