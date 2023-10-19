@@ -19,7 +19,6 @@ export class NestContext implements Context {
   }
 
   static getInstance(context: OakContext, status?: Status): NestContext {
-    context.state;
     const nestContext = context.state[nestContextKey];
     if (nestContext) {
       return nestContext;
