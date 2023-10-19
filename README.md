@@ -4,7 +4,7 @@
 [![Deno](https://github.com/jiawei397/deno-oak-nest/actions/workflows/deno.yml/badge.svg)](https://github.com/jiawei397/deno-oak-nest/actions/workflows/deno.yml)
 [![codecov](https://codecov.io/gh/jiawei397/deno-oak-nest/branch/master/graph/badge.svg?token=NKP41TU4SL)](https://codecov.io/gh/jiawei397/deno-oak-nest)
 
-Rely on [oak@v12.6.1](https://deno.land/x/oak@v12.6.1/mod.ts) and [hono@v3.7.6](https://deno.land/x/hono@v3.7.6/mod.ts) to simulate some
+Rely on [oak@v12.6.1](https://deno.land/x/oak@v12.6.1/mod.ts) and [hono@v3.8.1](https://deno.land/x/hono@v3.7.1/mod.ts) to simulate some
 annotation functions of [NestJS](https://docs.nestjs.com/) which is a great frame for
 Node.js.
 
