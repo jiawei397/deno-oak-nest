@@ -12,6 +12,8 @@ import {
   Params,
   Post,
   Query,
+  Res,
+  type Response,
 } from "@nest";
 import { AppService } from "./app.service.ts";
 import { QueryDto, QueryWithoutPropDto, SaveDto } from "./app.dto.ts";
@@ -138,5 +140,11 @@ export class AppController
   validQueryWithoutProp(@Query() query: QueryWithoutPropDto) {
     console.log("query", query);
     return query;
+  }
+
+  @Get("/redirect")
+  redirect(@Res() res: Response) {
+    res.headers.set("Location", "https://www.baidu.com");
+    res.status = 302;
   }
 }

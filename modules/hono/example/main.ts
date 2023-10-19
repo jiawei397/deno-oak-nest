@@ -17,7 +17,7 @@ app.use(async (req, res, next) => {
   await next();
   const ms = Date.now() - start;
   res.headers.set("X-Response-Time", `${ms}ms`);
-  console.log(`${req.method} ${req.url} - ${ms}ms`);
+  console.log(`${req.method} ${req.url} ${res.status} - ${ms}ms`);
 });
 
 const port = Number(Deno.env.get("PORT") || 2000);
