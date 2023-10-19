@@ -1,5 +1,5 @@
-import { assert, assertEquals, assertRejects } from "../../test_deps.ts";
-import { Controller, Get, Header, HeaderJSON, HttpCode } from "./controller.ts";
+import { assertEquals, assertRejects } from "../../test_deps.ts";
+import { Controller, Get, Header, HttpCode } from "./controller.ts";
 import {
   createMockApp,
   createMockContext,
@@ -47,19 +47,6 @@ Deno.test("Header decorator", async (t) => {
       callStack.push(1);
       return "test";
     }
-
-    @Get("/b")
-    @HeaderJSON()
-    json() {
-      callStack.push(2);
-      return true;
-    }
-
-    @Get("/c")
-    bool() {
-      callStack.push(3);
-      return true;
-    }
   }
 
   const app = createMockApp();
@@ -77,41 +64,6 @@ Deno.test("Header decorator", async (t) => {
     assertEquals(ctx.response.headers.get("x-test"), "test");
 
     assertEquals(callStack, [1]);
-
-    callStack.length = 0;
-  });
-
-  await t.step("header set json", async () => {
-    const ctx = createMockContext({
-      path: "/b",
-      method: "GET",
-    });
-
-    await mockCallMethod(app, ctx);
-    assertEquals(ctx.response.status, 200);
-    assertEquals(ctx.response.body, true);
-    assert(
-      ctx.response.headers.get("content-type")?.includes("application/json"),
-    );
-
-    assertEquals(callStack, [2]);
-
-    callStack.length = 0;
-  });
-
-  await t.step("header no json set", async () => {
-    const ctx = createMockContext({
-      path: "/c",
-      method: "GET",
-    });
-
-    await mockCallMethod(app, ctx);
-    assertEquals(ctx.response.status, 200);
-    assertEquals(ctx.response.body, true);
-    const contentType = ctx.response.headers.get("content-type");
-    assert(!contentType);
-
-    assertEquals(callStack, [3]);
 
     callStack.length = 0;
   });

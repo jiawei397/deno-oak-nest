@@ -4,7 +4,6 @@ import {
   Body,
   Controller,
   Get,
-  HeaderJSON,
   OnApplicationBootstrap,
   OnApplicationShutdown,
   OnModuleDestroy,
@@ -53,7 +52,6 @@ export class AppController
   }
 
   @Get("/bool")
-  @HeaderJSON()
   bool() {
     return true;
   }

@@ -63,7 +63,3 @@ export function Header(key: string, val: string): MethodDecorator {
     Reflect.defineMetadata(META_HEADER_KEY, map, descriptor.value);
   };
 }
-
-export function HeaderJSON(): MethodDecorator {
-  return Header("Content-Type", "application/json; charset=utf-8");
-}

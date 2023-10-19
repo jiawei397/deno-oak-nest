@@ -52,10 +52,8 @@ export class NestContext implements Context {
       return context.body(body);
     }
     const contextType = this.response.headers.get("content-type");
-    if (contextType && contextType.includes("application/json")) {
-      return context.json(body);
-    }
     if (
+      (contextType && contextType.includes("application/json")) ||
       typeof body === "object" || typeof body === "number" ||
       typeof body === "boolean"
     ) {
