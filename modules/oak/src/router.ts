@@ -1,5 +1,6 @@
 import { format, green, resolve, yellow } from "../../../deps.ts";
 import { join } from "../../../src/application.ts";
+import { NotImplementedException } from "../../../src/exceptions.ts";
 import {
   ListenOptions,
 } from "../../../src/interfaces/application.interface.ts";
@@ -10,7 +11,13 @@ import {
   MiddlewareHandler,
   NotFoundHandler,
 } from "../../../src/interfaces/route.interface.ts";
-import { OakApplication, OakContext, OakOriginRouter, send } from "../deps.ts";
+import {
+  OakApplication,
+  OakContext,
+  OakMiddleware,
+  OakOriginRouter,
+  send,
+} from "../deps.ts";
 import { NestContext } from "./context.ts";
 
 export class OakRouter implements IRouter {
@@ -20,6 +27,15 @@ export class OakRouter implements IRouter {
   constructor(options?: { strict?: boolean }) {
     this.router = new OakOriginRouter({ strict: options?.strict ?? false });
     this.app = new OakApplication();
+  }
+
+  useOriginMiddleware(fn: OakMiddleware, path?: string) {
+    if (path) {
+      throw new NotImplementedException(
+        "Not support path in useOriginMiddleware method when use oak framework.",
+      );
+    }
+    this.app.use(fn);
   }
 
   notFound(fn: NotFoundHandler): void {
