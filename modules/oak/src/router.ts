@@ -119,7 +119,7 @@ export class OakRouter implements IRouter {
     const prefixWithoutSlash = join(prefix || "/");
     const root = resolve(Deno.cwd(), baseDir!);
     const index = "index.html"; // TODO: options.index;
-    if (!prefixWithoutSlash) {
+    if (!prefixWithoutSlash && (pathname === "/" || pathname === "")) {
       return send(context, "", {
         ...otherOptions,
         index,
