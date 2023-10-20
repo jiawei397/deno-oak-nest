@@ -2,7 +2,7 @@
 import { Input, Select } from "cliffy/prompt/mod.ts";
 import { Command } from "cliffy/command/mod.ts";
 import { colors } from "cliffy/ansi/colors.ts";
-import { createProject } from "./src/new.ts";
+import { createProject, Engine } from "./src/new.ts";
 import { generateCommand } from "./src/generate.ts";
 
 const info = colors.bold.blue;
@@ -20,7 +20,12 @@ function createNewProject() {
           `Which platform would you like to download by the new project?`,
         options: ["gitee+ssh", "github+https", "github+ssh"],
       });
-      await createProject(name, platform);
+      const engine = await Select.prompt({
+        message: `Which engine would you like to use for the new project?`,
+        options: ["hono", "oak"],
+        default: "hono",
+      }) as Engine;
+      await createProject(name, platform, engine);
       console.log(info("Project created"));
       console.log(`🚀  Successfully created project ${name}
 👉  Get started with the following commands:

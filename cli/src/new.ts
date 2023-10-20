@@ -13,6 +13,8 @@ const templateName = projectName;
 
 export type Platform = "github+ssh" | "github+https" | "gitee+ssh";
 
+export type Engine = "hono" | "oak";
+
 function getUrl(platform: string) {
   switch (platform) {
     case "github+ssh":
@@ -105,9 +107,28 @@ async function writeReadme(name: string) {
   await Deno.writeTextFile(realPath, newDoc);
 }
 
+// 读取import_map.json文件，替换hono为oak
+async function writeImportMap(name: string) {
+  const realPath = join(name, "import_map.json");
+  const content = await Deno.readTextFile(realPath);
+  const newContent = content.replaceAll("hono", "oak");
+  await Deno.writeTextFile(realPath, newContent);
+}
+
+async function writeMain(name: string) {
+  const realPath = join(name, "src/main.ts");
+  const content = await Deno.readTextFile(realPath);
+  const newContent = content.replace(/@nest\/hono/g, "@nest/oak").replace(
+    /HonoRouter/g,
+    "OakRouter",
+  );
+  await Deno.writeTextFile(realPath, newContent);
+}
+
 export async function createProject(
   name: string,
   platform: string,
+  engine: Engine,
 ) {
   const url = getUrl(platform);
   if (platform.endsWith("ssh")) {
@@ -118,6 +139,10 @@ export async function createProject(
 
   await writeReadme(name);
   await writeDenoJson(name, "deno.jsonc");
+  if (engine === "oak") {
+    await writeImportMap(name);
+    await writeMain(name);
+  }
 
   //   console.log(`init project ${projectName} end`);
 }
