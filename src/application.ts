@@ -100,34 +100,30 @@ export async function mapRoute(
   const instance = await Factory(Cls, undefined, cache);
   const prototype = Cls.prototype;
   const result: RouteMap[] = [];
-  Object.getOwnPropertyNames(prototype)
-    .forEach((item) => {
-      if (item === "constructor") {
-        return;
-      }
-      if (typeof prototype[item] !== "function") {
-        return;
-      }
-      const fn = prototype[item];
-      const methodPath = Reflect.getMetadata(META_PATH_KEY, fn);
-      if (!methodPath) {
-        return;
-      }
-      const methodType = Reflect.getMetadata(META_METHOD_KEY, fn);
-      const aliasOptions: AliasOptions = Reflect.getMetadata(
-        META_ALIAS_KEY,
-        fn,
-      );
-      result.push({
-        methodPath,
-        aliasOptions,
-        methodType: methodType.toLowerCase(),
-        fn,
-        instance,
-        cls: Cls,
-        methodName: item,
-      });
+  Object.getOwnPropertyNames(prototype).forEach((item) => {
+    if (item === "constructor") {
+      return;
+    }
+    if (typeof prototype[item] !== "function") {
+      return;
+    }
+    const fn = prototype[item];
+    const methodPath = Reflect.getMetadata(META_PATH_KEY, fn);
+    if (!methodPath) {
+      return;
+    }
+    const methodType = Reflect.getMetadata(META_METHOD_KEY, fn);
+    const aliasOptions: AliasOptions = Reflect.getMetadata(META_ALIAS_KEY, fn);
+    result.push({
+      methodPath,
+      aliasOptions,
+      methodType: methodType.toLowerCase(),
+      fn,
+      instance,
+      cls: Cls,
+      methodName: item,
     });
+  });
   return result;
 }
 
@@ -176,20 +172,22 @@ export async function collect(
   if (!imports || !imports.length) {
     return;
   }
-  await Promise.all(imports.map(async (item: any) => {
-    if (!item) {
-      return;
-    }
-    const module = await item;
-    return collect(
-      module,
-      moduleArr,
-      controllerArr,
-      registeredProviders,
-      dynamicProviders,
-      specialProviders,
-    );
-  }));
+  await Promise.all(
+    imports.map(async (item: any) => {
+      if (!item) {
+        return;
+      }
+      const module = await item;
+      return collect(
+        module,
+        moduleArr,
+        controllerArr,
+        registeredProviders,
+        dynamicProviders,
+        specialProviders,
+      );
+    }),
+  );
 }
 
 export async function getRouterArr(
@@ -197,18 +195,20 @@ export async function getRouterArr(
   cache: Map<any, any>,
 ) {
   const routerArr: RouteItem[] = [];
-  await Promise.all(controllers.map(async (Cls) => {
-    const arr = await mapRoute(Cls, cache);
-    const path = Reflect.getMetadata(META_PATH_KEY, Cls);
-    const aliasOptions = Reflect.getMetadata(META_ALIAS_KEY, Cls);
-    const controllerPath = join(path);
-    routerArr.push({
-      controllerPath,
-      arr,
-      cls: Cls,
-      aliasOptions,
-    });
-  }));
+  await Promise.all(
+    controllers.map(async (Cls) => {
+      const arr = await mapRoute(Cls, cache);
+      const path = Reflect.getMetadata(META_PATH_KEY, Cls);
+      const aliasOptions = Reflect.getMetadata(META_ALIAS_KEY, Cls);
+      const controllerPath = join(path);
+      routerArr.push({
+        controllerPath,
+        arr,
+        cls: Cls,
+        aliasOptions,
+      });
+    }),
+  );
   return routerArr;
 }
 
@@ -352,10 +352,7 @@ export class Application {
    * @example
    * app.useStaticAssets('public')
    */
-  useStaticAssets(
-    path: string,
-    options: StaticOptions = {},
-  ) {
+  useStaticAssets(path: string, options: StaticOptions = {}) {
     this.staticOptions = {
       baseDir: path,
       ...options,
@@ -410,10 +407,7 @@ export class Application {
     }
 
     // response http code
-    const code: number = Reflect.getMetadata(
-      META_HTTP_CODE_KEY,
-      options.fn,
-    );
+    const code: number = Reflect.getMetadata(META_HTTP_CODE_KEY, options.fn);
     if (code) {
       context.response.status = code;
     }
@@ -425,12 +419,7 @@ export class Application {
     context: Context,
   ): Promise<boolean> {
     try {
-      const passed = await checkByGuard(
-        target,
-        fn,
-        context,
-        this.globalGuards,
-      );
+      const passed = await checkByGuard(target, fn, context, this.globalGuards);
       if (!passed) {
         throw new ForbiddenException("");
       }
@@ -510,12 +499,13 @@ export class Application {
             ? replacePrefix(methodPath, this.apiPrefix)
             : join(controllerPathWithPrefix, methodPath);
           let aliasPath = alias ??
-            (controllerAliasPath && !isAbsolute &&
+            (controllerAliasPath &&
+              !isAbsolute &&
               join(controllerAliasPath, methodPath));
           const funcStart = Date.now();
           const callback = async (context: Context) => {
             // validate guard
-            if (await this.validateGuard(instance, fn, context) === false) {
+            if ((await this.validateGuard(instance, fn, context)) === false) {
               return;
             }
 
@@ -533,41 +523,33 @@ export class Application {
               const next = async () => {
                 const result = await fn.apply(instance, args);
                 if (
-                  result !== undefined &&
-                  (context.response.body === null ||
-                    context.response.body === undefined)
+                  result !== undefined
+                  // (context.response.body === null || // if set by ctx.response.body, don't return again
+                  // context.response.body === undefined)
                 ) {
                   context.response.body = result;
                 }
                 return result;
               };
-              await checkByInterceptors(
-                context,
-                this.globalInterceptors,
+              await checkByInterceptors(context, this.globalInterceptors, fn, {
+                target: instance,
+                methodName,
+                methodType,
+                args,
                 fn,
-                {
-                  target: instance,
-                  methodName,
-                  methodType,
-                  args,
-                  fn,
-                  next,
-                },
-              );
+                next,
+              });
             } catch (error) {
               await this.catchFilter(instance, fn, context, error);
             }
 
-            await this.formatResponse(
-              context,
-              {
-                fn,
-                target: instance,
-                methodType,
-                args,
-                methodName,
-              },
-            );
+            await this.formatResponse(context, {
+              fn,
+              target: instance,
+              methodType,
+              args,
+              methodName,
+            });
             // console.log(context.res.body, result);
           };
           this.router[methodType](originPath, callback);
@@ -587,12 +569,11 @@ export class Application {
             green(
               `Mapped {${
                 aliasPath
-                  ? (originPath + ", " + red(aliasPath))
-                  : (isAbsolute ? red(originPath) : originPath)
-              }, ${methodType.toUpperCase()}} route ${
-                funcEnd -
-                funcStart
-              }ms`,
+                  ? originPath + ", " + red(aliasPath)
+                  : isAbsolute
+                  ? red(originPath)
+                  : originPath
+              }, ${methodType.toUpperCase()}} route ${funcEnd - funcStart}ms`,
             ),
           );
         });
@@ -610,12 +591,7 @@ export class Application {
 
     // deal global not found
     this.router.notFound(async (ctx) => {
-      await this.catchFilter(
-        null,
-        null,
-        ctx,
-        new NotFoundException(""),
-      );
+      await this.catchFilter(null, null, ctx, new NotFoundException(""));
     });
   }
 
@@ -649,30 +625,29 @@ export class Application {
         });
       }
     }
-    await Promise.all(arr.map(({ instance, provider }) => {
-      // register global interceptor, filter, guard
-      if ("provide" in provider) {
-        const provide = provider.provide;
-        if (provide === APP_INTERCEPTOR) {
-          this.useGlobalInterceptors(instance);
-        } else if (provide === APP_FILTER) {
-          this.useGlobalFilters(instance);
-        } else if (provide === APP_GUARD) {
-          this.useGlobalGuards(instance);
+    await Promise.all(
+      arr.map(({ instance, provider }) => {
+        // register global interceptor, filter, guard
+        if ("provide" in provider) {
+          const provide = provider.provide;
+          if (provide === APP_INTERCEPTOR) {
+            this.useGlobalInterceptors(instance);
+          } else if (provide === APP_FILTER) {
+            this.useGlobalFilters(instance);
+          } else if (provide === APP_GUARD) {
+            this.useGlobalGuards(instance);
+          }
         }
-      }
-      return onModuleInit(instance);
-    }));
+        return onModuleInit(instance);
+      }),
+    );
     return arr;
   }
 
   async init(appModule: ModuleType, cache: Map<any, any>) {
     this.cache = cache;
 
-    this.log(
-      yellow("[NestFactory]"),
-      green(`Starting Nest application...`),
-    );
+    this.log(yellow("[NestFactory]"), green(`Starting Nest application...`));
     const start = Date.now();
     const modules: ModuleType[] = [];
     const controllers: Type<any>[] = this.controllers;
@@ -689,9 +664,7 @@ export class Application {
     );
     this.log(
       yellow("[NestApplication]"),
-      green(
-        `AppModule dependencies collected ${Date.now() - start}ms`,
-      ),
+      green(`AppModule dependencies collected ${Date.now() - start}ms`),
     );
 
     const startInit = Date.now();
@@ -700,23 +673,25 @@ export class Application {
     await this.initProviders(registeredProviders);
 
     if (controllers.length) {
-      await Promise.all(controllers.map(async (controller) => {
-        const instance = await this.initController(controller);
-        this.instances.add(instance);
-      }));
+      await Promise.all(
+        controllers.map(async (controller) => {
+          const instance = await this.initController(controller);
+          this.instances.add(instance);
+        }),
+      );
     }
 
     // init modules
-    await Promise.all(modules.map(async (module) => {
-      const instance = await this.initModule(module);
-      this.instances.add(instance);
-    }));
+    await Promise.all(
+      modules.map(async (module) => {
+        const instance = await this.initModule(module);
+        this.instances.add(instance);
+      }),
+    );
 
     this.log(
       yellow("[NestApplication]"),
-      green(
-        `AppModule dependencies initialized ${Date.now() - startInit}ms`,
-      ),
+      green(`AppModule dependencies initialized ${Date.now() - startInit}ms`),
     );
   }
 
@@ -724,37 +699,45 @@ export class Application {
    * TODO: think about whether to use Promise.all or a for loop
    */
   private async onApplicationBootstrap(): Promise<void> {
-    await Promise.all([...this.instances].map((instance) => {
-      if (typeof instance.onApplicationBootstrap === "function") {
-        return instance.onApplicationBootstrap();
-      }
-    }));
+    await Promise.all(
+      [...this.instances].map((instance) => {
+        if (typeof instance.onApplicationBootstrap === "function") {
+          return instance.onApplicationBootstrap();
+        }
+      }),
+    );
   }
 
   /**
    * TODO: think about whether to use Promise.all or a for loop
    */
   private async onApplicationShutdown(signal?: string): Promise<void> {
-    await Promise.all([...this.instances].map((instance) => {
-      if (typeof instance.onApplicationShutdown === "function") {
-        return instance.onApplicationShutdown(signal);
-      }
-    }));
+    await Promise.all(
+      [...this.instances].map((instance) => {
+        if (typeof instance.onApplicationShutdown === "function") {
+          return instance.onApplicationShutdown(signal);
+        }
+      }),
+    );
   }
 
   private async beforeApplicationShutdown(signal?: string): Promise<void> {
-    await Promise.all([...this.instances].map((instance) => {
-      if (typeof instance.beforeApplicationShutdown === "function") {
-        return instance.beforeApplicationShutdown(signal);
-      }
-    }));
+    await Promise.all(
+      [...this.instances].map((instance) => {
+        if (typeof instance.beforeApplicationShutdown === "function") {
+          return instance.beforeApplicationShutdown(signal);
+        }
+      }),
+    );
   }
 
   private async onModuleDestroy(): Promise<void> {
-    await Promise.all([...this.instances].map((instance) => {
-      if (typeof instance.onModuleDestroy === "function") {
-        return instance.onModuleDestroy();
-      }
-    }));
+    await Promise.all(
+      [...this.instances].map((instance) => {
+        if (typeof instance.onModuleDestroy === "function") {
+          return instance.onModuleDestroy();
+        }
+      }),
+    );
   }
 }
