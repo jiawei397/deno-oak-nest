@@ -1,7 +1,7 @@
 # oak_nest_mysql_module
 
-This is a mysql module for [`deno_nest`](https://deno.land/x/deno_nest). Currently
-used MySQL client is <https://deno.land/x/mysql@v2.11.0/mod.ts>.
+This is a mysql module for [`deno_nest`](https://deno.land/x/deno_nest).
+Currently used MySQL client is <https://deno.land/x/mysql@v2.11.0/mod.ts>.
 
 ## example
 

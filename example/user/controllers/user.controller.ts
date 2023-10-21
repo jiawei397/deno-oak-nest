@@ -6,16 +6,16 @@ import {
   Controller,
   ControllerName,
   Delete,
+  Form,
   Get,
   Ip,
   MethodName,
   Post,
   Query,
   Res,
-  UploadedFile,
   UseGuards,
 } from "../../../mod.ts";
-import type { Context, FormDataFormattedBody, Response } from "../../../mod.ts";
+import type { Context, Response } from "../../../mod.ts";
 import { mockjs, nanoid } from "../../deps.ts";
 import { AuthGuard } from "../../guards/auth.guard.ts";
 import { AuthGuard2 } from "../../guards/auth2.guard.ts";
@@ -162,15 +162,14 @@ export class UserController {
 
   @Post("upload2")
   upload2(
-    @UploadedFile({
+    @Form({
       maxFileSize: 10 * 1024 * 1024 * 1024,
-      validateCls: UploadDto, // this will validate the param
-    }) result: FormDataFormattedBody<UploadDto>,
+    }) result: UploadDto,
     @Res() res: Response,
   ) {
     console.log("---upload----", result);
-    console.log(result.fields.age);
-    res.body = result.fields;
+    console.log(result.age);
+    res.body = result;
     // res.body = result;
     // return res.json(result);
   }

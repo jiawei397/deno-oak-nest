@@ -52,9 +52,11 @@ export async function validateParams(Cls: Constructor, value: object) {
     });
     assert(
       msgs.length > 0,
-      `the msgs must be not empty and the validationErrors are ${JSON.stringify(
-        errors
-      )}`
+      `the msgs must be not empty and the validationErrors are ${
+        JSON.stringify(
+          errors,
+        )
+      }`,
     );
     throw new BodyParamValidationException(msgs.join(", "));
   }
@@ -76,14 +78,14 @@ export function Body(key?: string) {
         // get the params providers
         "design:paramtypes",
         target,
-        methodName
+        methodName,
       );
       await validateParams(providers?.[index], value);
       if (key) {
         return value?.[key];
       }
       return value;
-    }
+    },
   );
 }
 
@@ -91,14 +93,14 @@ function parseNumOrBool(
   val: string | string[] | null | undefined,
   target: any,
   methodName: string,
-  index: number
+  index: number,
 ) {
   if (val) {
     const providers = Reflect.getMetadata(
       // get the params providers
       "design:paramtypes",
       target,
-      methodName
+      methodName,
     );
     if (providers?.[index]) {
       // cannot deal Array here, because cannot get the real type of every item.
@@ -112,13 +114,13 @@ function transAndValidateParams(
   target: any,
   methodName: string,
   index: number,
-  map: Record<string, string | string[] | File>
+  map: Record<string, string | string[] | File>,
 ) {
   const providers = Reflect.getMetadata(
     // get the params providers
     "design:paramtypes",
     target,
-    methodName
+    methodName,
   );
   if (!providers || !providers[index] || providers[index] === Object) {
     return map;
@@ -130,7 +132,7 @@ function transAndValidateParams(
 export function getTransNumOrBoolOrArray(
   type: Constructor,
   val: string | string[],
-  arrayItemType?: ArrayItemType
+  arrayItemType?: ArrayItemType,
 ): boolean | number | string | (boolean | number | string)[] {
   if (type === Boolean) {
     return val === "true";
@@ -165,7 +167,7 @@ export async function transAndValidateByCls(
   map: Record<
     string,
     string | number | boolean | File | (string | number | boolean | File)[]
-  >
+  >,
 ) {
   const keys = Reflect.getMetadataKeys(cls.prototype);
   keys.forEach((key) => {
@@ -181,7 +183,7 @@ export async function transAndValidateByCls(
     map[realKey] = getTransNumOrBoolOrArray(
       type,
       map[realKey] as string,
-      arr.at(2)
+      arr.at(2),
     );
   });
   await validateParams(cls, map);
@@ -204,7 +206,7 @@ export function Query(key?: string) {
         const val = ctx.request.query(key);
         return parseNumOrBool(val, target, methodName, index);
       }
-    }
+    },
   );
 }
 
@@ -220,7 +222,7 @@ export function Params(key?: string) {
         return transAndValidateParams(target, methodName, index, params);
       }
       return parseNumOrBool(ctx.request.param(key), target, methodName, index);
-    }
+    },
   );
 }
 
@@ -232,11 +234,11 @@ export function Headers(key?: string) {
           ctx.request.header(key),
           target,
           methodName,
-          index
+          index,
         );
       }
       return ctx.request.headers();
-    }
+    },
   );
 }
 
@@ -266,7 +268,7 @@ export function Cookies(key?: string) {
         return parseNumOrBool(val, target, methodName, index);
       }
       return ctx.request.cookies();
-    }
+    },
   );
 }
 
@@ -281,13 +283,13 @@ export const Cookie = Cookies;
 export const MethodName = createParamDecorator(
   (_ctx: Context, _target: any, methodName: string) => {
     return methodName;
-  }
+  },
 );
 
 export const ControllerName = createParamDecorator(
   (_ctx: Context, target: any) => {
     return target.constructor.name;
-  }
+  },
 );
 
 export function Form(options: FormDataOptions = {}) {
@@ -314,6 +316,6 @@ export function Form(options: FormDataOptions = {}) {
       });
       await transAndValidateParams(target, methodName, index, fields);
       return fields;
-    }
+    },
   );
 }

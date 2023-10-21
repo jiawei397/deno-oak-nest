@@ -1,6 +1,7 @@
 # CORS
 
-Forked from the Node.js package `expressjs cors`. Now it is just a simple and opinionated cors middleware.
+Forked from the Node.js package `expressjs cors`. Now it is just a simple and
+opinionated cors middleware.
 
 Example
 
@@ -19,17 +20,18 @@ console.log(`app will start with: http://localhost:${port}/api`);
 app.listen({ port });
 ```
 
-If you use the default options, it will work as both `origin: true` and `credentials: true`.
+If you use the default options, it will work as both `origin: true` and
+`credentials: true`.
 
 Test in browser:
 
 ```js
-fetch('http://localhost:2000', {
-  method: 'GET',
-  mode: 'cors',
+fetch("http://localhost:2000", {
+  method: "GET",
+  mode: "cors",
 })
-.then(response => response.text())
-.then(data => {
-  console.log(data);
-});
+  .then((response) => response.text())
+  .then((data) => {
+    console.log(data);
+  });
 ```

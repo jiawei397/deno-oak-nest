@@ -5,7 +5,7 @@ export type ParamDecoratorCallback = (
   ctx: Context,
   target: Instance,
   methodName: string,
-  index: number
+  index: number,
   // deno-lint-ignore no-explicit-any
 ) => any;
 

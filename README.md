@@ -4,15 +4,17 @@
 [![Deno](https://github.com/jiawei397/deno-oak-nest/actions/workflows/deno.yml/badge.svg)](https://github.com/jiawei397/deno-oak-nest/actions/workflows/deno.yml)
 [![codecov](https://codecov.io/gh/jiawei397/deno-oak-nest/branch/master/graph/badge.svg?token=NKP41TU4SL)](https://codecov.io/gh/jiawei397/deno-oak-nest)
 
-Rely on [oak@v12.6.1](https://deno.land/x/oak@v12.6.1/mod.ts) and [hono@v3.8.1](https://deno.land/x/hono@v3.7.1/mod.ts) to simulate some
-annotation functions of [NestJS](https://docs.nestjs.com/) which is a great frame for
-Node.js.
+Rely on [oak@v12.6.1](https://deno.land/x/oak@v12.6.1/mod.ts) and
+[hono@v3.8.1](https://deno.land/x/hono@v3.7.1/mod.ts) to simulate some
+annotation functions of [NestJS](https://docs.nestjs.com/) which is a great
+frame for Node.js.
 
 I will update the `oak` or `Hono` version if need.
 
 > The previous framework name was `oak_nest`, now renamed `deno_nest`.
-> 
-> It is recommended to use `Hono` as the underlying layer because its performance is better.
+>
+> It is recommended to use `Hono` as the underlying layer because its
+> performance is better.
 
 ## start
 
@@ -32,7 +34,8 @@ Then use as `nest` or `nest new`.
 
 ### config
 
-If you not use CLI create project, then efore start your app, you may set `deno.json` or `deno.jsonc` before:
+If you not use CLI create project, then efore start your app, you may set
+`deno.json` or `deno.jsonc` before:
 
 ```json
 "compilerOptions": {
@@ -68,6 +71,7 @@ now are available：
 ```ts
 import {
   Body,
+  type CanActivate,
   Context,
   Controller,
   createParamDecorator,
@@ -79,7 +83,6 @@ import {
   Query,
   Res,
   UseGuards,
-  type CanActivate,
 } from "@nest";
 import mockjs from "https://deno.land/x/deno_mock@v2.0.0/mod.ts";
 import { delay } from "https://deno.land/std@0.194.0/async/mod.ts";
@@ -304,12 +307,7 @@ export class UserModule {
 Then this is your main.ts:
 
 ```ts
-import {
-  Context,
-  isHttpError,
-  NestFactory,
-  Status,
-} from "@nest";
+import { Context, isHttpError, NestFactory, Status } from "@nest";
 import { HonoRouter } from "@nest/hono";
 import { AppModule } from "./app.module.ts";
 
@@ -407,8 +405,8 @@ import { Inject } from "@nest";
 export const InjectModel = (Cls: Constructor) => Inject(() => getModel(Cls));
 ```
 
-> To support it, I changed the `router.register` method to asynchronous. It was not a
-> pleasant decision.
+> To support it, I changed the `router.register` method to asynchronous. It was
+> not a pleasant decision.
 
 Here is a Service example:
 
@@ -456,10 +454,7 @@ export class AsyncModule {
 And the `AsyncService` like this:
 
 ```ts
-import {
-  Inject,
-  Injectable,
-} from "@nest";
+import { Inject, Injectable } from "@nest";
 import { ASYNC_KEY } from "./async.constant.ts";
 
 @Injectable()

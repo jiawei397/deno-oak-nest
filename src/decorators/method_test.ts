@@ -263,7 +263,7 @@ Deno.test("Query", async (t) => {
       @Query("m") m: string[],
       @Query("n") n: number[],
       @Query("o") o: boolean[],
-      @Query() query2: QueryDto
+      @Query() query2: QueryDto,
     ) {
       callStack.push(1);
       assertEquals(query, mockQuery);
@@ -277,7 +277,7 @@ Deno.test("Query", async (t) => {
       assertEquals(
         h,
         undefined,
-        "if no parsed, should be undefined instead of false"
+        "if no parsed, should be undefined instead of false",
       );
       assertEquals(m, ["aa", "bb"]);
       assert(Array.isArray(m));
@@ -312,7 +312,7 @@ Deno.test("Query", async (t) => {
       @Query() query: any,
       @Query("a") a: string,
       @Query("c") c: string,
-      @Query("e") e: string
+      @Query("e") e: string,
     ) {
       callStack.push(2);
       assertEquals(query, mockQuery);
@@ -338,11 +338,11 @@ Deno.test("Query", async (t) => {
       assertEquals(query.a, mockErrorButNotValidatePathQuery.a);
       assertEquals<string | number>(
         query.d,
-        mockErrorButNotValidatePathQuery.d
+        mockErrorButNotValidatePathQuery.d,
       );
       assert(
         typeof query.d === "string",
-        "not set Property, so should be string type"
+        "not set Property, so should be string type",
       );
     }
 
@@ -431,7 +431,7 @@ Deno.test("Params", async (t) => {
       @Params() params: any,
       @Params("id") id: string,
       @Params("id") id2: number,
-      @Params("name") name: string
+      @Params("name") name: string,
     ) {
       callStack.push(1);
       assertEquals(id, "1");
@@ -491,7 +491,7 @@ Deno.test("Req, Res, ControllerName, MethodName", async () => {
       @Req() req: any,
       @Res() res: any,
       @ControllerName() controllerName: string,
-      @MethodName() methodName: string
+      @MethodName() methodName: string,
     ) {
       callStack.push(1);
       assertEquals(req, ctx.request);
@@ -532,7 +532,7 @@ Deno.test("Cookies", async () => {
       @Cookies("a") a: string,
       @Cookies("c") c: string,
       @Cookies("c") c1: number,
-      @Cookies("d") d: string
+      @Cookies("d") d: string,
     ) {
       callStack.push(1);
       assertEquals(cookie, mockedCookie);
@@ -573,7 +573,7 @@ Deno.test("Headers", async () => {
       @Headers() headers: any,
       @Headers("a") a: string,
       @Headers("c") c: string,
-      @Headers("c") c1: number
+      @Headers("c") c1: number,
     ) {
       callStack.push(1);
       assertEquals(headers, mockedHeaders);
@@ -607,7 +607,7 @@ Deno.test("transAndValidateByCls", async (t) => {
     } catch (error) {
       assertEquals(
         error.message,
-        "age must be a number conforming to the specified constraints"
+        "age must be a number conforming to the specified constraints",
       );
     }
   });
@@ -892,8 +892,7 @@ Deno.test("form with file", async (t) => {
     b(
       @Form({
         maxFileSize: 1,
-      })
-      body: Dto
+      }) body: Dto,
     ) {
       callStack.push(2);
       return body;

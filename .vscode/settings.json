@@ -11,4 +11,13 @@
     "javascript": "deno run -A --unstable ",
     "typescript": "deno run -A --unstable "
   },
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  }
 }
