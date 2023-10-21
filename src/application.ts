@@ -457,6 +457,8 @@ export class Application {
     const apiPrefixReg = this.apiPrefixOptions?.exclude;
 
     const routerArr = await getRouterArr(this.controllers, this.cache);
+    let num = 0;
+    const start = Date.now();
     routerArr.forEach(
       ({ controllerPath, arr, aliasOptions: controllerAliasOptions }) => {
         let isAbsolute = controllerAliasOptions?.isAbsolute;
@@ -482,6 +484,7 @@ export class Application {
           );
         const startTime = Date.now();
         let lastCls;
+
         arr.forEach((routeMap: RouteMap) => {
           const {
             methodPath,
@@ -553,6 +556,7 @@ export class Application {
             // console.log(context.res.body, result);
           };
           this.router[methodType](originPath, callback);
+          num++;
 
           if (aliasPath) {
             aliasPath = replacePrefixAndSuffix(
@@ -562,6 +566,7 @@ export class Application {
               controllerPath,
             );
             this.router[methodType](aliasPath, callback);
+            num++;
           }
           const funcEnd = Date.now();
           this.log(
@@ -587,6 +592,12 @@ export class Application {
           ),
         );
       },
+    );
+    this.log(
+      yellow("[RoutesResolver]"),
+      green(
+        `Mapped ${red(num.toString())} routes with ${Date.now() - start}ms`,
+      ),
     );
 
     // deal global not found
