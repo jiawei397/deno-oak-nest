@@ -12,7 +12,6 @@ import {
 import type { Constructor } from "../interfaces/type.interface.ts";
 import type {
   ArrayItemType,
-  FormDataFormattedBody,
   FormDataOptions,
 } from "../interfaces/param.interface.ts";
 import { Context } from "../interfaces/context.interface.ts";
@@ -33,7 +32,8 @@ export function Property(arrayItemType?: ArrayItemType): PropertyDecorator {
 }
 
 export async function validateParams(Cls: Constructor, value: object) {
-  if (!Cls || Cls === Object) { // if no class validation, we can skip this
+  if (!Cls || Cls === Object) {
+    // if no class validation, we can skip this
     return;
   }
   const post = new Cls();
@@ -52,9 +52,9 @@ export async function validateParams(Cls: Constructor, value: object) {
     });
     assert(
       msgs.length > 0,
-      `the msgs must be not empty and the validationErrors are ${
-        JSON.stringify(errors)
-      }`,
+      `the msgs must be not empty and the validationErrors are ${JSON.stringify(
+        errors
+      )}`
     );
     throw new BodyParamValidationException(msgs.join(", "));
   }
@@ -65,26 +65,25 @@ export function Body(key?: string) {
     async (ctx: Context, target: any, methodName: string, index: number) => {
       const request = ctx.request;
       const contentType = request.header("content-type");
-      if (
-        !contentType || !contentType.includes("application/json")
-      ) {
+      if (!contentType || !contentType.includes("application/json")) {
         throw new BodyParamValidationException("content-type must be json");
       }
       const value = await request.json();
       if (!value || typeof value !== "object") {
         throw new BodyParamValidationException("body must be json object");
       }
-      const providers = Reflect.getMetadata( // get the params providers
+      const providers = Reflect.getMetadata(
+        // get the params providers
         "design:paramtypes",
         target,
-        methodName,
+        methodName
       );
       await validateParams(providers?.[index], value);
       if (key) {
         return value?.[key];
       }
       return value;
-    },
+    }
   );
 }
 
@@ -92,13 +91,14 @@ function parseNumOrBool(
   val: string | string[] | null | undefined,
   target: any,
   methodName: string,
-  index: number,
+  index: number
 ) {
   if (val) {
-    const providers = Reflect.getMetadata( // get the params providers
+    const providers = Reflect.getMetadata(
+      // get the params providers
       "design:paramtypes",
       target,
-      methodName,
+      methodName
     );
     if (providers?.[index]) {
       // cannot deal Array here, because cannot get the real type of every item.
@@ -112,12 +112,13 @@ function transAndValidateParams(
   target: any,
   methodName: string,
   index: number,
-  map: Record<string, string | string[] | File>,
+  map: Record<string, string | string[] | File>
 ) {
-  const providers = Reflect.getMetadata( // get the params providers
+  const providers = Reflect.getMetadata(
+    // get the params providers
     "design:paramtypes",
     target,
-    methodName,
+    methodName
   );
   if (!providers || !providers[index] || providers[index] === Object) {
     return map;
@@ -129,7 +130,7 @@ function transAndValidateParams(
 export function getTransNumOrBoolOrArray(
   type: Constructor,
   val: string | string[],
-  arrayItemType?: ArrayItemType,
+  arrayItemType?: ArrayItemType
 ): boolean | number | string | (boolean | number | string)[] {
   if (type === Boolean) {
     return val === "true";
@@ -164,7 +165,7 @@ export async function transAndValidateByCls(
   map: Record<
     string,
     string | number | boolean | File | (string | number | boolean | File)[]
-  >,
+  >
 ) {
   const keys = Reflect.getMetadataKeys(cls.prototype);
   keys.forEach((key) => {
@@ -180,7 +181,7 @@ export async function transAndValidateByCls(
     map[realKey] = getTransNumOrBoolOrArray(
       type,
       map[realKey] as string,
-      arr.at(2),
+      arr.at(2)
     );
   });
   await validateParams(cls, map);
@@ -203,7 +204,7 @@ export function Query(key?: string) {
         const val = ctx.request.query(key);
         return parseNumOrBool(val, target, methodName, index);
       }
-    },
+    }
   );
 }
 
@@ -219,7 +220,7 @@ export function Params(key?: string) {
         return transAndValidateParams(target, methodName, index, params);
       }
       return parseNumOrBool(ctx.request.param(key), target, methodName, index);
-    },
+    }
   );
 }
 
@@ -231,11 +232,11 @@ export function Headers(key?: string) {
           ctx.request.header(key),
           target,
           methodName,
-          index,
+          index
         );
       }
       return ctx.request.headers();
-    },
+    }
   );
 }
 
@@ -248,8 +249,9 @@ export const Res = createParamDecorator((ctx: Context) => {
 });
 
 export const Ip = createParamDecorator((ctx: Context) => {
-  return ctx.request.header("x-real-ip") ||
-    ctx.request.header("x-forwarded-for");
+  return (
+    ctx.request.header("x-real-ip") || ctx.request.header("x-forwarded-for")
+  );
 });
 
 export const Host = createParamDecorator((ctx: Context) => {
@@ -261,15 +263,10 @@ export function Cookies(key?: string) {
     async (ctx: Context, target: any, methodName: string, index: number) => {
       if (key) {
         const val = await ctx.request.cookie(key);
-        return parseNumOrBool(
-          val,
-          target,
-          methodName,
-          index,
-        );
+        return parseNumOrBool(val, target, methodName, index);
       }
       return ctx.request.cookies();
-    },
+    }
   );
 }
 
@@ -284,18 +281,18 @@ export const Cookie = Cookies;
 export const MethodName = createParamDecorator(
   (_ctx: Context, _target: any, methodName: string) => {
     return methodName;
-  },
+  }
 );
 
 export const ControllerName = createParamDecorator(
   (_ctx: Context, target: any) => {
     return target.constructor.name;
-  },
+  }
 );
 
-export function UploadedFile(options: FormDataOptions = {}) {
+export function Form(options: FormDataOptions = {}) {
   return createParamDecoratorWithLowLevel(
-    async (ctx: Context) => {
+    async (ctx: Context, target: any, methodName: string, index: number) => {
       const result = await ctx.request.formData();
       // console.log(result);
       const fields: Record<string, any> = {};
@@ -304,36 +301,19 @@ export function UploadedFile(options: FormDataOptions = {}) {
           if (options.maxFileSize && value.size >= options.maxFileSize) {
             throw new BodyParamValidationException("file size too large");
           }
-          return;
         }
-        fields[key] = value;
+        if (fields[key] === undefined) {
+          fields[key] = value;
+        } else {
+          if (Array.isArray(fields[key])) {
+            fields[key].push(value);
+          } else {
+            fields[key] = [fields[key], value];
+          }
+        }
       });
-      if (options.validateCls) {
-        await transAndValidateByCls(
-          options.validateCls,
-          fields,
-        );
-        return {
-          fields,
-          original: result,
-        } as FormDataFormattedBody<typeof options.validateCls>;
-      }
-      return result;
-    },
-  );
-}
-
-export const FormData = UploadedFile;
-
-export function Form() {
-  return createParamDecoratorWithLowLevel(
-    async (ctx: Context, target: any, methodName: string, index: number) => {
-      const result = await ctx.request.formData();
-      const map: Record<string, string | File> = {};
-      result.forEach((value, key) => {
-        map[key] = value;
-      });
-      return transAndValidateParams(target, methodName, index, map);
-    },
+      await transAndValidateParams(target, methodName, index, fields);
+      return fields;
+    }
   );
 }

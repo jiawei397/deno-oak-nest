@@ -31,7 +31,6 @@ import {
   Req,
   Res,
   transAndValidateByCls,
-  UploadedFile,
 } from "./method.ts";
 
 Deno.test("getTransNumOrBoolOrArray", () => {
@@ -264,7 +263,7 @@ Deno.test("Query", async (t) => {
       @Query("m") m: string[],
       @Query("n") n: number[],
       @Query("o") o: boolean[],
-      @Query() query2: QueryDto,
+      @Query() query2: QueryDto
     ) {
       callStack.push(1);
       assertEquals(query, mockQuery);
@@ -278,7 +277,7 @@ Deno.test("Query", async (t) => {
       assertEquals(
         h,
         undefined,
-        "if no parsed, should be undefined instead of false",
+        "if no parsed, should be undefined instead of false"
       );
       assertEquals(m, ["aa", "bb"]);
       assert(Array.isArray(m));
@@ -313,7 +312,7 @@ Deno.test("Query", async (t) => {
       @Query() query: any,
       @Query("a") a: string,
       @Query("c") c: string,
-      @Query("e") e: string,
+      @Query("e") e: string
     ) {
       callStack.push(2);
       assertEquals(query, mockQuery);
@@ -323,9 +322,7 @@ Deno.test("Query", async (t) => {
     }
 
     @Get("b")
-    testNoQuery(
-      @Query() query: any,
-    ) {
+    testNoQuery(@Query() query: any) {
       callStack.push(3);
       assertEquals(query, {});
     }
@@ -341,11 +338,11 @@ Deno.test("Query", async (t) => {
       assertEquals(query.a, mockErrorButNotValidatePathQuery.a);
       assertEquals<string | number>(
         query.d,
-        mockErrorButNotValidatePathQuery.d,
+        mockErrorButNotValidatePathQuery.d
       );
       assert(
         typeof query.d === "string",
-        "not set Property, so should be string type",
+        "not set Property, so should be string type"
       );
     }
 
@@ -434,7 +431,7 @@ Deno.test("Params", async (t) => {
       @Params() params: any,
       @Params("id") id: string,
       @Params("id") id2: number,
-      @Params("name") name: string,
+      @Params("name") name: string
     ) {
       callStack.push(1);
       assertEquals(id, "1");
@@ -445,9 +442,7 @@ Deno.test("Params", async (t) => {
     }
 
     @Get("b")
-    testNoParam(
-      @Params() params: any,
-    ) {
+    testNoParam(@Params() params: any) {
       callStack.push(2);
       assertEquals(params, {});
     }
@@ -496,7 +491,7 @@ Deno.test("Req, Res, ControllerName, MethodName", async () => {
       @Req() req: any,
       @Res() res: any,
       @ControllerName() controllerName: string,
-      @MethodName() methodName: string,
+      @MethodName() methodName: string
     ) {
       callStack.push(1);
       assertEquals(req, ctx.request);
@@ -537,7 +532,7 @@ Deno.test("Cookies", async () => {
       @Cookies("a") a: string,
       @Cookies("c") c: string,
       @Cookies("c") c1: number,
-      @Cookies("d") d: string,
+      @Cookies("d") d: string
     ) {
       callStack.push(1);
       assertEquals(cookie, mockedCookie);
@@ -578,7 +573,7 @@ Deno.test("Headers", async () => {
       @Headers() headers: any,
       @Headers("a") a: string,
       @Headers("c") c: string,
-      @Headers("c") c1: number,
+      @Headers("c") c1: number
     ) {
       callStack.push(1);
       assertEquals(headers, mockedHeaders);
@@ -598,64 +593,6 @@ Deno.test("Headers", async () => {
   callStack.length = 0;
 });
 
-Deno.test("UploadedFile form data", async (t) => {
-  const callStack: number[] = [];
-  const fileMockData = new FormData();
-  fileMockData.set("test", "a");
-  fileMockData.set("file", new File(["hello"], "b.md"));
-
-  @Controller("")
-  class A {
-    @Post("a")
-    noUpload(@UploadedFile() body: FormData) {
-      callStack.push(1);
-      assert(body instanceof FormData, "will pass body");
-      assertEquals(body.keys.length, 0, "no upload data will not pass body");
-    }
-
-    @Post("b")
-    upload(@UploadedFile() body: any) {
-      callStack.push(2);
-      assertEquals(body, fileMockData, "will pass body");
-    }
-  }
-
-  const app = createMockApp();
-  app.addController(A);
-
-  await t.step("not upload", async () => {
-    const ctx = createMockContext({
-      path: "/a",
-      method: "POST",
-      body: {
-        type: "form-data",
-        value: fileMockData,
-      },
-    });
-
-    await mockCallMethod(app, ctx);
-
-    assertEquals(callStack, [1]);
-
-    callStack.length = 0;
-  });
-
-  await t.step("upload", async () => {
-    const ctx = createMockContext({
-      path: "/b",
-      method: "POST",
-      body: {
-        type: "form-data",
-        value: Promise.resolve(fileMockData),
-      },
-    });
-    await mockCallMethod(app, ctx);
-
-    assertEquals(callStack, [2]);
-    callStack.length = 0;
-  });
-});
-
 Deno.test("transAndValidateByCls", async (t) => {
   await t.step("not trans", async () => {
     class A {
@@ -670,7 +607,7 @@ Deno.test("transAndValidateByCls", async (t) => {
     } catch (error) {
       assertEquals(
         error.message,
-        "age must be a number conforming to the specified constraints",
+        "age must be a number conforming to the specified constraints"
       );
     }
   });
@@ -708,10 +645,7 @@ Deno.test("transAndValidateByCls", async (t) => {
       });
       assert(false, "should not reach here");
     } catch (error) {
-      assertEquals(
-        error.message,
-        "status must be a valid enum value",
-      );
+      assertEquals(error.message, "status must be a valid enum value");
     }
   });
 });
@@ -774,11 +708,6 @@ Deno.test("ip and host", async (t) => {
 
 Deno.test("form", async (t) => {
   const callStack: number[] = [];
-  const mockedData = new FormData();
-  mockedData.set("a", "b");
-  mockedData.set("c", "true");
-  mockedData.set("d", "true");
-  mockedData.set("e", "1");
 
   class Dto {
     a: string;
@@ -790,6 +719,8 @@ Deno.test("form", async (t) => {
 
     @Property()
     e: number;
+
+    f: string[];
   }
 
   @Controller("")
@@ -807,6 +738,8 @@ Deno.test("form", async (t) => {
 
       assertEquals(form.e, 1);
       assert(typeof form.e === "number");
+
+      assertEquals(form.f, ["f1", "f2"]);
     }
   }
 
@@ -814,6 +747,14 @@ Deno.test("form", async (t) => {
   app.addController(A);
 
   await t.step("only property can trans bool and number", async () => {
+    const mockedData = new FormData();
+    mockedData.set("a", "b");
+    mockedData.set("c", "true");
+    mockedData.set("d", "true");
+    mockedData.set("e", "1");
+    mockedData.append("f", "f1");
+    mockedData.append("f", "f2");
+
     const ctx = createMockContext({
       path: "/a",
       method: "POST",
@@ -826,6 +767,186 @@ Deno.test("form", async (t) => {
     await mockCallMethod(app, ctx);
 
     assertEquals(callStack, [1]);
+
+    callStack.length = 0;
+  });
+});
+
+Deno.test("form not pass", async (t) => {
+  const callStack: number[] = [];
+
+  // deno-lint-ignore no-unused-vars
+  class Dto {
+    @IsString()
+    a: string;
+
+    @Property()
+    @IsNumber()
+    @Max(10)
+    b: number;
+  }
+
+  @Controller("")
+  class A {
+    @Post("a")
+    a(@Form() body: Dto) {
+      callStack.push(1);
+      return body;
+    }
+
+    @Post("b")
+    b(@Form() body: any) {
+      callStack.push(2);
+      return body;
+    }
+  }
+
+  const app = createMockApp();
+  app.addController(A);
+
+  await t.step("not pass", async () => {
+    const fileMockData = new FormData();
+    fileMockData.set("a", "a");
+    fileMockData.set("b", "20");
+
+    const ctx = createMockContext({
+      path: "/a",
+      method: "POST",
+      body: {
+        type: "form-data",
+        value: fileMockData,
+      },
+    });
+    await mockCallMethod(app, ctx);
+    assertEquals(callStack, []);
+    assertEquals(ctx.response.status, 400);
+
+    callStack.length = 0;
+  });
+
+  await t.step("passed success", async () => {
+    const fileMockData = new FormData();
+    fileMockData.set("a", "a");
+    fileMockData.set("b", "2");
+
+    const ctx = createMockContext({
+      path: "/a",
+      method: "POST",
+      body: {
+        type: "form-data",
+        value: Promise.resolve(fileMockData),
+      },
+    });
+    await mockCallMethod(app, ctx);
+
+    assertEquals(callStack, [1]);
+    assertEquals(ctx.response.body, {
+      a: "a",
+      b: 2,
+    });
+    callStack.length = 0;
+  });
+
+  await t.step("not validate but pass", async () => {
+    const fileMockData = new FormData();
+    fileMockData.set("a", "a");
+    fileMockData.set("b", "20");
+
+    const ctx = createMockContext({
+      path: "/b",
+      method: "POST",
+      body: {
+        type: "form-data",
+        value: fileMockData,
+      },
+    });
+    await mockCallMethod(app, ctx);
+    assertEquals(callStack, [2]);
+    assertEquals(ctx.response.status, 200);
+    assertEquals(ctx.response.body, {
+      a: "a",
+      b: "20",
+    });
+
+    callStack.length = 0;
+  });
+});
+
+Deno.test("form with file", async (t) => {
+  const callStack: number[] = [];
+
+  interface Dto {
+    a: string;
+    file: File;
+  }
+
+  @Controller("")
+  class A {
+    @Post("a")
+    a(@Form() body: Dto) {
+      callStack.push(1);
+      return body;
+    }
+
+    @Post("b")
+    b(
+      @Form({
+        maxFileSize: 1,
+      })
+      body: Dto
+    ) {
+      callStack.push(2);
+      return body;
+    }
+  }
+
+  const app = createMockApp();
+  app.addController(A);
+
+  await t.step("valid parsed files", async () => {
+    const fileMockData = new FormData();
+    fileMockData.set("a", "a");
+    fileMockData.set("file", new File(["test"], "test.txt"));
+
+    const ctx = createMockContext({
+      path: "/a",
+      method: "POST",
+      body: {
+        type: "form-data",
+        value: fileMockData,
+      },
+    });
+    await mockCallMethod(app, ctx);
+    assertEquals(callStack, [1]);
+    assertEquals(ctx.response.status, 200);
+    const body = ctx.response.body as Dto;
+    assertEquals(body.a, "a");
+    assertEquals(body.file.name, "test.txt");
+
+    callStack.length = 0;
+  });
+
+  await t.step("file size too large", async () => {
+    const fileMockData = new FormData();
+    fileMockData.set("a", "a");
+    fileMockData.set("file", new File(["test"], "test.txt"));
+
+    const ctx = createMockContext({
+      path: "/b",
+      method: "POST",
+      body: {
+        type: "form-data",
+        value: fileMockData,
+      },
+    });
+    await mockCallMethod(app, ctx);
+    assertEquals(callStack, []);
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, {
+      statusCode: 400,
+      message: "file size too large",
+      error: "params not valid",
+    });
 
     callStack.length = 0;
   });
