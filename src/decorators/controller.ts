@@ -63,3 +63,15 @@ export function Header(key: string, val: string): MethodDecorator {
     Reflect.defineMetadata(META_HEADER_KEY, map, descriptor.value);
   };
 }
+
+export function Redirect(location: string, status = 302): MethodDecorator {
+  return (_target, _property, descriptor) => {
+    Reflect.defineMetadata(META_HTTP_CODE_KEY, status, descriptor.value);
+    const map = Reflect.getMetadata(META_HEADER_KEY, descriptor.value) || {};
+    map["Location"] = location;
+    Reflect.defineMetadata(META_HEADER_KEY, map, descriptor.value);
+
+    // set status
+    Reflect.defineMetadata(META_HTTP_CODE_KEY, status, descriptor.value);
+  };
+}

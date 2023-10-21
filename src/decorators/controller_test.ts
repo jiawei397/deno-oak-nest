@@ -1,5 +1,5 @@
 import { assertEquals, assertRejects } from "../../test_deps.ts";
-import { Controller, Get, Header, HttpCode } from "./controller.ts";
+import { Controller, Get, Header, HttpCode, Redirect } from "./controller.ts";
 import {
   createMockApp,
   createMockContext,
@@ -64,6 +64,57 @@ Deno.test("Header decorator", async (t) => {
     assertEquals(ctx.response.headers.get("x-test"), "test");
 
     assertEquals(callStack, [1]);
+
+    callStack.length = 0;
+  });
+});
+
+Deno.test("redirect", async (t) => {
+  const callStack: number[] = [];
+  @Controller("")
+  class A {
+    @Get("/a")
+    @Redirect("https://nestjs.com", 301)
+    index() {
+      callStack.push(1);
+    }
+
+    @Get("/b")
+    @Redirect("https://nestjs.com")
+    index2() {
+      callStack.push(2);
+    }
+  }
+
+  const app = createMockApp();
+  app.addController(A);
+
+  await t.step("status is 301", async () => {
+    const ctx = createMockContext({
+      path: "/a",
+      method: "GET",
+    });
+
+    await mockCallMethod(app, ctx);
+    assertEquals(ctx.response.status, 301);
+    assertEquals(ctx.response.headers.get("Location"), "https://nestjs.com");
+
+    assertEquals(callStack, [1]);
+
+    callStack.length = 0;
+  });
+
+  await t.step("status is 302", async () => {
+    const ctx = createMockContext({
+      path: "/b",
+      method: "GET",
+    });
+
+    await mockCallMethod(app, ctx);
+    assertEquals(ctx.response.status, 302);
+    assertEquals(ctx.response.headers.get("Location"), "https://nestjs.com");
+
+    assertEquals(callStack, [2]);
 
     callStack.length = 0;
   });
