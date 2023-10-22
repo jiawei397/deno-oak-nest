@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any no-unused-vars
 import {
+  APP_FILTER,
   Body,
   Catch,
   type Context,
@@ -8,6 +9,7 @@ import {
   ExceptionFilter,
   Form,
   Get,
+  HttpException,
   Injectable,
   IRouterConstructor,
   ModuleType,
@@ -1392,4 +1394,62 @@ export function createCommonTests(
       );
     },
   );
+
+  Deno.test(`${type} APP_FILTER use global filter`, {
+    sanitizeOps: false,
+    sanitizeResources: false,
+  }, async (t) => {
+    const callStack: number[] = [];
+
+    @Injectable()
+    class A {}
+
+    @Injectable()
+    class B {
+      @Get("/")
+      b() {
+        throw new BadRequestException("b error");
+      }
+    }
+
+    @Catch(HttpException)
+    class AppFilter implements ExceptionFilter {
+      constructor(private readonly a: A) {
+        assert(a instanceof A);
+      }
+      // deno-lint-ignore require-await
+      async catch(exception: HttpException, context: Context): Promise<void> {
+        callStack.push(2);
+        context.response.status = exception.status;
+        context.response.body = {
+          statusCode: exception.status,
+          message: exception.message,
+        };
+      }
+    }
+
+    @Module({
+      controllers: [B],
+      providers: [{
+        provide: APP_FILTER,
+        useClass: AppFilter,
+      }],
+    })
+    class AppModule {}
+
+    await t.step("filter should work as global", async () => {
+      const { app, port } = await createApp(AppModule);
+
+      const res = await fetch(`http://localhost:${port}/`, {
+        method: "GET",
+      });
+      assertEquals(res.status, 400);
+      assertEquals(await res.json(), {
+        message: "b error",
+        statusCode: 400,
+      });
+
+      await app.close();
+    });
+  });
 }
