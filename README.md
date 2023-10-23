@@ -21,13 +21,13 @@ I will update the `oak` or `Hono` version if need.
 You can use CLI to init:
 
 ```bash
-deno run --allow-env --allow-run --allow-net --allow-read --allow-write --import-map https://deno.land/x/deno_nest@v3.1.7/cli/import_map.json https://deno.land/x/deno_nest@v3.1.7/cli/main.ts
+deno run --allow-env --allow-run --allow-net --allow-read --allow-write --import-map https://deno.land/x/deno_nest@v3.1.8/cli/import_map.json https://deno.land/x/deno_nest@v3.1.8/cli/main.ts
 ```
 
 Or you can install CLI by:
 
 ```bash
-deno install --allow-env --allow-run --allow-net --allow-read --allow-write --import-map https://deno.land/x/deno_nest@v3.1.7/cli/import_map.json  -n nest -f https://deno.land/x/deno_nest@v3.1.7/cli/main.ts
+deno install --allow-env --allow-run --allow-net --allow-read --allow-write --import-map https://deno.land/x/deno_nest@v3.1.8/cli/import_map.json  -n nest -f https://deno.land/x/deno_nest@v3.1.8/cli/main.ts
 ```
 
 Then use as `nest` or `nest new`.
@@ -43,9 +43,9 @@ If you not use CLI create project, then efore start your app, you may set
   "strictPropertyInitialization": false
 },
 "imports": {
-  "@nest": "https://deno.land/x/deno_nest@v3.1.7/mod.ts",
-  "@nest/hono": "https://deno.land/x/deno_nest@v3.1.7/modules/hono/mod.ts",
-  "@nest/oak": "https://deno.land/x/deno_nest@v3.1.7/modules/oak/mod.ts",
+  "@nest": "https://deno.land/x/deno_nest@v3.1.8/mod.ts",
+  "@nest/hono": "https://deno.land/x/deno_nest@v3.1.8/modules/hono/mod.ts",
+  "@nest/oak": "https://deno.land/x/deno_nest@v3.1.8/modules/oak/mod.ts",
   "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts"
 }
 ```

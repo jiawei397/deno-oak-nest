@@ -6,9 +6,9 @@ opinionated cors middleware.
 Example
 
 ```ts
-import { NestFactory } from "https://deno.land/x/deno_nest@v3.1.7/mod.ts";
-import { HonoRouter } from "https://deno.land/x/deno_nest@v3.1.7/modules/hono/mod.ts";
-import { CORS } from "https://deno.land/x/deno_nest@v3.1.7/modules/cors/mod.ts";
+import { NestFactory } from "https://deno.land/x/deno_nest@v3.1.8/mod.ts";
+import { HonoRouter } from "https://deno.land/x/deno_nest@v3.1.8/modules/hono/mod.ts";
+import { CORS } from "https://deno.land/x/deno_nest@v3.1.8/modules/cors/mod.ts";
 import { AppModule } from "./app.module.ts";
 
 const app = await NestFactory.create(AppModule, HonoRouter);
