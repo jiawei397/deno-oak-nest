@@ -27,8 +27,8 @@ Deno.test("Factory without providers", async () => {
   const b = await Factory(A);
   assertEquals(a, b, "Factory should return the same instance");
 
-  const c = await Factory(A, Scope.REQUEST);
-  assert(a !== c, "Factory should return different instance");
+  // const c = await Factory(A, Scope.REQUEST);
+  // assert(a !== c, "Factory should return different instance");
 
   const d = await Factory(A, Scope.TRANSIENT);
   assert(a !== d, "Factory should return different instance");
@@ -44,7 +44,7 @@ Deno.test("Factory with providers", async () => {
   }
 
   @Injectable({
-    singleton: false,
+    scope: Scope.TRANSIENT,
   })
   class C {
     constructor() {
@@ -95,8 +95,8 @@ Deno.test("initProvider", async (t) => {
   const a = await initProvider(A);
   assert(a instanceof A);
 
-  const c = await initProvider(A, Scope.REQUEST);
-  assert(c !== a);
+  // const c = await initProvider(A, Scope.REQUEST);
+  // assert(c !== a);
 
   const d = await initProvider(A, Scope.TRANSIENT);
   assert(d !== a);

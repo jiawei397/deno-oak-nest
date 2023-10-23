@@ -93,7 +93,7 @@
       "request": "launch",
       "name": "test",
       "type": "node",
-      "program": "${workspaceFolder}/src/decorators/controller_test.ts",
+      "program": "${workspaceFolder}/src/decorators/method_test.ts",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "deno",
       "runtimeArgs": [

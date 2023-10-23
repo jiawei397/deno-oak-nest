@@ -2,6 +2,7 @@
 import type { InjectParams } from "../interfaces/factory.interface.ts";
 import { Reflect } from "../../deps.ts";
 import type { Constructor } from "../interfaces/type.interface.ts";
+import { Scope } from "../interfaces/scope-options.interface.ts";
 
 export const INJECT_META_KEY = "design:inject";
 
@@ -32,19 +33,21 @@ export function getInjectData(
   return Reflect.getMetadata(INJECT_META_KEY + parameterIndex, target);
 }
 
-export const Injectable = ({
-  singleton = true,
-} = {}): ClassDecorator =>
-(target) => {
-  if (!singleton) { // default is singleton
-    Reflect.defineMetadata(SINGLETON_MEAT_KEY, false, target);
-  }
+type InjectableOptions = {
+  scope?: Scope;
 };
+
+export const Injectable =
+  (options?: InjectableOptions): ClassDecorator => (target) => {
+    if (options?.scope === Scope.TRANSIENT) { // default is singleton, no need to set alone
+      Reflect.defineMetadata(SINGLETON_MEAT_KEY, options.scope, target);
+    }
+  };
 
 export function isSingleton(Cls: Constructor) {
   if (typeof Cls === "function") {
     const meta = Reflect.getMetadata(SINGLETON_MEAT_KEY, Cls);
-    return meta !== false;
+    return meta !== Scope.TRANSIENT;
   }
   return true;
 }

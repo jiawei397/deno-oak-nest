@@ -15,16 +15,5 @@ export enum Scope {
   /**
    * A new instance is instantiated for each request processing pipeline
    */
-  REQUEST = 2,
-}
-/**
- * @publicApi
- *
- * @see [Injection Scopes](https://docs.nestjs.com/fundamentals/injection-scopes)
- */
-export interface ScopeOptions {
-  /**
-   * Specifies the lifetime of an injected Provider or Controller.
-   */
-  scope?: Scope;
+  // REQUEST = 2,
 }

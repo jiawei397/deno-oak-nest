@@ -78,12 +78,7 @@ export const getInstance = async <T>(
             );
           }
         }
-        let param;
-        if (scope === Scope.REQUEST) { // TODO I don't quite understand the difference between REQUEST and TRANSIENT, so it maybe error.
-          param = await Factory(paramtype, Scope.DEFAULT, factoryCaches);
-        } else {
-          param = await Factory(paramtype, scope, factoryCaches);
-        }
+        const param = await Factory(paramtype, scope, factoryCaches);
         if (!isSingleton(paramtype)) {
           Reflect.defineMetadata(META_CONTAINER_KEY, target, param); // the meta can only be set to the instance
           if (param.__post__init__ instanceof Function) {

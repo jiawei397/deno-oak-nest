@@ -14,7 +14,7 @@ Deno.test("Inject alone", () => {
   assertEquals(result, injectKey);
 });
 
-Deno.test("Inject with proviverInit", async () => {
+Deno.test("Inject with providerInit", async () => {
   const callStack: number[] = [];
   const InjectModel = (name: string) => Inject(() => name + "1");
 
@@ -58,7 +58,7 @@ Deno.test("Inject with controller", async () => {
 
 Deno.test("Injectable singleton false", async (t) => {
   @Injectable({
-    singleton: false,
+    scope: Scope.TRANSIENT,
   })
   class A {}
 

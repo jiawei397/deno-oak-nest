@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Injectable, META_CONTAINER_KEY, Reflect } from "@nest";
+import { Injectable, META_CONTAINER_KEY, Reflect, Scope } from "@nest";
 
 interface ILogger {
   info(...messages: any[]): void;
@@ -9,7 +9,7 @@ interface ILogger {
 }
 
 @Injectable({
-  singleton: false,
+  scope: Scope.TRANSIENT,
 })
 export class LoggerService implements ILogger {
   private parentName?: string;
