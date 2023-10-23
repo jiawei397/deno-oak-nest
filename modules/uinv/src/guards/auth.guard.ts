@@ -35,7 +35,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
 
     async validateRequest(context: Context) {
       const request = context.request;
-      const headers = new Headers(request.headers());
+      const headers = request.headers();
       let b;
       if (headers.has(isPrivateTokenField)) {
         logger.debug(

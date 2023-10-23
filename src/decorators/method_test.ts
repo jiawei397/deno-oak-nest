@@ -570,14 +570,14 @@ Deno.test("Headers", async () => {
   class A {
     @Get("a")
     a(
-      @Headers() headers: any,
+      @Headers() headers: Headers,
       @Headers("a") a: string,
       @Headers("c") c: string,
       @Headers("c") c1: number,
     ) {
       callStack.push(1);
-      assertEquals(headers, mockedHeaders);
-      assertEquals(headers["a"], "b");
+      assert(headers instanceof Headers);
+      assertEquals(headers.get("a"), "b");
       assertEquals(a, "b");
       assertEquals<string>(c, "4");
       assertEquals<number>(c1, 4);

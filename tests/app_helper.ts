@@ -1065,8 +1065,8 @@ export function createCommonTests(
         assert(!await req.cookie("c"));
 
         const headers = req.headers();
-        assertEquals(headers.a, "3");
-        assertEquals(headers.b, "4");
+        assertEquals(headers.get("a"), "3");
+        assertEquals(headers.get("b"), "4");
         assertEquals(req.header("a"), "3");
         assertEquals(req.header("b"), "4");
         assert(!req.header("c"));

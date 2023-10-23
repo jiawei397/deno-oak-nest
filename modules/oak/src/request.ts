@@ -86,14 +86,10 @@ export class NestRequest implements Request {
   }
 
   /**
-   * Get all headers as a key-value object
+   * Get all headers
    */
-  headers(): Record<string, string> {
-    const headersObject: Record<string, string> = {};
-    for (const [name, value] of this.originalRequest.headers.entries()) {
-      headersObject[name] = value;
-    }
-    return headersObject;
+  headers(): Headers {
+    return this.originalRequest.headers;
   }
 
   /**

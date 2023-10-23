@@ -172,8 +172,8 @@ info(
   @Add() name: string,
   @Add2("name") name2: string,
   @Body() params: any,
-  @Headers() headers: any,
-  @Headers("host") host: any,
+  @Headers() headers: Headers,
+  @Headers("host") host: string,
   @Res() res: Response,
 ) {
   console.log("ctx", name, name2, params, headers, host);

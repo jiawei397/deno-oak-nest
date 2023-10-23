@@ -45,7 +45,7 @@ export const createMockContext = (options: {
       return options.reqHeaders?.[key];
     },
     headers() {
-      return { ...options.reqHeaders };
+      return new Headers(options.reqHeaders);
     },
     async cookies() {
       return { ...options.cookies };

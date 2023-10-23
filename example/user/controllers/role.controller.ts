@@ -86,8 +86,8 @@ export class RoleController {
   @Post("/info")
   info(
     @Body() params: RoleInfoDto,
-    @Headers() headers: any,
-    @Headers("host") host: any,
+    @Headers() headers: Headers,
+    @Headers("host") host: string,
   ) {
     console.log("ctx", params, headers, host);
     return "role info ";

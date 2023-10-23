@@ -6,7 +6,7 @@ export interface Request {
   get url(): string;
   get method(): string;
   states: Record<string, any>;
-  headers(): Record<string, string>;
+  headers(): Headers;
   header(name: string): string | undefined;
   cookies(): Promise<Record<string, string>>;
   cookie(name: string): Promise<string | undefined>;

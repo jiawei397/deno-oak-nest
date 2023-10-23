@@ -39,10 +39,10 @@ export class NestRequest implements Request {
   }
 
   /**
-   * Get all headers as a key-value object
+   * Get all headers
    */
-  headers(): Record<string, string> {
-    return this.originalRequest.header();
+  headers(): Headers {
+    return this.originalRequest.raw.headers;
   }
 
   /**

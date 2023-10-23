@@ -47,7 +47,7 @@ Deno.test("createParamDecoratorWithLowLevel", async () => {
   const callStack: number[] = [];
   const aResult = "body";
 
-  const Headers = () =>
+  const Header = () =>
     createParamDecoratorWithLowLevel((_ctx: Context) => {
       callStack.push(1);
       return 2;
@@ -56,8 +56,8 @@ Deno.test("createParamDecoratorWithLowLevel", async () => {
   @Controller("user")
   class A {
     @Get("a")
-    a(@Headers() headers: number) {
-      callStack.push(headers);
+    a(@Header() header: number) {
+      callStack.push(header);
       callStack.push(3);
       return aResult;
     }
@@ -80,7 +80,7 @@ Deno.test("transferParam", async () => {
   const callStack: number[] = [];
   const aResult = "body";
 
-  const Headers = () =>
+  const Header = () =>
     createParamDecoratorWithLowLevel((_ctx: Context) => {
       callStack.push(1);
       return 2;
@@ -99,14 +99,14 @@ Deno.test("transferParam", async () => {
   class A {
     @Get("a")
     a(
-      @Headers() headers: number,
+      @Header() header: number,
       context: Context,
       @Body() body: number,
       context2: Context,
     ) {
       assertEquals(ctx, context);
       assertEquals(ctx, context2);
-      callStack.push(headers);
+      callStack.push(header);
       callStack.push(body);
       callStack.push(5);
       return aResult;

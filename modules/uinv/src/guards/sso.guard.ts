@@ -73,7 +73,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
             "Authorization": request.header("Authorization") || "",
           },
           cacheTimeout,
-          originHeaders: new Headers(headers),
+          originHeaders: headers,
           cacheStore: store,
           isDebug,
         });
