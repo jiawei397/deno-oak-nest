@@ -9,6 +9,7 @@ import {
 import { Abstract } from "./interfaces/provider.interface.ts";
 import { Constructor, Type } from "./interfaces/type.interface.ts";
 import { Context } from "./interfaces/context.interface.ts";
+import { HttpException, InternalServerErrorException } from "./exceptions.ts";
 
 export const META_EXCEPTION_FILTER_KEY = Symbol("meta:exception:filter");
 export const META_EXCEPTION_CATCH_KEY = Symbol("meta:exception:catch");
@@ -121,4 +122,15 @@ export async function checkByFilters(
     }
   }
   throw tempError;
+}
+
+@Catch()
+export class DefaultGlobalExceptionFilter implements ExceptionFilter {
+  catch(exception: Error, context: Context) {
+    const err = exception instanceof HttpException
+      ? exception
+      : new InternalServerErrorException(exception.message || exception);
+    context.response.body = err.response;
+    context.response.status = err.status;
+  }
 }

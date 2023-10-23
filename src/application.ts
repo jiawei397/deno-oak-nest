@@ -14,18 +14,13 @@ import {
   isModule,
   onModuleInit,
 } from "./decorators/module.ts";
-import {
-  ForbiddenException,
-  HttpException,
-  InternalServerErrorException,
-  NotFoundException,
-} from "./exceptions.ts";
+import { ForbiddenException, NotFoundException } from "./exceptions.ts";
 import {
   Factory,
   globalFactoryCaches,
   initProvider,
 } from "./factorys/class.factory.ts";
-import { checkByFilters } from "./filter.ts";
+import { checkByFilters, DefaultGlobalExceptionFilter } from "./filter.ts";
 import { checkByGuard } from "./guard.ts";
 import { checkByInterceptors } from "./interceptor.ts";
 import {
@@ -217,7 +212,9 @@ export class Application {
   private apiPrefixOptions: ApiPrefixOptions = {};
   private staticOptions: StaticOptions;
   private globalInterceptors: NestUseInterceptors = [];
-  private globalExceptionFilters: ExceptionFilters = [];
+  private globalExceptionFilters: ExceptionFilters = [
+    DefaultGlobalExceptionFilter,
+  ];
   private globalGuards: NestGuards = [];
   private cache: Map<any, any> = globalFactoryCaches;
 
@@ -442,15 +439,7 @@ export class Application {
       this.globalExceptionFilters,
       fn,
       error,
-    ).catch((err) => this.catchError(context, err));
-  }
-
-  private catchError(context: Context, error: any) {
-    const err = error instanceof HttpException
-      ? error
-      : new InternalServerErrorException(error.message || error);
-    context.response.body = err.response;
-    context.response.status = err.status;
+    );
   }
 
   protected async routes() {
