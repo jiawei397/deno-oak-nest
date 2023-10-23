@@ -14,6 +14,7 @@
     "@nest/redis": "../modules/redis/mod.ts",
     "@nest/scheduler": "../modules/scheduler/mod.ts",
     "@nest/uinv": "../modules/uinv/mod.ts",
+    "@nest/tests": "../tests/mod.ts",
     "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts",
     "std/": "https://deno.land/std@0.202.0/",
     "cliffy/": "https://deno.land/x/cliffy@v1.0.0-rc.3/",
