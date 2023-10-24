@@ -1,20 +1,20 @@
 import {
   assert,
   assertEquals,
-  assertFalse,
+  assertNotEquals,
   assertRejects,
 } from "../../test_deps.ts";
-import { Reflect } from "../../deps.ts";
-import { Injectable } from "../decorators/inject.ts";
+import { Inject, Injectable } from "../decorators/inject.ts";
 import { Scope } from "../interfaces/scope-options.interface.ts";
 import {
   clearAllFactoryCaches,
   Factory,
   globalFactoryCaches,
   initProvider,
-  META_CONTAINER_KEY,
   setFactoryCaches,
 } from "./class.factory.ts";
+import { INQUIRER } from "../constants.ts";
+import { type Constructor } from "../interfaces/type.interface.ts";
 
 Deno.test("Factory without providers", async () => {
   class A {
@@ -39,30 +39,29 @@ Deno.test("Factory with providers", async () => {
 
   const callStack: number[] = [];
 
-  @Injectable()
-  class B {
-  }
-
   @Injectable({
     scope: Scope.TRANSIENT,
   })
   class C {
-    constructor() {
-      assertFalse(
-        Reflect.getMetadata(META_CONTAINER_KEY, this),
-        "C not be injected metadata in constructor",
-      );
+    constructor(@Inject(INQUIRER) private parentClass: Constructor) {
+      callStack.push(1);
     }
 
-    __post__init__() {
-      callStack.push(1);
+    getParent() {
+      return this.parentClass;
+    }
+  }
+
+  @Injectable()
+  class B {
+    constructor(public readonly c: C) {
+      callStack.push(2);
     }
   }
 
   @Controller()
   class A {
-    constructor(public readonly b: B, public readonly c: C) {
-    }
+    constructor(public readonly b: B, public readonly c: C) {}
   }
 
   const a = await Factory(A);
@@ -70,22 +69,19 @@ Deno.test("Factory with providers", async () => {
   assert(a.b instanceof B);
   assert(a.c);
   assert(a.c instanceof C);
+  assert(a.b.c instanceof C);
+  assertNotEquals(a.b.c, a.c);
+  assertEquals(a.c.getParent(), A, "C should record the parent class A");
+  assertEquals(a.b.c.getParent(), B, "C should record the parent class B");
 
-  assertEquals(callStack, [1]);
+  assertEquals(callStack, [1, 1, 2]);
 
   const a1 = await Factory(A);
   assert(a === a1, "Factory should return the same instance");
   assert(a.b === a1.b, "B should return the same instance");
   assert(a.c === a1.c, "C should return the same instance");
 
-  assertEquals(callStack, [1]);
-
-  assertEquals(Reflect.getMetadata(META_CONTAINER_KEY, a), undefined);
-  assertEquals(Reflect.getMetadata(META_CONTAINER_KEY, a.b), undefined);
-  assert(
-    Reflect.getMetadata(META_CONTAINER_KEY, a.c) === A,
-    "C should record the parent class A",
-  );
+  assertEquals(callStack, [1, 1, 2]);
 });
 
 Deno.test("initProvider", async (t) => {

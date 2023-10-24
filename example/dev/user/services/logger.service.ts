@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Injectable, META_CONTAINER_KEY, Reflect, Scope } from "@nest";
+import { type Constructor, Inject, Injectable, INQUIRER, Scope } from "@nest";
 
 interface ILogger {
   info(...messages: any[]): void;
@@ -14,12 +14,8 @@ interface ILogger {
 export class LoggerService implements ILogger {
   private parentName?: string;
 
-  /**
-   * The parent name was not injected when the service was created
-   * @private
-   */
-  __post__init__() {
-    this.parentName = Reflect.getMetadata(META_CONTAINER_KEY, this)?.name;
+  constructor(@Inject(INQUIRER) private parentClass: Constructor) {
+    this.parentName = this.parentClass.name;
   }
 
   private write(

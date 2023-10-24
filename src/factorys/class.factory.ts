@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Reflect } from "../../deps.ts";
+import { INQUIRER } from "../constants.ts";
 import { getInjectData, isSingleton } from "../decorators/inject.ts";
 import type {
   ClassProvider,
@@ -11,12 +12,10 @@ import type {
   NestGuards,
   NestUseInterceptors,
   Provider,
-  Type,
   ValueProvider,
 } from "../interfaces/mod.ts";
 import { Scope } from "../interfaces/mod.ts";
 
-export const META_CONTAINER_KEY = "meta:container"; // the container of the class
 export const globalFactoryCaches = new Map();
 
 export const setFactoryCaches = (key: any, value: any) => {
@@ -28,9 +27,10 @@ export function clearAllFactoryCaches() {
 }
 
 export const Factory = <T>(
-  target: Type<T>,
+  target: Constructor<T>,
   scope: Scope = Scope.DEFAULT,
   factoryCaches = globalFactoryCaches,
+  parentClass?: Constructor,
 ): Promise<T> => {
   const singleton = isSingleton(target) && scope === Scope.DEFAULT;
   if (singleton) {
@@ -39,7 +39,7 @@ export const Factory = <T>(
       return factoryCaches.get(target);
     }
   }
-  const instance = getInstance(target, scope, factoryCaches);
+  const instance = getInstance(target, scope, factoryCaches, parentClass);
   if (singleton) {
     factoryCaches.set(target, instance);
   }
@@ -47,9 +47,10 @@ export const Factory = <T>(
 };
 
 export const getInstance = async <T>(
-  target: Type<T>,
+  target: Constructor<T>,
   scope: Scope = Scope.DEFAULT,
   factoryCaches = globalFactoryCaches,
+  parentClass?: Constructor,
 ): Promise<T> => {
   if (!target || (typeof target !== "object" && typeof target !== "function")) {
     throw new Error(
@@ -60,12 +61,15 @@ export const getInstance = async <T>(
   let args: any[] = [];
   if (paramtypes?.length) {
     args = await Promise.all(
-      paramtypes.map(async (paramtype: Type, index: number) => {
+      paramtypes.map(async (paramtype: Constructor, index: number) => {
         const injectedData = getInjectData(target, index);
         if (injectedData) {
           if (
             typeof injectedData === "string" || typeof injectedData === "symbol"
           ) {
+            if (INQUIRER === injectedData) { // inject parentClass
+              return parentClass;
+            }
             return factoryCaches.get(injectedData);
           }
           if (typeof injectedData === "function") {
@@ -78,13 +82,7 @@ export const getInstance = async <T>(
             );
           }
         }
-        const param = await Factory(paramtype, scope, factoryCaches);
-        if (!isSingleton(paramtype)) {
-          Reflect.defineMetadata(META_CONTAINER_KEY, target, param); // the meta can only be set to the instance
-          if (param.__post__init__ instanceof Function) {
-            param.__post__init__();
-          }
-        }
+        const param = await Factory(paramtype, scope, factoryCaches, target);
         return param;
       }),
     );

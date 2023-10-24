@@ -19,11 +19,11 @@ export class TestModule {
     this.data = data;
   }
 
-  get<T extends Instance>(constructor: Type<T>) {
-    return Factory<T>(constructor, undefined, this.factoryCaches);
+  get<T extends Instance>(constructor: Type<T>, parentClass?: Type<any>) {
+    return Factory<T>(constructor, undefined, this.factoryCaches, parentClass);
   }
-  resolve(constructor: Constructor) {
-    return getInstance(constructor, undefined, this.factoryCaches);
+  resolve(constructor: Constructor, parentClass?: Type<any>) {
+    return getInstance(constructor, undefined, this.factoryCaches, parentClass);
   }
   overrideProvider(provide: Provide, value: any) {
     const data = this.data;
