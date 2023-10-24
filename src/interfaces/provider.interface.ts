@@ -31,11 +31,8 @@ export type SpecialProvider<T = any> =
  * For example:
  * ```typescript
  * const configServiceProvider = {
- * provide: ConfigService,
- * useClass:
- *   process.env.NODE_ENV === 'development'
- *     ? DevelopmentConfigService
- *     : ProductionConfigService,
+ *    provide: ConfigService,
+ *    useClass: ProductionConfigService
  * };
  * ```
  *

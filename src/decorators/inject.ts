@@ -10,8 +10,7 @@ export const SINGLETON_MEAT_KEY = "meta:singleton";
 
 /**
  * Inject decorator
- *
- * For example:
+ * @example
  * ```typescript
  * const InjectModel = (name: string) => Inject(() => name);
  * ```
