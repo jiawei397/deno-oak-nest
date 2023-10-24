@@ -1,3 +1,4 @@
+import { type DynamicModule } from "../../../src/interfaces/module.interface.ts";
 import {
   Client,
   type ClientOptions,
@@ -10,7 +11,7 @@ import { POSTGRES_KEY } from "./postgres.constant.ts";
 export class PostgresModule {
   static client: Client;
 
-  static forRoot(config: ClientOptions | ConnectionString) {
+  static forRoot(config: ClientOptions | ConnectionString): DynamicModule {
     return {
       module: PostgresModule,
       providers: [

@@ -1,10 +1,11 @@
+import { DynamicModule } from "../../../src/interfaces/module.interface.ts";
 import { Client, type ClientConfig, red, yellow } from "../deps.ts";
 import { MYSQL_KEY } from "./mysql.constant.ts";
 
 export class MysqlModule {
   static client: Client;
 
-  static forRoot(config: ClientConfig) {
+  static forRoot(config: ClientConfig): DynamicModule {
     return {
       module: MysqlModule,
       providers: [

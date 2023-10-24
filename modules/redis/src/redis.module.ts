@@ -1,4 +1,5 @@
-import { connect, red, RedisConnectOptions, yellow } from "../deps.ts";
+import { type DynamicModule } from "../../../src/interfaces/module.interface.ts";
+import { connect, red, type RedisConnectOptions, yellow } from "../deps.ts";
 import type { Redis } from "../deps.ts";
 import { REDIS_KEY } from "./redis.constant.ts";
 import { RedisService } from "./redis.service.ts";
@@ -7,7 +8,7 @@ import { RedisStore } from "./redis.store.ts";
 export class RedisModule {
   static client: Redis;
 
-  static forRoot(db: RedisConnectOptions) {
+  static forRoot(db: RedisConnectOptions): DynamicModule {
     return {
       module: RedisModule,
       providers: [
