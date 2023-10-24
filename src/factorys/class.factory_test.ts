@@ -91,11 +91,19 @@ Deno.test("initProvider", async (t) => {
   const a = await initProvider(A);
   assert(a instanceof A);
 
-  // const c = await initProvider(A, Scope.REQUEST);
-  // assert(c !== a);
+  await t.step("initProvider with self map", async () => {
+    const a1 = await initProvider(A, undefined, new Map());
+    assert(a1 instanceof A);
+    assert(a1 !== a);
+  });
 
-  const d = await initProvider(A, Scope.TRANSIENT);
-  assert(d !== a);
+  await t.step("initProvider with scope", async () => {
+    // const c = await initProvider(A, Scope.REQUEST);
+    // assert(c !== a);
+
+    const d = await initProvider(A, Scope.TRANSIENT);
+    assert(d !== a);
+  });
 
   await t.step("useExisting", async () => {
     const provider = {
@@ -183,6 +191,73 @@ Deno.test("initProvider", async (t) => {
         return "c";
       },
       inject: [B],
+    };
+    const res = await initProvider(provider);
+    assertEquals(res, "c");
+    assertEquals(callStack, [1]);
+  });
+
+  await t.step("useFactory with inject optional is true", async () => {
+    const callStack: number[] = [];
+    class B {}
+    const provider = {
+      provide: "a",
+      useFactory: (b: B, c?: string) => {
+        callStack.push(1);
+        assert(b instanceof B);
+        assertEquals(c, undefined);
+        return "c";
+      },
+      inject: [
+        // { provide: "SomeOptionalProvider", useValue: "anything" },
+        B,
+        { token: "SomeOptionalProvider", optional: true },
+      ],
+    };
+    const res = await initProvider(provider);
+    assertEquals(res, "c");
+    assertEquals(callStack, [1]);
+  });
+
+  await t.step("useFactory with inject optional is false", async () => {
+    class B {}
+    const provider = {
+      provide: "a",
+      // deno-lint-ignore no-unused-vars
+      useFactory: (b: B, c?: string) => {
+        assert(false, "not reached");
+      },
+      inject: [
+        // { provide: "SomeOptionalProvider", useValue: "anything" },
+        B,
+        { token: "SomeOptionalProvider", optional: false },
+      ],
+    };
+    await assertRejects(() => initProvider(provider));
+  });
+
+  await t.step("useFactory with inject optional works", async () => {
+    const callStack: number[] = [];
+    const someOptionalProvider = {
+      provide: "SomeOptionalProvider",
+      useValue: "anything",
+    };
+    const res1 = await initProvider(someOptionalProvider);
+    assertEquals(res1, someOptionalProvider.useValue);
+
+    class B {}
+    const provider = {
+      provide: "a",
+      useFactory: (b: B, c?: string) => {
+        callStack.push(1);
+        assert(b instanceof B);
+        assertEquals(c, someOptionalProvider.useValue);
+        return "c";
+      },
+      inject: [
+        B,
+        { token: "SomeOptionalProvider", optional: false },
+      ],
     };
     const res = await initProvider(provider);
     assertEquals(res, "c");

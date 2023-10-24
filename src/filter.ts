@@ -6,7 +6,6 @@ import {
   ExceptionFilter,
   ExceptionFilters,
 } from "./interfaces/filter.interface.ts";
-import { Abstract } from "./interfaces/provider.interface.ts";
 import { Constructor, Type } from "./interfaces/type.interface.ts";
 import { Context } from "./interfaces/context.interface.ts";
 import { HttpException, InternalServerErrorException } from "./exceptions.ts";
@@ -69,7 +68,7 @@ export function UseFilters(
  * @publicApi
  */
 export function Catch(
-  ...exceptions: Array<Type<any> | Abstract<any>>
+  ...exceptions: Array<Type<any>>
 ): ClassDecorator {
   return function (target: any) {
     Reflect.defineMetadata(
@@ -104,8 +103,10 @@ export async function checkByFilters(
   let tempError = error;
   for (let len = filters.length, i = len - 1; i >= 0; i--) {
     const filter = filters[i];
-    const catchedExceptions: Array<Type<any> | Abstract<any>> = Reflect
-      .getMetadata(META_EXCEPTION_CATCH_KEY, filter);
+    const catchedExceptions: Array<Type> = Reflect.getMetadata(
+      META_EXCEPTION_CATCH_KEY,
+      filter,
+    );
     if (catchedExceptions) {
       const isOne = catchedExceptions.length === 0
         ? true

@@ -2,6 +2,7 @@
 import { Reflect } from "../../deps.ts";
 import { INQUIRER } from "../constants.ts";
 import { getInjectData, isSingleton } from "../decorators/inject.ts";
+import { InternalServerErrorException } from "../exceptions.ts";
 import type {
   ClassProvider,
   Constructor,
@@ -123,9 +124,18 @@ export async function initProvider(
       let result;
       if (itemProvider.inject?.length) {
         const args = await Promise.all(
-          itemProvider.inject.map((item: any) => {
-            if (item instanceof Function) {
-              return Factory(item, itemProvider.scope, cache);
+          itemProvider.inject.map((item) => {
+            if (typeof item === "object") {
+              const val = cache.get(item.token);
+              if (val === undefined && item.optional !== true) {
+                throw new InternalServerErrorException(
+                  `FactoryProvider: ${item.token.toString()} not found`,
+                );
+              }
+              return val;
+            }
+            if (typeof item === "function") {
+              return initProvider(item, itemProvider.scope, cache);
             }
             return item;
           }),
@@ -138,6 +148,7 @@ export async function initProvider(
       return result;
     }
   }
+  return item;
 }
 
 export async function getMergedMetas<T>(

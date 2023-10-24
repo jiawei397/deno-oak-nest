@@ -1,12 +1,8 @@
-// deno-lint-ignore-file no-explicit-any ban-types
+// deno-lint-ignore-file no-explicit-any
 import { Scope } from "./scope-options.interface.ts";
 import { Type } from "./type.interface.ts";
 
-export interface Abstract<T> extends Function {
-  prototype: T;
-}
-
-export type Provide = string | symbol | Type<any> | Abstract<any>;
+export type Provide = string | symbol | Type;
 
 /**
  * @publicApi
@@ -112,7 +108,12 @@ export interface FactoryProvider<T = any> {
   /**
    * Optional list of providers to be injected into the context of the Factory function.
    */
-  inject?: Array<Type<any> | string | symbol | Abstract<any> | Function>;
+  inject?: Array<
+    Provide | {
+      token: Provide;
+      optional: boolean;
+    }
+  >;
   /**
    * Optional enum defining lifetime of the provider that is returned by the Factory function.
    */
