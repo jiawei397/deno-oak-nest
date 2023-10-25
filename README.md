@@ -358,15 +358,15 @@ If you want to connect db such as Mongodb, you can do like this:
 
 ```ts
 import { Module } from "@nest";
-import { AppController } from "./app.controller.ts";
+import { MongoModule } from "@nest/mongo";
 import { UserModule } from "./user/user.module.ts";
 
 @Module({
   imports: [
-    MongoFactory.forRoot(globals.db), // it can return a Promise
+    MongoModule.forRoot("mongodb://10.100.30.65:27018/test"),
     UserModule,
   ],
-  controllers: [AppController],
+  controllers: [],
 })
 export class AppModule {}
 ```
@@ -406,9 +406,6 @@ import { Inject } from "@nest";
 export const InjectModel = (Cls: Constructor) => Inject(() => getModel(Cls));
 ```
 
-> To support it, I changed the `router.register` method to asynchronous. It was
-> not a pleasant decision.
-
 Here is a Service example:
 
 ```ts
@@ -425,7 +422,8 @@ export class UserService {
 }
 ```
 
-In the above code, `this.model` is the `getModel` result.
+In the above code, `this.model` is the `getModel` result. More example see
+`modules/mongo/example`.
 
 ### register Dynamic Module
 
@@ -497,8 +495,8 @@ export class AppModule {}
 ```
 
 You can also see the `RedisModule` example
-[this way](https://deno.land/x/oak_nest_redis_module) or use the modules such as
-`cache` and `scheduler` in the `modules` dir.
+[this way](https://deno.land/x/deno_nest@v3.3.0/modules/redis) or use the
+modules such as `cache` and `scheduler` in the `modules` dir.
 
 ## use alias
 

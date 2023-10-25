@@ -1,4 +1,4 @@
-# oak_nest_schedule_module
+# nest_schedule_module
 
 This is a `schedule` module for [`deno_nest`](https://deno.land/x/deno_nest).
 

@@ -1,4 +1,4 @@
-# oak_nest_redis_module
+# nest_redis_module
 
 This is a redis module for [`deno_nest`](https://deno.land/x/deno_nest).
 

@@ -1,4 +1,4 @@
-# oak_nest_postgres_module
+# nest_postgres_module
 
 This is a Postgres module for [`deno_nest`](https://deno.land/x/deno_nest).
 Currently used Postgres client is <https://deno.land/x/postgres@v0.17.0/mod.ts>

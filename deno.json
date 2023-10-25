@@ -7,6 +7,7 @@
     "dev:cache": "deno task --cwd=modules/cache dev",
     "dev:cors": "deno task --cwd=modules/cors dev",
     "dev:es": "deno task --cwd=modules/elasticsearch dev",
+    "dev:mongo": "deno task --cwd=modules/mongo dev",
     "dev:mysql": "deno task --cwd=modules/mysql dev",
     "dev:oak": "deno task --cwd=modules/oak dev",
     "dev:postgres": "deno task --cwd=modules/postgres dev",

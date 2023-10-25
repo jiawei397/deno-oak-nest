@@ -1,4 +1,4 @@
-# oak_nest_elasticsearch_module
+# nest_elasticsearch_module
 
 This is a redis module for [`deno_nest`](https://deno.land/x/deno_nest).
 
