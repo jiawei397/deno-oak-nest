@@ -235,9 +235,6 @@ Deno.test("collect module order", async (t) => {
 
     const moduleDepsArr = sortModuleDeps(moduleMap);
 
-    console.log(moduleMap);
-    console.log(moduleDepsArr);
-
     assertEquals(moduleMap.size, 6);
     assertEquals(moduleDepsArr.length, 6);
     assertEquals(moduleDepsArr, [

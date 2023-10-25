@@ -343,7 +343,6 @@ Deno.test("module init", async (t) => {
     const app = createMockApp();
     await app.init(AppModule, new Map());
 
-    console.log("module inited", callStack);
     assertEquals(
       callStack,
       [1, 2, 5, 4, 6, 3],
