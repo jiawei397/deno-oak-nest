@@ -5,9 +5,9 @@ This is a redis module for [`deno_nest`](https://deno.land/x/deno_nest).
 ## example
 
 ```typescript
-import { Module } from "https://deno.land/x/deno_nest@v3.3.0/mod.ts";
+import { Module } from "https://deno.land/x/deno_nest@v3.3.1/mod.ts";
 import { AppController } from "./app.controller.ts";
-import { ElasticsearchModule } from "https://deno.land/x/deno_nest@v3.3.0/modules/elasticsearch/mod.ts";
+import { ElasticsearchModule } from "https://deno.land/x/deno_nest@v3.3.1/modules/elasticsearch/mod.ts";
 
 @Module({
   imports: [
@@ -23,8 +23,8 @@ export class AppModule {}
 Then can be used in AppController:
 
 ```ts
-import { ElasticsearchService } from "https://deno.land/x/deno_nest@v3.3.0/modules/elasticsearch/mod.ts";
-import { Controller, Get } from "https://deno.land/x/deno_nest@v3.3.0/mod.ts";
+import { ElasticsearchService } from "https://deno.land/x/deno_nest@v3.3.1/modules/elasticsearch/mod.ts";
+import { Controller, Get } from "https://deno.land/x/deno_nest@v3.3.1/mod.ts";
 
 @Controller("")
 export class AppController {
