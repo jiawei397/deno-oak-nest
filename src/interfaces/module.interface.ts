@@ -1,18 +1,17 @@
-// deno-lint-ignore-file no-explicit-any
 import { Provider } from "./provider.interface.ts";
-import { Type } from "./type.interface.ts";
+import { Constructor } from "./type.interface.ts";
 
 export interface ModuleMetadata {
   /**
    * Optional list of imported modules that export the providers which are
    * required in this module.
    */
-  imports?: any[];
+  imports?: ModuleType[];
   /**
    * Optional list of controllers defined in this module which have to be
    * instantiated.
    */
-  controllers?: Type<any>[];
+  controllers?: Constructor[];
 
   /**
    * Optional list of providers that will be instantiated by the Nest injector
@@ -37,7 +36,7 @@ export interface DynamicModule extends ModuleMetadata {
   /**
    * A module reference
    */
-  module: Type<any>;
+  module: Constructor;
   // /**
   //  * When "true", makes a module global-scoped.
   //  *
@@ -50,7 +49,7 @@ export interface DynamicModule extends ModuleMetadata {
   // global?: boolean;
 }
 
-export type ModuleType = Type<any> | DynamicModule;
+export type ModuleType = Constructor | DynamicModule;
 
 export interface OnApplicationBootstrap {
   onApplicationBootstrap(): void | Promise<void>;

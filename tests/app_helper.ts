@@ -109,7 +109,7 @@ export function createCommonTests(
         await app.close();
       });
 
-      await t.step("fetch ok with global prefix, return result", async (it) => {
+      await t.step("fetch ok with global prefix, return result", async () => {
         @Controller("/")
         class A {
           @Get("/")

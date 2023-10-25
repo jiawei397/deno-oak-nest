@@ -8,12 +8,7 @@ import {
   META_METHOD_KEY,
   META_PATH_KEY,
 } from "./decorators/controller.ts";
-import {
-  getModuleMetadata,
-  isDynamicModule,
-  isModule,
-  onModuleInit,
-} from "./decorators/module.ts";
+import { isDynamicModule, onModuleInit } from "./decorators/module.ts";
 import { ForbiddenException, NotFoundException } from "./exceptions.ts";
 import {
   Factory,
@@ -37,14 +32,11 @@ import { NestUseInterceptors } from "./interfaces/interceptor.interface.ts";
 import { LoggerService } from "./interfaces/log.interface.ts";
 import { NestMiddleware } from "./interfaces/middleware.interface.ts";
 import { ModuleType } from "./interfaces/module.interface.ts";
-import {
-  Provider,
-  RegisteredProvider,
-  SpecialProvider,
-} from "./interfaces/provider.interface.ts";
+import { Provider } from "./interfaces/provider.interface.ts";
 import { IRouter, RouteItem, RouteMap } from "./interfaces/route.interface.ts";
 import { Scope } from "./interfaces/scope-options.interface.ts";
 import { Constructor, Type } from "./interfaces/type.interface.ts";
+import { collectModuleDeps, CollectResult, sortModuleDeps } from "./module.ts";
 import { transferParam } from "./params.ts";
 
 export function join(...paths: string[]) {
@@ -120,69 +112,6 @@ export async function mapRoute(
     });
   });
   return result;
-}
-
-export async function collect(
-  rootModule: ModuleType,
-  moduleArr: ModuleType[],
-  controllerArr: Type<any>[],
-  registeredProviders: RegisteredProvider[],
-  dynamicProviders: Provider[],
-  specialProviders: SpecialProvider[],
-) {
-  if (!isModule(rootModule)) {
-    return;
-  }
-  moduleArr.push(rootModule);
-  const isDynamic = isDynamicModule(rootModule);
-  const imports = isDynamic
-    ? rootModule.imports
-    : getModuleMetadata("imports", rootModule);
-
-  const controllers = isDynamic
-    ? rootModule.controllers
-    : getModuleMetadata("controllers", rootModule);
-  const providers: Provider[] = isDynamic
-    ? rootModule.providers
-    : getModuleMetadata("providers", rootModule);
-  // const exports = isDynamicModule
-  //   ? module.exports
-  //   : getModuleMetadata("exports", module); // TODO don't think well how to use exports
-  if (controllers) {
-    controllerArr.push(...controllers);
-  }
-  if (providers) {
-    if (isDynamic) {
-      dynamicProviders.push(...providers);
-    } else {
-      providers.forEach((provider) => {
-        if ("provide" in provider) {
-          specialProviders.push(provider);
-        } else {
-          registeredProviders.push(provider);
-        }
-      });
-    }
-  }
-  if (!imports || !imports.length) {
-    return;
-  }
-  await Promise.all(
-    imports.map(async (item: any) => {
-      if (!item) {
-        return;
-      }
-      const module = await item;
-      return collect(
-        module,
-        moduleArr,
-        controllerArr,
-        registeredProviders,
-        dynamicProviders,
-        specialProviders,
-      );
-    }),
-  );
 }
 
 export async function getRouterArr(
@@ -644,53 +573,51 @@ export class Application {
     return arr;
   }
 
-  async init(appModule: ModuleType, cache: Map<any, any>) {
-    this.cache = cache;
-
-    this.log(yellow("[NestFactory]"), green(`Starting Nest application...`));
-    const start = Date.now();
-    const modules: ModuleType[] = [];
-    const controllers: Type<any>[] = this.controllers;
-    const registeredProviders: RegisteredProvider[] = [];
-    const dynamicProviders: Provider[] = [];
-    const specialProviders: SpecialProvider[] = [];
-    await collect(
-      appModule,
-      modules,
-      controllers,
-      registeredProviders,
-      dynamicProviders,
-      specialProviders,
+  private async initControllers(controllerArr: Constructor[]) {
+    await Promise.all(
+      controllerArr.map(async (controller) => {
+        const instance = await this.initController(controller);
+        this.instances.add(instance);
+      }),
     );
-    this.log(
-      yellow("[NestApplication]"),
-      green(`AppModule dependencies collected ${Date.now() - start}ms`),
-    );
+  }
 
-    const startInit = Date.now();
-    await this.initProviders(specialProviders);
-    await this.initProviders(dynamicProviders); // init dynamic providers first to avoid it be inited first by other providers
-    await this.initProviders(registeredProviders);
-
-    if (controllers.length) {
-      await Promise.all(
-        controllers.map(async (controller) => {
-          const instance = await this.initController(controller);
-          this.instances.add(instance);
-        }),
-      );
-    }
-
-    // init modules
+  private async initModules(modules: ModuleType[]) {
     await Promise.all(
       modules.map(async (module) => {
         const instance = await this.initModule(module);
         this.instances.add(instance);
       }),
     );
+  }
+
+  async init(appModule: ModuleType, cache: Map<any, any>) {
+    this.cache = cache;
+
+    this.log(yellow("[NestFactory]"), green(`Starting Nest application...`));
+    const start = Date.now();
+    const moduleMap = new Map<ModuleType, CollectResult>();
+    await collectModuleDeps(
+      appModule,
+      moduleMap,
+    );
+    const moduleDepsArr = sortModuleDeps(moduleMap);
+    this.log(
+      yellow("[InstanceLoader]"),
+      green(`AppModule dependencies collected ${Date.now() - start}ms`),
+    );
+
+    const startInit = Date.now();
+    for (const module of moduleDepsArr) {
+      const { controllerArr, providerArr } = moduleMap.get(module)!;
+      await this.initProviders(providerArr);
+      this.controllers.push(...controllerArr);
+      await this.initControllers(controllerArr);
+    }
+    await this.initModules(moduleDepsArr);
 
     this.log(
-      yellow("[NestApplication]"),
+      yellow("[InstanceLoader]"),
       green(`AppModule dependencies initialized ${Date.now() - startInit}ms`),
     );
   }

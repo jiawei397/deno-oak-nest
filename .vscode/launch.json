@@ -8,7 +8,7 @@
       "request": "launch",
       "name": "dev",
       "type": "node",
-      "program": "${workspaceFolder}/example/main.ts",
+      "program": "${workspaceFolder}/example/dev/main.ts",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "deno",
       "runtimeArgs": [
@@ -93,7 +93,7 @@
       "request": "launch",
       "name": "test",
       "type": "node",
-      "program": "${workspaceFolder}/src/decorators/method_test.ts",
+      "program": "${workspaceFolder}/src/module_test.ts",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "deno",
       "runtimeArgs": [

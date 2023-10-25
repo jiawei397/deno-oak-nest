@@ -1,4 +1,5 @@
 import { assert, assertEquals } from "../../test_deps.ts";
+import { DynamicModule } from "../interfaces/module.interface.ts";
 import {
   defineModuleMetadata,
   getModuleMetadata,
@@ -37,8 +38,23 @@ Deno.test("Module", () => {
     useFactory: () => "d",
   }];
 
+  @Module({})
+  class AsyncModule {
+    static register(): DynamicModule {
+      return {
+        module: AsyncModule,
+        providers: [{
+          provide: "async1",
+          useFactory: () => { // can be async
+            return Promise.resolve(true);
+          },
+        }],
+      };
+    }
+  }
+
   @Module({
-    imports: ["a", "b"],
+    imports: [AsyncModule],
     controllers: [A],
     providers,
   })
@@ -47,23 +63,34 @@ Deno.test("Module", () => {
 
   assert(isModule(ModuleA));
 
-  assertEquals(getModuleMetadata("imports", ModuleA), ["a", "b"]);
+  assertEquals(getModuleMetadata("imports", ModuleA), [AsyncModule]);
   assertEquals(getModuleMetadata("controllers", ModuleA), [A]);
   assertEquals(getModuleMetadata("providers", ModuleA), providers);
 });
 
-Deno.test("onModuleInit", () => {
-  const callStack: number[] = [];
-  class AppService {
-    onModuleInit() {
-      callStack.push(1);
+Deno.test("onModuleInit", async (t) => {
+  await t.step("has onModuleInit", () => {
+    const callStack: number[] = [];
+    class AppService {
+      onModuleInit() {
+        callStack.push(1);
+      }
     }
-  }
 
-  const appService = new AppService();
-  onModuleInit(appService);
-  assertEquals(callStack, [1]);
+    const appService = new AppService();
+    onModuleInit(appService);
+    assertEquals(callStack, [1]);
 
-  onModuleInit(appService);
-  assertEquals(callStack, [1], "should not call onModuleInit twice");
+    onModuleInit(appService);
+    assertEquals(callStack, [1], "should not call onModuleInit twice");
+  });
+
+  await t.step("has not onModuleInit", () => {
+    const callStack: number[] = [];
+    class AppService {}
+
+    const appService = new AppService();
+    onModuleInit(appService);
+    assertEquals(callStack, []);
+  });
 });

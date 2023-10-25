@@ -1,7 +1,9 @@
+import { Module } from "../../../src/decorators/module.ts";
 import { DynamicModule } from "../../../src/interfaces/module.interface.ts";
 import { Client, type ClientConfig, red, yellow } from "../deps.ts";
 import { MYSQL_KEY } from "./mysql.constant.ts";
 
+@Module({})
 export class MysqlModule {
   static client: Client;
 

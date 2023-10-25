@@ -35,7 +35,7 @@ export function defineModuleMetadata(target: object) {
   Reflect.defineMetadata(MODULE_KEY, true, target);
 }
 
-export function getModuleMetadata(key: ModuleMetadataKey, module: any) {
+export function getModuleMetadata<T>(key: ModuleMetadataKey, module: any): T {
   return Reflect.getOwnMetadata(key, module);
 }
 

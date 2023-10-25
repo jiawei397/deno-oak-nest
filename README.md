@@ -432,10 +432,11 @@ In the above code, `this.model` is the `getModel` result.
 You can also register a Dynamic Module like this:
 
 ```ts
-import { DynamicModule } from "@nest";
+import { DynamicModule, Module } from "@nest";
 import { ASYNC_KEY } from "./async.constant.ts";
 import { AsyncService } from "./async.service.ts";
 
+@Module({})
 export class AsyncModule {
   static register(db: string): DynamicModule {
     return {

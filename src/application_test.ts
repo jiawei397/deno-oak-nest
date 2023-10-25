@@ -1,7 +1,5 @@
-// deno-lint-ignore-file no-unused-vars no-explicit-any
 import { assert, assertEquals } from "../test_deps.ts";
 import {
-  collect,
   getRouterArr,
   join,
   mapRoute,
@@ -26,14 +24,8 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from "./exceptions.ts";
-import { ModuleType, OnModuleInit } from "./interfaces/module.interface.ts";
+import { OnModuleInit } from "./interfaces/module.interface.ts";
 import { Module } from "./decorators/module.ts";
-import {
-  Provider,
-  RegisteredProvider,
-  SpecialProvider,
-} from "./interfaces/provider.interface.ts";
-import { Type } from "./interfaces/type.interface.ts";
 
 Deno.test("join", () => {
   assertEquals(join(), "");
@@ -244,76 +236,6 @@ Deno.test("mapRoute with controller route", async () => {
   });
 });
 
-Deno.test("collect", async () => {
-  const callStack: number[] = [];
-
-  const moduleArr: ModuleType[] = [];
-  const controllerArr: Type<any>[] = [];
-  const registeredProviderArr: RegisteredProvider[] = [];
-  const dynamicProviders: Provider[] = [];
-  const specialProviders: SpecialProvider[] = [];
-
-  const Controller = (): ClassDecorator => () => {};
-
-  class ChildService {}
-
-  @Controller()
-  class ChildController {
-    constructor(private readonly childService: ChildService) {}
-  }
-
-  @Module({
-    imports: [],
-    controllers: [
-      ChildController,
-    ],
-  })
-  class ChildModule {}
-
-  class AppService {}
-
-  class SchedulerService {
-    onModuleInit() {
-      callStack.push(1);
-    }
-  }
-
-  @Controller()
-  class AppController {
-    constructor(private readonly appService: AppService) {}
-  }
-
-  @Module({
-    imports: [ChildModule],
-    controllers: [
-      AppController,
-    ],
-    providers: [SchedulerService],
-  })
-  class AppModule {}
-
-  await collect(
-    AppModule,
-    moduleArr,
-    controllerArr,
-    registeredProviderArr,
-    dynamicProviders,
-    specialProviders,
-  );
-
-  assertEquals(moduleArr.length, 2);
-  assertEquals(controllerArr.length, 2);
-  assertEquals(controllerArr[0], AppController);
-  assertEquals(controllerArr[1], ChildController);
-
-  assertEquals(registeredProviderArr.length, 1);
-  assertEquals(registeredProviderArr[0], SchedulerService);
-
-  assertEquals(dynamicProviders.length, 0);
-
-  assertEquals(specialProviders.length, 0);
-});
-
 Deno.test("module init", async (t) => {
   const callStack: number[] = [];
 
@@ -386,7 +308,7 @@ Deno.test("module init", async (t) => {
 
     assertEquals(
       callStack,
-      [5, 6, 2, 3],
+      [2, 5, 6, 3],
       "because no provider, so no call 1, 4",
     );
 
@@ -424,7 +346,7 @@ Deno.test("module init", async (t) => {
     console.log("module inited", callStack);
     assertEquals(
       callStack,
-      [5, 4, 1, 6, 2, 3],
+      [1, 2, 5, 4, 6, 3],
     );
 
     callStack.length = 0;

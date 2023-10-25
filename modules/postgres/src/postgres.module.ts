@@ -1,3 +1,4 @@
+import { Module } from "../../../src/decorators/module.ts";
 import { type DynamicModule } from "../../../src/interfaces/module.interface.ts";
 import {
   Client,
@@ -8,6 +9,7 @@ import {
 } from "../deps.ts";
 import { POSTGRES_KEY } from "./postgres.constant.ts";
 
+@Module({})
 export class PostgresModule {
   static client: Client;
 
