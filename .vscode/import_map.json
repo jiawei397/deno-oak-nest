@@ -9,6 +9,7 @@
     "@nest/cache": "../modules/cache/mod.ts",
     "@nest/elasticsearch": "../modules/elasticsearch/mod.ts",
     "@nest/oak": "../modules/oak/mod.ts",
+    "@nest/mongo": "../modules/mongo/mod.ts",
     "@nest/mysql": "../modules/mysql/mod.ts",
     "@nest/postgres": "../modules/postgres/mod.ts",
     "@nest/redis": "../modules/redis/mod.ts",
@@ -19,6 +20,7 @@
     "std/": "https://deno.land/std@0.202.0/",
     "cliffy/": "https://deno.land/x/cliffy@v1.0.0-rc.3/",
     "zip": "https://deno.land/x/zip@v1.2.2/mod.ts",
-    "jsonc": "https://deno.land/x/jsonc@1/main.ts"
+    "jsonc": "https://deno.land/x/jsonc@1/main.ts",
+    "deno_mongo_schema": "https://deno.land/x/deno_mongo_schema@v1.0.3/mod.ts"
   }
 }
