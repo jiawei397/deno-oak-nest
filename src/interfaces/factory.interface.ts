@@ -31,3 +31,5 @@ export type FactoryCreateOptions = {
   strict?: boolean;
   cache?: Map<any, any>;
 };
+
+export type FactoryCaches = Map<any, any>;

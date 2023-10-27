@@ -27,6 +27,7 @@ class A {
 Deno.test("test origin only with controller", async () => {
   const moduleRef = await createTestingModule({
     controllers: [A],
+    // providers: [B],
   })
     .compile();
   const a = await moduleRef.get(A);

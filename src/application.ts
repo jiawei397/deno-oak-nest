@@ -2,19 +2,12 @@
 import { blue, format, green, red, Reflect, yellow } from "../deps.ts";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "./constants.ts";
 import {
-  META_ALIAS_KEY,
   META_HEADER_KEY,
   META_HTTP_CODE_KEY,
-  META_METHOD_KEY,
-  META_PATH_KEY,
 } from "./decorators/controller.ts";
 import { isDynamicModule, onModuleInit } from "./decorators/module.ts";
 import { ForbiddenException, NotFoundException } from "./exceptions.ts";
-import {
-  Factory,
-  globalFactoryCaches,
-  initProvider,
-} from "./factorys/class.factory.ts";
+import { factory } from "./factorys/class.factory.ts";
 import { checkByFilters, DefaultGlobalExceptionFilter } from "./filter.ts";
 import { checkByGuard } from "./guard.ts";
 import { checkByInterceptors } from "./interceptor.ts";
@@ -24,117 +17,22 @@ import {
   ShutdownSignal,
 } from "./interfaces/application.interface.ts";
 import { Context } from "./interfaces/context.interface.ts";
-import { AliasOptions } from "./interfaces/controller.interface.ts";
-import { StaticOptions } from "./interfaces/factory.interface.ts";
+import {
+  FactoryCaches,
+  StaticOptions,
+} from "./interfaces/factory.interface.ts";
 import { ExceptionFilters } from "./interfaces/filter.interface.ts";
 import { ControllerMethod, NestGuards } from "./interfaces/guard.interface.ts";
 import { NestUseInterceptors } from "./interfaces/interceptor.interface.ts";
 import { LoggerService } from "./interfaces/log.interface.ts";
 import { NestMiddleware } from "./interfaces/middleware.interface.ts";
-import { ModuleType } from "./interfaces/module.interface.ts";
+import { CollectResult, ModuleType } from "./interfaces/module.interface.ts";
 import { Provider } from "./interfaces/provider.interface.ts";
-import { IRouter, RouteItem, RouteMap } from "./interfaces/route.interface.ts";
-import { Scope } from "./interfaces/scope-options.interface.ts";
+import { IRouter, RouteMap } from "./interfaces/route.interface.ts";
 import { Constructor, Type } from "./interfaces/type.interface.ts";
-import { collectModuleDeps, CollectResult, sortModuleDeps } from "./module.ts";
+import { collectModuleDeps, sortModuleDeps } from "./module.ts";
 import { transferParam } from "./params.ts";
-
-export function join(...paths: string[]) {
-  if (paths.length === 0) {
-    return "";
-  }
-  const str = paths.join("/").replaceAll("///", "/").replaceAll("//", "/");
-  let last = str;
-  if (!last.startsWith("/")) {
-    last = "/" + last;
-  }
-  if (last.endsWith("/")) {
-    last = last.substring(0, last.length - 1);
-  }
-  return last;
-}
-
-export function replacePrefix(str: string, prefix: string) {
-  return join(str.replace(/\$\{prefix\}/, prefix));
-}
-
-export function replaceSuffix(str: string, suffix: string) {
-  return join(str.replace(/\$\{suffix\}/, suffix));
-}
-
-export function replaceController(str: string, suffix: string) {
-  return join(str.replace(/\$\{controller\}/, suffix));
-}
-
-export function replacePrefixAndSuffix(
-  str: string,
-  prefix: string,
-  suffix: string,
-  controller?: string,
-) {
-  let temp = replacePrefix(str, prefix);
-  if (controller) {
-    temp = replaceController(temp, controller);
-  }
-  temp = replaceSuffix(temp, suffix);
-  return temp;
-}
-
-export async function mapRoute(
-  Cls: Type,
-  cache?: Map<any, any>,
-): Promise<RouteMap[]> {
-  const instance = await Factory(Cls, undefined, cache);
-  const prototype = Cls.prototype;
-  const result: RouteMap[] = [];
-  Object.getOwnPropertyNames(prototype).forEach((item) => {
-    if (item === "constructor") {
-      return;
-    }
-    if (typeof prototype[item] !== "function") {
-      return;
-    }
-    const fn = prototype[item];
-    const methodPath = Reflect.getMetadata(META_PATH_KEY, fn);
-    if (!methodPath) {
-      return;
-    }
-    const methodType = Reflect.getMetadata(META_METHOD_KEY, fn);
-    const aliasOptions: AliasOptions = Reflect.getMetadata(META_ALIAS_KEY, fn);
-    result.push({
-      methodPath,
-      aliasOptions,
-      methodType: methodType.toLowerCase(),
-      fn,
-      instance,
-      cls: Cls,
-      methodName: item,
-    });
-  });
-  return result;
-}
-
-export async function getRouterArr(
-  controllers: Type<any>[],
-  cache: Map<any, any>,
-) {
-  const routerArr: RouteItem[] = [];
-  await Promise.all(
-    controllers.map(async (Cls) => {
-      const arr = await mapRoute(Cls, cache);
-      const path = Reflect.getMetadata(META_PATH_KEY, Cls);
-      const aliasOptions = Reflect.getMetadata(META_ALIAS_KEY, Cls);
-      const controllerPath = join(path);
-      routerArr.push({
-        controllerPath,
-        arr,
-        cls: Cls,
-        aliasOptions,
-      });
-    }),
-  );
-  return routerArr;
-}
+import { join, replacePrefix, replacePrefixAndSuffix } from "./utils.ts";
 
 export class Application {
   private apiPrefix = "";
@@ -145,14 +43,15 @@ export class Application {
     DefaultGlobalExceptionFilter,
   ];
   private globalGuards: NestGuards = [];
-  private cache: Map<any, any> = globalFactoryCaches;
 
   private abortController: AbortController = new AbortController();
   private instances = new Set<any>();
-  private controllers: Type<any>[] = [];
+  private controllers: Type[] = [];
 
   private logger: LoggerService = console;
   private startTime = Date.now();
+
+  moduleCaches: Map<ModuleType, FactoryCaches> = new Map();
 
   constructor(protected router: IRouter) {}
 
@@ -374,7 +273,7 @@ export class Application {
   protected async routes() {
     const apiPrefixReg = this.apiPrefixOptions?.exclude;
 
-    const routerArr = await getRouterArr(this.controllers, this.cache);
+    const routerArr = await factory.getRouterArr(this.controllers);
     let num = 0;
     const start = Date.now();
     routerArr.forEach(
@@ -487,16 +386,17 @@ export class Application {
             num++;
           }
           const funcEnd = Date.now();
+          const path = aliasPath
+            ? originPath + ", " + red(aliasPath)
+            : isAbsolute
+            ? red(originPath)
+            : originPath;
           this.log(
             yellow("[RouterExplorer]"),
             green(
-              `Mapped {${
-                aliasPath
-                  ? originPath + ", " + red(aliasPath)
-                  : isAbsolute
-                  ? red(originPath)
-                  : originPath
-              }, ${methodType.toUpperCase()}} route ${funcEnd - funcStart}ms`,
+              `Mapped {${path || "/"}, ${methodType.toUpperCase()}} route ${
+                funcEnd - funcStart
+              }ms`,
             ),
           );
         });
@@ -530,22 +430,22 @@ export class Application {
       await onModuleInit(module);
       return module;
     } else {
-      const instance = await Factory(module, undefined, this.cache);
+      const instance = await factory.create(module);
       await onModuleInit(instance);
       return instance;
     }
   }
 
-  private async initController(Cls: Type) {
-    const instance = await Factory(Cls, undefined, this.cache);
+  private async initController(Cls: Type, caches: Map<any, any>) {
+    const instance = await factory.create(Cls, { caches });
     await onModuleInit(instance);
     return instance;
   }
 
-  private async initProviders(providers: Provider[]) {
+  private async initProviders(providers: Provider[], caches: Map<any, any>) {
     const arr = [];
     for (const provider of providers) {
-      const instance = await initProvider(provider, Scope.DEFAULT, this.cache);
+      const instance = await factory.initProvider(provider, { caches });
       this.instances.add(instance);
       if (instance) {
         arr.push({
@@ -573,16 +473,54 @@ export class Application {
     return arr;
   }
 
-  private async initControllers(controllerArr: Constructor[]) {
+  private async initControllers(
+    controllerArr: Constructor[],
+    caches: Map<any, any>,
+  ) {
     await Promise.all(
       controllerArr.map(async (controller) => {
-        const instance = await this.initController(controller);
+        const instance = await this.initController(controller, caches);
         this.instances.add(instance);
+        factory.globalCaches.set(controller, instance); // add to global caches
       }),
     );
   }
 
-  private async initModules(modules: ModuleType[]) {
+  private async initModules(
+    moduleMap: Map<ModuleType, CollectResult>,
+    modules: ModuleType[],
+  ) {
+    for (const module of modules) {
+      const {
+        controllerArr,
+        providerArr,
+        exportsArr,
+        childModuleArr,
+        cache: moduleCache,
+        global,
+      } = moduleMap.get(module)!;
+
+      this.moduleCaches.set(module, moduleCache);
+
+      if (childModuleArr.length) {
+        childModuleArr.forEach((childModule) => {
+          const { exportsArr: childExportsArr, cache: childModuleCache } =
+            moduleMap.get(childModule)!;
+          childExportsArr.forEach((item) => {
+            factory.copyProviderCache(item, childModuleCache, moduleCache);
+          });
+        });
+      }
+      await this.initProviders(providerArr, moduleCache);
+      if (global) {
+        exportsArr.forEach((item) => {
+          factory.copyProviderCache(item, moduleCache, factory.globalCaches);
+        });
+      }
+
+      this.controllers.push(...controllerArr);
+      await this.initControllers(controllerArr, moduleCache);
+    }
     await Promise.all(
       modules.map(async (module) => {
         const instance = await this.initModule(module);
@@ -591,8 +529,10 @@ export class Application {
     );
   }
 
-  async init(appModule: ModuleType, cache: Map<any, any>) {
-    this.cache = cache;
+  async init(appModule: ModuleType, caches?: FactoryCaches) {
+    if (caches) {
+      factory.globalCaches = caches;
+    }
 
     this.log(yellow("[NestFactory]"), green(`Starting Nest application...`));
     const start = Date.now();
@@ -608,14 +548,7 @@ export class Application {
     );
 
     const startInit = Date.now();
-    for (const module of moduleDepsArr) {
-      const { controllerArr, providerArr } = moduleMap.get(module)!;
-      await this.initProviders(providerArr);
-      this.controllers.push(...controllerArr);
-      await this.initControllers(controllerArr);
-    }
-    await this.initModules(moduleDepsArr);
-
+    await this.initModules(moduleMap, moduleDepsArr);
     this.log(
       yellow("[InstanceLoader]"),
       green(`AppModule dependencies initialized ${Date.now() - startInit}ms`),

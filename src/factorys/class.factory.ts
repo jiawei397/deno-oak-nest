@@ -1,132 +1,171 @@
 // deno-lint-ignore-file no-explicit-any
 import { Reflect } from "../../deps.ts";
 import { INQUIRER } from "../constants.ts";
+import {
+  META_ALIAS_KEY,
+  META_METHOD_KEY,
+  META_PATH_KEY,
+} from "../decorators/controller.ts";
 import { getInjectData, isSingleton } from "../decorators/inject.ts";
 import { InternalServerErrorException } from "../exceptions.ts";
 import type {
-  ClassProvider,
+  AliasOptions,
   Constructor,
   ControllerMethod,
   ExceptionFilters,
-  ExistingProvider,
-  FactoryProvider,
+  FactoryCaches,
   NestGuards,
   NestUseInterceptors,
   Provider,
-  ValueProvider,
+  RouteItem,
+  RouteMap,
 } from "../interfaces/mod.ts";
 import { Scope } from "../interfaces/mod.ts";
+import {
+  isClassProvider,
+  isExistingProvider,
+  isFactoryProvider,
+  isSpecialProvider,
+  isValueProvider,
+} from "../module.ts";
+import { join } from "../utils.ts";
 
-export const globalFactoryCaches = new Map();
+export class ClassFactory {
+  globalCaches: FactoryCaches = new Map();
 
-export const setFactoryCaches = (key: any, value: any) => {
-  globalFactoryCaches.set(key, value);
-};
-
-export function clearAllFactoryCaches() {
-  globalFactoryCaches.clear();
-}
-
-export const Factory = <T>(
-  target: Constructor<T>,
-  scope: Scope = Scope.DEFAULT,
-  factoryCaches = globalFactoryCaches,
-  parentClass?: Constructor,
-): Promise<T> => {
-  const singleton = isSingleton(target) && scope === Scope.DEFAULT;
-  if (singleton) {
-    if (factoryCaches.has(target)) {
-      //   console.debug("factory.has cache", target);
-      return factoryCaches.get(target);
+  getInstanceFromCaches<T>(
+    target: any,
+    cache?: FactoryCaches,
+  ): T | undefined {
+    if (cache?.has(target)) {
+      return cache.get(target);
     }
+    return this.globalCaches.get(target);
   }
-  const instance = getInstance(target, scope, factoryCaches, parentClass);
-  if (singleton) {
-    factoryCaches.set(target, instance);
-  }
-  return instance;
-};
 
-export const getInstance = async <T>(
-  target: Constructor<T>,
-  scope: Scope = Scope.DEFAULT,
-  factoryCaches = globalFactoryCaches,
-  parentClass?: Constructor,
-): Promise<T> => {
-  if (!target || (typeof target !== "object" && typeof target !== "function")) {
-    throw new Error(
-      `Factory target must be a class or function, but got ${target}`,
-    );
-  }
-  const paramtypes = Reflect.getMetadata("design:paramtypes", target);
-  let args: any[] = [];
-  if (paramtypes?.length) {
-    args = await Promise.all(
-      paramtypes.map(async (paramtype: Constructor, index: number) => {
-        const injectedData = getInjectData(target, index);
-        if (injectedData) {
-          if (
-            typeof injectedData === "string" || typeof injectedData === "symbol"
-          ) {
-            if (INQUIRER === injectedData) { // inject parentClass
-              return parentClass;
+  async getInstance<T>(
+    target: Constructor<T>,
+    options: {
+      scope?: Scope;
+      caches?: FactoryCaches;
+      parentClass?: Constructor;
+    } = {},
+  ): Promise<T> {
+    if (
+      !target || (typeof target !== "object" && typeof target !== "function")
+    ) {
+      throw new Error(
+        `Factory target must be a class or function, but got ${target}`,
+      );
+    }
+    const paramtypes = Reflect.getMetadata("design:paramtypes", target);
+    let args: any[] = [];
+    if (paramtypes?.length) {
+      args = await Promise.all(
+        paramtypes.map(async (paramtype: Constructor, index: number) => {
+          const injectedData = getInjectData(target, index);
+          if (injectedData) {
+            if (
+              typeof injectedData === "string" ||
+              typeof injectedData === "symbol"
+            ) {
+              if (INQUIRER === injectedData) { // inject parentClass
+                return options.parentClass;
+              }
+              return this.getInstanceFromCaches(injectedData, options.caches);
             }
-            return factoryCaches.get(injectedData);
+            if (typeof injectedData === "function") {
+              return injectedData();
+            }
+            if (typeof injectedData.fn === "function") {
+              return injectedData.fn.apply(
+                injectedData.scope,
+                injectedData.params,
+              );
+            }
           }
-          if (typeof injectedData === "function") {
-            return injectedData();
-          }
-          if (typeof injectedData.fn === "function") {
-            return injectedData.fn.apply(
-              injectedData.scope,
-              injectedData.params,
-            );
-          }
-        }
-        const param = await Factory(paramtype, scope, factoryCaches, target);
-        return param;
-      }),
-    );
-  }
-  const instance = new target(...args);
-  return instance;
-};
-
-export async function initProvider(
-  item: Provider,
-  scope = Scope.DEFAULT,
-  cache = globalFactoryCaches,
-) {
-  if (item instanceof Function) {
-    return Factory(item, scope, cache);
+          const param = await this.create(paramtype, {
+            ...options,
+            parentClass: target,
+          });
+          return param;
+        }),
+      );
+    }
+    const instance = new target(...args);
+    return instance;
   }
 
-  if (item.provide) {
-    if ("useExisting" in item) { // TODO not get how to use it
-      const itemProvider = item as ExistingProvider;
-      const existingInstance = Factory(itemProvider.useExisting, scope, cache);
+  // deno-lint-ignore require-await
+  async create<T>(
+    target: Constructor<T>,
+    options: {
+      scope?: Scope;
+      caches?: FactoryCaches;
+      parentClass?: Constructor;
+    } = {},
+  ): Promise<T> {
+    const caches = options.caches || this.globalCaches;
+    const scope = options.scope ?? Scope.DEFAULT;
+    const singleton = isSingleton(target) && scope === Scope.DEFAULT;
+    if (singleton) {
+      const instance = this.getInstanceFromCaches<T>(target, caches);
+      if (instance) {
+        return instance;
+      }
+    }
+    const instance = this.getInstance(target, options);
+    if (singleton) {
+      caches.set(target, instance);
+    }
+    return instance;
+  }
+
+  async initProvider(
+    provider: Provider,
+    options: {
+      scope?: Scope;
+      caches?: FactoryCaches;
+    } = {},
+  ) {
+    if (provider instanceof Function) { // same with class provider
+      return this.create(provider, options);
+    }
+    const caches = options.caches || this.globalCaches;
+
+    if (isClassProvider(provider)) {
+      return this.create(provider.useClass, {
+        scope: provider.scope,
+        caches,
+      });
+    }
+
+    if (isExistingProvider(provider)) {
+      const existingInstance = this.getInstanceFromCaches(
+        provider.useExisting,
+        options.caches,
+      );
       if (!existingInstance) {
         throw new Error(
-          `ExistingProvider: ${itemProvider.useExisting} not found`,
+          `ExistingProvider: ${provider.useExisting} not found`,
         );
       }
-      cache.set(itemProvider.provide, existingInstance);
+      caches.set(provider.provide, existingInstance);
       return existingInstance;
-    } else if ("useValue" in item) {
-      const itemProvider = item as ValueProvider;
-      cache.set(itemProvider.provide, itemProvider.useValue);
-      return itemProvider.useValue;
-    } else if ("useClass" in item) {
-      const itemProvider = item as ClassProvider;
-      return Factory(itemProvider.useClass, itemProvider.scope, cache);
-    } else if ("useFactory" in item) {
-      const itemProvider = item as FactoryProvider;
+    }
+
+    if (isValueProvider(provider)) {
+      caches.set(provider.provide, provider.useValue);
+      return provider.useValue;
+    }
+
+    if (isFactoryProvider(provider)) {
       let result;
-      if (itemProvider.inject?.length) {
+      if (provider.inject?.length) {
         const args = await Promise.all(
-          itemProvider.inject.map((item) => {
+          provider.inject.map((item) => {
             if (typeof item === "object") {
-              const val = cache.get(item.token);
+              const val = caches.get(item.token);
               if (val === undefined && item.optional !== true) {
                 throw new InternalServerErrorException(
                   `FactoryProvider: ${item.token.toString()} not found`,
@@ -135,21 +174,94 @@ export async function initProvider(
               return val;
             }
             if (typeof item === "function") {
-              return initProvider(item, itemProvider.scope, cache);
+              return this.initProvider(item, {
+                scope: provider.scope,
+                caches,
+              });
             }
             return item;
           }),
         );
-        result = await itemProvider.useFactory(...args);
+        result = await provider.useFactory(...args);
       } else {
-        result = await itemProvider.useFactory();
+        result = await provider.useFactory();
       }
-      cache.set(itemProvider.provide, result);
+      caches.set(provider.provide, result);
       return result;
     }
   }
-  return item;
+
+  copyProviderCache(
+    item: Provider,
+    oldCache: FactoryCaches,
+    newCache: FactoryCaches,
+  ) {
+    if (isSpecialProvider(item)) {
+      const instance = oldCache.get(item.provide);
+      newCache.set(item.provide, instance);
+    } else {
+      const instance = oldCache.get(item);
+      newCache.set(item, instance);
+    }
+  }
+
+  async mapRoute(
+    Cls: Constructor,
+  ): Promise<RouteMap[]> {
+    const instance = await this.create(Cls);
+    const prototype = Cls.prototype;
+    const result: RouteMap[] = [];
+    Object.getOwnPropertyNames(prototype).forEach((item) => {
+      if (item === "constructor") {
+        return;
+      }
+      if (typeof prototype[item] !== "function") {
+        return;
+      }
+      const fn = prototype[item];
+      const methodPath = Reflect.getMetadata(META_PATH_KEY, fn);
+      if (!methodPath) {
+        return;
+      }
+      const methodType = Reflect.getMetadata(META_METHOD_KEY, fn);
+      const aliasOptions: AliasOptions = Reflect.getMetadata(
+        META_ALIAS_KEY,
+        fn,
+      );
+      result.push({
+        methodPath,
+        aliasOptions,
+        methodType: methodType.toLowerCase(),
+        fn,
+        instance,
+        cls: Cls,
+        methodName: item,
+      });
+    });
+    return result;
+  }
+
+  async getRouterArr(controllers: Constructor[]) {
+    const routerArr: RouteItem[] = [];
+    await Promise.all(
+      controllers.map(async (Cls) => {
+        const arr = await this.mapRoute(Cls);
+        const path = Reflect.getMetadata(META_PATH_KEY, Cls);
+        const aliasOptions = Reflect.getMetadata(META_ALIAS_KEY, Cls);
+        const controllerPath = join(path);
+        routerArr.push({
+          controllerPath,
+          arr,
+          cls: Cls,
+          aliasOptions,
+        });
+      }),
+    );
+    return routerArr;
+  }
 }
+
+export const factory = new ClassFactory();
 
 export async function getMergedMetas<T>(
   target: InstanceType<Constructor> | null,
@@ -166,7 +278,7 @@ export async function getMergedMetas<T>(
   ];
   const arr = await Promise.all(filters.map((filter) => {
     if (typeof filter === "function") {
-      return Factory(filter);
+      return factory.create(filter);
     }
     return filter;
   }));

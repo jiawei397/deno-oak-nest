@@ -14,6 +14,7 @@ export class AsyncModule {
           return Promise.resolve(true);
         },
       }, AsyncService],
+      exports: [AsyncService],
     };
   }
 }

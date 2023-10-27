@@ -4,7 +4,7 @@ import {
   isDynamicModule,
   isModule,
 } from "./decorators/module.ts";
-import { ModuleType } from "./interfaces/module.interface.ts";
+import { CollectResult, ModuleType } from "./interfaces/module.interface.ts";
 import {
   ClassProvider,
   ExistingProvider,
@@ -13,12 +13,6 @@ import {
   SpecialProvider,
   ValueProvider,
 } from "./interfaces/provider.interface.ts";
-
-export interface CollectResult {
-  childModuleArr: ModuleType[];
-  controllerArr: Constructor[];
-  providerArr: Provider[];
-}
 
 export function isSpecialProvider(
   provider: Provider,
@@ -42,8 +36,10 @@ export function isExistingProvider(
   return "useExisting" in provider;
 }
 
-export function isClassProvider(provider: Provider): provider is ClassProvider {
-  return "useClass" in provider || !isSpecialProvider(provider);
+export function isClassProvider(
+  provider: Provider,
+): provider is ClassProvider {
+  return "useClass" in provider;
 }
 
 export async function collectModuleDeps(
@@ -61,6 +57,9 @@ export async function collectModuleDeps(
       childModuleArr: [],
       controllerArr: [],
       providerArr: [],
+      exportsArr: [],
+      cache: new Map(),
+      global: isDynamic && !!rootModule.global,
     }!;
     moduleDepsMap.set(moduleKey, data);
   }
@@ -78,16 +77,21 @@ export async function collectModuleDeps(
   const providers = isDynamic
     ? rootModule.providers
     : getModuleMetadata<Provider[]>("providers", rootModule);
-  // const exports = isDynamicModule
-  //   ? module.exports
-  //   : getModuleMetadata("exports", module); // TODO don't think well how to use exports
+  const exports = isDynamic
+    ? rootModule.exports
+    : getModuleMetadata<Provider[]>("exports", rootModule);
   if (controllers) {
     controllerArr.push(...controllers);
+  }
+  if (exports) {
+    data.exportsArr.push(...exports);
   }
   if (providers) {
     const valueProviders = providers.filter(isValueProvider);
     const existingProviders = providers.filter(isExistingProvider);
-    const classProviders = providers.filter(isClassProvider);
+    const classProviders = providers.filter((provider) =>
+      isClassProvider(provider) || !isSpecialProvider(provider)
+    );
     const factoryProviders = providers.filter(isFactoryProvider);
     providerArr.push(
       ...valueProviders,

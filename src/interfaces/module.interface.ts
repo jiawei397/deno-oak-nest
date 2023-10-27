@@ -1,3 +1,4 @@
+import { FactoryCaches } from "./factory.interface.ts";
 import { Provider } from "./provider.interface.ts";
 import { Constructor } from "./type.interface.ts";
 
@@ -19,7 +20,7 @@ export interface ModuleMetadata {
    */
   providers?: Provider[];
 
-  // exports?: Provider[];
+  exports?: Provider[];
 }
 
 export type ModuleMetadataKey = keyof ModuleMetadata;
@@ -46,7 +47,7 @@ export interface DynamicModule extends ModuleMetadata {
   //  *
   //  * @default false
   //  */
-  // global?: boolean;
+  global?: boolean;
 }
 
 export type ModuleType = Constructor | DynamicModule;
@@ -69,4 +70,13 @@ export interface OnApplicationShutdown {
 
 export interface OnModuleInit {
   onModuleInit(): void | Promise<void>;
+}
+
+export interface CollectResult {
+  childModuleArr: ModuleType[];
+  controllerArr: Constructor[];
+  providerArr: Provider[];
+  exportsArr: Provider[];
+  cache: FactoryCaches;
+  global: boolean;
 }

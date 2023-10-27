@@ -8,11 +8,8 @@ export type Provide = string | symbol | Type;
  * @publicApi
  */
 export type Provider<T = any> =
-  | Type<T>
-  | ClassProvider<T>
-  | ValueProvider<T>
-  | FactoryProvider<T>
-  | ExistingProvider<T>;
+  | RegisteredProvider<T>
+  | SpecialProvider<T>;
 
 export type RegisteredProvider<T = any> = Type<T>;
 

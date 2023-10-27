@@ -2,8 +2,12 @@ import { assert, assertEquals } from "../test_deps.ts";
 import { createMockContext } from "../tests/common_helper.ts";
 import {
   getReadableStream,
+  join,
   parseSearch,
   parseSearchParams,
+  replacePrefix,
+  replacePrefixAndSuffix,
+  replaceSuffix,
   setCacheControl,
 } from "./utils.ts";
 
@@ -177,4 +181,158 @@ Deno.test("getReadableStream should return a readable stream with the given mess
   const text = decoder.decode(result.value);
 
   assertEquals(text, message);
+});
+
+Deno.test("join", () => {
+  assertEquals(join(), "");
+  assertEquals(join(""), "");
+  assertEquals(join("/"), "");
+  assertEquals(join("api"), "/api");
+  assertEquals(join("/api"), "/api");
+  assertEquals(join("/api/"), "/api");
+  assertEquals(join("api/"), "/api");
+
+  assertEquals(join("", "/api"), "/api");
+  assertEquals(join("", "/api/"), "/api");
+  assertEquals(join("", "api/"), "/api");
+
+  assertEquals(join("/api", "/"), "/api");
+  assertEquals(join("/api/", "/"), "/api");
+  assertEquals(join("/api", "/user"), "/api/user");
+  assertEquals(join("/api", "/user/"), "/api/user");
+  assertEquals(join("/api", "user/"), "/api/user");
+
+  assertEquals(join("/api", "user", "add"), "/api/user/add");
+  assertEquals(join("/api", "/user", "add"), "/api/user/add");
+  assertEquals(join("/api", "/user", "add/"), "/api/user/add");
+  assertEquals(join("/api", "/user/", "add/"), "/api/user/add");
+  assertEquals(join("/api", "/user/", "/add"), "/api/user/add");
+  assertEquals(join("/api", "/user/", "/add/"), "/api/user/add");
+});
+
+Deno.test("replacePrefix", async (t) => {
+  await t.step("no replace", () => {
+    const str = "/v1/user";
+    assertEquals(replacePrefix(str, "/api/"), str);
+  });
+
+  await t.step("replace empty prefix", () => {
+    const str = "${prefix}/v1/user";
+    assertEquals(replacePrefix(str, ""), "/v1/user");
+  });
+
+  await t.step("replace  prefix /", () => {
+    const str = "${prefix}/v1/user";
+    assertEquals(replacePrefix(str, "/"), "/v1/user");
+  });
+
+  await t.step("replace prefix", () => {
+    const str = "${prefix}/v1/user";
+    assertEquals(replacePrefix(str, "/api/"), "/api/v1/user");
+  });
+
+  await t.step("replace prefix2", () => {
+    const str = "${prefix}/v1/user";
+    assertEquals(replacePrefix(str, "api/"), "/api/v1/user");
+  });
+
+  await t.step("replace prefix3", () => {
+    const str = "${prefix}/v1/user";
+    assertEquals(replacePrefix(str, "api"), "/api/v1/user");
+  });
+
+  await t.step("replace prefix not ok", () => {
+    const str = "${prefix2}/v1/user";
+    assertEquals(replacePrefix(str, "api/"), "/" + str);
+  });
+});
+
+Deno.test("replaceSuffix", async (t) => {
+  await t.step("no replace", () => {
+    const str = "/v1/user";
+    assertEquals(replaceSuffix(str, "/api/"), str);
+  });
+
+  await t.step("replace suffix", () => {
+    const str = "${suffix}/v1/user";
+    assertEquals(replaceSuffix(str, "/api/"), "/api/v1/user");
+  });
+
+  await t.step("replace suffix2", () => {
+    const str = "${suffix}/v1/user";
+    assertEquals(replaceSuffix(str, "api/"), "/api/v1/user");
+  });
+
+  await t.step("replace suffix3", () => {
+    const str = "${suffix}/v1/user";
+    assertEquals(replaceSuffix(str, "api"), "/api/v1/user");
+  });
+
+  await t.step("replace suffix4", () => {
+    const str = "/v1/user/${suffix}";
+    assertEquals(replaceSuffix(str, "api"), "/v1/user/api");
+  });
+
+  await t.step("replace suffix5", () => {
+    const str = "/v1/${suffix}/user";
+    assertEquals(replaceSuffix(str, "api"), "/v1/api/user");
+  });
+
+  await t.step("replace suffix not ok", () => {
+    const str = "${suffix2}/v1/user";
+    assertEquals(replaceSuffix(str, "api/"), "/" + str);
+  });
+});
+
+Deno.test("replacePrefixAndSuffix", async (t) => {
+  await t.step("no replace", () => {
+    const str = "/v1/user";
+    assertEquals(replacePrefixAndSuffix(str, "/api/", "info"), str);
+  });
+
+  await t.step("replace suffix", () => {
+    const str = "${suffix}/v1/user";
+    assertEquals(replacePrefixAndSuffix(str, "/api/", "info"), "/info/v1/user");
+  });
+
+  await t.step("replace prefix", () => {
+    const str = "${prefix}/v1/user";
+    assertEquals(replacePrefixAndSuffix(str, "api/", "info"), "/api/v1/user");
+  });
+
+  await t.step("replace prefix and suffix", () => {
+    const str = "${prefix}/v1/user/${suffix}";
+    assertEquals(
+      replacePrefixAndSuffix(str, "api", "info"),
+      "/api/v1/user/info",
+    );
+  });
+  await t.step("replace prefix and suffix2", () => {
+    const str = "${prefix}/v1/user/${suffix}";
+    assertEquals(
+      replacePrefixAndSuffix(str, "/api", "/info"),
+      "/api/v1/user/info",
+    );
+  });
+
+  await t.step("replace prefix and suffix3", () => {
+    const str = "${prefix}/v1/user/${suffix}";
+    assertEquals(
+      replacePrefixAndSuffix(str, "/api/", "/info/"),
+      "/api/v1/user/info",
+    );
+  });
+
+  await t.step("replace prefix suffix and controller", () => {
+    const str = "${prefix}/v1/${controller}/${suffix}";
+    assertEquals(
+      replacePrefixAndSuffix(str, "/api/", "/info/", "user"),
+      "/api/v1/user/info",
+    );
+  });
+
+  await t.step("replace not ok", () => {
+    const str = "${suffix2}/v1/user";
+    assertEquals(replacePrefixAndSuffix(str, "/api/", "/info/"), "/" + str);
+  });
 });

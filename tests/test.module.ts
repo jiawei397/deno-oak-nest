@@ -8,22 +8,27 @@ import type {
   Instance,
   Type,
 } from "../src/interfaces/type.interface.ts";
-import { Factory, getInstance } from "../src/factorys/class.factory.ts";
+import { factory } from "../src/factorys/class.factory.ts";
 import { NestFactory } from "../src/factorys/nest.factory.ts";
+import { Application } from "../src/application.ts";
 
 export class TestModule {
   factoryCaches = new Map();
   data: ModuleMetadata;
 
+  app: Application;
+  rootModule: Constructor;
+
   constructor(data: ModuleMetadata) {
     this.data = data;
   }
 
-  get<T extends Instance>(constructor: Type<T>, parentClass?: Type<any>) {
-    return Factory<T>(constructor, undefined, this.factoryCaches, parentClass);
+  get<T extends Instance>(constructor: Type<T>): Promise<T> | null {
+    const map = this.app.moduleCaches.get(this.rootModule)!;
+    return map.get(constructor) || null;
   }
   resolve(constructor: Constructor, parentClass?: Type<any>) {
-    return getInstance(constructor, undefined, this.factoryCaches, parentClass);
+    return factory.getInstance(constructor, { parentClass });
   }
   overrideProvider(provide: Provide, value: any) {
     const data = this.data;
@@ -46,7 +51,8 @@ export class TestModule {
     })
     class AppModule {}
 
-    await NestFactory.create(AppModule, MockRouter, {
+    this.rootModule = AppModule;
+    this.app = await NestFactory.create(AppModule, MockRouter, {
       cache: this.factoryCaches,
     });
     return this;

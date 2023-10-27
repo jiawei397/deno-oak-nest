@@ -1,10 +1,13 @@
 // deno-lint-ignore-file no-unused-vars
 import { assert, assertEquals } from "../test_deps.ts";
 import { Module } from "./decorators/module.ts";
-import { DynamicModule, ModuleType } from "./interfaces/module.interface.ts";
+import {
+  CollectResult,
+  DynamicModule,
+  ModuleType,
+} from "./interfaces/module.interface.ts";
 import {
   collectModuleDeps,
-  CollectResult,
   isClassProvider,
   isExistingProvider,
   isFactoryProvider,
@@ -109,7 +112,7 @@ Deno.test("collect", async (t) => {
     assert(isFactoryProvider(appModule.providerArr[1]));
 
     assert(!isSpecialProvider(appModule.providerArr[2])); // SchedulerService
-    assert(isClassProvider(appModule.providerArr[2]));
+    assert(!isClassProvider(appModule.providerArr[2]));
 
     assert(isSpecialProvider(appModule.providerArr[3]));
     assert(isClassProvider(appModule.providerArr[3]));
@@ -136,7 +139,7 @@ Deno.test("collect", async (t) => {
     assertEquals(asyncModule.controllerArr.length, 0);
     assertEquals(asyncModule.providerArr.length, 2);
     assert(isFactoryProvider(asyncModule.providerArr[0]));
-    assert(isClassProvider(asyncModule.providerArr[1]));
+    assert(!isSpecialProvider(asyncModule.providerArr[1]));
   });
 });
 
@@ -171,8 +174,6 @@ Deno.test("collect module order", async (t) => {
     );
     assertEquals(moduleMap.size, 3);
 
-    // console.log(moduleMap);
-    // console.log(moduleDepsArr);
     const moduleDepsArr = sortModuleDeps(moduleMap);
     assertEquals(moduleDepsArr.length, 3);
     assertEquals(moduleDepsArr, [DynModule, ChildModule, AppModule]);
@@ -194,8 +195,6 @@ Deno.test("collect module order", async (t) => {
     );
     assertEquals(moduleMap.size, 3);
 
-    // console.log(moduleMap);
-    // console.log(moduleDepsArr);
     const moduleDepsArr = sortModuleDeps(moduleMap);
     assertEquals(moduleDepsArr.length, 3);
     assertEquals(moduleDepsArr, [ChildModule, DynModule, AppModule]);

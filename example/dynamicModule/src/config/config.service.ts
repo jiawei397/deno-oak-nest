@@ -6,7 +6,9 @@ import { CONFIG_KEY } from "./config.constant.ts";
 export class ConfigService {
   constructor(
     @Inject(CONFIG_KEY) private readonly envConfig: EnvConfig,
-  ) {}
+  ) {
+    console.log("ConfigService.constructor()", envConfig);
+  }
 
   get(key: string): string {
     return this.envConfig[key];

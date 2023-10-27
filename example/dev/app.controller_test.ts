@@ -15,7 +15,7 @@ Deno.test("app test", async () => {
   })
     .overrideProvider(UserService, userService)
     .compile();
-  const appController = await moduleRef.get(AppController);
+  const appController = await moduleRef.get(AppController)!;
   assertEquals(await appController.version(), "0.0.1");
   assertEquals(callStacks, [1]);
 });

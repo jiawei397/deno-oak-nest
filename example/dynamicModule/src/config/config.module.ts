@@ -23,6 +23,8 @@ export class ConfigModule {
         },
         ConfigService,
       ],
+      exports: [ConfigService],
+      global: true,
     };
   }
 }

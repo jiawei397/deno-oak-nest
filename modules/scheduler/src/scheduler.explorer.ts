@@ -1,5 +1,5 @@
 import { cron } from "../deps.ts";
-import { Factory } from "../../../src/factorys/class.factory.ts";
+import { factory } from "../../../src/factorys/class.factory.ts";
 import { CronJob, schedulerRegistry, TimeJob } from "./scheduler.registry.ts";
 
 export class ScheduleExplorer {
@@ -16,7 +16,7 @@ export class ScheduleExplorer {
       return;
     }
     for (const [target, cronJobs] of schedulerRegistry.cronMap) {
-      const instance = await Factory(target);
+      const instance = await factory.create(target);
       cronJobs.forEach((cronItem: CronJob) => {
         const cronTime = cronItem.cronTime;
         const methodName = cronItem.methodName;
@@ -36,7 +36,7 @@ export class ScheduleExplorer {
       return;
     }
     for (const [target, timeoutJobs] of schedulerRegistry.timeoutMap) {
-      const instance = await Factory(target);
+      const instance = await factory.create(target);
       timeoutJobs.forEach((timeoutItem: TimeJob) => {
         const delay = timeoutItem.delay;
         const methodName = timeoutItem.methodName;
@@ -58,7 +58,7 @@ export class ScheduleExplorer {
       return;
     }
     for (const [target, intervalJobs] of schedulerRegistry.intervalMap) {
-      const instance = await Factory(target);
+      const instance = await factory.create(target);
       intervalJobs.forEach((intervalItem: TimeJob) => {
         const delay = intervalItem.delay;
         const methodName = intervalItem.methodName;

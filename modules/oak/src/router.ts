@@ -1,5 +1,4 @@
 import { format, green, resolve, yellow } from "../../../deps.ts";
-import { join } from "../../../src/application.ts";
 import { NotImplementedException } from "../../../src/exceptions.ts";
 import {
   ListenOptions,
@@ -11,6 +10,7 @@ import {
   MiddlewareHandler,
   NotFoundHandler,
 } from "../../../src/interfaces/route.interface.ts";
+import { join } from "../../../src/utils.ts";
 import {
   OakApplication,
   OakContext,

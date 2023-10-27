@@ -1,6 +1,6 @@
 import { getInjectData, Inject, Injectable } from "./inject.ts";
 import { assert, assertEquals } from "../../test_deps.ts";
-import { Factory, initProvider } from "../factorys/class.factory.ts";
+import { factory } from "../factorys/class.factory.ts";
 import { Scope } from "../interfaces/scope-options.interface.ts";
 import { Controller } from "./controller.ts";
 
@@ -30,9 +30,11 @@ Deno.test("Inject with providerInit", async () => {
     }
   }
 
-  await initProvider(A, Scope.DEFAULT);
+  await factory.initProvider(A);
 
   assertEquals(callStack, [1]);
+
+  factory.globalCaches.clear();
 });
 
 Deno.test("Inject with controller", async () => {
@@ -51,9 +53,11 @@ Deno.test("Inject with controller", async () => {
     }
   }
 
-  const a1 = await Factory(A);
+  const a1 = await factory.create(A);
   assert(a1 instanceof A);
   assertEquals(callStack, [1]);
+
+  factory.globalCaches.clear();
 });
 
 Deno.test("Injectable singleton false", async (t) => {
@@ -63,10 +67,12 @@ Deno.test("Injectable singleton false", async (t) => {
   class A {}
 
   await t.step("check instance", async () => {
-    const a1 = await Factory(A);
+    const a1 = await factory.create(A);
     assert(a1 instanceof A);
-    const a2 = await Factory(A);
+    const a2 = await factory.create(A);
     assert(a2 instanceof A);
     assert(a1 !== a2, "A should return different instance");
   });
+
+  factory.globalCaches.clear();
 });

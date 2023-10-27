@@ -97,3 +97,44 @@ export function getReadableStream(): ReadableStreamResult {
     },
   };
 }
+
+export function join(...paths: string[]) {
+  if (paths.length === 0) {
+    return "";
+  }
+  const str = paths.join("/").replaceAll("///", "/").replaceAll("//", "/");
+  let last = str;
+  if (!last.startsWith("/")) {
+    last = "/" + last;
+  }
+  if (last.endsWith("/")) {
+    last = last.substring(0, last.length - 1);
+  }
+  return last;
+}
+
+export function replacePrefix(str: string, prefix: string) {
+  return join(str.replace(/\$\{prefix\}/, prefix));
+}
+
+export function replaceSuffix(str: string, suffix: string) {
+  return join(str.replace(/\$\{suffix\}/, suffix));
+}
+
+export function replaceController(str: string, suffix: string) {
+  return join(str.replace(/\$\{controller\}/, suffix));
+}
+
+export function replacePrefixAndSuffix(
+  str: string,
+  prefix: string,
+  suffix: string,
+  controller?: string,
+) {
+  let temp = replacePrefix(str, prefix);
+  if (controller) {
+    temp = replaceController(temp, controller);
+  }
+  temp = replaceSuffix(temp, suffix);
+  return temp;
+}
