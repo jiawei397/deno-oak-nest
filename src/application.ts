@@ -450,13 +450,13 @@ export class Application {
     }
   }
 
-  private async initController(Cls: Type, caches: Map<any, any>) {
+  private async initController(Cls: Type, caches: FactoryCaches) {
     const instance = await factory.create(Cls, { caches });
     await onModuleInit(instance);
     return instance;
   }
 
-  private async initProviders(providers: Provider[], caches: Map<any, any>) {
+  private async initProviders(providers: Provider[], caches: FactoryCaches) {
     const arr = [];
     for (const provider of providers) {
       const instance = await factory.initProvider(provider, { caches });
@@ -489,12 +489,13 @@ export class Application {
 
   private async initControllers(
     controllerArr: Constructor[],
-    caches: Map<any, any>,
+    caches: FactoryCaches,
   ) {
     await Promise.all(
       controllerArr.map(async (controller) => {
         const instance = await this.initController(controller, caches);
         this.instances.add(instance);
+        factory.moduleCaches.set(instance, caches); // add to module caches
         factory.globalCaches.set(controller, instance); // add to global caches
       }),
     );

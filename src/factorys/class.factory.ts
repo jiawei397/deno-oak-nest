@@ -14,6 +14,7 @@ import type {
   ControllerMethod,
   ExceptionFilters,
   FactoryCaches,
+  Instance,
   NestGuards,
   NestUseInterceptors,
   Provider,
@@ -32,6 +33,7 @@ import { join } from "../utils.ts";
 
 export class ClassFactory {
   globalCaches: FactoryCaches = new Map();
+  moduleCaches: Map<Instance, FactoryCaches> = new Map();
 
   getInstanceFromCaches<T>(
     target: any,
@@ -259,29 +261,31 @@ export class ClassFactory {
     );
     return routerArr;
   }
+
+  async getMergedMetas<T>(
+    target: InstanceType<Constructor> | null,
+    fn: ControllerMethod | null,
+    globalMetas: ExceptionFilters | NestGuards | NestUseInterceptors,
+    metaKey: string | symbol,
+  ): Promise<T[]> {
+    const classes = (target && Reflect.getMetadata(metaKey, target)) || [];
+    const fns = (fn && Reflect.getOwnMetadata(metaKey, fn)) || [];
+    const all = [
+      ...globalMetas,
+      ...classes,
+      ...fns,
+    ];
+    const arr = await Promise.all(all.map((item) => {
+      if (typeof item === "function") {
+        return this.create(item, {
+          caches: target ? this.moduleCaches.get(target) : undefined,
+        });
+      }
+      return item;
+    }));
+    // return [...new Set(arr)]; // No need to remove duplicates, it may be controlled by the user
+    return arr;
+  }
 }
 
 export const factory = new ClassFactory();
-
-export async function getMergedMetas<T>(
-  target: InstanceType<Constructor> | null,
-  fn: ControllerMethod | null,
-  globalMetas: ExceptionFilters | NestGuards | NestUseInterceptors,
-  metaKey: string | symbol,
-): Promise<T[]> {
-  const classes = (target && Reflect.getMetadata(metaKey, target)) || [];
-  const fns = (fn && Reflect.getOwnMetadata(metaKey, fn)) || [];
-  const filters = [
-    ...globalMetas,
-    ...classes,
-    ...fns,
-  ];
-  const arr = await Promise.all(filters.map((filter) => {
-    if (typeof filter === "function") {
-      return factory.create(filter);
-    }
-    return filter;
-  }));
-  // return [...new Set(arr)]; // No need to remove duplicates, it may be controlled by the user
-  return arr;
-}

@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { Reflect } from "../deps.ts";
 import { ControllerMethod } from "./interfaces/guard.interface.ts";
-import { getMergedMetas } from "./factorys/class.factory.ts";
+import { factory } from "./factorys/class.factory.ts";
 import {
   ExceptionFilter,
   ExceptionFilters,
@@ -84,7 +84,7 @@ export function getExceptionFilters(
   fn: ControllerMethod | null,
   globalFilters: ExceptionFilters,
 ): Promise<ExceptionFilter[]> {
-  return getMergedMetas<ExceptionFilter>(
+  return factory.getMergedMetas<ExceptionFilter>(
     target,
     fn,
     globalFilters,

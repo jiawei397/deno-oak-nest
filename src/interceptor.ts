@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Reflect } from "../deps.ts";
-import { getMergedMetas } from "./factorys/class.factory.ts";
+import { factory } from "./factorys/class.factory.ts";
 import { Context } from "./interfaces/context.interface.ts";
 import type { ControllerMethod } from "./interfaces/guard.interface.ts";
 import type {
@@ -31,7 +31,7 @@ export function getInterceptors(
   fn: ControllerMethod,
   globalInterceptors: NestUseInterceptors,
 ): Promise<NestInterceptor[]> {
-  return getMergedMetas<NestInterceptor>(
+  return factory.getMergedMetas<NestInterceptor>(
     target,
     fn,
     globalInterceptors,
