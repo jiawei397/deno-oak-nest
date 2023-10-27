@@ -93,7 +93,7 @@
       "request": "launch",
       "name": "test",
       "type": "node",
-      "program": "${workspaceFolder}/src/module_test.ts",
+      "program": "${workspaceFolder}/tests/test.module_test.ts",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "deno",
       "runtimeArgs": [

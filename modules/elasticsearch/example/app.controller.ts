@@ -1,9 +1,14 @@
+import { assert, Controller, Get } from "@nest";
 import { ElasticsearchService } from "@nest/elasticsearch";
-import { Controller, Get } from "@nest";
 
 @Controller("")
 export class AppController {
-  constructor(private readonly elasticSearchService: ElasticsearchService) {}
+  constructor(private readonly elasticSearchService: ElasticsearchService) {
+    assert(
+      this.elasticSearchService,
+      "injected elasticSearchService maybe exist",
+    );
+  }
   @Get("/")
   getById() {
     return this.elasticSearchService.get({

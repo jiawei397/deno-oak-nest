@@ -12,6 +12,8 @@ export class ElasticsearchModule {
         provide: ES_KEY,
         useValue: options,
       }, ElasticsearchService],
+      exports: [ElasticsearchService],
+      global: true,
     };
   }
 }
