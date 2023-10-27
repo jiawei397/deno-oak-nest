@@ -2,7 +2,7 @@ import { assert, assertEquals } from "../test_deps.ts";
 import { Controller, Get } from "./decorators/controller.ts";
 import type { CanActivate } from "./interfaces/guard.interface.ts";
 import { UseGuards } from "./guard.ts";
-import { Injectable } from "./decorators/inject.ts";
+import { Inject, Injectable } from "./decorators/inject.ts";
 import {
   createMockApp,
   createMockContext,
@@ -16,7 +16,7 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from "./exceptions.ts";
-import { OnModuleInit } from "./interfaces/module.interface.ts";
+import { DynamicModule, OnModuleInit } from "./interfaces/module.interface.ts";
 import { Module } from "./decorators/module.ts";
 
 Deno.test("module init", async (t) => {
@@ -363,5 +363,287 @@ Deno.test("routes with guard false", async (t) => {
       new InternalServerErrorException("AuthGuard3 error").response,
     );
     assertEquals(callStack, []);
+  });
+});
+
+Deno.test("dynamic module", async (t) => {
+  const callStack: number[] = [];
+  const CONFIG_KEY = "CONFIG";
+  const injectedValue = "injectedValue";
+
+  @Injectable()
+  class AsyncService {
+    constructor(@Inject(CONFIG_KEY) private readonly key: string) {
+      callStack.push(1);
+    }
+
+    get() {
+      return this.key;
+    }
+  }
+
+  await t.step("module normal use", async () => {
+    @Controller("")
+    class AppController {
+      constructor(private readonly asyncService: AsyncService) {
+        callStack.push(2);
+        assertEquals(this.asyncService.get(), injectedValue);
+      }
+    }
+
+    @Module({})
+    class AsyncModule {
+      static register(): DynamicModule {
+        return {
+          module: AsyncModule,
+          providers: [
+            {
+              provide: CONFIG_KEY,
+              useFactory: () => {
+                return injectedValue;
+              },
+            },
+            AsyncService,
+          ],
+          exports: [AsyncService],
+          // global: true,
+        };
+      }
+    }
+
+    @Module({
+      imports: [AsyncModule.register()],
+      controllers: [
+        AppController,
+      ],
+      providers: [],
+    })
+    class AppModule {}
+
+    const app = createMockApp();
+    await app.init(AppModule, new Map());
+
+    assertEquals(callStack, [1, 2]);
+
+    callStack.length = 0;
+  });
+
+  await t.step("module without exports not work well", async () => {
+    @Controller("")
+    class AppController {
+      constructor(private readonly asyncService: AsyncService) {
+        callStack.push(2);
+        assertEquals(
+          this.asyncService.get(),
+          undefined,
+          "not well inject data",
+        );
+      }
+    }
+
+    @Module({})
+    class AsyncModule {
+      static register(): DynamicModule {
+        return {
+          module: AsyncModule,
+          providers: [
+            {
+              provide: CONFIG_KEY,
+              useFactory: () => {
+                return injectedValue;
+              },
+            },
+            AsyncService,
+          ],
+        };
+      }
+    }
+
+    @Module({
+      imports: [AsyncModule.register()],
+      controllers: [
+        AppController,
+      ],
+      providers: [],
+    })
+    class AppModule {}
+
+    const app = createMockApp();
+    await app.init(AppModule, new Map());
+
+    assertEquals(callStack, [1, 1, 2]);
+
+    callStack.length = 0;
+  });
+
+  await t.step("another module use dynamic module", async (it) => {
+    @Module({})
+    class DyncModule {
+      static register(): DynamicModule {
+        return {
+          module: DyncModule,
+          providers: [
+            {
+              provide: CONFIG_KEY,
+              useValue: injectedValue,
+            },
+            AsyncService,
+          ],
+          exports: [AsyncService],
+        };
+      }
+    }
+
+    await it.step("normal work", async () => {
+      @Controller("cats")
+      class CatsController {
+        constructor(private readonly asyncService: AsyncService) {
+          callStack.push(3);
+          assertEquals(this.asyncService.get(), injectedValue);
+        }
+      }
+
+      @Module({
+        imports: [DyncModule],
+        controllers: [CatsController],
+        providers: [],
+      })
+      class CatsModule {}
+
+      @Controller("")
+      class AppController {
+        constructor(private readonly asyncService: AsyncService) {
+          callStack.push(2);
+          assertEquals(this.asyncService.get(), injectedValue);
+        }
+      }
+
+      @Module({
+        imports: [DyncModule.register(), CatsModule],
+        controllers: [
+          AppController,
+        ],
+        providers: [],
+      })
+      class AppModule {}
+
+      const app = createMockApp();
+      await app.init(AppModule, new Map());
+
+      assertEquals(callStack, [1, 3, 2]);
+
+      callStack.length = 0;
+    });
+
+    await it.step("not work when not import DyncModule in CatsModule", async () => {
+      @Controller("")
+      class AppController {
+        constructor(private readonly asyncService: AsyncService) {
+          callStack.push(2);
+          assertEquals(this.asyncService.get(), injectedValue);
+        }
+      }
+
+      @Controller("cats")
+      class CatsController {
+        constructor(private readonly asyncService: AsyncService) {
+          callStack.push(4);
+          assertEquals(
+            this.asyncService.get(),
+            undefined,
+            "this asyncService is different with the normal one",
+          );
+        }
+      }
+
+      @Module({
+        imports: [],
+        controllers: [CatsController],
+        providers: [],
+      })
+      class CatsModule {}
+
+      @Module({
+        imports: [DyncModule.register(), CatsModule],
+        controllers: [
+          AppController,
+        ],
+        providers: [],
+      })
+      class AppModule {}
+
+      const app = createMockApp();
+      await app.init(AppModule, new Map());
+
+      assertEquals(callStack, [1, 1, 4, 2]);
+
+      callStack.length = 0;
+    });
+  });
+
+  await t.step("module global set true", async (it) => {
+    @Module({})
+    class DyncModule {
+      static register(): DynamicModule {
+        return {
+          module: DyncModule,
+          providers: [
+            {
+              provide: CONFIG_KEY,
+              useFactory: () => {
+                return injectedValue;
+              },
+            },
+            AsyncService,
+          ],
+          exports: [AsyncService],
+          global: true,
+        };
+      }
+    }
+
+    await it.step("not work when DyncModule set to global", async () => {
+      @Controller("cats")
+      class CatsController {
+        constructor(private readonly asyncService: AsyncService) {
+          callStack.push(4);
+          assertEquals(
+            this.asyncService.get(),
+            injectedValue,
+          );
+        }
+      }
+
+      @Module({
+        imports: [],
+        controllers: [CatsController],
+        providers: [],
+      })
+      class CatsModule {}
+
+      @Controller("")
+      class AppController {
+        constructor(private readonly asyncService: AsyncService) {
+          callStack.push(2);
+          assertEquals(this.asyncService.get(), injectedValue);
+        }
+      }
+
+      @Module({
+        imports: [DyncModule.register(), CatsModule],
+        controllers: [
+          AppController,
+        ],
+        providers: [],
+      })
+      class AppModule {}
+
+      const app = createMockApp();
+      await app.init(AppModule, new Map());
+
+      assertEquals(callStack, [1, 4, 2]);
+
+      callStack.length = 0;
+    });
   });
 });
