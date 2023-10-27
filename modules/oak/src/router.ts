@@ -92,11 +92,8 @@ export class OakRouter implements IRouter {
     this.app.use(this.router.allowedMethods());
   }
 
-  startServer(options?: ListenOptions) {
-    const listenCallback = options?.onListen || function ({ port, hostname }) {
-      console.log(`Listening on http://${hostname}:${port}/`);
-    };
-    listenCallback({
+  startServer(options: ListenOptions) {
+    options.onListen!({
       port: options?.port ?? 8000,
       hostname: options?.hostname ?? "localhost",
     });

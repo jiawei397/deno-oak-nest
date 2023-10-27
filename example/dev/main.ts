@@ -108,9 +108,4 @@ const port = Number(Deno.env.get("PORT") || 2000);
 //   res.status = 500;
 // });
 
-app.listen({
-  port,
-  onListen({ port, hostname }) {
-    console.log(`Server started at http://${hostname}:${port}`);
-  },
-});
+app.listen({ port });

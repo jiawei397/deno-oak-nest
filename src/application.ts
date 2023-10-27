@@ -99,18 +99,32 @@ export class Application {
     this.router.routes();
     this.router.serveForStatic(this.staticOptions);
     await this.onApplicationBootstrap();
-    this.router.startServer({
-      signal: this.abortController.signal,
-      ...options,
+    return new Promise((resolve) => {
+      this.router.startServer({
+        signal: this.abortController.signal,
+        ...options,
+        onListen: (params) => {
+          if (options?.onListen) {
+            options?.onListen(params);
+          } else {
+            this.log(
+              yellow("[NestApplication]"),
+              green("Server started at"),
+              `http://${params.hostname}:${params.port}`,
+            );
+          }
+          resolve();
+        },
+      });
+      this.log(
+        yellow("[NestApplication]"),
+        green(
+          `Nest application successfully started ${
+            Date.now() - this.startTime
+          }ms`,
+        ),
+      );
     });
-    this.log(
-      yellow("[NestApplication]"),
-      green(
-        `Nest application successfully started ${
-          Date.now() - this.startTime
-        }ms`,
-      ),
-    );
   }
 
   /**

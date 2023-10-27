@@ -26,7 +26,9 @@ app.use(async (req, res, next) => {
 });
 
 const port = Number(Deno.env.get("PORT") || 2000);
-app.listen({ port });
+await app.listen({
+  port,
+});
 
 // setTimeout(() => {
 //   app.close();
