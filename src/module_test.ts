@@ -16,6 +16,16 @@ import {
   sortModuleDeps,
 } from "./module.ts";
 
+Deno.test("isSpecialProvider", () => {
+  assertEquals(isSpecialProvider(Symbol("test")), false);
+  assert(
+    isSpecialProvider({
+      provide: "test",
+      useValue: "test",
+    }),
+  );
+});
+
 Deno.test("collect", async (t) => {
   const moduleMap = new Map<ModuleType, CollectResult>();
 
