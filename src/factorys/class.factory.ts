@@ -194,7 +194,7 @@ export class ClassFactory {
   }
 
   copyProviderCache(
-    item: Provider,
+    item: Provider | symbol,
     oldCache: FactoryCaches,
     newCache: FactoryCaches,
   ) {

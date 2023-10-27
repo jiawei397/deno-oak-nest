@@ -15,8 +15,11 @@ import {
 } from "./interfaces/provider.interface.ts";
 
 export function isSpecialProvider(
-  provider: Provider,
+  provider: Provider | symbol,
 ): provider is SpecialProvider {
+  if (typeof provider === "symbol") {
+    return false;
+  }
   return "provide" in provider;
 }
 

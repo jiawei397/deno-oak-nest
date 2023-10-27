@@ -1,9 +1,11 @@
+import { assert, Controller, Get, Inject, Query } from "@nest";
 import { Client, MYSQL_KEY } from "@nest/mysql";
-import { Controller, Get, Inject, Query } from "@nest";
 
 @Controller("")
 export class AppController {
-  constructor(@Inject(MYSQL_KEY) private readonly client: Client) {}
+  constructor(@Inject(MYSQL_KEY) private readonly client: Client) {
+    assert(this.client, "injected MYSQL_KEY maybe exist");
+  }
 
   @Get("/createUserTable")
   async createUserTable() {

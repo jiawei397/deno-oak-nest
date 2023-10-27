@@ -20,7 +20,7 @@ export interface ModuleMetadata {
    */
   providers?: Provider[];
 
-  exports?: Provider[];
+  exports?: (Provider | symbol)[];
 }
 
 export type ModuleMetadataKey = keyof ModuleMetadata;
@@ -76,7 +76,7 @@ export interface CollectResult {
   childModuleArr: ModuleType[];
   controllerArr: Constructor[];
   providerArr: Provider[];
-  exportsArr: Provider[];
+  exportsArr: (Provider | symbol)[];
   cache: FactoryCaches;
   global: boolean;
 }
