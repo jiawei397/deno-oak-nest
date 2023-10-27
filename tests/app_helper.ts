@@ -28,7 +28,6 @@ import {
   assertEquals,
   assertNotEquals,
   assertNotStrictEquals,
-  delay,
 } from "../test_deps.ts";
 import { BadRequestException } from "../src/exceptions.ts";
 
@@ -52,8 +51,7 @@ export function createCommonTests(
     if (apiPrefix) {
       app.setGlobalPrefix(apiPrefix);
     }
-    app.listen({ port });
-    await delay(100);
+    await app.listen({ port });
     const baseUrl = `http://localhost:${port}`;
     return { app, port, baseUrl };
   }
@@ -208,8 +206,7 @@ export function createCommonTests(
       });
 
       const port = await getPort();
-      app.listen({ port });
-      await delay(100);
+      await app.listen({ port });
 
       await it.step("fetch /", async () => {
         const res = await fetch(`http://localhost:${port}`);
@@ -257,8 +254,7 @@ export function createCommonTests(
       });
 
       const port = await getPort();
-      app.listen({ port });
-      await delay(100);
+      await app.listen({ port });
 
       await it.step("fetch /", async () => {
         const res = await fetch(`http://localhost:${port}`);
@@ -477,8 +473,7 @@ export function createCommonTests(
       });
 
       const port = await getPort();
-      app.listen({ port });
-      await delay(100);
+      await app.listen({ port });
 
       const res = await fetch(`http://localhost:${port}`);
       assertEquals(res.status, 404);
@@ -509,8 +504,7 @@ export function createCommonTests(
       });
 
       const port = await getPort();
-      app.listen({ port });
-      await delay(100);
+      await app.listen({ port });
 
       await it.step("fetch /", async () => {
         const res = await fetch(`http://localhost:${port}`);
@@ -565,7 +559,7 @@ export function createCommonTests(
         callStack.push(2);
       });
       const port = await getPort();
-      app.listen({ port });
+      await app.listen({ port });
 
       // test start
       addEventListener("error", (event) => {
@@ -625,8 +619,7 @@ export function createCommonTests(
         app.useGlobalInterceptors(GlobalInterceptor);
 
         const port = await getPort();
-        app.listen({ port });
-        await delay(100);
+        await app.listen({ port });
 
         const res = await fetch(`http://localhost:${port}`);
         assertEquals(res.status, 404);
@@ -660,8 +653,7 @@ export function createCommonTests(
         app.useGlobalInterceptors(GlobalInterceptor);
 
         const port = await getPort();
-        app.listen({ port });
-        await delay(100);
+        await app.listen({ port });
 
         const res = await fetch(`http://localhost:${port}`);
         assertEquals(res.status, 200);
@@ -712,8 +704,7 @@ export function createCommonTests(
         app.useGlobalInterceptors(GlobalInterceptor);
 
         const port = await getPort();
-        app.listen({ port });
-        await delay(100);
+        await app.listen({ port });
 
         const res = await fetch(`http://localhost:${port}`);
         assertEquals(res.status, 200);
@@ -765,8 +756,7 @@ export function createCommonTests(
       app.useGlobalFilters(GlobalFilter);
 
       const port = await getPort();
-      app.listen({ port });
-      await delay(100);
+      await app.listen({ port });
 
       const res = await fetch(`http://localhost:${port}`);
       assertEquals(res.status, 200);
@@ -804,8 +794,7 @@ export function createCommonTests(
       app.useGlobalFilters(GlobalFilter);
 
       const port = await getPort();
-      app.listen({ port });
-      await delay(100);
+      await app.listen({ port });
 
       const res = await fetch(`http://localhost:${port}`);
       assertEquals(res.status, 500);
@@ -1105,8 +1094,7 @@ export function createCommonTests(
 
       const app = await NestFactory.create(AppModule, Router);
       const port = await getPort();
-      app.listen({ port });
-      await delay(100);
+      await app.listen({ port });
 
       const res = await fetch(`http://localhost:${port}/`, {
         method: "POST",
@@ -1149,8 +1137,7 @@ export function createCommonTests(
 
       const app = await NestFactory.create(AppModule, Router);
       const port = await getPort();
-      app.listen({ port });
-      await delay(100);
+      await app.listen({ port });
 
       const res = await fetch(`http://localhost:${port}/`, {
         method: "POST",
@@ -1177,8 +1164,7 @@ export function createCommonTests(
         app.useStaticAssets(`tests/static`);
 
         const port = await getPort();
-        app.listen({ port });
-        await delay(100);
+        await app.listen({ port });
 
         await it.step("fetch /", async () => {
           const res = await fetch(`http://localhost:${port}/`);
@@ -1227,8 +1213,7 @@ export function createCommonTests(
         app.useStaticAssets(`tests/static`, { prefix: "/static" });
 
         const port = await getPort();
-        app.listen({ port });
-        await delay(100);
+        await app.listen({ port });
 
         await it.step("fetch /", async () => {
           const res = await fetch(`http://localhost:${port}/`);
@@ -1290,8 +1275,7 @@ export function createCommonTests(
         app.useStaticAssets(`tests/static`);
 
         const port = await getPort();
-        app.listen({ port });
-        await delay(100);
+        await app.listen({ port });
 
         await it.step("fetch /", async () => {
           const res = await fetch(`http://localhost:${port}/`, {
@@ -1320,8 +1304,7 @@ export function createCommonTests(
         app.useStaticAssets(`tests/static`);
 
         const port = await getPort();
-        app.listen({ port });
-        await delay(100);
+        await app.listen({ port });
 
         await it.step("fetch /", async () => {
           const res = await fetch(`http://localhost:${port}/`);
@@ -1344,8 +1327,7 @@ export function createCommonTests(
         });
 
         const port = await getPort();
-        app.listen({ port });
-        await delay(100);
+        await app.listen({ port });
 
         await it.step("fetch /", async () => {
           const res = await fetch(`http://localhost:${port}/`);
@@ -1374,8 +1356,7 @@ export function createCommonTests(
           app.useStaticAssets(`tests/static`);
 
           const port = await getPort();
-          app.listen({ port });
-          await delay(100);
+          await app.listen({ port });
 
           await it.step("fetch /", async () => {
             const res = await fetch(`http://localhost:${port}/`, {
