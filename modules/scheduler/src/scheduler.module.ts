@@ -10,6 +10,8 @@ export class ScheduleModule {
       providers: [
         ScheduleExplorer,
       ],
+      exports: [ScheduleExplorer],
+      global: true,
     };
   }
 }

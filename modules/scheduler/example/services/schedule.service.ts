@@ -4,7 +4,9 @@ import { TestService } from "./test.service.ts";
 
 @Injectable()
 export class ScheduleService {
-  constructor(private readonly testService: TestService) {}
+  constructor(private readonly testService: TestService) {
+    assert(this.testService, "testService is not defined");
+  }
 
   @Timeout(2000)
   onceJob() {

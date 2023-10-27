@@ -30,9 +30,19 @@ import { CollectResult, ModuleType } from "./interfaces/module.interface.ts";
 import { Provider } from "./interfaces/provider.interface.ts";
 import { IRouter, RouteMap } from "./interfaces/route.interface.ts";
 import { Constructor, Type } from "./interfaces/type.interface.ts";
-import { collectModuleDeps, sortModuleDeps } from "./module.ts";
+import {
+  collectModuleDeps,
+  isClassProvider,
+  isSpecialProvider,
+  sortModuleDeps,
+} from "./module.ts";
 import { transferParam } from "./params.ts";
-import { join, replacePrefix, replacePrefixAndSuffix } from "./utils.ts";
+import {
+  join,
+  replacePrefix,
+  replacePrefixAndSuffix,
+  storeCronInstance,
+} from "./utils.ts";
 
 export class Application {
   private apiPrefix = "";
@@ -441,50 +451,33 @@ export class Application {
   private async initModule(module: ModuleType) {
     const isDynamic = isDynamicModule(module);
     if (isDynamic) {
-      await onModuleInit(module);
       return module;
     } else {
       const instance = await factory.create(module);
-      await onModuleInit(instance);
       return instance;
     }
   }
 
-  private async initController(Cls: Type, caches: FactoryCaches) {
-    const instance = await factory.create(Cls, { caches });
-    await onModuleInit(instance);
-    return instance;
-  }
-
   private async initProviders(providers: Provider[], caches: FactoryCaches) {
-    const arr = [];
     for (const provider of providers) {
       const instance = await factory.initProvider(provider, { caches });
       this.instances.add(instance);
-      if (instance) {
-        arr.push({
-          instance,
-          provider,
-        });
+      // register global interceptor, filter, guard
+      if (isSpecialProvider(provider)) {
+        const provide = provider.provide;
+        if (provide === APP_INTERCEPTOR) {
+          this.useGlobalInterceptors(instance);
+        } else if (provide === APP_FILTER) {
+          this.useGlobalFilters(instance);
+        } else if (provide === APP_GUARD) {
+          this.useGlobalGuards(instance);
+        } else if (isClassProvider(provider)) {
+          storeCronInstance(provider.useClass, instance);
+        }
+      } else {
+        storeCronInstance(provider, instance);
       }
     }
-    await Promise.all(
-      arr.map(({ instance, provider }) => {
-        // register global interceptor, filter, guard
-        if ("provide" in provider) {
-          const provide = provider.provide;
-          if (provide === APP_INTERCEPTOR) {
-            this.useGlobalInterceptors(instance);
-          } else if (provide === APP_FILTER) {
-            this.useGlobalFilters(instance);
-          } else if (provide === APP_GUARD) {
-            this.useGlobalGuards(instance);
-          }
-        }
-        return onModuleInit(instance);
-      }),
-    );
-    return arr;
   }
 
   private async initControllers(
@@ -493,9 +486,9 @@ export class Application {
   ) {
     await Promise.all(
       controllerArr.map(async (controller) => {
-        const instance = await this.initController(controller, caches);
+        const instance = await factory.create(controller, { caches });
         this.instances.add(instance);
-        factory.moduleCaches.set(instance, caches); // add to module caches
+        factory.instanceCaches.set(instance, caches); // add to module caches
         factory.globalCaches.set(controller, instance); // add to global caches
       }),
     );
@@ -532,7 +525,6 @@ export class Application {
           factory.copyProviderCache(item, moduleCache, factory.globalCaches);
         });
       }
-
       this.controllers.push(...controllerArr);
       await this.initControllers(controllerArr, moduleCache);
     }
@@ -542,6 +534,8 @@ export class Application {
         this.instances.add(instance);
       }),
     );
+
+    await this.onModuleInit();
   }
 
   async init(appModule: ModuleType, caches?: FactoryCaches) {
@@ -568,6 +562,12 @@ export class Application {
       yellow("[InstanceLoader]"),
       green(`AppModule dependencies initialized ${Date.now() - startInit}ms`),
     );
+  }
+
+  private async onModuleInit(): Promise<void> {
+    for await (const instance of this.instances) {
+      await onModuleInit(instance);
+    }
   }
 
   /**

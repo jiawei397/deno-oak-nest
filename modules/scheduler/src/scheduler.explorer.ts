@@ -1,6 +1,7 @@
 import { cron } from "../deps.ts";
-import { factory } from "../../../src/factorys/class.factory.ts";
 import { CronJob, schedulerRegistry, TimeJob } from "./scheduler.registry.ts";
+import { Reflect } from "../../../deps.ts";
+import { APP_CRON_INSTANCE } from "../../../src/constants.ts";
 
 export class ScheduleExplorer {
   onModuleInit() {
@@ -16,7 +17,7 @@ export class ScheduleExplorer {
       return;
     }
     for (const [target, cronJobs] of schedulerRegistry.cronMap) {
-      const instance = await factory.create(target);
+      const instance = await Reflect.getMetadata(APP_CRON_INSTANCE, target);
       cronJobs.forEach((cronItem: CronJob) => {
         const cronTime = cronItem.cronTime;
         const methodName = cronItem.methodName;
@@ -36,7 +37,8 @@ export class ScheduleExplorer {
       return;
     }
     for (const [target, timeoutJobs] of schedulerRegistry.timeoutMap) {
-      const instance = await factory.create(target);
+      const instance = await Reflect.getMetadata(APP_CRON_INSTANCE, target);
+
       timeoutJobs.forEach((timeoutItem: TimeJob) => {
         const delay = timeoutItem.delay;
         const methodName = timeoutItem.methodName;
@@ -58,7 +60,8 @@ export class ScheduleExplorer {
       return;
     }
     for (const [target, intervalJobs] of schedulerRegistry.intervalMap) {
-      const instance = await factory.create(target);
+      const instance = await Reflect.getMetadata(APP_CRON_INSTANCE, target);
+
       intervalJobs.forEach((intervalItem: TimeJob) => {
         const delay = intervalItem.delay;
         const methodName = intervalItem.methodName;

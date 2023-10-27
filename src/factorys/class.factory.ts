@@ -33,7 +33,7 @@ import { join } from "../utils.ts";
 
 export class ClassFactory {
   globalCaches: FactoryCaches = new Map();
-  moduleCaches: Map<Instance, FactoryCaches> = new Map();
+  instanceCaches: Map<Instance, FactoryCaches> = new Map();
 
   getInstanceFromCaches<T>(
     target: any,
@@ -278,7 +278,7 @@ export class ClassFactory {
     const arr = await Promise.all(all.map((item) => {
       if (typeof item === "function") {
         return this.create(item, {
-          caches: target ? this.moduleCaches.get(target) : undefined,
+          caches: target ? this.instanceCaches.get(target) : undefined,
         });
       }
       return item;

@@ -1,6 +1,8 @@
 import { assert, assertEquals } from "../test_deps.ts";
 import { createMockContext } from "../tests/common_helper.ts";
 import {
+  flagCronProvider,
+  getCronInstance,
   getReadableStream,
   join,
   parseSearch,
@@ -9,6 +11,7 @@ import {
   replacePrefixAndSuffix,
   replaceSuffix,
   setCacheControl,
+  storeCronInstance,
 } from "./utils.ts";
 
 const test = Deno.test;
@@ -334,5 +337,23 @@ Deno.test("replacePrefixAndSuffix", async (t) => {
   await t.step("replace not ok", () => {
     const str = "${suffix2}/v1/user";
     assertEquals(replacePrefixAndSuffix(str, "/api/", "/info/"), "/" + str);
+  });
+});
+
+Deno.test("storeCronInstance and getCronInstance", async (t) => {
+  await t.step("should return null if no instance is stored", () => {
+    class CronService {}
+    const instance = new CronService();
+    storeCronInstance(CronService, instance);
+    assertEquals(getCronInstance(CronService), undefined);
+  });
+
+  await t.step("should return instance if instance is stored", () => {
+    class CronService {}
+    flagCronProvider(CronService);
+
+    const instance = new CronService();
+    storeCronInstance(CronService, instance);
+    assertEquals(getCronInstance(CronService), instance);
   });
 });

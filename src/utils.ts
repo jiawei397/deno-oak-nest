@@ -1,4 +1,7 @@
 import { Context } from "./interfaces/context.interface.ts";
+import { APP_CRON, APP_CRON_INSTANCE } from "./constants.ts";
+import { Reflect } from "../deps.ts";
+import { Constructor, Instance } from "./interfaces/type.interface.ts";
 
 export function isDebug() {
   return Deno.env.get("DEBUG") === "true";
@@ -137,4 +140,18 @@ export function replacePrefixAndSuffix(
   }
   temp = replaceSuffix(temp, suffix);
   return temp;
+}
+
+export function storeCronInstance(provider: Constructor, instance: Instance) {
+  if (Reflect.getMetadata(APP_CRON, provider)) { // this is Cron Service, store its cache
+    Reflect.defineMetadata(APP_CRON_INSTANCE, instance, provider);
+  }
+}
+
+export function getCronInstance(provider: Constructor): Instance | undefined {
+  return Reflect.getMetadata(APP_CRON_INSTANCE, provider);
+}
+
+export function flagCronProvider(provider: Constructor) {
+  Reflect.defineMetadata(APP_CRON, true, provider);
 }
