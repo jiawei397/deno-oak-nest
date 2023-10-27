@@ -35,6 +35,8 @@ export class PostgresModule {
           },
         },
       ],
+      exports: [POSTGRES_KEY],
+      global: true,
     };
   }
 

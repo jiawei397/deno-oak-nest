@@ -35,6 +35,8 @@ export class RedisModule {
         RedisService,
         RedisStore,
       ],
+      exports: [REDIS_KEY, RedisService, RedisStore],
+      global: true,
     };
   }
 

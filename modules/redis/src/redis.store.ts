@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import { Factory } from "../../../src/factorys/class.factory.ts";
+import { assert } from "../../../deps.ts";
+import { factory } from "../../../src/factorys/class.factory.ts";
 import { ICacheStore } from "../../cache/src/cache.interface.ts";
 import { Inject } from "../deps.ts";
 import type { Redis } from "../deps.ts";
@@ -10,6 +11,7 @@ export class RedisStore implements ICacheStore {
   key = "cache_store";
   timeoutMap: Map<string, number>;
   constructor(@Inject(REDIS_KEY) public readonly client: Redis) {
+    assert(this.client, "redis client should be inited");
     this.timeoutMap = new Map<string, number>();
     this.clear().catch(console.error);
   }
@@ -76,6 +78,6 @@ export class RedisStore implements ICacheStore {
 export const createStore = async () => {
   return {
     name: REDIS_STORE_NAME,
-    store: await Factory(RedisStore),
+    store: await factory.create(RedisStore),
   };
 };

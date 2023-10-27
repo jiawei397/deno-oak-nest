@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, UseInterceptors } from "@nest";
+import { assert, Controller, Get, Inject, UseInterceptors } from "@nest";
 import { CacheInterceptor, SetCacheStore } from "@nest/cache";
 import { type Redis, REDIS_KEY, RedisService } from "@nest/redis";
 
@@ -7,7 +7,10 @@ export class AppController {
   constructor(
     private readonly redisService: RedisService,
     @Inject(REDIS_KEY) private readonly client: Redis,
-  ) {}
+  ) {
+    assert(redisService, "redisService should be inited");
+    assert(client, "redis client should be inited");
+  }
 
   @Get("/")
   async version() {
