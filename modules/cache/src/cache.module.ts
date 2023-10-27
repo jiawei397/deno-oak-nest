@@ -16,6 +16,8 @@ export class CacheModule {
         },
         CacheInterceptor,
       ],
+      exports: [CacheInterceptor],
+      global: true,
     };
   }
 }
