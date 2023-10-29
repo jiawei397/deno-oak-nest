@@ -1,11 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { vary } from "../deps.ts";
-import {
-  CORSHeader,
-  CORSHeaders,
-  CorsOptions,
-  MultiCORSHeaders,
-} from "./types.ts";
+import { CORSHeader, CORSHeaders, CorsOptions } from "./types.ts";
 import type {
   Request,
   Response,

@@ -673,7 +673,7 @@ Deno.test("life cycle", async (t) => {
     onModuleDestroy(): void | Promise<void> {
       callStack.push(5);
     }
-    onApplicationShutdown(signal: string): void | Promise<void> {
+    onApplicationShutdown(_signal: string): void | Promise<void> {
       callStack.push(4);
     }
     onApplicationBootstrap(): void | Promise<void> {
@@ -683,7 +683,7 @@ Deno.test("life cycle", async (t) => {
       callStack.push(2);
     }
     beforeApplicationShutdown(
-      signal?: string | undefined,
+      _signal?: string | undefined,
     ): void | Promise<void> {
       callStack.push(12);
     }
@@ -707,14 +707,14 @@ Deno.test("life cycle", async (t) => {
       callStack.push(6);
     }
     beforeApplicationShutdown(
-      signal?: string | undefined,
+      _signal?: string | undefined,
     ): void | Promise<void> {
       callStack.push(11);
     }
     onModuleDestroy(): void | Promise<void> {
       callStack.push(10);
     }
-    onApplicationShutdown(signal: string): void | Promise<void> {
+    onApplicationShutdown(_signal: string): void | Promise<void> {
       callStack.push(9);
     }
     onApplicationBootstrap(): void | Promise<void> {
