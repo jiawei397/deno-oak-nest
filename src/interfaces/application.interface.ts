@@ -4,7 +4,7 @@ export type ApiPrefixOptions = {
    * @example
    * ["^/?v\\d{1,3}/", /^\/?v\d{1,3}\//]
    */
-  exclude?: (string | RegExp)[];
+  exclude?: RegExp[];
 };
 
 /**

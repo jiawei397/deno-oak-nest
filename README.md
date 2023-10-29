@@ -629,13 +629,12 @@ But if you set global prefix `/api`, this will get `/api/v2/user/info`.
 #### global prefix exclude
 
 If you not want to set `isAbsolute` in every Controller, you can set an RegExp
-by exclude when you `setGlobalPrefix`, it can be a String which will call
-`new RegExp` or RegExp.
+by exclude when you `setGlobalPrefix`.
 
 ```typescript
 const app = await NestFactory.create(AppModule);
 app.setGlobalPrefix("/api", {
-  exclude: ["^/?v\\d{1,3}/", /^\/?v\d{1,3}\//],
+  exclude: [/^\/?v\d{1,3}\//],
 });
 ```
 
