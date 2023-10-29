@@ -55,7 +55,12 @@ Deno.test("createMockRouter", async (t) => {
 
     assertEquals(router.routes(), undefined);
     assertEquals(router.serveForStatic(), undefined);
-    assertEquals(router.startServer(), undefined);
+    assertEquals(
+      router.startServer({
+        onListen: () => {},
+      }),
+      undefined,
+    );
     assertThrows(() => router.useOriginMiddleware(() => {}));
   });
 });

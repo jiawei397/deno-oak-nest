@@ -12,6 +12,7 @@ import {
 } from "../src/interfaces/route.interface.ts";
 import { Application } from "../src/application.ts";
 import { NotImplementedException } from "../src/exceptions.ts";
+import { ListenOptions } from "../src/interfaces/application.interface.ts";
 
 export async function findUnusedPort(port: number) {
   try {
@@ -172,8 +173,8 @@ export class MockRouter implements IRouter {
     // empty
   }
 
-  startServer() {
-    // empty
+  startServer(options: ListenOptions) {
+    options.onListen?.({ hostname: "localhost", port: 3000 });
   }
 
   serveForStatic() {
