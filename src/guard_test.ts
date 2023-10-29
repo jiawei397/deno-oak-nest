@@ -205,3 +205,68 @@ Deno.test("application guard can not change body and status in canActive", async
   assertNotEquals(ctx.response.status, changedStatus);
   assertEquals(callStack, []);
 });
+
+Deno.test("application all guard", async (t) => {
+  const callStack: number[] = [];
+  class Guard1 implements CanActivate {
+    async canActivate(_context: Context): Promise<boolean> {
+      callStack.push(1);
+      return true;
+    }
+  }
+  class Guard2 implements CanActivate {
+    async canActivate(_context: Context): Promise<boolean> {
+      callStack.push(2);
+      return true;
+    }
+  }
+
+  class Guard3 implements CanActivate {
+    async canActivate(_context: Context): Promise<boolean> {
+      callStack.push(3);
+      return true;
+    }
+  }
+
+  @UseGuards(Guard1)
+  @Controller("user")
+  class A {
+    @UseGuards(Guard2)
+    @Get("/a")
+    method1() {
+      callStack.push(4);
+      return "a";
+    }
+  }
+
+  const app = createMockApp();
+  app.addController(A);
+
+  await t.step("no global guard", async () => {
+    const ctx = createMockContext({
+      path: "/user/a",
+      method: "GET",
+    });
+
+    await mockCallMethod(app, ctx);
+
+    assertEquals(callStack, [1, 2, 4]);
+
+    callStack.length = 0;
+  });
+
+  await t.step("use global", async () => {
+    app.useGlobalGuards(Guard3);
+
+    const ctx = createMockContext({
+      path: "/user/a",
+      method: "GET",
+    });
+
+    await mockCallMethod(app, ctx);
+
+    assertEquals(callStack, [3, 1, 2, 4]);
+
+    callStack.length = 0;
+  });
+});
