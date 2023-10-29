@@ -7,7 +7,7 @@ import { ControllerMethod } from "./guard.interface.ts";
 import { Next } from "./middleware.interface.ts";
 import { Type } from "./type.interface.ts";
 
-export type MethodType = "get" | "post" | "put" | "delete";
+export type MethodType = "get" | "post" | "put" | "delete" | "patch";
 
 export interface RouteMap {
   methodPath: string;

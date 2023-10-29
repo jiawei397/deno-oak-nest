@@ -6,6 +6,7 @@ import {
 } from "../src/interfaces/context.interface.ts";
 import {
   IRouter,
+  MethodType,
   MiddlewareHandler,
   NotFoundHandler,
 } from "../src/interfaces/route.interface.ts";
@@ -22,9 +23,9 @@ export async function findUnusedPort(port: number) {
   }
 }
 
-export const createMockContext = (options: {
+export type MockOptions = {
   path: string;
-  method: string;
+  method: Uppercase<MethodType> | "OPTIONS";
   body?: {
     type: string;
     value: any;
@@ -34,7 +35,9 @@ export const createMockContext = (options: {
   cookies?: Record<string, string>;
   params?: Record<string, string>;
   queries?: Record<string, string | string[]>;
-}): Context => {
+};
+
+export const createMockContext = (options: MockOptions): Context => {
   const mockRequest: Request = {
     method: options.method,
     url: options.path.startsWith("http")
@@ -60,10 +63,18 @@ export const createMockContext = (options: {
       return options.params?.[name];
     },
     queries(name: string) {
-      return options.queries?.[name] as string[];
+      const value = options.queries?.[name];
+      if (!value) {
+        return [];
+      }
+      return Array.isArray(value) ? value : [value];
     },
     query(name: string) {
-      return options.queries?.[name] as string;
+      const value = options.queries?.[name];
+      if (!value) {
+        return undefined;
+      }
+      return Array.isArray(value) ? value[0] : value;
     },
     async json() {
       return options.body?.value;
@@ -96,20 +107,25 @@ export const createMockContext = (options: {
   };
 };
 
-type MethodType = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+export type MethodHandler = (ctx: Context) => Promise<void>;
+
 export class MockRouter implements IRouter {
-  map: Map<MethodType, Map<string, MiddlewareHandler>> = new Map();
+  map: Map<Uppercase<MethodType>, Map<string, MethodHandler>> = new Map();
 
   routes(): void {
     // empty
   }
-  private handle(path: string, fn: MiddlewareHandler, method: MethodType) {
+  private handle(
+    path: string,
+    fn: MiddlewareHandler,
+    method: Uppercase<MethodType>,
+  ) {
     let getMap = this.map.get(method);
     if (!getMap) {
-      getMap = new Map<string, MiddlewareHandler>();
+      getMap = new Map<string, MethodHandler>();
       this.map.set(method, getMap);
     }
-    getMap.set(path, fn);
+    getMap.set(path || "/", (ctx) => fn(ctx, createMockNext()));
   }
   get(
     path: string,
@@ -191,12 +207,13 @@ export async function mockCallMethod(
   await (app as any).routes();
 
   const url = ctx.request.url;
-  const method = ctx.request.method as "GET" | "POST" | "PUT" | "DELETE";
+  const method = ctx.request.method as Uppercase<MethodType>;
   const router = (app as any).router as MockRouter;
   const pathname = new URL(url).pathname;
-  const func = router.map.get(method)!.get(pathname);
+  // console.log(router.map);
+  const func = router.map.get(method)?.get(pathname);
   if (!func) {
     throw new Error(`can not find ${method} ${url}`);
   }
-  return func(ctx, createMockNext());
+  return func(ctx);
 }
