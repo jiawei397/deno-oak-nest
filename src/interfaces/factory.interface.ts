@@ -1,4 +1,6 @@
-// deno-lint-ignore-file no-explicit-any ban-types ban-types
+// deno-lint-ignore-file no-explicit-any ban-types ban-types no-explicit-any
+import { LoggerService } from "./log.interface.ts";
+
 export interface InjectedData {
   fn: Function;
   params: any[];
@@ -30,6 +32,7 @@ export interface StaticOptions {
 export type FactoryCreateOptions = {
   strict?: boolean;
   cache?: Map<any, any>;
+  logger?: LoggerService | false;
 };
 
 export type FactoryCaches = Map<any, any>;

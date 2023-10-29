@@ -58,7 +58,7 @@ export class Application {
   private instances = new Set<any>();
   private controllers: Type[] = [];
 
-  private logger: LoggerService = console;
+  private logger: LoggerService | false = console;
   private startTime = Date.now();
 
   moduleCaches: Map<ModuleType, FactoryCaches> = new Map();
@@ -142,9 +142,7 @@ export class Application {
    * @param [signal] The signal which caused the shutdown.
    */
   async close(signal?: ShutdownSignal) {
-    await this.onModuleDestroy().catch((err) => {
-      this.logger.error(err); // TODO: log format
-    });
+    await this.onModuleDestroy().catch(this.log.bind(this));
     await this.beforeApplicationShutdown(signal);
     this.abortController.abort();
     await this.onApplicationShutdown(signal);
@@ -189,10 +187,9 @@ export class Application {
 
   /**
    * Sets custom logger service.
-   * Flushes buffered logs if auto flush is on.
    * @returns {void}
    */
-  useLogger(logger: LoggerService): void {
+  useLogger(logger: LoggerService | false): void {
     this.logger = logger;
   }
 
@@ -217,6 +214,7 @@ export class Application {
   }
 
   private log(...message: string[]) {
+    if (!this.logger) return;
     this.logger.info(
       yellow("[Nest]"),
       green(format(new Date(), "yyyy-MM-dd HH:mm:ss")),

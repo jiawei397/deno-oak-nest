@@ -20,7 +20,7 @@
     "dev:provider": "deno run -A --watch example/provider/main.ts",
     "cli": "deno task --cwd=cli install",
     "pm2": "pm2 start --name deno_nest example/main.ts --interpreter='deno' --interpreter-args='run --allow-net --allow-env --allow-write --allow-read --unstable'",
-    "test": "deno test --allow-env --allow-net --allow-write --allow-read --parallel --ignore=example --coverage=cov_profile",
+    "test": "DENO_ENV=test deno test --allow-env --allow-net --allow-write --allow-read --parallel --ignore=example --coverage=cov_profile",
     "cache": "deno cache --lock deno.lock --unstable --lock-write deps.ts",
     "coverage": "deno coverage --unstable --lcov ./cov_profile",
     "coverage:html": "rm -rf cov_profile && deno task test && deno task coverage > cov.lcov && genhtml -o cov_profile/html cov.lcov",

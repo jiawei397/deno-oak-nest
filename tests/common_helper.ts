@@ -194,6 +194,7 @@ export function createMockRouter() {
 export function createMockApp() {
   const router = createMockRouter();
   const app = new Application(router);
+  app.useLogger(false);
 
   return app;
 }

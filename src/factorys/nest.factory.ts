@@ -13,6 +13,11 @@ export class NestFactory {
   ) {
     const router = new Router({ strict: options?.strict });
     const app = new Application(router);
+    if (options?.logger !== undefined) {
+      app.useLogger(options.logger);
+    } else if (Deno.env.get("DENO_ENV") === "test") {
+      app.useLogger(false);
+    }
     await app.init(rootModule, options?.cache);
 
     return app;
