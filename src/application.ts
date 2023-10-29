@@ -213,7 +213,7 @@ export class Application {
     this.controllers.push(...clsArr);
   }
 
-  private log(...message: string[]) {
+  protected log(...message: string[]) {
     if (!this.logger) return;
     this.logger.info(
       yellow("[Nest]"),

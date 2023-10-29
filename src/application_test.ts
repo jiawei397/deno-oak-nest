@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { assert, assertEquals } from "../test_deps.ts";
 import { Controller, Get } from "./decorators/controller.ts";
 import type { CanActivate } from "./interfaces/guard.interface.ts";
@@ -8,7 +9,7 @@ import {
   createMockContext,
   mockCallMethod,
 } from "../tests/common_helper.ts";
-import { type Context } from "./interfaces/context.interface.ts";
+import type { Context, Response } from "./interfaces/context.interface.ts";
 import { Status } from "../deps.ts";
 import {
   BadRequestException,
@@ -25,6 +26,7 @@ import {
   OnModuleInit,
 } from "./interfaces/module.interface.ts";
 import { Module } from "./decorators/module.ts";
+import { Res } from "./decorators/method.ts";
 
 Deno.test("module init", async (t) => {
   const callStack: number[] = [];
@@ -771,5 +773,44 @@ Deno.test("onModuleDestroy", async (t) => {
     assertEquals(callStack, [10]);
 
     callStack.length = 0;
+  });
+});
+
+Deno.test("useLogger", () => {
+  const app = createMockApp();
+  app.useLogger(console);
+
+  (app as any).log("test");
+});
+
+Deno.test("response 304", async (t) => {
+  const app = createMockApp();
+
+  await t.step("304", async () => {
+    @Controller("")
+    class AppController {
+      @Get("/a")
+      a(@Res() res: Response) {
+        res.status = 304;
+        res.body = "hello";
+      }
+    }
+    @Module({
+      controllers: [
+        AppController,
+      ],
+    })
+    class AppModule {}
+
+    await app.init(AppModule, new Map());
+
+    const ctx = createMockContext({
+      path: "/a",
+      method: "GET",
+    });
+    await mockCallMethod(app, ctx);
+
+    assertEquals(ctx.response.status, 304);
+    assertEquals(ctx.response.body, null);
   });
 });
