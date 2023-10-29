@@ -184,6 +184,27 @@ export function createCommonTests(
     },
   );
 
+  Deno.test(`${type} render null`, {
+    sanitizeOps: false,
+    sanitizeResources: false,
+  }, async (t) => {
+    const callStack: number[] = [];
+    @Module({})
+    class AppModule {}
+    const { app, baseUrl } = await createApp(AppModule);
+    app.get("/", (req, res) => {
+      callStack.push(1);
+      res.body = null;
+    });
+    await t.step("render null", async () => {
+      const res = await fetch(`${baseUrl}`);
+      assertEquals(res.status, 200);
+      assertEquals(await res.text(), "");
+      assertEquals(callStack, [1]);
+      callStack.length = 0;
+    });
+  });
+
   Deno.test(`${type} test strict`, {
     sanitizeOps: false,
     sanitizeResources: false,
