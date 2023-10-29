@@ -40,6 +40,23 @@
     },
     {
       "request": "launch",
+      "name": "scheduler",
+      "type": "node",
+      "program": "${workspaceFolder}/modules/scheduler/example/main.ts",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--inspect-brk",
+        "-A",
+        "--config",
+        "modules/scheduler/deno.json",
+        "--unstable"
+      ],
+      "attachSimplePort": 9229
+    },
+    {
+      "request": "launch",
       "name": "hono",
       "type": "node",
       "program": "${workspaceFolder}/modules/hono/example/main.ts",
@@ -93,7 +110,7 @@
       "request": "launch",
       "name": "test",
       "type": "node",
-      "program": "${workspaceFolder}/tests/test.module_test.ts",
+      "program": "${workspaceFolder}/src/application_test.ts",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "deno",
       "runtimeArgs": [
