@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any require-await
 import {
   Controller,
   Delete,
@@ -6,10 +6,16 @@ import {
   Post,
   Put,
 } from "../src/decorators/controller.ts";
-import { assertEquals, assertNotEquals, assertRejects } from "../test_deps.ts";
+import {
+  assertEquals,
+  assertNotEquals,
+  assertRejects,
+  assertThrows,
+} from "../test_deps.ts";
 import {
   createMockApp,
   createMockContext,
+  createMockRouter,
   findUnusedPort,
   mockCallMethod,
   MockOptions,
@@ -24,7 +30,37 @@ Deno.test("findUnusedPort", async () => {
   listener1.close();
 });
 
-Deno.test("createMockContext - returns expected context object", async () => {
+Deno.test("createMockRouter", async (t) => {
+  const router = createMockRouter();
+
+  await t.step("use", () => {
+    router.use(async (ctx, next) => {
+      ctx.response.body = "Hello, world!";
+      await next();
+    });
+    assertEquals(router.map.get("GET")!.size, 1);
+    assertEquals(router.map.get("POST")!.size, 1);
+    assertEquals(router.map.get("PATCH")!.size, 1);
+    assertEquals(router.map.get("PUT")!.size, 1);
+    assertEquals(router.map.get("DELETE")!.size, 1);
+  });
+
+  await t.step("not implement", () => {
+    assertEquals(
+      router.notFound(async (ctx) => {
+        ctx.response.body = "Not Found";
+      }),
+      undefined,
+    );
+
+    assertEquals(router.routes(), undefined);
+    assertEquals(router.serveForStatic(), undefined);
+    assertEquals(router.startServer(), undefined);
+    assertThrows(() => router.useOriginMiddleware(() => {}));
+  });
+});
+
+Deno.test("createMockContext - returns expected context object", async (t) => {
   const options: MockOptions = {
     path: "/test",
     method: "GET",
@@ -40,33 +76,41 @@ Deno.test("createMockContext - returns expected context object", async () => {
 
   const ctx = createMockContext(options);
 
-  assertEquals(ctx.request.method, options.method);
-  assertEquals(ctx.request.url, `http://localhost${options.path}`);
-  assertEquals(await ctx.request.json(), options.body?.value);
-  assertEquals(await ctx.request.formData(), options.body?.value as any);
-  assertEquals(await ctx.request.text(), options.body?.value as any);
-  assertEquals(
-    ctx.request.header("User-Agent"),
-    options.reqHeaders?.["User-Agent"],
-  );
-  assertEquals(await ctx.request.cookies(), options.cookies);
-  assertEquals(
-    await ctx.request.cookie("sessionId"),
-    options.cookies?.sessionId,
-  );
-  assertEquals(ctx.request.params(), options.params);
-  assertEquals(ctx.request.param("id"), options.params?.id);
-  assertEquals(ctx.request.queries("search"), [options.queries?.search]);
-  assertEquals(ctx.request.queries("page"), options.queries?.page);
-  assertEquals(ctx.request.queries("search2"), []);
+  await t.step("context", async () => {
+    assertEquals(ctx.request.method, options.method);
+    assertEquals(ctx.request.url, `http://localhost${options.path}`);
+    assertEquals(await ctx.request.json(), options.body?.value);
+    assertEquals(await ctx.request.formData(), options.body?.value as any);
+    assertEquals(await ctx.request.text(), options.body?.value as any);
+    assertEquals(
+      ctx.request.header("User-Agent"),
+      options.reqHeaders?.["User-Agent"],
+    );
+    assertEquals(await ctx.request.cookies(), options.cookies);
+    assertEquals(
+      await ctx.request.cookie("sessionId"),
+      options.cookies?.sessionId,
+    );
+    assertEquals(ctx.request.params(), options.params);
+    assertEquals(ctx.request.param("id"), options.params?.id);
+    assertEquals(ctx.request.queries("search"), [options.queries?.search]);
+    assertEquals(ctx.request.queries("page"), options.queries?.page);
+    assertEquals(ctx.request.queries("search2"), []);
 
-  assertEquals(ctx.request.query("search2"), undefined);
-  assertEquals(ctx.request.query("search"), options.queries?.search);
-  assertEquals(ctx.request.query("page"), options.queries?.page[0]);
-  assertEquals(ctx.response.body, options.body?.value);
-  assertEquals(ctx.response.status, 200);
-  assertEquals(ctx.response.statusText, "");
-  assertEquals(ctx.render(), undefined, "not implement");
+    assertEquals(ctx.request.query("search2"), undefined);
+    assertEquals(ctx.request.query("search"), options.queries?.search);
+    assertEquals(ctx.request.query("page"), options.queries?.page[0]);
+    assertEquals(ctx.response.body, options.body?.value);
+    assertEquals(ctx.response.status, 200);
+    assertEquals(ctx.response.statusText, "");
+  });
+
+  await t.step("context - not implement", async () => {
+    assertEquals(ctx.render(), undefined, "not implement");
+
+    assertThrows(() => ctx.request.getOriginalRequest());
+    assertThrows(() => ctx.response.getOriginalResponse());
+  });
 });
 
 Deno.test("mockCallMethod", async (t) => {

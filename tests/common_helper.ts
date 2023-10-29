@@ -11,6 +11,7 @@ import {
   NotFoundHandler,
 } from "../src/interfaces/route.interface.ts";
 import { Application } from "../src/application.ts";
+import { NotImplementedException } from "../src/exceptions.ts";
 
 export async function findUnusedPort(port: number) {
   try {
@@ -125,7 +126,7 @@ export class MockRouter implements IRouter {
       getMap = new Map<string, MethodHandler>();
       this.map.set(method, getMap);
     }
-    getMap.set(path || "/", (ctx) => fn(ctx, createMockNext()));
+    getMap.set(path || "/", (ctx) => fn(ctx, () => Promise.resolve()));
   }
   get(
     path: string,
@@ -181,16 +182,12 @@ export class MockRouter implements IRouter {
 
   // deno-lint-ignore ban-types
   useOriginMiddleware(_fn: Function, _path?: string): void {
-    // empty
+    throw new NotImplementedException("");
   }
 }
 
 export function createMockRouter() {
   return new MockRouter();
-}
-
-export function createMockNext() {
-  return async () => {};
 }
 
 export function createMockApp() {
