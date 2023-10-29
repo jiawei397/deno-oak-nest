@@ -514,6 +514,10 @@
     "https://deno.land/x/oak@v12.6.1/structured_clone.ts": "c3888b14d1eec558345bfbf13d0993d59bd45aaa8588444e35dd558c3a921cd8",
     "https://deno.land/x/oak@v12.6.1/testing.ts": "37d684d57bb8e5150fb5eb2677e66b04dcb422709cf2c5a74c1df94d52aa02e2",
     "https://deno.land/x/oak@v12.6.1/util.ts": "0a3fdffb114859c2de84e1783efa3a544af4d2af8c6f08e0d25655de9d3e69bb",
+    "https://deno.land/x/oak_cors@v0.1.1/deps.ts": "431d0e88b1d0e5065bd13624ec1e3a0b7069efce7dd43dad3cf8a5a041fa5575",
+    "https://deno.land/x/oak_cors@v0.1.1/mod.ts": "0db150e12c8e018ca7493866555e674c76bebfbd843ef53aa45b5ae4d17d6d6a",
+    "https://deno.land/x/oak_cors@v0.1.1/src/cors.ts": "d8cea90fdcd86ac0a4225b4d1f048ebf0e162efc32c686456fbb4a7d48bc824d",
+    "https://deno.land/x/oak_cors@v0.1.1/src/types.ts": "a5066b49c4670ca543ee271ffccddd6a7a5e2c496259441fc711a4f65c57819b",
     "https://deno.land/x/path_to_regexp@v6.2.1/index.ts": "894060567837bae8fc9c5cbd4d0a05e9024672083d5883b525c031eea940e556",
     "https://deno.land/x/vary@1.0.0/mod.ts": "e7c452694b21336419f16e0891f8ea503adaafc7bde956fb29e1a86f450a68e6"
   }
