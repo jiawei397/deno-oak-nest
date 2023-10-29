@@ -36,6 +36,10 @@ Deno.test("test origin only with controller", async () => {
   assert(b instanceof B);
   assert(a["b"] === b);
   assertEquals(a.find(), "b");
+
+  class C {}
+  const c = await moduleRef.get(C);
+  assertEquals(c, null);
 });
 
 Deno.test("test origin with providers", async () => {
