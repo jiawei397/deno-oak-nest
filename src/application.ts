@@ -38,9 +38,8 @@ import {
 } from "./module.ts";
 import { transferParam } from "./params.ts";
 import {
-  join,
-  replacePrefix,
-  replacePrefixAndSuffix,
+  getControllerPaths,
+  getMethodPaths,
   storeCronInstance,
 } from "./utils.ts";
 
@@ -300,27 +299,14 @@ export class Application {
     const start = Date.now();
     routerArr.forEach(
       ({ controllerPath, arr, aliasOptions: controllerAliasOptions }) => {
-        let isAbsolute = controllerAliasOptions?.isAbsolute;
-        if (!isAbsolute && apiPrefixReg) {
-          isAbsolute = apiPrefixReg.some((str) => {
-            const reg = typeof str === "string" ? new RegExp(str) : str;
-            return reg.test(controllerPath);
-          });
-        }
-        let controllerPathWithPrefix = isAbsolute
-          ? controllerPath
-          : join(this.apiPrefix, controllerPath);
-        controllerPathWithPrefix = replacePrefixAndSuffix(
-          controllerPathWithPrefix,
-          this.apiPrefix,
-          controllerPath,
-        );
-        const controllerAliasPath = controllerAliasOptions?.alias &&
-          replacePrefixAndSuffix(
-            controllerAliasOptions.alias,
-            this.apiPrefix,
+        const { controllerPathWithPrefix, controllerAliasPath } =
+          getControllerPaths({
+            apiPrefix: this.apiPrefix,
+            apiPrefixReg,
             controllerPath,
-          );
+            controllerAliasOptions,
+          });
+
         const startTime = Date.now();
         let lastCls;
 
@@ -335,15 +321,14 @@ export class Application {
             cls,
           } = routeMap;
           lastCls = cls;
-          const isAbsolute = aliasOptions?.isAbsolute;
-          const alias = aliasOptions?.alias;
-          const originPath = isAbsolute
-            ? replacePrefix(methodPath, this.apiPrefix)
-            : join(controllerPathWithPrefix, methodPath);
-          let aliasPath = alias ??
-            (controllerAliasPath &&
-              !isAbsolute &&
-              join(controllerAliasPath, methodPath));
+          const { originPath, aliasPath } = getMethodPaths({
+            apiPrefix: this.apiPrefix,
+            controllerPathWithPrefix,
+            controllerPath,
+            controllerAliasPath,
+            methodPath,
+            methodAliasOptions: aliasOptions,
+          });
           const funcStart = Date.now();
           const callback = async (context: Context) => {
             // validate guard
@@ -398,19 +383,13 @@ export class Application {
           num++;
 
           if (aliasPath) {
-            aliasPath = replacePrefixAndSuffix(
-              aliasPath,
-              this.apiPrefix,
-              methodPath,
-              controllerPath,
-            );
             this.router[methodType](aliasPath, callback);
             num++;
           }
           const funcEnd = Date.now();
           const path = aliasPath
             ? originPath + ", " + red(aliasPath)
-            : isAbsolute
+            : aliasOptions?.isAbsolute
             ? red(originPath)
             : originPath;
           this.log(

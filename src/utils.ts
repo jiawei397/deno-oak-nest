@@ -2,6 +2,7 @@ import { Context } from "./interfaces/context.interface.ts";
 import { APP_CRON, APP_CRON_INSTANCE } from "./constants.ts";
 import { Reflect } from "../deps.ts";
 import { Constructor, Instance } from "./interfaces/type.interface.ts";
+import { AliasOptions } from "./interfaces/controller.interface.ts";
 
 export function isDebug() {
   return Deno.env.get("DEBUG") === "true";
@@ -154,4 +155,88 @@ export function getCronInstance(provider: Constructor): Instance | undefined {
 
 export function flagCronProvider(provider: Constructor) {
   Reflect.defineMetadata(APP_CRON, true, provider);
+}
+
+type MethodNameOptions = {
+  apiPrefix?: string;
+  controllerPath: string;
+  controllerPathWithPrefix: string;
+  controllerAliasPath?: string;
+  methodPath: string;
+  methodAliasOptions?: AliasOptions;
+};
+export function getMethodPaths(params: MethodNameOptions) {
+  const {
+    apiPrefix = "",
+    controllerPathWithPrefix,
+    controllerPath,
+    controllerAliasPath,
+    methodPath,
+    methodAliasOptions,
+  } = params;
+
+  const methodIsAbsolute = methodAliasOptions?.isAbsolute;
+  const methodAlias = methodAliasOptions?.alias;
+  const originPath = methodIsAbsolute
+    ? replacePrefix(methodPath, apiPrefix)
+    : join(controllerPathWithPrefix, methodPath);
+  let aliasPath: string | undefined = undefined;
+  if (methodAlias) {
+    if (controllerAliasPath && !methodIsAbsolute) {
+      aliasPath = join(controllerAliasPath, methodPath);
+    } else {
+      aliasPath = methodAlias;
+    }
+    aliasPath = replacePrefixAndSuffix(
+      aliasPath,
+      apiPrefix,
+      methodPath,
+      controllerPath,
+    );
+  }
+
+  return {
+    originPath,
+    aliasPath,
+  };
+}
+
+type ControllerPathOptions = {
+  apiPrefix?: string;
+  apiPrefixReg?: RegExp[];
+  controllerPath: string;
+  controllerAliasOptions?: AliasOptions;
+};
+
+export function getControllerPaths(options: ControllerPathOptions): {
+  controllerPathWithPrefix: string;
+  controllerAliasPath?: string;
+} {
+  const {
+    apiPrefix = "",
+    apiPrefixReg,
+    controllerPath,
+    controllerAliasOptions,
+  } = options;
+  let isAbsolute = controllerAliasOptions?.isAbsolute;
+  if (!isAbsolute && apiPrefixReg) {
+    isAbsolute = apiPrefixReg.some((reg) => {
+      return reg.test(controllerPath);
+    });
+  }
+  let controllerPathWithPrefix = isAbsolute
+    ? controllerPath
+    : join(apiPrefix, controllerPath);
+  controllerPathWithPrefix = replacePrefixAndSuffix(
+    controllerPathWithPrefix,
+    apiPrefix,
+    controllerPath,
+  );
+  const controllerAliasPath = controllerAliasOptions?.alias &&
+    replacePrefixAndSuffix(
+      controllerAliasOptions.alias,
+      apiPrefix,
+      controllerPath,
+    );
+  return { controllerPathWithPrefix, controllerAliasPath };
 }
