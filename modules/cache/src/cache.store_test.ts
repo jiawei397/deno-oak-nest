@@ -1,4 +1,4 @@
-import { assertEquals } from "../../../test_deps.ts";
+import { assert, assertEquals } from "../../../test_deps.ts";
 import { LocalStore, MemoryStore } from "./cache.store.ts";
 
 Deno.test("CacheStore", async (t) => {
@@ -24,6 +24,14 @@ Deno.test("CacheStore", async (t) => {
 
   await t.step("MemoryStore.clear", () => {
     memoryStore.set("foo", "bar");
+    memoryStore.set("baz", "qux");
+    memoryStore.clear();
+    assertEquals(memoryStore.get("foo"), undefined);
+    assertEquals(memoryStore.get("baz"), undefined);
+  });
+
+  await t.step("MemoryStore.clear with ttl", () => {
+    memoryStore.set("foo", "bar", { ttl: 1 });
     memoryStore.set("baz", "qux");
     memoryStore.clear();
     assertEquals(memoryStore.get("foo"), undefined);
@@ -67,6 +75,14 @@ Deno.test("CacheStore", async (t) => {
     assertEquals(localStore.get("baz"), undefined);
   });
 
+  await t.step("LocalStore.clear with ttl", () => {
+    localStore.set("foo", "bar", { ttl: 1 });
+    localStore.set("baz", "qux");
+    localStore.clear();
+    assertEquals(localStore.get("foo"), undefined);
+    assertEquals(localStore.get("baz"), undefined);
+  });
+
   await t.step("LocalStore.has", () => {
     localStore.set("foo", "bar");
     assertEquals(localStore.has("foo"), true);
@@ -97,6 +113,8 @@ Deno.test("LocalStore", async (t) => {
     // Try to get the value again
     value = store.get("testKey");
     assertEquals(value, undefined);
+
+    assert(store.has("testKey") === false);
   });
 
   await t.step("should delete values correctly", () => {
