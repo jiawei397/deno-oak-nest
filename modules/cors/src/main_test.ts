@@ -92,6 +92,16 @@ describe("cors", () => {
     });
   });
 
+  describe("origin is false", () => {
+    it("*", async () => {
+      await CORS(false)(mockRequest, mockResponse, mockNext);
+      assertEquals(
+        mockResponse.headers.get("Access-Control-Allow-Origin"),
+        null,
+      );
+    });
+  });
+
   describe("origin is Array", () => {
     it("contain the origin", async () => {
       const origins = ["https://www.google.com", origin];
@@ -161,6 +171,92 @@ describe("cors", () => {
     });
   });
 
+  it("maxAge set to 1", async () => {
+    await CORS({
+      maxAge: 1,
+    })(mockRequest, mockResponse, mockNext);
+    assertEquals(
+      mockResponse.headers.get("Access-Control-Max-Age"),
+      "1",
+    );
+  });
+
+  describe("exposedHeaders", () => {
+    it("exposedHeaders is Array", async () => {
+      await CORS({
+        exposedHeaders: ["x-test", "x-test2"],
+      })(mockRequest, mockResponse, mockNext);
+      assertEquals(
+        mockResponse.headers.get("Access-Control-Expose-Headers"),
+        "x-test,x-test2",
+      );
+    });
+
+    it("exposedHeaders is Array but empty", async () => {
+      await CORS({
+        exposedHeaders: [""],
+      })(mockRequest, mockResponse, mockNext);
+      assertEquals(
+        mockResponse.headers.get("Access-Control-Expose-Headers"),
+        null,
+      );
+    });
+
+    it("exposedHeaders is not Array", async () => {
+      await CORS({
+        exposedHeaders: "x-test",
+      })(mockRequest, mockResponse, mockNext);
+      assertEquals(
+        mockResponse.headers.get("Access-Control-Expose-Headers"),
+        "x-test",
+      );
+    });
+  });
+
+  describe("allowedHeaders", () => {
+    it("allowedHeaders is Array", async () => {
+      await CORS({
+        allowedHeaders: ["x-test", "x-test2"],
+      })(mockRequest, mockResponse, mockNext);
+      assertEquals(
+        mockResponse.headers.get("Access-Control-Allow-Headers"),
+        "x-test,x-test2",
+      );
+    });
+
+    it("allowedHeaders is not Array", async () => {
+      await CORS({
+        allowedHeaders: "x-test",
+      })(mockRequest, mockResponse, mockNext);
+      assertEquals(
+        mockResponse.headers.get("Access-Control-Allow-Headers"),
+        "x-test",
+      );
+    });
+  });
+
+  describe("methods", () => {
+    it("methods is Array", async () => {
+      await CORS({
+        methods: ["get", "post"],
+      })(mockRequest, mockResponse, mockNext);
+      assertEquals(
+        mockResponse.headers.get("Access-Control-Allow-Methods"),
+        "get,post",
+      );
+    });
+
+    it("methods is not Array", async () => {
+      await CORS({
+        methods: "get",
+      })(mockRequest, mockResponse, mockNext);
+      assertEquals(
+        mockResponse.headers.get("Access-Control-Allow-Methods"),
+        "get",
+      );
+    });
+  });
+
   describe("OPTIONS status", () => {
     it("no params", async () => {
       await CORS()(mockRequest, mockResponse, mockNext);
@@ -189,5 +285,37 @@ describe("cors", () => {
         200,
       );
     });
+  });
+});
+
+describe("cors get", () => {
+  let mockNext: Next;
+  const origin = "https://www.baidu.com";
+  let mockRequest: Request, mockResponse: Response;
+  beforeEach(() => {
+    const context = createMockContext({
+      method: "GET",
+      path: "https://pan.baidu.com/options",
+      reqHeaders: {
+        origin,
+      },
+    });
+    mockRequest = context.request;
+    mockResponse = context.response;
+    mockNext = () => {
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 0);
+      });
+    };
+  });
+
+  it("no params", async () => {
+    await CORS()(mockRequest, mockResponse, mockNext);
+    assertEquals(
+      mockResponse.headers.get("Access-Control-Allow-Origin"),
+      origin,
+    );
   });
 });

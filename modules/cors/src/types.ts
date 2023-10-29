@@ -50,4 +50,4 @@ export interface CORSHeader {
 
 export type MultiCORSHeaders = CORSHeader[];
 
-export type CORSHeaders = MultiCORSHeaders[] | CORSHeader[] | null;
+export type CORSHeaders = (MultiCORSHeaders | CORSHeader | null)[];
