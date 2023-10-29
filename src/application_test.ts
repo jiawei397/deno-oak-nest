@@ -16,7 +16,14 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from "./exceptions.ts";
-import { DynamicModule, OnModuleInit } from "./interfaces/module.interface.ts";
+import {
+  BeforeApplicationShutdown,
+  DynamicModule,
+  OnApplicationBootstrap,
+  OnApplicationShutdown,
+  OnModuleDestroy,
+  OnModuleInit,
+} from "./interfaces/module.interface.ts";
 import { Module } from "./decorators/module.ts";
 
 Deno.test("module init", async (t) => {
@@ -645,5 +652,124 @@ Deno.test("dynamic module", async (t) => {
 
       callStack.length = 0;
     });
+  });
+});
+
+Deno.test("life cycle", async (t) => {
+  const callStack: number[] = [];
+
+  @Controller("")
+  class AppController
+    implements
+      OnModuleInit,
+      OnApplicationBootstrap,
+      OnApplicationShutdown,
+      OnApplicationShutdown,
+      BeforeApplicationShutdown,
+      OnModuleDestroy {
+    constructor() {
+      callStack.push(1);
+    }
+    onModuleDestroy(): void | Promise<void> {
+      callStack.push(5);
+    }
+    onApplicationShutdown(signal: string): void | Promise<void> {
+      callStack.push(4);
+    }
+    onApplicationBootstrap(): void | Promise<void> {
+      callStack.push(3);
+    }
+    onModuleInit(): void | Promise<void> {
+      callStack.push(2);
+    }
+    beforeApplicationShutdown(
+      signal?: string | undefined,
+    ): void | Promise<void> {
+      callStack.push(12);
+    }
+  }
+
+  @Module({
+    imports: [],
+    controllers: [
+      AppController,
+    ],
+  })
+  class AppModule
+    implements
+      OnModuleInit,
+      OnApplicationBootstrap,
+      OnApplicationShutdown,
+      BeforeApplicationShutdown,
+      OnApplicationShutdown,
+      OnModuleDestroy {
+    constructor() {
+      callStack.push(6);
+    }
+    beforeApplicationShutdown(
+      signal?: string | undefined,
+    ): void | Promise<void> {
+      callStack.push(11);
+    }
+    onModuleDestroy(): void | Promise<void> {
+      callStack.push(10);
+    }
+    onApplicationShutdown(signal: string): void | Promise<void> {
+      callStack.push(9);
+    }
+    onApplicationBootstrap(): void | Promise<void> {
+      callStack.push(8);
+    }
+    onModuleInit(): void | Promise<void> {
+      callStack.push(7);
+    }
+  }
+
+  await t.step("app init", async () => {
+    const app = createMockApp();
+    await app.init(AppModule, new Map());
+
+    assertEquals(callStack, [1, 6, 2, 7]);
+    await app.close();
+
+    assertEquals(callStack, [1, 6, 2, 7, 5, 10, 12, 11, 4, 9]);
+
+    callStack.length = 0;
+  });
+
+  await t.step("app init and listen", async () => {
+    const app = createMockApp();
+    await app.init(AppModule, new Map());
+    await app.listen();
+
+    assertEquals(callStack, [1, 6, 2, 7, 3, 8]);
+    await app.close();
+
+    assertEquals(callStack, [1, 6, 2, 7, 3, 8, 5, 10, 12, 11, 4, 9]);
+
+    callStack.length = 0;
+  });
+});
+
+Deno.test("onModuleDestroy", async (t) => {
+  const callStack: number[] = [];
+  @Module({})
+  class AppModule implements OnModuleDestroy {
+    onModuleDestroy(): void | Promise<void> {
+      callStack.push(10);
+      throw new Error("onModuleDestroy error");
+    }
+  }
+
+  await t.step("app init", async () => {
+    const app = createMockApp();
+    await app.init(AppModule, new Map());
+
+    assertEquals(callStack, []);
+    await app.close();
+
+    assertEquals(callStack, [10]);
+
+    callStack.length = 0;
   });
 });

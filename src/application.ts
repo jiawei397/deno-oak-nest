@@ -159,7 +159,7 @@ export class Application {
    *
    * @returns {this} The Nest application context instance
    */
-  public enableShutdownHooks(signals: ShutdownSignal[] = []): this {
+  public enableShutdownHooks(signals: ShutdownSignal[] = ["SIGINT"]): this {
     let currentSignal: ShutdownSignal | "" = "";
     new Set(signals).forEach((signal) => {
       const callback = () => {
