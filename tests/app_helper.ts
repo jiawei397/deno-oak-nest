@@ -2,6 +2,7 @@
 import {
   APP_FILTER,
   Body,
+  CanActivate,
   Catch,
   type Context,
   Controller,
@@ -19,6 +20,7 @@ import {
   Patch,
   Post,
   Put,
+  UseGuards,
 } from "@nest";
 import { Module } from "@nest";
 import { Max, Min } from "class_validator";
@@ -30,6 +32,7 @@ import {
   assertNotStrictEquals,
 } from "../test_deps.ts";
 import { BadRequestException } from "../src/exceptions.ts";
+import { APP_GUARD } from "../src/constants.ts";
 
 let firstPort = 8000;
 
@@ -1450,6 +1453,70 @@ export function createCommonTests(
         message: "b error",
         statusCode: 400,
       });
+
+      await app.close();
+    });
+  });
+
+  Deno.test(`${type} APP_GUARD use global guard`, {
+    sanitizeOps: false,
+    sanitizeResources: false,
+    only: true,
+  }, async (t) => {
+    const callStack: number[] = [];
+
+    @Injectable()
+    class B {
+      b() {
+        callStack.push(2);
+        return this.c(); // test this
+      }
+      c() {
+        return "c";
+      }
+    }
+
+    @Injectable()
+    class Guard implements CanActivate {
+      constructor(private readonly b: B) {
+        callStack.push(1);
+        console.log("b----", b);
+        assert(b instanceof B);
+      }
+
+      // deno-lint-ignore require-await
+      async canActivate(_context: Context): Promise<boolean> {
+        callStack.push(3);
+        assertEquals(this.b.b(), "c");
+        return true;
+      }
+    }
+
+    @Controller("")
+    class A {
+      @Get("/a")
+      method1() {
+        callStack.push(4);
+        return "a";
+      }
+    }
+
+    @Module({
+      controllers: [A],
+      providers: [{
+        provide: APP_GUARD,
+        useClass: Guard,
+      }],
+    })
+    class AppModule {}
+
+    await t.step("guard should work as global", async () => {
+      const { app, port } = await createApp(AppModule);
+      assertEquals(callStack, [1]);
+
+      const res = await fetch(`http://localhost:${port}/a`);
+      assertEquals(res.status, 200);
+      assertEquals(callStack, [1, 3, 2, 4]);
 
       await app.close();
     });
