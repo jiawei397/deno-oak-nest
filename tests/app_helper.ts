@@ -20,7 +20,6 @@ import {
   Patch,
   Post,
   Put,
-  UseGuards,
 } from "@nest";
 import { Module } from "@nest";
 import { Max, Min } from "class_validator";
@@ -32,7 +31,7 @@ import {
   assertNotStrictEquals,
 } from "../test_deps.ts";
 import { BadRequestException } from "../src/exceptions.ts";
-import { APP_GUARD } from "../src/constants.ts";
+import { APP_GUARD, APP_INTERCEPTOR } from "../src/constants.ts";
 
 let firstPort = 8000;
 
@@ -1461,7 +1460,6 @@ export function createCommonTests(
   Deno.test(`${type} APP_GUARD use global guard`, {
     sanitizeOps: false,
     sanitizeResources: false,
-    only: true,
   }, async (t) => {
     const callStack: number[] = [];
 
@@ -1480,7 +1478,6 @@ export function createCommonTests(
     class Guard implements CanActivate {
       constructor(private readonly b: B) {
         callStack.push(1);
-        console.log("b----", b);
         assert(b instanceof B);
       }
 
@@ -1516,9 +1513,73 @@ export function createCommonTests(
 
       const res = await fetch(`http://localhost:${port}/a`);
       assertEquals(res.status, 200);
+      assertEquals(await res.text(), "a");
       assertEquals(callStack, [1, 3, 2, 4]);
 
       await app.close();
     });
+  });
+
+  Deno.test(`${type} APP_INTERCEPTOR use global interceptor`, {
+    sanitizeOps: false,
+    sanitizeResources: false,
+  }, async () => {
+    const callStack: number[] = [];
+
+    @Injectable()
+    class B {
+      b() {
+        callStack.push(1);
+        return this.c(); // test this
+      }
+      c() {
+        return "c";
+      }
+    }
+
+    @Controller("")
+    class A {
+      @Get("/a")
+      method1() {
+        callStack.push(2);
+        return "a";
+      }
+    }
+
+    @Injectable()
+    class GlobalInterceptor implements NestInterceptor {
+      constructor(private readonly b: B) {
+        callStack.push(3);
+        assert(b instanceof B);
+      }
+
+      async intercept(_ctx: Context, next: Next) {
+        callStack.push(4);
+        assertEquals(this.b.b(), "c");
+        await next();
+        callStack.push(5);
+      }
+    }
+
+    @Module({
+      controllers: [A],
+      providers: [{
+        provide: APP_INTERCEPTOR,
+        useClass: GlobalInterceptor,
+      }],
+    })
+    class AppModule {}
+
+    const app = await NestFactory.create(AppModule, Router);
+
+    const port = await getPort();
+    await app.listen({ port });
+
+    const res = await fetch(`http://localhost:${port}/a`);
+    assertEquals(res.status, 200);
+    assertEquals(await res.text(), "a");
+    assertEquals(callStack, [3, 4, 1, 2, 5]);
+    callStack.length = 0;
+    await app.close();
   });
 }
