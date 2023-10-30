@@ -27,7 +27,7 @@ import { QueryUserInfoDto, UploadDto } from "../dtos/user.dto.ts";
 
 @UseGuards(AuthGuard, SSOGuard)
 @Controller("/user", {
-  alias: "${prefix}/v1/${suffix}",
+  alias: "${prefix}/v1/${controller}",
 })
 export class UserController {
   constructor(private readonly loggerService: LoggerService) {
@@ -35,7 +35,8 @@ export class UserController {
   }
 
   @Get("/v2/${prefix}/user/large", {
-    isAbsolute: true,
+    // alias: "${controllerAlias}/abcd",
+    isAliasOnly: true,
   })
   large() {
     return new Array(100000).fill("Hello World").join("\n");
@@ -85,7 +86,7 @@ export class UserController {
   }
 
   @Get("/info2", {
-    alias: "${prefix}/v3/user/${suffix}",
+    alias: "${prefix}/v3/user/${method}",
   })
   @UseGuards(AuthGuard2, AuthGuard3)
   info2(@Res() res: Response, @Query() params: QueryUserInfoDto) {

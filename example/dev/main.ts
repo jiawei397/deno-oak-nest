@@ -12,9 +12,7 @@ const app = await NestFactory.create(AppModule, Router);
 // app.get("/", (req, res) => {
 //   res.body = "hello world";
 // });
-app.setGlobalPrefix("/api", {
-  exclude: [/^\/?v\d{1,3}\//],
-});
+app.setGlobalPrefix("/api");
 
 app.use(CORS());
 

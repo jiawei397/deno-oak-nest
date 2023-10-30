@@ -1,12 +1,3 @@
-export type ApiPrefixOptions = {
-  /**
-   * The controller path will check by exclude regExp
-   * @example
-   * ["^/?v\\d{1,3}/", /^\/?v\d{1,3}\//]
-   */
-  exclude?: RegExp[];
-};
-
 /**
  * The options of the application
  * @param [onError] the error handler not tested ok

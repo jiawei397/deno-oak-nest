@@ -102,9 +102,9 @@ export function getReadableStream(): ReadableStreamResult {
   };
 }
 
-export function join(...paths: string[]) {
+export function joinPath(...paths: string[]) {
   if (paths.length === 0) {
-    return "";
+    return "/";
   }
   const str = paths.join("/").replaceAll("///", "/").replaceAll("//", "/");
   let last = str;
@@ -114,33 +114,24 @@ export function join(...paths: string[]) {
   if (last.endsWith("/")) {
     last = last.substring(0, last.length - 1);
   }
-  return last;
+  return last || "/";
 }
 
-export function replacePrefix(str: string, prefix: string) {
-  return join(str.replace(/\$\{prefix\}/, prefix));
-}
-
-export function replaceSuffix(str: string, suffix: string) {
-  return join(str.replace(/\$\{suffix\}/, suffix));
-}
-
-export function replaceController(str: string, suffix: string) {
-  return join(str.replace(/\$\{controller\}/, suffix));
-}
-
-export function replacePrefixAndSuffix(
+export function replaceAliasPath(
   str: string,
-  prefix: string,
-  suffix: string,
-  controller?: string,
+  options: {
+    prefix?: string;
+    controller?: string;
+    controllerAliasPath?: string;
+    method?: string;
+  },
 ) {
-  let temp = replacePrefix(str, prefix);
-  if (controller) {
-    temp = replaceController(temp, controller);
-  }
-  temp = replaceSuffix(temp, suffix);
-  return temp;
+  return joinPath(
+    str.replace(/\$\{prefix\}/, options.prefix || "")
+      .replace(/\$\{method\}/, options.method || "")
+      .replace(/\$\{controller\}/, options.controller || "")
+      .replace(/\$\{controllerAlias\}/, options.controllerAliasPath || ""),
+  );
 }
 
 export function storeCronInstance(provider: Constructor, instance: Instance) {
@@ -157,41 +148,46 @@ export function flagCronProvider(provider: Constructor) {
   Reflect.defineMetadata(APP_CRON, true, provider);
 }
 
-type MethodNameOptions = {
+export type MethodPathOptions = {
   apiPrefix?: string;
-  controllerPath: string;
-  controllerPathWithPrefix: string;
+  controllerPathWithPrefix?: string;
   controllerAliasPath?: string;
+  controllerPath: string;
   methodPath: string;
   methodAliasOptions?: AliasOptions;
 };
-export function getMethodPaths(params: MethodNameOptions) {
+export function getMethodPaths(params: MethodPathOptions) {
   const {
     apiPrefix = "",
     controllerPathWithPrefix,
-    controllerPath,
     controllerAliasPath,
+    controllerPath,
     methodPath,
     methodAliasOptions,
   } = params;
 
-  const methodIsAbsolute = methodAliasOptions?.isAbsolute;
-  const methodAlias = methodAliasOptions?.alias;
-  const originPath = methodIsAbsolute
-    ? replacePrefix(methodPath, apiPrefix)
-    : join(controllerPathWithPrefix, methodPath);
+  const methodAlias = methodAliasOptions?.isAliasOnly
+    ? (methodAliasOptions?.alias || methodPath)
+    : methodAliasOptions?.alias;
+  const originPath = methodAliasOptions?.isAliasOnly
+    ? undefined
+    : controllerPathWithPrefix &&
+      joinPath(controllerPathWithPrefix, methodPath);
   let aliasPath: string | undefined = undefined;
   if (methodAlias) {
-    if (controllerAliasPath && !methodIsAbsolute) {
-      aliasPath = join(controllerAliasPath, methodPath);
-    } else {
-      aliasPath = methodAlias;
-    }
-    aliasPath = replacePrefixAndSuffix(
+    aliasPath = methodAlias;
+  } else if (controllerAliasPath) {
+    aliasPath = joinPath(controllerAliasPath, methodPath);
+  }
+  if (aliasPath) {
+    aliasPath = replaceAliasPath(
       aliasPath,
-      apiPrefix,
-      methodPath,
-      controllerPath,
+      {
+        prefix: apiPrefix,
+        controller: controllerPath,
+        controllerAliasPath,
+        method: methodPath,
+      },
     );
   }
 
@@ -201,42 +197,35 @@ export function getMethodPaths(params: MethodNameOptions) {
   };
 }
 
-type ControllerPathOptions = {
-  apiPrefix?: string;
-  apiPrefixReg?: RegExp[];
+export type ControllerPathOptions = {
+  prefix?: string;
   controllerPath: string;
   controllerAliasOptions?: AliasOptions;
 };
 
 export function getControllerPaths(options: ControllerPathOptions): {
-  controllerPathWithPrefix: string;
+  controllerPathWithPrefix?: string;
   controllerAliasPath?: string;
 } {
   const {
-    apiPrefix = "",
-    apiPrefixReg,
+    prefix = "",
     controllerPath,
     controllerAliasOptions,
   } = options;
-  let isAbsolute = controllerAliasOptions?.isAbsolute;
-  if (!isAbsolute && apiPrefixReg) {
-    isAbsolute = apiPrefixReg.some((reg) => {
-      return reg.test(controllerPath);
-    });
-  }
-  let controllerPathWithPrefix = isAbsolute
-    ? controllerPath
-    : join(apiPrefix, controllerPath);
-  controllerPathWithPrefix = replacePrefixAndSuffix(
-    controllerPathWithPrefix,
-    apiPrefix,
-    controllerPath,
-  );
-  const controllerAliasPath = controllerAliasOptions?.alias &&
-    replacePrefixAndSuffix(
-      controllerAliasOptions.alias,
-      apiPrefix,
-      controllerPath,
+  const controllerPathWithPrefix = controllerAliasOptions?.isAliasOnly
+    ? undefined
+    : joinPath(prefix, controllerPath);
+  const controllerAliasPath =
+    (controllerAliasOptions?.isAliasOnly || controllerAliasOptions?.alias) &&
+    replaceAliasPath(
+      controllerAliasOptions.alias || controllerPath,
+      {
+        prefix,
+        controller: controllerPath,
+      },
     );
-  return { controllerPathWithPrefix, controllerAliasPath };
+  return {
+    controllerPathWithPrefix,
+    controllerAliasPath,
+  };
 }

@@ -12,7 +12,6 @@ import { checkByFilters, DefaultGlobalExceptionFilter } from "./filter.ts";
 import { checkByGuard } from "./guard.ts";
 import { checkByInterceptors } from "./interceptor.ts";
 import {
-  ApiPrefixOptions,
   ListenOptions,
   ShutdownSignal,
 } from "./interfaces/application.interface.ts";
@@ -45,7 +44,6 @@ import {
 
 export class Application {
   private apiPrefix = "";
-  private apiPrefixOptions: ApiPrefixOptions = {};
   private staticOptions: StaticOptions;
   private globalInterceptors: NestUseInterceptors = [];
   private globalExceptionFilters: ExceptionFilters = [
@@ -64,9 +62,8 @@ export class Application {
 
   constructor(protected router: IRouter) {}
 
-  setGlobalPrefix(apiPrefix: string, options: ApiPrefixOptions = {}) {
+  setGlobalPrefix(apiPrefix: string) {
     this.apiPrefix = apiPrefix;
-    this.apiPrefixOptions = options;
   }
 
   /**
@@ -292,8 +289,6 @@ export class Application {
   }
 
   protected async routes() {
-    const apiPrefixReg = this.apiPrefixOptions?.exclude;
-
     const routerArr = await factory.getRouterArr(this.controllers);
     let num = 0;
     const start = Date.now();
@@ -301,8 +296,7 @@ export class Application {
       ({ controllerPath, arr, aliasOptions: controllerAliasOptions }) => {
         const { controllerPathWithPrefix, controllerAliasPath } =
           getControllerPaths({
-            apiPrefix: this.apiPrefix,
-            apiPrefixReg,
+            prefix: this.apiPrefix,
             controllerPath,
             controllerAliasOptions,
           });
@@ -323,8 +317,8 @@ export class Application {
           lastCls = cls;
           const { originPath, aliasPath } = getMethodPaths({
             apiPrefix: this.apiPrefix,
-            controllerPathWithPrefix,
             controllerPath,
+            controllerPathWithPrefix,
             controllerAliasPath,
             methodPath,
             methodAliasOptions: aliasOptions,
@@ -379,18 +373,21 @@ export class Application {
             });
             // console.log(context.res.body, result);
           };
-          this.router[methodType](originPath, callback);
-          num++;
+
+          if (originPath) {
+            this.router[methodType](originPath, callback);
+            num++;
+          }
 
           if (aliasPath) {
             this.router[methodType](aliasPath, callback);
             num++;
           }
           const funcEnd = Date.now();
-          const path = aliasPath
+          const path = (originPath && aliasPath)
             ? originPath + ", " + red(aliasPath)
-            : aliasOptions?.isAbsolute
-            ? red(originPath)
+            : aliasPath
+            ? red(aliasPath)
             : originPath;
           this.log(
             yellow("[RouterExplorer]"),
@@ -407,7 +404,9 @@ export class Application {
         this.log(
           red("[RoutesResolver]"),
           blue(
-            `${name} {${controllerPathWithPrefix}} ${endTime - startTime}ms`,
+            `${name} ${
+              controllerPathWithPrefix || red(controllerAliasPath || "")
+            } ${endTime - startTime}ms`,
           ),
         );
       },

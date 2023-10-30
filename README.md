@@ -542,28 +542,20 @@ alias with template `${prefix}/`:
 })
 ```
 
-Similarly, you can set suffix like this:
+Similarly, you can set method like this:
 
 ```typescript
 @Controller("user", {
-  alias: "/v1/${suffix}",
-})
-```
-
-Of course, you can set it at the same time:
-
-```typescript
-@Controller("user", {
-  alias: "${prefix}/v1/${suffix}",
+  alias: "${prefix}/v1/${controller}",
 })
 ```
 
 If you want your API not start with global prefix,then use the options
-`isAbsolute`:
+`isAliasOnly`, the `path` will be used as `alias`:
 
 ```typescript
 @Controller("/v1/user", {
-  isAbsolute: true,
+  isAliasOnly: true,
 })
 ```
 
@@ -583,60 +575,57 @@ Then you will have both API `/user/info` and `/v1/user/info`.
 
 #### template
 
-The template `${prefix}` and `${suffix}` also work like above, and add
-`${controller}`:
+The template `${prefix}` and `${controller}` also work like above, and add
+`${method}`:
 
 ```typescript
 @Controller("/user")
 export class UserController {
   @Get("/info", {
-    alias: "${prefix}/v3/${controller}/${suffix}",
+    alias: "${prefix}/v3/${controller}/${method}",
   })
   info() {}
 }
 ```
 
-#### isAbsolute
+#### isAliasOnly
 
-`isAbsolute` also work to set a Special API such as:
+`isAliasOnly` also work to set a Special API such as:
 
 ```typescript
 @Controller("/user")
 export class UserController {
   @Get("/v2/user/info", {
-    isAbsolute: true,
+    isAliasOnly: true,
   })
   info() {}
 }
 ```
 
-Then get an API `/v2/user/info`.
+Then get an API `/v2/user/info`, Even if the controller sets additional aliases:
 
-You can also use template as same:
-
-```typescript
-@Controller("/user")
+```ts
+@Controller("/user", { alias: "/v1/users" })
 export class UserController {
-  @Get("${prefix}/v2/${controller}/info", {
-    isAbsolute: true,
+  @Get("/v2/user/info", {
+    isAliasOnly: true,
   })
   info() {}
 }
 ```
 
-But if you set global prefix `/api`, this will get `/api/v2/user/info`.
+If not set method alias, but has controller alias, it will make every method
+both time:
 
-#### global prefix exclude
-
-If you not want to set `isAbsolute` in every Controller, you can set an RegExp
-by exclude when you `setGlobalPrefix`.
-
-```typescript
-const app = await NestFactory.create(AppModule);
-app.setGlobalPrefix("/api", {
-  exclude: [/^\/?v\d{1,3}\//],
-});
+```ts
+@Controller("/user", { alias: "/v1/users" })
+export class UserController {
+  @Get("info")
+  info() {}
+}
 ```
+
+This get `/users/info` and `/v1/users/info`.
 
 ## unit
 
@@ -761,7 +750,8 @@ Deno.test("resolve will return not same", async () => {
 - [x] support lifecycle
 - [x] Nest CLI
 - [x] unit Hono and Oak self
-- [ ] Nest Doc
+- [x] alias
+- [ ] Nest Doc, doing now
 
 ---
 

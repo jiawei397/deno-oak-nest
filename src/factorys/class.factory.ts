@@ -29,7 +29,7 @@ import {
   isSpecialProvider,
   isValueProvider,
 } from "../module.ts";
-import { join } from "../utils.ts";
+import { joinPath } from "../utils.ts";
 
 export class ClassFactory {
   globalCaches: FactoryCaches = new Map();
@@ -250,7 +250,7 @@ export class ClassFactory {
         const arr = await this.mapRoute(Cls);
         const path = Reflect.getMetadata(META_PATH_KEY, Cls);
         const aliasOptions = Reflect.getMetadata(META_ALIAS_KEY, Cls);
-        const controllerPath = join(path);
+        const controllerPath = joinPath(path);
         routerArr.push({
           controllerPath,
           arr,

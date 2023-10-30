@@ -358,7 +358,7 @@ Deno.test("getRouterArr", async (t) => {
     assert(Array.isArray(result));
     assertEquals(result.length, 1);
     assert(result[0]);
-    assertEquals(result[0].controllerPath, "");
+    assertEquals(result[0].controllerPath, "/");
 
     const arr = result[0].arr;
     assert(Array.isArray(arr));

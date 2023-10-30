@@ -67,7 +67,7 @@ export class AppController {
   }
 
   @Get("/v2/test", {
-    isAbsolute: true,
+    isAliasOnly: true,
   })
   @Header("a", "b")
   @Header("c", "d")

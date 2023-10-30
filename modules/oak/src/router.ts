@@ -10,7 +10,7 @@ import {
   MiddlewareHandler,
   NotFoundHandler,
 } from "../../../src/interfaces/route.interface.ts";
-import { join } from "../../../src/utils.ts";
+import { joinPath } from "../../../src/utils.ts";
 import {
   OakApplication,
   OakContext,
@@ -123,10 +123,10 @@ export class OakRouter implements IRouter {
       ...otherOptions
     } = options;
     const pathname = context.request.url.pathname;
-    if (prefix && !pathname.startsWith(join("/", prefix))) {
+    if (prefix && !pathname.startsWith(joinPath("/", prefix))) {
       return;
     }
-    const prefixWithoutSlash = join(prefix || "/");
+    const prefixWithoutSlash = joinPath(prefix || "/");
     const root = resolve(Deno.cwd(), baseDir!);
     const index = "index.html"; // TODO: options.index;
     if (!prefixWithoutSlash && (pathname === "/" || pathname === "")) {

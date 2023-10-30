@@ -1,15 +1,17 @@
 import { assert, assertEquals } from "../test_deps.ts";
 import { createMockContext } from "../tests/common_helper.ts";
 import {
+  ControllerPathOptions,
   flagCronProvider,
+  getControllerPaths,
   getCronInstance,
+  getMethodPaths,
   getReadableStream,
-  join,
+  joinPath,
+  MethodPathOptions,
   parseSearch,
   parseSearchParams,
-  replacePrefix,
-  replacePrefixAndSuffix,
-  replaceSuffix,
+  replaceAliasPath,
   setCacheControl,
   storeCronInstance,
 } from "./utils.ts";
@@ -186,157 +188,125 @@ Deno.test("getReadableStream should return a readable stream with the given mess
   assertEquals(text, message);
 });
 
-Deno.test("join", () => {
-  assertEquals(join(), "");
-  assertEquals(join(""), "");
-  assertEquals(join("/"), "");
-  assertEquals(join("api"), "/api");
-  assertEquals(join("/api"), "/api");
-  assertEquals(join("/api/"), "/api");
-  assertEquals(join("api/"), "/api");
+Deno.test("joinPath", () => {
+  assertEquals(joinPath(), "/");
+  assertEquals(joinPath(""), "/");
+  assertEquals(joinPath("/"), "/");
+  assertEquals(joinPath("api"), "/api");
+  assertEquals(joinPath("/api"), "/api");
+  assertEquals(joinPath("/api/"), "/api");
+  assertEquals(joinPath("api/"), "/api");
 
-  assertEquals(join("", "/api"), "/api");
-  assertEquals(join("", "/api/"), "/api");
-  assertEquals(join("", "api/"), "/api");
+  assertEquals(joinPath("", "/api"), "/api");
+  assertEquals(joinPath("", "/api/"), "/api");
+  assertEquals(joinPath("", "api/"), "/api");
 
-  assertEquals(join("/api", "/"), "/api");
-  assertEquals(join("/api/", "/"), "/api");
-  assertEquals(join("/api", "/user"), "/api/user");
-  assertEquals(join("/api", "/user/"), "/api/user");
-  assertEquals(join("/api", "user/"), "/api/user");
+  assertEquals(joinPath("/api", "/"), "/api");
+  assertEquals(joinPath("/api/", "/"), "/api");
+  assertEquals(joinPath("/api", "/user"), "/api/user");
+  assertEquals(joinPath("/api", "/user/"), "/api/user");
+  assertEquals(joinPath("/api", "user/"), "/api/user");
 
-  assertEquals(join("/api", "user", "add"), "/api/user/add");
-  assertEquals(join("/api", "/user", "add"), "/api/user/add");
-  assertEquals(join("/api", "/user", "add/"), "/api/user/add");
-  assertEquals(join("/api", "/user/", "add/"), "/api/user/add");
-  assertEquals(join("/api", "/user/", "/add"), "/api/user/add");
-  assertEquals(join("/api", "/user/", "/add/"), "/api/user/add");
+  assertEquals(joinPath("/api", "user", "add"), "/api/user/add");
+  assertEquals(joinPath("/api", "/user", "add"), "/api/user/add");
+  assertEquals(joinPath("/api", "/user", "add/"), "/api/user/add");
+  assertEquals(joinPath("/api", "/user/", "add/"), "/api/user/add");
+  assertEquals(joinPath("/api", "/user/", "/add"), "/api/user/add");
+  assertEquals(joinPath("/api", "/user/", "/add/"), "/api/user/add");
 });
 
-Deno.test("replacePrefix", async (t) => {
+Deno.test("replaceAliasPath", async (t) => {
   await t.step("no replace", () => {
     const str = "/v1/user";
-    assertEquals(replacePrefix(str, "/api/"), str);
+    assertEquals(
+      replaceAliasPath(str, { prefix: "/api/", method: "info" }),
+      str,
+    );
   });
 
-  await t.step("replace empty prefix", () => {
-    const str = "${prefix}/v1/user";
-    assertEquals(replacePrefix(str, ""), "/v1/user");
-  });
-
-  await t.step("replace  prefix /", () => {
-    const str = "${prefix}/v1/user";
-    assertEquals(replacePrefix(str, "/"), "/v1/user");
+  await t.step("replace method", () => {
+    const str = "${method}/v1/user";
+    assertEquals(
+      replaceAliasPath(str, { prefix: "/api/", method: "info" }),
+      "/info/v1/user",
+    );
   });
 
   await t.step("replace prefix", () => {
     const str = "${prefix}/v1/user";
-    assertEquals(replacePrefix(str, "/api/"), "/api/v1/user");
-  });
-
-  await t.step("replace prefix2", () => {
-    const str = "${prefix}/v1/user";
-    assertEquals(replacePrefix(str, "api/"), "/api/v1/user");
-  });
-
-  await t.step("replace prefix3", () => {
-    const str = "${prefix}/v1/user";
-    assertEquals(replacePrefix(str, "api"), "/api/v1/user");
-  });
-
-  await t.step("replace prefix not ok", () => {
-    const str = "${prefix2}/v1/user";
-    assertEquals(replacePrefix(str, "api/"), "/" + str);
-  });
-});
-
-Deno.test("replaceSuffix", async (t) => {
-  await t.step("no replace", () => {
-    const str = "/v1/user";
-    assertEquals(replaceSuffix(str, "/api/"), str);
-  });
-
-  await t.step("replace suffix", () => {
-    const str = "${suffix}/v1/user";
-    assertEquals(replaceSuffix(str, "/api/"), "/api/v1/user");
-  });
-
-  await t.step("replace suffix2", () => {
-    const str = "${suffix}/v1/user";
-    assertEquals(replaceSuffix(str, "api/"), "/api/v1/user");
-  });
-
-  await t.step("replace suffix3", () => {
-    const str = "${suffix}/v1/user";
-    assertEquals(replaceSuffix(str, "api"), "/api/v1/user");
-  });
-
-  await t.step("replace suffix4", () => {
-    const str = "/v1/user/${suffix}";
-    assertEquals(replaceSuffix(str, "api"), "/v1/user/api");
-  });
-
-  await t.step("replace suffix5", () => {
-    const str = "/v1/${suffix}/user";
-    assertEquals(replaceSuffix(str, "api"), "/v1/api/user");
-  });
-
-  await t.step("replace suffix not ok", () => {
-    const str = "${suffix2}/v1/user";
-    assertEquals(replaceSuffix(str, "api/"), "/" + str);
-  });
-});
-
-Deno.test("replacePrefixAndSuffix", async (t) => {
-  await t.step("no replace", () => {
-    const str = "/v1/user";
-    assertEquals(replacePrefixAndSuffix(str, "/api/", "info"), str);
-  });
-
-  await t.step("replace suffix", () => {
-    const str = "${suffix}/v1/user";
-    assertEquals(replacePrefixAndSuffix(str, "/api/", "info"), "/info/v1/user");
-  });
-
-  await t.step("replace prefix", () => {
-    const str = "${prefix}/v1/user";
-    assertEquals(replacePrefixAndSuffix(str, "api/", "info"), "/api/v1/user");
-  });
-
-  await t.step("replace prefix and suffix", () => {
-    const str = "${prefix}/v1/user/${suffix}";
     assertEquals(
-      replacePrefixAndSuffix(str, "api", "info"),
+      replaceAliasPath(str, { prefix: "/api/", method: "info" }),
+      "/api/v1/user",
+    );
+  });
+
+  await t.step("replace prefix and method", () => {
+    const str = "${prefix}/v1/user/${method}";
+    assertEquals(
+      replaceAliasPath(str, { prefix: "/api/", method: "info" }),
       "/api/v1/user/info",
     );
   });
-  await t.step("replace prefix and suffix2", () => {
-    const str = "${prefix}/v1/user/${suffix}";
+  await t.step("replace prefix and method2", () => {
+    const str = "${prefix}/v1/user/${method}";
     assertEquals(
-      replacePrefixAndSuffix(str, "/api", "/info"),
+      replaceAliasPath(str, { prefix: "/api", method: "/info" }),
       "/api/v1/user/info",
     );
   });
 
-  await t.step("replace prefix and suffix3", () => {
-    const str = "${prefix}/v1/user/${suffix}";
+  await t.step("replace prefix and method3", () => {
+    const str = "${prefix}/v1/user/${method}";
     assertEquals(
-      replacePrefixAndSuffix(str, "/api/", "/info/"),
+      replaceAliasPath(str, { prefix: "/api/", method: "/info/" }),
       "/api/v1/user/info",
     );
   });
 
-  await t.step("replace prefix suffix and controller", () => {
-    const str = "${prefix}/v1/${controller}/${suffix}";
+  await t.step("replace prefix method and controller", () => {
+    const str = "${prefix}/v1/${controller}/${method}";
     assertEquals(
-      replacePrefixAndSuffix(str, "/api/", "/info/", "user"),
+      replaceAliasPath(str, {
+        prefix: "/api/",
+        method: "info",
+        controller: "user",
+      }),
       "/api/v1/user/info",
+    );
+  });
+
+  await t.step("replace method and controllerAlias", () => {
+    const str = "${controllerAlias}/${method}";
+    assertEquals(
+      replaceAliasPath(str, {
+        prefix: "/api/",
+        method: "info",
+        controller: "user",
+        controllerAliasPath: "/v1/",
+      }),
+      "/v1/info",
+    );
+  });
+
+  await t.step("replace prefix method and controllerAlias", () => {
+    const str = "${prefix}/${controllerAlias}/${method}";
+    assertEquals(
+      replaceAliasPath(str, {
+        prefix: "/api/",
+        method: "info",
+        controller: "user",
+        controllerAliasPath: "/v1/",
+      }),
+      "/api/v1/info",
     );
   });
 
   await t.step("replace not ok", () => {
-    const str = "${suffix2}/v1/user";
-    assertEquals(replacePrefixAndSuffix(str, "/api/", "/info/"), "/" + str);
+    const str = "${method2}/v1/user";
+    assertEquals(
+      replaceAliasPath(str, { prefix: "/api/", method: "info" }),
+      "/" + str,
+    );
   });
 });
 
@@ -355,5 +325,257 @@ Deno.test("storeCronInstance and getCronInstance", async (t) => {
     const instance = new CronService();
     storeCronInstance(CronService, instance);
     assertEquals(getCronInstance(CronService), instance);
+  });
+});
+
+Deno.test("getControllerPaths", async (t) => {
+  await t.step("controllerPath and no alias", () => {
+    const options: ControllerPathOptions = {
+      prefix: "/api",
+      controllerPath: "controllers/example",
+    };
+    const result = getControllerPaths(options);
+
+    assertEquals(result.controllerPathWithPrefix, "/api/controllers/example");
+    assertEquals(result.controllerAliasPath, undefined);
+  });
+  await t.step("controllerPath and alias", () => {
+    const options: ControllerPathOptions = {
+      prefix: "/api",
+      controllerPath: "controllers/example",
+      controllerAliasOptions: {
+        alias: "alias/example",
+      },
+    };
+    const result = getControllerPaths(options);
+
+    assertEquals(result.controllerPathWithPrefix, "/api/controllers/example");
+    assertEquals(result.controllerAliasPath, "/alias/example");
+  });
+
+  await t.step("controllerPath and alias, replace template", () => {
+    const options: ControllerPathOptions = {
+      prefix: "/api",
+      controllerPath: "controllers/example",
+      controllerAliasOptions: {
+        alias: "alias/${prefix}/${controller}",
+      },
+    };
+    const result = getControllerPaths(options);
+
+    assertEquals(result.controllerPathWithPrefix, "/api/controllers/example");
+    assertEquals(result.controllerAliasPath, "/alias/api/controllers/example");
+  });
+
+  await t.step("controllerPath and alias and aliasOnly", () => {
+    const options: ControllerPathOptions = {
+      prefix: "/api",
+      controllerPath: "controllers/example",
+      controllerAliasOptions: {
+        alias: "alias/example",
+        isAliasOnly: true,
+      },
+    };
+    const result = getControllerPaths(options);
+
+    assertEquals(result.controllerPathWithPrefix, undefined);
+    assertEquals(result.controllerAliasPath, "/alias/example");
+  });
+
+  await t.step("controllerPath and aliasOnly, no alias", () => {
+    const options: ControllerPathOptions = {
+      prefix: "/api",
+      controllerPath: "controllers/example",
+      controllerAliasOptions: {
+        isAliasOnly: true,
+      },
+    };
+    const result = getControllerPaths(options);
+    assertEquals(result.controllerPathWithPrefix, undefined);
+    assertEquals(result.controllerAliasPath, "/controllers/example");
+  });
+});
+
+Deno.test("getMethodPaths", async (t) => {
+  await t.step("no prefix, and no alias", () => {
+    const params: MethodPathOptions = {
+      controllerPathWithPrefix: "/api/users",
+      controllerPath: "/users",
+      methodPath: ":id",
+    };
+
+    const { originPath, aliasPath } = getMethodPaths(params);
+
+    assertEquals(originPath, "/api/users/:id");
+    assertEquals(aliasPath, undefined);
+  });
+
+  await t.step("no prefix, and has controller alias, no method alias", () => {
+    const params: MethodPathOptions = {
+      controllerPathWithPrefix: "/api/users",
+      controllerPath: "/users",
+      controllerAliasPath: "/users-alias",
+      methodPath: ":id",
+    };
+
+    const { originPath, aliasPath } = getMethodPaths(params);
+
+    assertEquals(originPath, "/api/users/:id");
+    assertEquals(aliasPath, "/users-alias/:id");
+  });
+
+  await t.step(
+    "no prefix, and has controller alias, and has method alias",
+    () => {
+      const params: MethodPathOptions = {
+        controllerPathWithPrefix: "/api/users",
+        controllerPath: "/users",
+        controllerAliasPath: "/users-alias",
+        methodPath: ":id",
+        methodAliasOptions: {
+          alias: ":id-alias",
+        },
+      };
+
+      const { originPath, aliasPath } = getMethodPaths(params);
+
+      assertEquals(originPath, "/api/users/:id");
+      assertEquals(aliasPath, "/:id-alias");
+    },
+  );
+
+  await t.step(
+    "no prefix, and has controller alias, and has method alias, and isAliasOnly",
+    () => {
+      const params: MethodPathOptions = {
+        controllerPathWithPrefix: "/api/users",
+        controllerPath: "/users",
+        controllerAliasPath: "/users-alias",
+        methodPath: ":id",
+        methodAliasOptions: {
+          alias: ":id-alias",
+          isAliasOnly: true,
+        },
+      };
+
+      const { originPath, aliasPath } = getMethodPaths(params);
+
+      assertEquals(originPath, undefined);
+      assertEquals(aliasPath, "/:id-alias");
+    },
+  );
+
+  await t.step(
+    "no prefix, and has controller alias, and has method alias, and isAliasOnly, and template replace controller",
+    () => {
+      const params: MethodPathOptions = {
+        controllerPathWithPrefix: "/api/users",
+        controllerPath: "/users",
+        controllerAliasPath: "/users-alias",
+        methodPath: ":id",
+        methodAliasOptions: {
+          alias: "${controller}/:id-alias",
+          isAliasOnly: true,
+        },
+      };
+
+      const { originPath, aliasPath } = getMethodPaths(params);
+
+      assertEquals(originPath, undefined);
+      assertEquals(aliasPath, "/users/:id-alias");
+    },
+  );
+
+  await t.step(
+    "no prefix, and has controller alias, and has method alias, and isAliasOnly, and template replace controllerAlias",
+    () => {
+      const params: MethodPathOptions = {
+        controllerPathWithPrefix: "/api/users",
+        controllerPath: "/users",
+        controllerAliasPath: "/users-alias",
+        methodPath: ":id",
+        methodAliasOptions: {
+          alias: "${controllerAlias}/:id-alias",
+          isAliasOnly: true,
+        },
+      };
+
+      const { originPath, aliasPath } = getMethodPaths(params);
+
+      assertEquals(originPath, undefined);
+      assertEquals(aliasPath, "/users-alias/:id-alias");
+    },
+  );
+
+  await t.step(
+    "no prefix, and has controller alias, and has method alias, and template replace controllerAlias",
+    () => {
+      const params: MethodPathOptions = {
+        controllerPathWithPrefix: "/api/users",
+        controllerPath: "/users",
+        controllerAliasPath: "/users-alias",
+        methodPath: ":id",
+        methodAliasOptions: {
+          alias: "${controllerAlias}/:id-alias",
+        },
+      };
+
+      const { originPath, aliasPath } = getMethodPaths(params);
+
+      assertEquals(originPath, "/api/users/:id");
+      assertEquals(aliasPath, "/users-alias/:id-alias");
+    },
+  );
+
+  await t.step(
+    "has prefix, and has controller alias, but no method alias",
+    () => {
+      const params: MethodPathOptions = {
+        apiPrefix: "/api",
+        controllerPathWithPrefix: "/api/users",
+        controllerPath: "/users",
+        controllerAliasPath: "/users-alias",
+        methodPath: "/:id",
+      };
+      const { originPath, aliasPath } = getMethodPaths(params);
+
+      assertEquals(originPath, "/api/users/:id");
+      assertEquals(aliasPath, "/users-alias/:id");
+    },
+  );
+
+  await t.step("has prefix, and has both alias", () => {
+    const params: MethodPathOptions = {
+      controllerPathWithPrefix: "/api/users",
+      controllerPath: "/users",
+      controllerAliasPath: "/users-alias",
+      methodPath: "/:id",
+      methodAliasOptions: {
+        alias: "/:id-alias",
+      },
+    };
+
+    const { originPath, aliasPath } = getMethodPaths(params);
+
+    assertEquals(originPath, "/api/users/:id");
+    assertEquals(aliasPath, "/:id-alias");
+  });
+
+  await t.step("has prefix, and alias, isAliasOnly", () => {
+    const params: MethodPathOptions = {
+      controllerPathWithPrefix: "/api/users",
+      controllerPath: "/users",
+      controllerAliasPath: "/users-alias",
+      methodPath: "/:id",
+      methodAliasOptions: {
+        alias: "/:id-alias",
+        isAliasOnly: true,
+      },
+    };
+
+    const { originPath, aliasPath } = getMethodPaths(params);
+
+    assertEquals(originPath, undefined);
+    assertEquals(aliasPath, "/:id-alias");
   });
 });

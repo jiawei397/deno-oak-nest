@@ -130,7 +130,7 @@ Deno.test("Controller method with alias", async (t) => {
       return "a";
     }
 
-    @Get("/c", { alias: "/v1/c", isAbsolute: true })
+    @Get("/c", { alias: "/v1/c" })
     c() {
       callStack.push(2);
       return "c";

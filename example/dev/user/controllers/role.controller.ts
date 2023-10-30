@@ -24,6 +24,7 @@ import { AuthGuard } from "../../guards/auth.guard.ts";
 
 @Controller("/role", {
   alias: "/v1/role",
+  isAliasOnly: true,
 })
 @UseInterceptors(CacheInterceptor)
 @UseGuards(AuthGuard)
