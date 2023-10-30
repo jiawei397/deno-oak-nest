@@ -19,13 +19,12 @@ function getDefaultErrorBody(
 /**
  * A middleware that will deal the exceptions when called, and set the response time for other middleware in
  * milliseconds as `X-Response-Time` which can be used for diagnostics and other
- * instrumentation of an application.  Utilise the middleware before the "real"
- * processing occurs.
+ * instrumentation of an application.
  *
  * ```ts
  * import { anyExceptionFilter } from "https://deno.land/x/deno_nest/modules/uinv/mod.ts";
  *
- * app.use(anyExceptionFilter({
+ * app.useGlobalFilters(anyExceptionFilter({
  *  logger: console,
  *  isDisableFormat404: true,
  *  isLogCompleteError: true,
