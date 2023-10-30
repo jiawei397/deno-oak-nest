@@ -13,6 +13,6 @@ COPY . .
 
 # ENV DENO_DIR=deno-dir
 
-RUN deno cache --unstable example/main.ts
+RUN deno cache --unstable example/dev/main.ts
 
-CMD deno run --allow-net --allow-env --allow-write --allow-read --unstable example/main.ts
+CMD deno run --allow-net --allow-env --allow-write --allow-read --unstable example/dev/main.ts
