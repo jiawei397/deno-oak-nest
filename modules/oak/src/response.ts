@@ -6,10 +6,10 @@ export class NestResponse implements Response {
   body: string | object | number | boolean | null;
   headers: Headers = new Headers();
   status: Status;
-  originContext: OakContext;
+  originalContext: OakContext;
 
   constructor(context: OakContext) {
-    this.originContext = context;
+    this.originalContext = context;
     this.status = Status.OK;
   }
 
@@ -18,6 +18,33 @@ export class NestResponse implements Response {
   }
 
   getOriginalResponse<T>(): T {
-    return this.originContext.response as T;
+    return this.originalContext.response as T;
+  }
+
+  render() {
+    const context = this.originalContext;
+    const body = this.body;
+    if (this.status) {
+      context.response.status = this.status;
+    }
+    this.headers.forEach((val, key) => {
+      context.response.headers.set(key, val);
+    });
+    const contextType = this.headers.get("content-type");
+    if (!contextType) {
+      if (typeof body === "number" || typeof body === "boolean") {
+        context.response.headers.set(
+          "content-type",
+          "application/json; charset=utf-8",
+        );
+      } else if (typeof body === "string") {
+        context.response.headers.set(
+          "content-type",
+          "text/html; charset=utf-8",
+        );
+      }
+    }
+
+    context.response.body = body;
   }
 }

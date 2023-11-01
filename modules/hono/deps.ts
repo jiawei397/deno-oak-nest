@@ -13,3 +13,5 @@ export {
   type ServeStaticOptions,
   setCookie,
 } from "https://deno.land/x/hono@v3.8.1/middleware.ts";
+
+export type HonoResponse = Response;

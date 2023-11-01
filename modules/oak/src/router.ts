@@ -47,7 +47,7 @@ export class OakRouter implements IRouter {
       const nestCtx = NestContext.getInstance(ctx);
       nestCtx.response.status = 404;
       await fn(nestCtx);
-      return nestCtx.render();
+      return nestCtx.response.render();
     });
   }
 
@@ -56,7 +56,7 @@ export class OakRouter implements IRouter {
       const nestCtx = NestContext.getInstance(ctx);
       nestCtx.response.status = 200;
       await fn(nestCtx, next as Next);
-      return nestCtx.render();
+      return nestCtx.response.render();
     };
   }
 
@@ -77,14 +77,10 @@ export class OakRouter implements IRouter {
   }
 
   use(fn: MiddlewareHandler) {
-    // return this.app.use(this.handle(fn));
-    return this.app.use(
-      async (ctx: OakContext, next: () => Promise<unknown>) => {
-        const nestCtx = NestContext.getInstance(ctx, 404);
-        await fn(nestCtx, next as Next);
-        // return nestCtx.render();
-      },
-    );
+    return this.app.use((ctx: OakContext, next: () => Promise<unknown>) => {
+      const nestCtx = NestContext.getInstance(ctx, 404);
+      return fn(nestCtx, next as Next);
+    });
   }
 
   routes(): void {

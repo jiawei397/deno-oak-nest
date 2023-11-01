@@ -108,11 +108,10 @@ Deno.test("createMockContext - returns expected context object", async (t) => {
     assertEquals(ctx.response.body, options.body?.value);
     assertEquals(ctx.response.status, 200);
     assertEquals(ctx.response.statusText, "");
+    assertEquals(ctx.response.render(), undefined);
   });
 
   await t.step("context - not implement", async () => {
-    assertEquals(ctx.render(), undefined, "not implement");
-
     assertThrows(() => ctx.request.getOriginalRequest());
     assertThrows(() => ctx.response.getOriginalResponse());
   });

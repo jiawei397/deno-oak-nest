@@ -28,7 +28,7 @@ export class HonoRouter implements IRouter {
       const nestCtx = NestContext.getInstance(ctx);
       nestCtx.response.status = 200;
       await fn(nestCtx, next);
-      return nestCtx.render();
+      return nestCtx.response.render();
     };
   }
 
@@ -83,7 +83,7 @@ export class HonoRouter implements IRouter {
       const nestCtx = NestContext.getInstance(ctx);
       nestCtx.response.status = 404;
       await fn(nestCtx);
-      return nestCtx.render();
+      return nestCtx.response.render();
     });
   }
 
