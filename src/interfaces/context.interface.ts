@@ -33,10 +33,9 @@ export interface Response {
   status: Status;
   readonly statusText: string;
   /**
-   * If you changed the response body, status, headers in middleware, you should call this method to render the response.
+   * This method should only called in middleware.
    *
-   * Otherwise, this method should not be called.
-   *
+   * If you changed the response body, status, headers in middleware, you must call this method to render the response.
    * Nevertheless, this can cause the render to be executed repeatedly. The processing of all more reasonable modification responses is in the interceptor, not in the middleware.
    * @warning not recommended to call this method directly, unless you know what you are doing.
    */

@@ -559,6 +559,161 @@ export function createCommonTests(
       await app.close();
     });
 
+    await t.step(
+      "middleware change response with res.render()",
+      async (it) => {
+        const callStack: number[] = [];
+
+        @Controller("/a")
+        class A {
+          @Get("/")
+          get() {
+            callStack.push(5);
+            return "a";
+          }
+        }
+
+        @Module({
+          controllers: [A],
+        })
+        class AppModule {}
+
+        const app = await NestFactory.create(AppModule, Router);
+
+        app.use(async (req, res, next) => { // if changed response, must used before router
+          callStack.push(1);
+          await next();
+          callStack.push(2);
+          res.headers.set("a", "b");
+          return res.render();
+        });
+
+        app.get("/", (_, res) => {
+          callStack.push(3);
+          return "hello world";
+        });
+
+        app.get("/hello", (_, res) => {
+          callStack.push(4);
+          res.body = "hello world";
+        });
+
+        const port = await getPort();
+        await app.listen({ port });
+
+        await it.step("fetch /", async () => {
+          const res = await fetch(`http://localhost:${port}`);
+          assertEquals(res.status, 200);
+          assertEquals(await res.text(), "hello world");
+          assertEquals(res.headers.get("a"), "b");
+          assertEquals(callStack, [1, 3, 2]);
+
+          callStack.length = 0;
+        });
+
+        await it.step("fetch /hello", async () => {
+          const res = await fetch(`http://localhost:${port}/hello`);
+          assertEquals(res.status, 200);
+          assertEquals(await res.text(), "hello world");
+          assertEquals(res.headers.get("a"), "b");
+          assertEquals(callStack, [1, 4, 2]);
+
+          callStack.length = 0;
+        });
+
+        await it.step("fetch /a", async () => {
+          const res = await fetch(`http://localhost:${port}/a`);
+          assertEquals(res.status, 200);
+          assertEquals(await res.text(), "a");
+          assertEquals(res.headers.get("a"), "b");
+          assertEquals(callStack, [1, 5, 2]);
+
+          callStack.length = 0;
+        });
+
+        // last
+        callStack.length = 0;
+        await app.close();
+      },
+    );
+
+    await t.step(
+      "middleware change response without res.render()",
+      async (it) => {
+        const callStack: number[] = [];
+
+        @Controller("/a")
+        class A {
+          @Get("/")
+          get() {
+            callStack.push(5);
+            return "a";
+          }
+        }
+
+        @Module({
+          controllers: [A],
+        })
+        class AppModule {}
+
+        const app = await NestFactory.create(AppModule, Router);
+
+        app.use(async (req, res, next) => { // if changed response, must used before router
+          callStack.push(1);
+          await next();
+          callStack.push(2);
+          res.headers.set("a", "b");
+        });
+
+        app.get("/", (_, res) => {
+          callStack.push(3);
+          return "hello world";
+        });
+
+        app.get("/hello", (_, res) => {
+          callStack.push(4);
+          res.body = "hello world";
+        });
+
+        const port = await getPort();
+        await app.listen({ port });
+
+        await it.step("fetch /", async () => {
+          const res = await fetch(`http://localhost:${port}`);
+          assertEquals(res.status, 200);
+          assertEquals(await res.text(), "hello world");
+          assertEquals(res.headers.has("a"), false);
+          assertEquals(callStack, [1, 3, 2]);
+
+          callStack.length = 0;
+        });
+
+        await it.step("fetch /hello", async () => {
+          const res = await fetch(`http://localhost:${port}/hello`);
+          assertEquals(res.status, 200);
+          assertEquals(await res.text(), "hello world");
+          assertEquals(res.headers.has("a"), false);
+          assertEquals(callStack, [1, 4, 2]);
+
+          callStack.length = 0;
+        });
+
+        await it.step("fetch /a", async () => {
+          const res = await fetch(`http://localhost:${port}/a`);
+          assertEquals(res.status, 200);
+          assertEquals(await res.text(), "a");
+          assertEquals(res.headers.has("a"), false);
+          assertEquals(callStack, [1, 5, 2]);
+
+          callStack.length = 0;
+        });
+
+        // last
+        callStack.length = 0;
+        await app.close();
+      },
+    );
+
     await t.step("middleware with controller error", async () => {
       @Controller("/")
       class A {
@@ -585,15 +740,17 @@ export function createCommonTests(
       await app.listen({ port });
 
       // test start
-      addEventListener("error", (event) => {
+      const errorCallback = (event: Event) => {
         event.preventDefault();
         callStack.push(3);
-      });
+      };
+      addEventListener("error", errorCallback);
 
-      addEventListener("unhandledrejection", (event) => {
+      const unhandledrejectionCallback = (event: Event) => {
         event.preventDefault();
         callStack.push(4);
-      });
+      };
+      addEventListener("unhandledrejection", unhandledrejectionCallback);
 
       const res = await fetch(`http://localhost:${port}`);
       assertEquals(res.status, 500);
@@ -606,6 +763,8 @@ export function createCommonTests(
 
       // last
       callStack.length = 0;
+      removeEventListener("error", errorCallback);
+      removeEventListener("unhandledrejection", unhandledrejectionCallback);
       await app.close();
     });
   });
