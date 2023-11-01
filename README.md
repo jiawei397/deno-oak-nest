@@ -320,7 +320,7 @@ app.use(async (req, res, next) => {
   const start = Date.now();
   await next();
   const ms = Date.now() - start;
-  res.headers.set("X-Response-Time", `${ms}ms`);
+  console.log(`${req.method} ${req.url} ${res.status} - ${ms}ms`);
 });
 
 app.get("/", (_req, res) => {

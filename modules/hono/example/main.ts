@@ -21,7 +21,6 @@ app.use(async (req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   await next();
   const ms = Date.now() - start;
-  res.headers.set("X-Response-Time", `${ms}ms`);
   console.log(`${req.method} ${req.url} ${res.status} - ${ms}ms`);
 });
 

@@ -9,6 +9,5 @@ export class LoggingInterceptor implements NestInterceptor {
     console.log("LoggingInterceptor", `After...`);
     const ms = Date.now() - start;
     ctx.response.headers.set("X-Response-Time", `${ms}ms`);
-    // return "abcd";
   }
 }
