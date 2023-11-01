@@ -41,6 +41,7 @@ export type MockOptions = {
 
 export const createMockContext = (options: MockOptions): Context => {
   const mockRequest: Request = {
+    startTime: Date.now(),
     method: options.method,
     url: options.path.startsWith("http")
       ? options.path

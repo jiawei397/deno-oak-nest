@@ -22,7 +22,6 @@ export class NestResponse implements Response {
   }
 
   render(): HonoResponse {
-    console.count("render");
     const context = this.originalContext;
     const body = this.body;
     if (this.status) {

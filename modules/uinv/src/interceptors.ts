@@ -20,9 +20,8 @@ export function getLogInterceptor(options?: {
   @Injectable()
   class LoggingInterceptor implements NestInterceptor {
     async intercept(ctx: Context, next: Next) {
-      const start = Date.now();
       await next();
-      const time = Date.now() - start;
+      const time = Date.now() - ctx.request.startTime;
       const msg =
         `${ctx.request.method} ${ctx.request.url} [${ctx.response.status}] - ${time}ms`;
       logger[logLevel](msg);

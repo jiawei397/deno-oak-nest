@@ -5,6 +5,7 @@ import { getCookie, HonoContext, HonoRequest } from "../deps.ts";
 export class NestRequest implements Request {
   originalRequest: HonoRequest;
   originalContext: HonoContext;
+  startTime = Date.now();
   // deno-lint-ignore no-explicit-any
   states: Record<string, any> = {};
 

@@ -2,6 +2,7 @@
 import { Status } from "../../deps.ts";
 
 export interface Request {
+  startTime: number;
   getOriginalRequest<T>(): T;
   get url(): string;
   get method(): string;

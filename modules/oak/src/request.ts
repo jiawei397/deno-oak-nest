@@ -6,6 +6,7 @@ import { OakContext, OakRequest } from "../deps.ts";
 export class NestRequest implements Request {
   originalRequest: OakRequest;
   originalContext: OakContext;
+  startTime = Date.now();
 
   states: Record<string, any> = {};
 
