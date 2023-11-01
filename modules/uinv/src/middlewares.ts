@@ -20,6 +20,7 @@ export function getLogMiddleware(options?: {
     logger[logLevel](msg);
     if (options?.isHeaderResponseTime) {
       res.headers.set("X-Response-Time", `${time}ms`);
+      return res.render();
     }
   };
   return middleware;
