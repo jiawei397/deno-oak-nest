@@ -1157,8 +1157,8 @@ export function createCommonTests(
         assert(await req.text() === "");
         res.body = "hello world";
         assertEquals(res.statusText, "OK");
-        const originResponse = res.getOriginalResponse();
-        assertNotEquals(originResponse, res);
+        const originContext = res.getOriginalContext();
+        assert(originContext);
       });
 
       const res = await fetch(`${baseUrl}`);

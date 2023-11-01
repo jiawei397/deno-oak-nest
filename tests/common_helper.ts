@@ -97,7 +97,7 @@ export const createMockContext = (options: MockOptions): Context => {
     status: 200,
     statusText: "",
 
-    getOriginalResponse: function <T>(): T {
+    getOriginalContext: function <T>(): T {
       throw new Error("Function not implemented.");
     },
     render() {},

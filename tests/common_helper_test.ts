@@ -113,7 +113,7 @@ Deno.test("createMockContext - returns expected context object", async (t) => {
 
   await t.step("context - not implement", async () => {
     assertThrows(() => ctx.request.getOriginalRequest());
-    assertThrows(() => ctx.response.getOriginalResponse());
+    assertThrows(() => ctx.response.getOriginalContext());
   });
 });
 

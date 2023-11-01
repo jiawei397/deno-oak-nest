@@ -17,8 +17,8 @@ export class NestResponse implements Response {
     return STATUS_TEXT[this.status];
   }
 
-  getOriginalResponse<T>(): T {
-    return this.originalContext.res as T;
+  getOriginalContext<T>(): T {
+    return this.originalContext as T;
   }
 
   render(): HonoResponse {

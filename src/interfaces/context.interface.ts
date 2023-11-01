@@ -27,7 +27,7 @@ export interface Request {
 }
 
 export interface Response {
-  getOriginalResponse<T>(): T;
+  getOriginalContext<T>(): T;
   body: string | object | number | boolean | null;
   headers: Headers;
   status: Status;
