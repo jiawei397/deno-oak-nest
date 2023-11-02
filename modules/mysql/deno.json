@@ -12,6 +12,7 @@
   "imports": {
     "@nest": "../../mod.ts",
     "@nest/hono": "../hono/mod.ts",
-    "@nest/mysql": "./mod.ts"
+    "@nest/mysql": "./mod.ts",
+    "mysql": "https://deno.land/x/mysql@v2.11.0/mod.ts"
   }
 }

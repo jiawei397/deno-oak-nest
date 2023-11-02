@@ -1,7 +1,6 @@
 # nest_mysql_module
 
 This is a mysql module for [`deno_nest`](https://deno.land/x/deno_nest).
-Currently used MySQL client is <https://deno.land/x/mysql@v2.11.0/mod.ts>.
 
 ## example
 
@@ -12,10 +11,13 @@ Add import map in `deno.json`:
   "imports": {
     "@nest": "https://deno.land/x/deno_nest@v3.5.2/mod.ts",
     "@nest/hono": "https://deno.land/x/deno_nest@v3.5.2/modules/hono/mod.ts",
-    "@nest/mysql": "https://deno.land/x/deno_nest@v3.5.2/modules/mysql/mod.ts"
+    "@nest/mysql": "https://deno.land/x/deno_nest@v3.5.2/modules/mysql/mod.ts",
+    "mysql": "https://deno.land/x/mysql@v2.11.0/mod.ts"
   }
 }
 ```
+
+You can change mysql version by yourself.
 
 Here is `app.module.ts`:
 
