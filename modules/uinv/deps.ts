@@ -1,18 +1,4 @@
 export {
-  bgBlue,
-  bgRgb24,
-  bgRgb8,
-  blue,
-  bold,
-  green,
-  italic,
-  red,
-  rgb24,
-  rgb8,
-  yellow,
-} from "https://deno.land/std@0.194.0/fmt/colors.ts";
-
-export {
   Ajax,
   type AjaxConfig,
   type AjaxData,
