@@ -1,6 +1,7 @@
 import { applyEdits, modify } from "jsonc";
 import { decompress } from "zip";
 import { join } from "std/path/mod.ts";
+import importMap from "../../.vscode/import_map.json" with { type: "json" };
 
 const projectName = "deno_nest_template";
 const branchName = "main";
@@ -111,17 +112,21 @@ async function writeReadme(name: string) {
 async function writeImportMap(name: string) {
   const realPath = join(name, "import_map.json");
   const content = await Deno.readTextFile(realPath);
-  const newContent = content.replaceAll("hono", "oak");
-  await Deno.writeTextFile(realPath, newContent);
+  // "@nest/hono": "https://deno.land/x/deno_nest@v3.1.1/modules/hono/mod.ts",
+  // "hono/": "https://deno.land/x/hono@v3.9.1/",
+  const newContent = content.replace(/\"hono\/\"/, `"oak"`).replaceAll(
+    "hono",
+    "oak",
+  );
+  const json = JSON.parse(newContent);
+  json.imports["oak"] = importMap.imports.oak;
+  await Deno.writeTextFile(realPath, JSON.stringify(json, null, 2));
 }
 
 async function writeMain(name: string) {
   const realPath = join(name, "src/main.ts");
   const content = await Deno.readTextFile(realPath);
-  const newContent = content.replace(/@nest\/hono/g, "@nest/oak").replace(
-    /HonoRouter/g,
-    "OakRouter",
-  );
+  const newContent = content.replace(/@nest\/hono/g, "@nest/oak");
   await Deno.writeTextFile(realPath, newContent);
 }
 
