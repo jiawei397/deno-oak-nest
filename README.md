@@ -5,11 +5,12 @@
 [![codecov](https://codecov.io/gh/jiawei397/deno-oak-nest/branch/master/graph/badge.svg?token=NKP41TU4SL)](https://codecov.io/gh/jiawei397/deno-oak-nest)
 
 Rely on [oak@v12.6.1](https://deno.land/x/oak@v12.6.1/mod.ts) and
-[hono@v3.8.1](https://deno.land/x/hono@v3.8.1/mod.ts) to simulate some
+[hono@v3.9.1](https://deno.land/x/hono@v3.9.1/mod.ts) to simulate some
 annotation functions of [NestJS](https://docs.nestjs.com/) which is a great
 frame for Node.js.
 
-I will update the `oak` or `Hono` version if need.
+You can change the `oak` or `Hono` version if need, but the safest use is to use
+the version recommended by `Nest`, as it has undergone thorough unit testing.
 
 > The previous framework name was `oak_nest`, now renamed `deno_nest`.
 >
@@ -47,6 +48,8 @@ If you not use CLI create project, then efore start your app, you may set
   "@nest/hono": "https://deno.land/x/deno_nest@v3.5.2/modules/hono/mod.ts",
   "@nest/oak": "https://deno.land/x/deno_nest@v3.5.2/modules/oak/mod.ts",
   "@nest/tests": "https://deno.land/x/deno_nest@v3.5.2/tests/mod.ts",
+  "hono/": "https://deno.land/x/hono@v3.9.1/",
+  "oak": "https://deno.land/x/oak@v12.6.1/mod.ts",
   "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts"
 }
 ```
