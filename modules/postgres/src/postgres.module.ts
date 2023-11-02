@@ -1,12 +1,7 @@
+import { red, yellow } from "../../../deps.ts";
 import { Module } from "../../../src/decorators/module.ts";
 import { type DynamicModule } from "../../../src/interfaces/module.interface.ts";
-import {
-  Client,
-  type ClientOptions,
-  type ConnectionString,
-  red,
-  yellow,
-} from "../deps.ts";
+import { Client, type ClientOptions, type ConnectionString } from "../deps.ts";
 import { POSTGRES_KEY } from "./postgres.constant.ts";
 
 @Module({})

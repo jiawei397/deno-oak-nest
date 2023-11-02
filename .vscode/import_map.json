@@ -21,6 +21,7 @@
     "hono/": "https://deno.land/x/hono@v3.9.1/",
     "oak": "https://deno.land/x/oak@v12.6.1/mod.ts",
     "mysql": "https://deno.land/x/mysql@v2.11.0/mod.ts",
+    "postgres/": "https://deno.land/x/postgres@v0.17.0/",
     "cliffy/": "https://deno.land/x/cliffy@v1.0.0-rc.3/",
     "zip": "https://deno.land/x/zip@v1.2.2/mod.ts",
     "jsonc": "https://deno.land/x/jsonc@1/main.ts",

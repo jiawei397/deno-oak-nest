@@ -16,10 +16,13 @@ Add import map in `deno.json`:
   "imports": {
     "@nest": "https://deno.land/x/deno_nest@v3.5.2/mod.ts",
     "@nest/hono": "https://deno.land/x/deno_nest@v3.5.2/modules/hono/mod.ts",
-    "@nest/postgres": "https://deno.land/x/deno_nest@v3.5.2/modules/postgres/mod.ts"
+    "@nest/postgres": "https://deno.land/x/deno_nest@v3.5.2/modules/postgres/mod.ts",
+    "postgres/": "https://deno.land/x/postgres@v0.17.0/"
   }
 }
 ```
+
+You can change the `postgres` version by yourself.
 
 Then `app.modules.ts`:
 

@@ -12,6 +12,7 @@
   "imports": {
     "@nest": "../../mod.ts",
     "@nest/hono": "../hono/mod.ts",
-    "@nest/postgres": "./mod.ts"
+    "@nest/postgres": "./mod.ts",
+    "postgres/": "https://deno.land/x/postgres@v0.17.0/"
   }
 }
