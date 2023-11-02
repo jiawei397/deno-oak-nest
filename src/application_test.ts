@@ -655,6 +655,86 @@ Deno.test("dynamic module", async (t) => {
       callStack.length = 0;
     });
   });
+
+  await t.step("dynamic module, same key in different modules", async () => {
+    const injectedValue2 = "injectedValue2";
+
+    @Injectable()
+    class AsyncService2 {
+      constructor(@Inject(CONFIG_KEY) private readonly key: string) {
+        callStack.push(2);
+      }
+      get() {
+        return this.key;
+      }
+    }
+
+    @Controller("")
+    class AppController {
+      constructor(
+        private readonly asyncService: AsyncService,
+        private readonly asyncService2: AsyncService2,
+      ) {
+        callStack.push(3);
+        assertEquals(this.asyncService.get(), injectedValue);
+        assertEquals(this.asyncService2.get(), injectedValue2);
+      }
+    }
+
+    @Module({})
+    class AsyncModule {
+      static register(): DynamicModule {
+        return {
+          module: AsyncModule,
+          providers: [
+            {
+              provide: CONFIG_KEY,
+              useFactory: () => {
+                return injectedValue;
+              },
+            },
+            AsyncService,
+          ],
+          exports: [AsyncService],
+        };
+      }
+    }
+
+    @Module({})
+    class AsyncModule2 {
+      static register(): DynamicModule {
+        return {
+          module: AsyncModule2,
+          providers: [
+            {
+              provide: CONFIG_KEY,
+              useFactory: () => {
+                return injectedValue2;
+              },
+            },
+            AsyncService2,
+          ],
+          exports: [AsyncService2],
+        };
+      }
+    }
+
+    @Module({
+      imports: [AsyncModule.register(), AsyncModule2.register()],
+      controllers: [
+        AppController,
+      ],
+      providers: [],
+    })
+    class AppModule {}
+
+    const app = createMockApp();
+    await app.init(AppModule, new Map());
+
+    assertEquals(callStack, [1, 2, 3]);
+
+    callStack.length = 0;
+  });
 });
 
 Deno.test("life cycle", async (t) => {
