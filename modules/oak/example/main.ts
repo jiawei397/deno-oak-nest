@@ -1,9 +1,9 @@
 import { NestFactory } from "@nest";
-import { OakRouter } from "@nest/oak";
+import { Router } from "@nest/oak";
 import { AppModule } from "./app.module.ts";
 import { CORS } from "https://deno.land/x/oak_cors@v0.1.1/mod.ts";
 
-const app = await NestFactory.create(AppModule, OakRouter);
+const app = await NestFactory.create(AppModule, Router);
 app.setGlobalPrefix("/api");
 app.useStaticAssets("example/static", {
   prefix: "static",
