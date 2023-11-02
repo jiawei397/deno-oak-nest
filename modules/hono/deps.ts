@@ -4,7 +4,7 @@ export {
   type HonoRequest,
   type MiddlewareHandler as HonoMiddlewareHandler,
   type Next as HonoNext,
-} from "https://deno.land/x/hono@v3.8.1/mod.ts";
+} from "hono/mod.ts";
 
 export {
   etag,
@@ -12,6 +12,6 @@ export {
   serveStatic,
   type ServeStaticOptions,
   setCookie,
-} from "https://deno.land/x/hono@v3.8.1/middleware.ts";
+} from "hono/middleware.ts";
 
 export type HonoResponse = Response;
