@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-unused-vars no-explicit-any require-await
 import { Controller, Get } from "./decorators/controller.ts";
-import { assert, assertEquals } from "../test_deps.ts";
+import { assert, assertEquals } from "../tests/test_deps.ts";
 import {
   createMockApp,
   createMockContext,

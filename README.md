@@ -86,7 +86,7 @@ import {
   UseGuards,
 } from "@nest";
 import mockjs from "https://deno.land/x/deno_mock@v2.0.0/mod.ts";
-import { delay } from "https://deno.land/std@0.194.0/async/mod.ts";
+import { delay } from "https://deno.land/std@0.202.0/async/mod.ts";
 
 class AuthGuard implements CanActivate {
   async canActivate(context: Context): Promise<boolean> {

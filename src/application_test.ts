@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { assert, assertEquals } from "../test_deps.ts";
+import { assert, assertEquals } from "../tests/test_deps.ts";
 import { Controller, Get } from "./decorators/controller.ts";
 import type { CanActivate } from "./interfaces/guard.interface.ts";
 import { UseGuards } from "./guard.ts";

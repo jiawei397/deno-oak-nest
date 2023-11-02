@@ -1,5 +1,5 @@
 import { getInjectData, Inject, Injectable } from "./inject.ts";
-import { assert, assertEquals } from "../../test_deps.ts";
+import { assert, assertEquals } from "../../tests/test_deps.ts";
 import { factory } from "../factorys/class.factory.ts";
 import { Scope } from "../interfaces/scope-options.interface.ts";
 import { Controller } from "./controller.ts";

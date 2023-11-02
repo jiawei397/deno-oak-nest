@@ -3,7 +3,12 @@ import {
   Response,
 } from "../../../src/interfaces/context.interface.ts";
 import { Next } from "../../../src/interfaces/middleware.interface.ts";
-import { assertEquals, beforeEach, describe, it } from "../../../test_deps.ts";
+import {
+  assertEquals,
+  beforeEach,
+  describe,
+  it,
+} from "../../../tests/test_deps.ts";
 import { createMockContext } from "../../../tests/common_helper.ts";
 import { CORS, defaults } from "./main.ts";
 

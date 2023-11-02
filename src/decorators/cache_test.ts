@@ -1,5 +1,5 @@
 // deno-lint-ignore-file require-await
-import { assert, assertEquals, delay } from "../../test_deps.ts";
+import { assert, assertEquals, delay } from "../../tests/test_deps.ts";
 import { Cache, clearCacheTimeout } from "./cache.ts";
 
 Deno.test("cache hit", async () => {

@@ -9,15 +9,15 @@ export {
   assertRejects,
   assertStrictEquals,
   assertThrows,
-} from "https://deno.land/std@0.194.0/testing/asserts.ts";
+} from "https://deno.land/std@0.202.0/assert/mod.ts";
 export {
   afterEach,
   beforeEach,
   describe,
   it,
-} from "https://deno.land/std@0.194.0/testing/bdd.ts";
+} from "https://deno.land/std@0.202.0/testing/bdd.ts";
 
-export { delay } from "https://deno.land/std@0.194.0/async/mod.ts";
+export { delay } from "https://deno.land/std@0.202.0/async/mod.ts";
 
 export {
   IsEnum,

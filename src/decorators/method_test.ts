@@ -8,7 +8,7 @@ import {
   IsString,
   Max,
   Min,
-} from "../../test_deps.ts";
+} from "../../tests/test_deps.ts";
 import {
   createMockApp,
   createMockContext,

@@ -3,7 +3,7 @@ import {
   assertEquals,
   assertNotEquals,
   assertRejects,
-} from "../../test_deps.ts";
+} from "../../tests/test_deps.ts";
 import { Inject, Injectable } from "../decorators/inject.ts";
 import { Scope } from "../interfaces/scope-options.interface.ts";
 import { factory } from "./class.factory.ts";

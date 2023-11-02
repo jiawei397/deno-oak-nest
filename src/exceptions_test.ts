@@ -22,7 +22,7 @@ import {
   UnprocessableEntityException,
   UnsupportedMediaTypeException,
 } from "./exceptions.ts";
-import { assertEquals, describe, it } from "../test_deps.ts";
+import { assertEquals, describe, it } from "../tests/test_deps.ts";
 
 describe("HttpException", () => {
   describe("constructor", () => {

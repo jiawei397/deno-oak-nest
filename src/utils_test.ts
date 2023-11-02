@@ -1,4 +1,4 @@
-import { assert, assertEquals } from "../test_deps.ts";
+import { assert, assertEquals } from "../tests/test_deps.ts";
 import { createMockContext } from "../tests/common_helper.ts";
 import {
   ControllerPathOptions,

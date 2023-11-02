@@ -3,7 +3,7 @@ import { createCommonTests } from "../../../tests/app_helper.ts";
 import { assert, Module, NestFactory } from "@nest";
 import { etag } from "../deps.ts";
 import { findUnusedPort } from "../../../tests/common_helper.ts";
-import { assertEquals } from "../../../test_deps.ts";
+import { assertEquals } from "../../../tests/test_deps.ts";
 
 createCommonTests(HonoRouter, "hono");
 

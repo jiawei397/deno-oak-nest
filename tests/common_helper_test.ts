@@ -11,7 +11,7 @@ import {
   assertNotEquals,
   assertRejects,
   assertThrows,
-} from "../test_deps.ts";
+} from "./test_deps.ts";
 import {
   createMockApp,
   createMockContext,

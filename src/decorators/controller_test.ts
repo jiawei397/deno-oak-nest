@@ -1,4 +1,4 @@
-import { assertEquals, assertRejects } from "../../test_deps.ts";
+import { assertEquals, assertRejects } from "../../tests/test_deps.ts";
 import { Controller, Get, Header, HttpCode, Redirect } from "./controller.ts";
 import {
   createMockApp,

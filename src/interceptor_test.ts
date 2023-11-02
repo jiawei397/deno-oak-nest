@@ -1,5 +1,4 @@
-// deno-lint-ignore-file
-import { assert, assertEquals, assertRejects } from "../test_deps.ts";
+import { assert, assertEquals } from "../tests/test_deps.ts";
 import {
   createMockApp,
   createMockContext,

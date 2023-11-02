@@ -13,6 +13,7 @@ import {
   HttpException,
   Injectable,
   IRouterConstructor,
+  Module,
   ModuleType,
   NestFactory,
   NestInterceptor,
@@ -21,15 +22,9 @@ import {
   Post,
   Put,
 } from "@nest";
-import { Module } from "@nest";
 import { Max, Min } from "class_validator";
 import { findUnusedPort } from "./common_helper.ts";
-import {
-  assert,
-  assertEquals,
-  assertNotEquals,
-  assertNotStrictEquals,
-} from "../test_deps.ts";
+import { assert, assertEquals, assertNotStrictEquals } from "./test_deps.ts";
 import { BadRequestException } from "../src/exceptions.ts";
 import { APP_GUARD, APP_INTERCEPTOR } from "../src/constants.ts";
 

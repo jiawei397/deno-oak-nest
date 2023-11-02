@@ -1,4 +1,4 @@
-import { assert, assertEquals } from "../../../test_deps.ts";
+import { assert, assertEquals } from "../../../tests/test_deps.ts";
 import { LocalStore, MemoryStore } from "./cache.store.ts";
 
 Deno.test("CacheStore", async (t) => {

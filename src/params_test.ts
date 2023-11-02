@@ -1,4 +1,4 @@
-import { assertEquals } from "../test_deps.ts";
+import { assertEquals } from "../tests/test_deps.ts";
 import {
   createMockApp,
   createMockContext,

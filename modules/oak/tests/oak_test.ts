@@ -3,7 +3,7 @@ import { OakRouter } from "@nest/oak";
 import { CORS } from "https://deno.land/x/oak_cors@v0.1.1/mod.ts";
 import { createCommonTests } from "../../../tests/app_helper.ts";
 import { findUnusedPort } from "../../../tests/common_helper.ts";
-import { assertEquals, assertThrows } from "../../../test_deps.ts";
+import { assertEquals, assertThrows } from "../../../tests/test_deps.ts";
 
 createCommonTests(OakRouter, "oak");
 

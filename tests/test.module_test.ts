@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-unused-vars
 import { Controller } from "../src/decorators/controller.ts";
 import { Injectable } from "../src/decorators/inject.ts";
-import { assert, assertEquals } from "../test_deps.ts";
+import { assert, assertEquals } from "./test_deps.ts";
 import { createTestingModule } from "./test.module.ts";
 
 @Injectable()
