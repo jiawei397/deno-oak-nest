@@ -13,6 +13,7 @@
     "@nest": "../../mod.ts",
     "@nest/hono": "../hono/mod.ts",
     "@nest/cache": "../cache/mod.ts",
-    "@nest/redis": "./mod.ts"
-  }
+    "@nest/redis": "./mod.ts",
+    "redis": "https://deno.land/x/redis@v0.29.3/mod.ts" 
+   }
 }

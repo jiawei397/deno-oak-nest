@@ -1,6 +1,7 @@
+import { red, yellow } from "../../../deps.ts";
 import { Module } from "../../../src/decorators/module.ts";
 import { type DynamicModule } from "../../../src/interfaces/module.interface.ts";
-import { connect, red, type RedisConnectOptions, yellow } from "../deps.ts";
+import { connect, type RedisConnectOptions } from "../deps.ts";
 import type { Redis } from "../deps.ts";
 import { REDIS_KEY } from "./redis.constant.ts";
 import { RedisService } from "./redis.service.ts";

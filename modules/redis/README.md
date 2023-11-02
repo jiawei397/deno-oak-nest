@@ -11,7 +11,8 @@ Add import map in `deno.json`:
   "imports": {
     "@nest": "https://deno.land/x/deno_nest@v3.5.2/mod.ts",
     "@nest/hono": "https://deno.land/x/deno_nest@v3.5.2/modules/hono/mod.ts",
-    "@nest/redis": "https://deno.land/x/deno_nest@v3.5.2/modules/redis/mod.ts"
+    "@nest/redis": "https://deno.land/x/deno_nest@v3.5.2/modules/redis/mod.ts",
+    "redis": "https://deno.land/x/redis@v0.29.3/mod.ts"
   }
 }
 ```
