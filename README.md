@@ -312,10 +312,10 @@ Then this is your main.ts:
 
 ```ts
 import { Context, isHttpError, NestFactory, Status } from "@nest";
-import { HonoRouter } from "@nest/hono";
+import { Router } from "@nest/hono";
 import { AppModule } from "./app.module.ts";
 
-const app = await NestFactory.create(AppModule, HonoRouter);
+const app = await NestFactory.create(AppModule, Router);
 app.setGlobalPrefix("api");
 
 // Timing
@@ -338,9 +338,9 @@ await app.listen({ port });
 If you want to use `oak` instead of `Hono`, you can change like this:
 
 ```ts
-import { OakRouter } from "@nest/oak";
+import { Router } from "@nest/oak";
 
-const app = await NestFactory.create(AppModule, OakRouter);
+const app = await NestFactory.create(AppModule, Router);
 ```
 
 ### use static files

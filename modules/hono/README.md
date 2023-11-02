@@ -24,7 +24,7 @@ app.module.ts:
 
 ```typescript
 import { NestFactory } from "@nest";
-import { HonoRouter as Router } from "@nest/hono";
+import { Router } from "@nest/hono";
 import { etag } from "hono/middleware.ts";
 import { AppModule } from "./app.module.ts";
 
