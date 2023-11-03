@@ -555,6 +555,53 @@ export function createCommonTests(
     });
 
     await t.step(
+      "middleware with app.get, change middleware order",
+      async (it) => {
+        const app = await NestFactory.create(AppModule, Router);
+        const callStack: number[] = [];
+
+        app.use(async (req, res, next) => {
+          callStack.push(1);
+          await next();
+          callStack.push(2);
+        });
+
+        app.get("/", (_, res) => {
+          callStack.push(3);
+          return "hello world";
+        });
+
+        app.get("/hello", (_, res) => {
+          callStack.push(4);
+          res.body = "hello world";
+        });
+
+        const port = await getPort();
+        await app.listen({ port });
+
+        await it.step("fetch /", async () => {
+          const res = await fetch(`http://localhost:${port}`);
+          assertEquals(res.status, 200);
+          assertEquals(await res.text(), "hello world");
+          assertEquals(callStack, [1, 3, 2]);
+
+          callStack.length = 0;
+        });
+
+        await it.step("fetch /hello", async () => {
+          const res = await fetch(`http://localhost:${port}/hello`);
+          assertEquals(res.status, 200);
+          assertEquals(await res.text(), "hello world");
+          assertEquals(callStack, [1, 4, 2]);
+        });
+
+        // last
+        callStack.length = 0;
+        await app.close();
+      },
+    );
+
+    await t.step(
       "middleware change response with res.render()",
       async (it) => {
         const callStack: number[] = [];
