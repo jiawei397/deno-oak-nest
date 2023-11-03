@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-unused-vars require-await
+// deno-lint-ignore-file no-unused-vars require-await no-explicit-any
 import { Controller, Get } from "../src/decorators/controller.ts";
 import { Injectable } from "../src/decorators/inject.ts";
 import { assert, assertEquals } from "./test_deps.ts";
@@ -6,6 +6,8 @@ import { createTestingModule } from "./test.module.ts";
 import { CanActivate } from "../src/interfaces/guard.interface.ts";
 import { Context } from "../src/interfaces/context.interface.ts";
 import { UseGuards } from "../src/guard.ts";
+import { ExceptionFilter } from "../src/interfaces/filter.interface.ts";
+import { Catch, UseFilters } from "../src/filter.ts";
 
 @Injectable()
 class B {
@@ -187,6 +189,73 @@ Deno.test("override guard", async (t) => {
     res.body?.cancel();
 
     assertEquals(callStack, [3]);
+
+    callStack.length = 0;
+
+    await app.close();
+  });
+});
+
+Deno.test("override exception filter", async (t) => {
+  const callStack: number[] = [];
+
+  @Catch()
+  class AnyExceptionFilter implements ExceptionFilter {
+    catch(_exception: any, context: Context) {
+      context.response.status = 400;
+      callStack.push(1);
+    }
+  }
+
+  @Controller("")
+  @UseFilters(AnyExceptionFilter)
+  class TestController {
+    @Get("/")
+    a() {
+      callStack.push(2);
+      throw new Error("test");
+    }
+  }
+
+  await t.step("test origin", async () => {
+    const moduleRef = await createTestingModule({
+      controllers: [TestController],
+    }).compile();
+    const app = moduleRef.createNestApplication();
+    await app.init();
+
+    const res = await fetch(`http://localhost:${app.port}/`);
+    assertEquals(res.status, 400);
+    res.body?.cancel();
+
+    assertEquals(callStack, [2, 1]);
+
+    callStack.length = 0;
+
+    await app.close();
+  });
+
+  await t.step("override exception filter", async () => {
+    @Catch()
+    class AnyExceptionFilter2 implements ExceptionFilter {
+      catch(_exception: any, context: Context) {
+        callStack.push(3);
+        context.response.status = 405;
+      }
+    }
+
+    const moduleRef = await createTestingModule({
+      controllers: [TestController],
+    }).overrideFilter(AnyExceptionFilter, AnyExceptionFilter2).compile();
+
+    const app = moduleRef.createNestApplication();
+    await app.init();
+
+    const res = await fetch(`http://localhost:${app.port}/`);
+    assertEquals(res.status, 405);
+    res.body?.cancel();
+
+    assertEquals(callStack, [2, 3]);
 
     callStack.length = 0;
 
