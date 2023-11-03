@@ -2,7 +2,7 @@ import { assert, createTestingModule } from "@nest/tests";
 import { LoggerService } from "./logger.service.ts";
 
 Deno.test("logger service test", async () => {
-  const moduleRef = await createTestingModule({
+  const moduleRef = createTestingModule({
     providers: [LoggerService],
   })
     .compile();

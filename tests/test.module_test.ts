@@ -26,7 +26,7 @@ class A {
 }
 
 Deno.test("test origin only with controller", async () => {
-  const moduleRef = await createTestingModule({
+  const moduleRef = createTestingModule({
     controllers: [A],
     // providers: [B],
   })
@@ -44,7 +44,7 @@ Deno.test("test origin only with controller", async () => {
 });
 
 Deno.test("test origin with providers", async () => {
-  const moduleRef = await createTestingModule({
+  const moduleRef = createTestingModule({
     controllers: [A],
     providers: [B],
   })
@@ -63,7 +63,7 @@ Deno.test("inject data by other object", async () => {
       return "d";
     },
   };
-  const moduleRef = await createTestingModule({
+  const moduleRef =  createTestingModule({
     controllers: [A],
   }).overrideProvider(B, d)
     .compile();
@@ -77,7 +77,7 @@ Deno.test("inject data by other object", async () => {
 });
 
 Deno.test("change provider self", async () => {
-  const moduleRef = await createTestingModule({
+  const moduleRef =  createTestingModule({
     controllers: [A],
   })
     .compile();
@@ -95,7 +95,7 @@ Deno.test("change provider self", async () => {
 });
 
 Deno.test("resolve will return not same", async () => {
-  const moduleRef = await createTestingModule({
+  const moduleRef =  createTestingModule({
     controllers: [A],
   })
     .compile();
@@ -110,7 +110,7 @@ Deno.test("resolve will return not same", async () => {
 });
 
 Deno.test("e2e test", async () => {
-  const moduleRef = await createTestingModule({
+  const moduleRef =  createTestingModule({
     controllers: [A],
     // providers: [B],
   })

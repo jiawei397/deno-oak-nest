@@ -1,5 +1,5 @@
 import { createTestingModule } from "@nest/tests";
-import { assertEquals } from "../../tests/test_deps.ts";
+import { assert, assertEquals } from "../../tests/test_deps.ts";
 import { UserService } from "./user/services/user.service.ts";
 import { AppController } from "./app.controller.ts";
 
@@ -15,7 +15,8 @@ Deno.test("app test", async () => {
   })
     .overrideProvider(UserService, userService)
     .compile();
-  const appController = await moduleRef.get(AppController)!;
+  const appController = await moduleRef.get(AppController);
+  assert(appController);
   assertEquals(await appController.version(), "0.0.1");
   assertEquals(callStacks, [1]);
 });

@@ -24,11 +24,13 @@ export class TestModule {
     this.data = data;
   }
 
-  get<T extends Instance>(constructor: Type<T>): Promise<T> | null {
-    const map = this.app.moduleCaches.get(this.rootModule)!;
+  async get<T extends Instance>(constructor: Type<T>): Promise<T | null> {
+    const app = await this.getApp();
+    const map = app.moduleCaches.get(this.rootModule)!;
     return map.get(constructor) || null;
   }
-  resolve(constructor: Constructor, parentClass?: Type<any>) {
+  async resolve(constructor: Constructor, parentClass?: Type<any>) {
+    await this.getApp();
     return factory.getInstance(constructor, { parentClass });
   }
   overrideProvider(provide: Provide, value: any) {
@@ -42,7 +44,18 @@ export class TestModule {
     });
     return this;
   }
-  async compile() {
+
+  private async getApp() {
+    if (this.app) {
+      return this.app;
+    }
+    this.app = await NestFactory.create(this.rootModule, MockRouter, {
+      cache: this.factoryCaches,
+    });
+    return this.app;
+  }
+
+  compile() {
     const data = this.data;
 
     @Module({
@@ -53,9 +66,7 @@ export class TestModule {
     class AppModule {}
 
     this.rootModule = AppModule;
-    this.app = await NestFactory.create(AppModule, MockRouter, {
-      cache: this.factoryCaches,
-    });
+
     return this;
   }
 
