@@ -4,7 +4,7 @@ import { OakContext } from "../deps.ts";
 import { NestRequest } from "./request.ts";
 import { NestResponse } from "./response.ts";
 
-export const nestContextKey = "NEST_CONTEXT";
+const nestContextKey = "NEST_CONTEXT";
 
 export class NestContext implements Context {
   request: NestRequest;
