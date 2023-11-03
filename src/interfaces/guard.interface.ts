@@ -8,4 +8,6 @@ export interface CanActivate {
 
 export type ControllerMethod = (...args: any[]) => any;
 
-export type NestGuards = (CanActivate | Constructor<CanActivate>)[];
+export type NestGuard = CanActivate | Constructor<CanActivate>;
+
+export type NestGuards = NestGuard[];

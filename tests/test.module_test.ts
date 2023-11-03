@@ -1,8 +1,11 @@
-// deno-lint-ignore-file no-unused-vars
+// deno-lint-ignore-file no-unused-vars require-await
 import { Controller, Get } from "../src/decorators/controller.ts";
 import { Injectable } from "../src/decorators/inject.ts";
 import { assert, assertEquals } from "./test_deps.ts";
 import { createTestingModule } from "./test.module.ts";
+import { CanActivate } from "../src/interfaces/guard.interface.ts";
+import { Context } from "../src/interfaces/context.interface.ts";
+import { UseGuards } from "../src/guard.ts";
 
 @Injectable()
 class B {
@@ -26,7 +29,7 @@ class A {
 }
 
 Deno.test("test origin only with controller", async () => {
-  const moduleRef = createTestingModule({
+  const moduleRef = await createTestingModule({
     controllers: [A],
     // providers: [B],
   })
@@ -44,7 +47,7 @@ Deno.test("test origin only with controller", async () => {
 });
 
 Deno.test("test origin with providers", async () => {
-  const moduleRef = createTestingModule({
+  const moduleRef = await createTestingModule({
     controllers: [A],
     providers: [B],
   })
@@ -57,13 +60,13 @@ Deno.test("test origin with providers", async () => {
   assertEquals(a.find(), "b");
 });
 
-Deno.test("inject data by other object", async () => {
+Deno.test("overrideProvider", async () => {
   const d = {
     findAll() {
       return "d";
     },
   };
-  const moduleRef =  createTestingModule({
+  const moduleRef = await createTestingModule({
     controllers: [A],
   }).overrideProvider(B, d)
     .compile();
@@ -77,7 +80,7 @@ Deno.test("inject data by other object", async () => {
 });
 
 Deno.test("change provider self", async () => {
-  const moduleRef =  createTestingModule({
+  const moduleRef = await createTestingModule({
     controllers: [A],
   })
     .compile();
@@ -95,7 +98,7 @@ Deno.test("change provider self", async () => {
 });
 
 Deno.test("resolve will return not same", async () => {
-  const moduleRef =  createTestingModule({
+  const moduleRef = await createTestingModule({
     controllers: [A],
   })
     .compile();
@@ -110,7 +113,7 @@ Deno.test("resolve will return not same", async () => {
 });
 
 Deno.test("e2e test", async () => {
-  const moduleRef =  createTestingModule({
+  const moduleRef = await createTestingModule({
     controllers: [A],
     // providers: [B],
   })
@@ -123,4 +126,70 @@ Deno.test("e2e test", async () => {
   assertEquals(await res.text(), "b");
 
   await app.close();
+});
+
+Deno.test("override guard", async (t) => {
+  const callStack: number[] = [];
+
+  @Injectable()
+  class AuthGuard implements CanActivate {
+    async canActivate(_context: Context): Promise<boolean> {
+      callStack.push(1);
+      return true;
+    }
+  }
+
+  @Controller("")
+  @UseGuards(AuthGuard)
+  class TestController {
+    @Get("/")
+    a() {
+      callStack.push(2);
+      return "a";
+    }
+  }
+
+  await t.step("test origin", async () => {
+    const moduleRef = await createTestingModule({
+      controllers: [TestController],
+    }).compile();
+    const app = moduleRef.createNestApplication();
+    await app.init();
+
+    const res = await fetch(`http://localhost:${app.port}/`);
+    assertEquals(res.status, 200);
+    assertEquals(await res.text(), "a");
+    assertEquals(callStack, [1, 2]);
+
+    callStack.length = 0;
+
+    await app.close();
+  });
+
+  await t.step("override guard", async () => {
+    @Injectable()
+    class AuthGuard2 implements CanActivate {
+      async canActivate(_context: Context): Promise<boolean> {
+        callStack.push(3);
+        return false;
+      }
+    }
+
+    const moduleRef = await createTestingModule({
+      controllers: [TestController],
+    }).overrideGuard(AuthGuard, AuthGuard2).compile();
+
+    const app = moduleRef.createNestApplication();
+    await app.init();
+
+    const res = await fetch(`http://localhost:${app.port}/`);
+    assertEquals(res.status, 403);
+    res.body?.cancel();
+
+    assertEquals(callStack, [3]);
+
+    callStack.length = 0;
+
+    await app.close();
+  });
 });

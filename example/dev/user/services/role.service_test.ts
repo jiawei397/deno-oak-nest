@@ -3,7 +3,7 @@ import { RoleService } from "./role.service.ts";
 import { assertEquals, createTestingModule } from "@nest/tests";
 
 Deno.test("role service test", async () => {
-  const moduleRef = createTestingModule({
+  const moduleRef = await createTestingModule({
     providers: [{
       provide: "CONNECTION",
       useValue: "connected",

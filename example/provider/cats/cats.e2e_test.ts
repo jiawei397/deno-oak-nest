@@ -2,7 +2,7 @@ import { assertEquals, createTestingModule } from "@nest/tests";
 import { CatsController } from "./cats.controller.ts";
 
 Deno.test("e2e test cats", async (t) => {
-  const moduleRef = createTestingModule({
+  const moduleRef = await createTestingModule({
     controllers: [CatsController],
   })
     .compile();

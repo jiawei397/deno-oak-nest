@@ -14,7 +14,7 @@ Deno.test("logger service test", async () => {
     constructor(private loggerService: LoggerService) {}
   }
 
-  const moduleRef = createTestingModule({
+  const moduleRef = await createTestingModule({
     controllers: [A, B],
   }).compile();
   const loggerService = await moduleRef.get(LoggerService, A);

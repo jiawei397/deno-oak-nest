@@ -632,8 +632,8 @@ This get `/users/info` and `/v1/users/info`.
 
 ## unit
 
-If you want to test your application, you can use `createTestingModule` to help
-use.
+If you want to test your application, you can use `await createTestingModule` to
+help use.
 
 First, let us create Service B and C, create a Controller A.
 
@@ -661,7 +661,7 @@ Then use `createTestingModule`:
 import { createTestingModule } from "@nest/tests";
 
 Deno.test("test origin only with controller", async () => {
-  const moduleRef = createTestingModule({
+  const moduleRef = await createTestingModule({
     controllers: [A],
   })
     .compile();
@@ -674,7 +674,7 @@ Deno.test("test origin only with controller", async () => {
 });
 
 Deno.test("test origin with providers", async () => {
-  const moduleRef = createTestingModule({
+  const moduleRef = await createTestingModule({
     controllers: [A],
     providers: [B],
   })
@@ -693,7 +693,7 @@ Deno.test("inject data by other object", async () => {
       return "d";
     },
   };
-  const moduleRef = createTestingModule({
+  const moduleRef = await createTestingModule({
     controllers: [A],
   }).overrideProvider(B, d)
     .compile();
@@ -707,7 +707,7 @@ Deno.test("inject data by other object", async () => {
 });
 
 Deno.test("change provider self", async () => {
-  const moduleRef = createTestingModule({
+  const moduleRef = await createTestingModule({
     controllers: [A],
   })
     .compile();
@@ -725,7 +725,7 @@ Deno.test("change provider self", async () => {
 });
 
 Deno.test("resolve will return not same", async () => {
-  const moduleRef = createTestingModule({
+  const moduleRef = await createTestingModule({
     controllers: [A],
   })
     .compile();

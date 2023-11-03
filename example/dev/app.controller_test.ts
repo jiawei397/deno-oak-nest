@@ -10,7 +10,7 @@ Deno.test("app test", async () => {
       callStacks.push(1);
     },
   };
-  const moduleRef = createTestingModule({
+  const moduleRef = await createTestingModule({
     controllers: [AppController],
   })
     .overrideProvider(UserService, userService)
