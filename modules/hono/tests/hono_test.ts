@@ -153,11 +153,6 @@ Deno.test("hono - useOriginContext", {
 
     const app = await NestFactory.create(AppModule, HonoRouter);
 
-    app.get("/", (_req, res) => {
-      const context = res.getOriginalContext<HonoContext>();
-      return context.text("Hello World!");
-    });
-
     const port = await findUnusedPort(8000);
     await app.listen({ port });
 

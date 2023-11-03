@@ -45,6 +45,8 @@ export class NestResponse implements Response {
       }
     }
 
-    context.response.body = body;
+    if (context.response.body === undefined || body !== undefined) {
+      context.response.body = body;
+    }
   }
 }

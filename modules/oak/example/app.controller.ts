@@ -1,5 +1,6 @@
-import { Controller, Get, Params, Query } from "@nest";
+import { Controller, Get, Params, Query, Res, type Response } from "@nest";
 import { AppService } from "./app.service.ts";
+import { OakContext } from "@nest/oak";
 
 @Controller("")
 export class AppController {
@@ -19,5 +20,13 @@ export class AppController {
   @Get("/query")
   query(@Query("name") name: string) {
     return `query ${name}!`;
+  }
+
+  @Get("/originContext")
+  originContext(@Res() res: Response) {
+    const context = res.getOriginalContext<OakContext>();
+    context.response.body = {
+      data: "from origin context",
+    };
   }
 }
