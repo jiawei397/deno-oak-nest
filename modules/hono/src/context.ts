@@ -4,7 +4,7 @@ import { HonoContext } from "../deps.ts";
 import { NestRequest } from "./request.ts";
 import { NestResponse } from "./response.ts";
 
-export const nestContextKey = Symbol("nestContext");
+const nestContextKey = Symbol("nestContext");
 
 export class NestContext implements Context {
   request: NestRequest;
