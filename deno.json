@@ -13,6 +13,7 @@
     "dev:postgres": "deno task --cwd=modules/postgres dev",
     "dev:redis": "deno task --cwd=modules/redis dev",
     "dev:scheduler": "deno task --cwd=modules/scheduler dev",
+    "dev:lifecycle": "deno run -A example/lifecycle/main.ts",
     "dev:interceptor": "deno run -A --watch example/interceptor/main.ts",
     "dev:decorator": "deno run -A --watch example/decorator/main.ts",
     "dev:dynamicModule": "deno task --cwd=example/dynamicModule dev",
