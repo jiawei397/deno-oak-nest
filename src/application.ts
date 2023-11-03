@@ -517,6 +517,8 @@ export class Application {
   async init(appModule: ModuleType, caches?: FactoryCaches) {
     if (caches) {
       factory.globalCaches = caches;
+    } else {
+      factory.globalCaches.clear();
     }
 
     this.log(yellow("[NestFactory]"), green(`Starting Nest application...`));

@@ -1,6 +1,6 @@
 import { Status, STATUS_TEXT } from "../../../deps.ts";
 import { Response } from "../../../src/interfaces/context.interface.ts";
-import { type HonoContext, type HonoResponse } from "../deps.ts";
+import { type HonoContext, HonoResponse } from "../deps.ts";
 
 export class NestResponse implements Response {
   body: string | object | number | boolean | null;
@@ -22,8 +22,11 @@ export class NestResponse implements Response {
   }
 
   render(): HonoResponse {
-    const context = this.originalContext;
     const body = this.body;
+    if (body && body instanceof HonoResponse) {
+      return body;
+    }
+    const context = this.originalContext;
     if (this.status) {
       context.status(this.status);
     }
@@ -38,6 +41,7 @@ export class NestResponse implements Response {
     ) {
       return context.body(body);
     }
+
     const contextType = this.headers.get("content-type");
     if (
       (contextType && contextType.includes("application/json")) ||

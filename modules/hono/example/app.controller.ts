@@ -11,6 +11,7 @@ import {
 } from "@nest";
 import { AppService } from "./app.service.ts";
 import { QueryDto, QueryWithoutPropDto, SaveDto } from "./app.dto.ts";
+import { HonoContext } from "@nest/hono";
 
 @Controller("")
 export class AppController {
@@ -115,5 +116,13 @@ export class AppController {
   redirect(@Res() res: Response) {
     res.headers.set("Location", "https://www.baidu.com");
     res.status = 302;
+  }
+
+  @Get("/originContext")
+  originContext(@Res() res: Response) {
+    const context = res.getOriginalContext<HonoContext>();
+    return context.json({
+      data: "from origin context",
+    });
   }
 }

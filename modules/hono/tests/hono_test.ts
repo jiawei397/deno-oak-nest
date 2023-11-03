@@ -1,7 +1,15 @@
 import { HonoRouter } from "@nest/hono";
 import { createCommonTests } from "../../../tests/app_helper.ts";
-import { assert, Module, NestFactory } from "@nest";
-import { etag } from "../deps.ts";
+import {
+  assert,
+  Controller,
+  Get,
+  Module,
+  NestFactory,
+  Res,
+  type Response,
+} from "@nest";
+import { etag, HonoContext } from "../deps.ts";
 import { findUnusedPort } from "../../../tests/common_helper.ts";
 import { assertEquals } from "../../../tests/test_deps.ts";
 
@@ -98,4 +106,65 @@ Deno.test("hono - useOriginMiddleware", {
       await app.close();
     },
   );
+});
+
+Deno.test("hono - useOriginContext", {
+  sanitizeOps: false,
+  sanitizeResources: false,
+}, async (t) => {
+  await t.step(
+    "app.get should ok",
+    async () => {
+      @Module({})
+      class AppModule {}
+
+      const app = await NestFactory.create(AppModule, HonoRouter);
+
+      app.get("/", (_req, res) => {
+        const context = res.getOriginalContext<HonoContext>();
+        return context.text("Hello World!");
+      });
+
+      const port = await findUnusedPort(8000);
+      await app.listen({ port });
+
+      const res = await fetch(`http://localhost:${port}/`);
+      assertEquals(res.status, 200);
+      assertEquals(await res.text(), "Hello World!");
+
+      await app.close();
+    },
+  );
+
+  await t.step("controller should ok", async () => {
+    @Controller("/")
+    class A {
+      @Get("/")
+      get(@Res() res: Response) {
+        const context = res.getOriginalContext<HonoContext>();
+        return context.text("Hello World!");
+      }
+    }
+
+    @Module({
+      controllers: [A],
+    })
+    class AppModule {}
+
+    const app = await NestFactory.create(AppModule, HonoRouter);
+
+    app.get("/", (_req, res) => {
+      const context = res.getOriginalContext<HonoContext>();
+      return context.text("Hello World!");
+    });
+
+    const port = await findUnusedPort(8000);
+    await app.listen({ port });
+
+    const res = await fetch(`http://localhost:${port}/`);
+    assertEquals(res.status, 200);
+    assertEquals(await res.text(), "Hello World!");
+
+    await app.close();
+  });
 });

@@ -14,4 +14,5 @@ export {
   setCookie,
 } from "hono/middleware.ts";
 
+export const HonoResponse = Response;
 export type HonoResponse = Response;
