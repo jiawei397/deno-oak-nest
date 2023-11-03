@@ -19,7 +19,7 @@ export {
   yellow,
 } from "https://deno.land/std@0.202.0/fmt/colors.ts";
 
-export { assert } from "https://deno.land/std@0.202.0/testing/asserts.ts";
+export { assert } from "https://deno.land/std@0.202.0/assert/assert.ts";
 
 export { format } from "https://deno.land/std@0.202.0/datetime/mod.ts";
 
