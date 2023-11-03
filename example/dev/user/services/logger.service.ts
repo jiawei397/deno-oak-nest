@@ -12,7 +12,7 @@ interface ILogger {
   scope: Scope.TRANSIENT,
 })
 export class LoggerService implements ILogger {
-  private parentName?: string;
+  parentName: string;
 
   constructor(@Inject(INQUIRER) private parentClass: Constructor) {
     this.parentName = this.parentClass.name;

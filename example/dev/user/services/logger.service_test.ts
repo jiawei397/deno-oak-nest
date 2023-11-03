@@ -1,6 +1,7 @@
 import { Controller } from "@nest";
 import { assert, createTestingModule } from "@nest/tests";
 import { LoggerService } from "./logger.service.ts";
+import { assertEquals } from "std/assert/assert_equals.ts";
 
 Deno.test("logger service test", async () => {
   @Controller("")
@@ -23,5 +24,7 @@ Deno.test("logger service test", async () => {
   assert(loggerService2);
   assert(loggerService instanceof LoggerService);
   assert(loggerService2 instanceof LoggerService);
+  assertEquals(loggerService.parentName, "A");
+  assertEquals(loggerService2.parentName, "B");
   assert(loggerService !== loggerService2, "service is not singleton");
 });
