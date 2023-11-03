@@ -91,7 +91,7 @@ export class TestModule {
   }
 }
 
-class App {
+export class App {
   app: Application;
   port: number;
   constructor(
