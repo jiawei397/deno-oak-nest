@@ -1,13 +1,27 @@
+import { Controller } from "@nest";
 import { assert, createTestingModule } from "@nest/tests";
 import { LoggerService } from "./logger.service.ts";
 
 Deno.test("logger service test", async () => {
-  const moduleRef = createTestingModule({
-    providers: [LoggerService],
-  })
-    .compile();
-  const loggerService = await moduleRef.get(LoggerService);
-  const loggerService2 = await moduleRef.get(LoggerService);
+  @Controller("")
+  class A {
+    constructor(private loggerService: LoggerService) {}
+  }
 
+  @Controller("")
+  class B {
+    constructor(private loggerService: LoggerService) {}
+  }
+
+  const moduleRef = createTestingModule({
+    controllers: [A, B],
+  }).compile();
+  const loggerService = await moduleRef.get(LoggerService, A);
+  const loggerService2 = await moduleRef.get(LoggerService, B);
+
+  assert(loggerService);
+  assert(loggerService2);
+  assert(loggerService instanceof LoggerService);
+  assert(loggerService2 instanceof LoggerService);
   assert(loggerService !== loggerService2, "service is not singleton");
 });

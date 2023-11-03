@@ -24,9 +24,24 @@ export class TestModule {
     this.data = data;
   }
 
-  async get<T extends Instance>(constructor: Type<T>): Promise<T | null> {
+  async get<T extends Instance>(
+    constructor: Type<T>,
+    parentClass?: Type<any>,
+  ): Promise<T | null> {
     const app = await this.getApp();
     const map = app.moduleCaches.get(this.rootModule)!;
+    if (parentClass) {
+      const parent = await map.get(parentClass);
+      if (!parent) {
+        return null;
+      }
+      for (const key in parent) {
+        if (parent[key] instanceof constructor) {
+          return parent[key];
+        }
+      }
+      return null;
+    }
     return map.get(constructor) || null;
   }
   async resolve(constructor: Constructor, parentClass?: Type<any>) {
