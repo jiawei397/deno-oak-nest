@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-unused-vars
-import { Controller } from "../src/decorators/controller.ts";
+import { Controller, Get } from "../src/decorators/controller.ts";
 import { Injectable } from "../src/decorators/inject.ts";
 import { assert, assertEquals } from "./test_deps.ts";
 import { createTestingModule } from "./test.module.ts";
@@ -19,6 +19,7 @@ class C {
 class A {
   constructor(private readonly b: B, private readonly c: C) {}
 
+  @Get("")
   find() {
     return this.b.findAll();
   }
@@ -106,4 +107,20 @@ Deno.test("resolve will return not same", async () => {
 
   const d = await moduleRef.resolve(B);
   assert(d !== c);
+});
+
+Deno.test("e2e test", async () => {
+  const moduleRef = await createTestingModule({
+    controllers: [A],
+    // providers: [B],
+  })
+    .compile();
+  const app = moduleRef.createNestApplication();
+  await app.init();
+
+  const res = await fetch(`http://localhost:${app.port}/`);
+  assertEquals(res.status, 200);
+  assertEquals(await res.text(), "b");
+
+  await app.close();
 });

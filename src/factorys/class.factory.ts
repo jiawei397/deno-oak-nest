@@ -35,6 +35,11 @@ export class ClassFactory {
   globalCaches: FactoryCaches = new Map();
   instanceCaches: Map<Instance, FactoryCaches> = new Map();
 
+  reset() {
+    this.globalCaches.clear();
+    this.instanceCaches.clear();
+  }
+
   getInstanceFromCaches<T>(
     target: any,
     cache?: FactoryCaches,
@@ -222,7 +227,7 @@ export class ClassFactory {
       }
       const fn = prototype[item];
       const methodPath = Reflect.getMetadata(META_PATH_KEY, fn);
-      if (!methodPath) {
+      if (methodPath === undefined) {
         return;
       }
       const methodType = Reflect.getMetadata(META_METHOD_KEY, fn);
