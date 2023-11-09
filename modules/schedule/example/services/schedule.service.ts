@@ -1,5 +1,11 @@
 import { assert, Injectable } from "@nest";
-import { Cron, CronExpression, Interval, Timeout } from "../../mod.ts";
+import {
+  Cron,
+  CronExpression,
+  Interval,
+  schedulerRegistry,
+  Timeout,
+} from "@nest/schedule";
 import { TestService } from "./test.service.ts";
 
 @Injectable()
@@ -25,7 +31,13 @@ export class ScheduleService {
     });
   }
 
-  @Interval(5000)
+  @Timeout(3000)
+  timeoutCancelJob() {
+    schedulerRegistry.clearInterval("intervalJob");
+    console.info("【ScheduleService】timeout cancel intervalJob");
+  }
+
+  @Interval(5000, "intervalJob")
   async intervalJob() {
     assert(this.testService, "testService is not defined");
     console.log("-----interval---", await this.testService.info());
