@@ -1,5 +1,5 @@
 import { assert, Injectable } from "@nest";
-import { Cron, Interval, Timeout } from "@nest/scheduler";
+import { Cron, Interval, Timeout } from "../../mod.ts";
 import { TestService } from "./test.service.ts";
 
 @Injectable()
@@ -43,5 +43,10 @@ export class ScheduleService {
   @Cron("0 */2 * * * *")
   intervalTwoMinuteJob() {
     console.info(`【${ScheduleService.name}】two minute interval job!`);
+  }
+
+  @Cron("45 * * * * *")
+  handleCron() {
+    console.debug("Called when the current second is 45");
   }
 }

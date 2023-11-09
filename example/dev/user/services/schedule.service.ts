@@ -1,6 +1,6 @@
 import { assert, Injectable } from "@nest";
 import { RoleService } from "./role.service.ts";
-import { Cron, Interval, Timeout } from "../../../../modules/scheduler/mod.ts";
+import { Cron, Interval, Timeout } from "../../../../modules/schedule/mod.ts";
 
 @Injectable()
 export class ScheduleService {

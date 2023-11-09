@@ -8,3 +8,4 @@ index.js
 cov_profile
 *.lcov
 vendor
+logs

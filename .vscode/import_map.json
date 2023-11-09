@@ -13,7 +13,7 @@
     "@nest/mysql": "../modules/mysql/mod.ts",
     "@nest/postgres": "../modules/postgres/mod.ts",
     "@nest/redis": "../modules/redis/mod.ts",
-    "@nest/scheduler": "../modules/scheduler/mod.ts",
+    "@nest/schedule": "../modules/schedule/mod.ts",
     "@nest/uinv": "../modules/uinv/mod.ts",
     "@nest/tests": "../tests/mod.ts",
     "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts",
@@ -26,6 +26,7 @@
     "cliffy/": "https://deno.land/x/cliffy@v1.0.0-rc.3/",
     "zip": "https://deno.land/x/zip@v1.2.2/mod.ts",
     "jsonc": "https://deno.land/x/jsonc@1/main.ts",
-    "deno_mongo_schema": "https://deno.land/x/deno_mongo_schema@v1.0.3/mod.ts"
+    "deno_mongo_schema": "https://deno.land/x/deno_mongo_schema@v1.0.3/mod.ts",
+    "date_log": "https://deno.land/x/date_log@v1.1.1/mod.ts"
   }
 }

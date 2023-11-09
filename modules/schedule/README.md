@@ -21,7 +21,7 @@ app.module.ts:
 
 ```typescript
 import { Module } from "@nest";
-import { ScheduleModule } from "@nest/scheduler";
+import { ScheduleModule } from "@nest/schedule";
 import { ScheduleService } from "./services/schedule.service.ts";
 import { Test2Service } from "./services/test2.service.ts";
 
@@ -46,7 +46,7 @@ Then `schedule.service.ts` may be like this:
 
 ```ts
 import { assert, Injectable } from "@nest";
-import { Cron, Interval, Timeout } from "@nest/scheduler";
+import { Cron, Interval, Timeout } from "@nest/schedule";
 import { TestService } from "./test.service.ts";
 
 @Injectable()

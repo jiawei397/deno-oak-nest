@@ -13,6 +13,7 @@
   "imports": {
     "std/": "https://deno.land/std@0.202.0/",
     "@nest": "../../mod.ts",
-    "@nest/hono": "../../modules/hono/mod.ts"
+    "@nest/hono": "../../modules/hono/mod.ts",
+    "hono/": "https://deno.land/x/hono@v3.9.1/"
   }
 }
