@@ -4,10 +4,25 @@ This is a redis module for [`deno_nest`](https://deno.land/x/deno_nest).
 
 ## example
 
+Add import map in `deno.json`:
+
+```json
+{
+  "imports": {
+    "@nest": "https://deno.land/x/deno_nest@v3.6.2/mod.ts",
+    "@nest/hono": "https://deno.land/x/deno_nest@v3.6.2/modules/hono/mod.ts",
+    "@nest/elasticsearch": "https://deno.land/x/deno_nest@v3.6.2/modules/elasticsearch/mod.ts",
+    "hono/": "https://deno.land/x/hono@v3.9.1/"
+  }
+}
+```
+
+Then use in `AppModule`:
+
 ```typescript
-import { Module } from "https://deno.land/x/deno_nest@v3.6.2/mod.ts";
+import { Module } from "@nest";
+import { ElasticsearchModule } from "@nest/elasticsearch";
 import { AppController } from "./app.controller.ts";
-import { ElasticsearchModule } from "https://deno.land/x/deno_nest@v3.6.2/modules/elasticsearch/mod.ts";
 
 @Module({
   imports: [
@@ -23,8 +38,8 @@ export class AppModule {}
 Then can be used in AppController:
 
 ```ts
-import { ElasticsearchService } from "https://deno.land/x/deno_nest@v3.6.2/modules/elasticsearch/mod.ts";
-import { Controller, Get } from "https://deno.land/x/deno_nest@v3.6.2/mod.ts";
+import { assert, Controller, Get } from "@nest";
+import { ElasticsearchService } from "@nest/elasticsearch";
 
 @Controller("")
 export class AppController {

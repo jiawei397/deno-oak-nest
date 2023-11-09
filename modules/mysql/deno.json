@@ -13,6 +13,7 @@
     "@nest": "../../mod.ts",
     "@nest/hono": "../hono/mod.ts",
     "@nest/mysql": "./mod.ts",
+    "hono/": "https://deno.land/x/hono@v3.9.1/",
     "mysql": "https://deno.land/x/mysql@v2.11.0/mod.ts"
   }
 }

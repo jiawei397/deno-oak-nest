@@ -11,7 +11,8 @@ Add import map in `deno.json`:
   "imports": {
     "@nest": "https://deno.land/x/deno_nest@v3.6.2/mod.ts",
     "@nest/hono": "https://deno.land/x/deno_nest@v3.6.2/modules/hono/mod.ts",
-    "@nest/schedule": "https://deno.land/x/deno_nest@v3.6.2/modules/schedule/mod.ts"
+    "@nest/schedule": "https://deno.land/x/deno_nest@v3.6.2/modules/schedule/mod.ts",
+    "hono/": "https://deno.land/x/hono@v3.9.1/"
   }
 }
 ```

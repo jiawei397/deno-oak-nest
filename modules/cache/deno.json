@@ -12,6 +12,7 @@
   "imports": {
     "@nest": "../../mod.ts",
     "@nest/hono": "../hono/mod.ts",
-    "@nest/cache": "./mod.ts"
+    "@nest/cache": "./mod.ts",
+    "hono/": "https://deno.land/x/hono@v3.9.1/"
   }
 }

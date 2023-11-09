@@ -4,15 +4,34 @@ This is a cache module for [`deno_nest`](https://deno.land/x/deno_nest).
 
 ## example
 
+Add import map in `deno.json`:
+
+```json
+{
+  "imports": {
+    "@nest": "https://deno.land/x/deno_nest@v3.6.2/mod.ts",
+    "@nest/hono": "https://deno.land/x/deno_nest@v3.6.2/modules/hono/mod.ts",
+    "@nest/cache": "https://deno.land/x/deno_nest@v3.6.2/modules/cache/mod.ts",
+    "hono/": "https://deno.land/x/hono@v3.9.1/"
+  }
+}
+```
+
+Then use in `AppModule`:
+
 ```typescript
-import { Module } from "https://deno.land/x/deno_nest@v3.6.2/mod.ts";
-import { CacheModule } from "https://deno.land/x/deno_nest@v3.6.2/modules/cache/mod.ts";
+import { Module } from "@nest";
+import { CacheModule } from "@nest/cache";
 import { AppController } from "./app.controller.ts";
 
 @Module({
   imports: [
     CacheModule.register({
       ttl: 60,
+      max: 2,
+      isDebug: true,
+      // policy: "public",
+      // store: "localStorage",
     }),
   ],
   controllers: [AppController],
@@ -23,8 +42,8 @@ export class AppModule {}
 Then `CacheInterceptor` can be used in any Controllers, or in a specific method.
 
 ```ts
-import { CacheInterceptor } from "https://deno.land/x/deno_nest@v3.6.2/modules/cache/mod.ts";
-import { Controller, Get } from "https://deno.land/x/deno_nest@v3.6.2/mod.ts";
+import { Controller, Get, Params, Query, UseInterceptors } from "@nest";
+import { CacheInterceptor, CacheTTL, SetCachePolicy } from "@nest/cache";
 
 @Controller("")
 @UseInterceptors(CacheInterceptor)
@@ -45,4 +64,5 @@ More can see the example dir.
 
 ## TODO
 
-- [ ] store
+- [x] store
+- [ ] Deno.kv
