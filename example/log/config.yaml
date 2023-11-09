@@ -1,0 +1,12 @@
+log:
+  appenders:
+    dateFile:
+      filename: logs/deno
+      daysToKeep: 10
+      pattern: yyyy-MM-dd.log
+  categories:
+    default:
+      appenders:
+        - dateFile
+        - console
+      level: DEBUG
