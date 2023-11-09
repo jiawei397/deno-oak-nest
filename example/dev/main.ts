@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-unused-vars
 import { NestFactory } from "@nest";
 import { CORS } from "@nest/cors";
-import { HonoRouter as Router } from "@nest/hono";
+import { Router } from "@nest/hono";
 import { AppModule } from "./app.module.ts";
 import { HttpExceptionFilter } from "./exception.ts";
 import { LoggingInterceptor } from "./interceptor/log.interceptor.ts";
