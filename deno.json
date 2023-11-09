@@ -18,6 +18,7 @@
     "dev:decorator": "deno run -A --watch example/decorator/main.ts",
     "dev:dynamicModule": "deno task --cwd=example/dynamicModule dev",
     "dev:dynamicModule:prod": "deno task --cwd=example/dynamicModule start",
+    "dev:upload": "deno run -A --watch example/upload/main.ts",
     "dev:provider": "deno run -A --watch example/provider/main.ts",
     "cli": "deno task --cwd=cli install",
     "pm2": "pm2 start --name deno_nest example/main.ts --interpreter='deno' --interpreter-args='run --allow-net --allow-env --allow-write --allow-read --unstable'",
