@@ -25,7 +25,7 @@ export class ScheduleExplorer {
           try {
             await instance[methodName]();
           } catch (err) {
-            console.error("SchedulerError", err);
+            console.error("ScheduleCronError", err);
           }
         });
       });
@@ -47,7 +47,9 @@ export class ScheduleExplorer {
           try {
             await instance[methodName]();
           } catch (err) {
-            console.error("SchedulerError", err);
+            console.error("ScheduleTimeoutError", err);
+          } finally {
+            schedulerRegistry.timeCaches.delete(timeKey);
           }
         }, delay);
         schedulerRegistry.registerTime(timeKey, jobName);
@@ -70,7 +72,7 @@ export class ScheduleExplorer {
           try {
             await instance[methodName]();
           } catch (err) {
-            console.error("SchedulerError", err);
+            console.error("ScheduleIntervalError", err);
           }
         }, delay);
         schedulerRegistry.registerTime(timeKey, jobName);

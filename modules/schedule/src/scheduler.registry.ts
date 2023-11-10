@@ -38,10 +38,27 @@ class SchedulerRegistry {
     this.timeCaches.set(name, timeKey);
   }
 
+  clearTimeoutByKey(timeKey: number) {
+    this.timeCaches.forEach((key, name) => {
+      if (key === timeKey) {
+        this.clearTimeout(name);
+      }
+    });
+  }
+
+  clearIntervalByKey(timeKey: number) {
+    this.timeCaches.forEach((key, name) => {
+      if (key === timeKey) {
+        this.clearInterval(name);
+      }
+    });
+  }
+
   clearTimeout(name: string) {
     const key = this.timeCaches.get(name);
     if (key) {
       clearTimeout(key);
+      this.timeCaches.delete(name);
     }
   }
 
@@ -49,6 +66,7 @@ class SchedulerRegistry {
     const key = this.timeCaches.get(name);
     if (key) {
       clearInterval(key);
+      this.timeCaches.delete(name);
     }
   }
 
