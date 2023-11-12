@@ -19,6 +19,12 @@ the version recommended by `Nest`, as it has undergone thorough unit testing.
 
 ## start
 
+### documents
+
+[Read our documentation](https://nests.deno.dev/).
+
+### use CLI
+
 You can use CLI to init:
 
 ```bash
