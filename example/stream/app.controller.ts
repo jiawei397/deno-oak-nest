@@ -1,11 +1,18 @@
-import { Controller, Get, getReadableStream } from "@nest";
+import {
+  Controller,
+  Get,
+  getReadableStream,
+  Header,
+  Res,
+  type Response,
+} from "@nest";
 
 @Controller("")
 export class AppController {
   /**
-   * response an stream, can test by `curl http://localhost:2000/`
+   * response an stream, can test by `curl http://localhost:2000/stream`
    */
-  @Get("/")
+  @Get("/stream")
   stream() {
     const { body, write, end } = getReadableStream();
     let num = 0;
@@ -31,5 +38,21 @@ export class AppController {
       }
     }, 1000);
     return body;
+  }
+
+  @Get("/file")
+  @Header("Content-Type", "application/octet-stream")
+  @Header("Content-Disposition", 'attachment; filename="README.md"')
+  async file() {
+    const input = await Deno.open("README.md", { read: true });
+    return input.readable;
+  }
+
+  @Get("/file2")
+  async file2(@Res() res: Response) {
+    const input = await Deno.open("README.md", { read: true });
+    res.headers.set("Content-Type", "application/octet-stream");
+    res.headers.set("Content-Disposition", 'attachment; filename="README.md"');
+    return input.readable;
   }
 }
