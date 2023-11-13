@@ -21,6 +21,7 @@
     "dev:log": "deno task --cwd=example/log dev",
     "dev:upload": "deno run -A --watch example/upload/main.ts",
     "dev:provider": "deno run -A --watch example/provider/main.ts",
+    "dev:stream": "deno run -A example/stream/main.ts",
     "cli": "deno task --cwd=cli install",
     "pm2": "pm2 start --name deno_nest example/main.ts --interpreter='deno' --interpreter-args='run --allow-net --allow-env --allow-write --allow-read --unstable'",
     "test": "DENO_ENV=test deno test --allow-env --allow-net --allow-write --allow-read --parallel --ignore=example --coverage=cov_profile",
