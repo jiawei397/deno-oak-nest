@@ -17,16 +17,11 @@ export interface StaticOptions {
   /**
    * The root directory from which to serve static assets.
    */
-  baseDir?: string;
+  baseDir: string;
   /**
    * Creates a virtual path prefix
    */
   prefix?: string;
-
-  // path?: string;
-  // rewriteRequestPath?: (path: string) => string;
-
-  // index?: string;
 }
 
 export type FactoryCreateOptions = {

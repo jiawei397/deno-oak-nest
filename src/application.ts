@@ -194,7 +194,9 @@ export class Application {
    * @example
    * app.useStaticAssets('public')
    */
-  useStaticAssets(path: string, options: StaticOptions = {}) {
+  useStaticAssets(path: string, options?: {
+    prefix?: string;
+  }) {
     this.staticOptions = {
       baseDir: path,
       ...options,
