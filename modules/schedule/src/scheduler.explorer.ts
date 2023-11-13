@@ -49,7 +49,7 @@ export class ScheduleExplorer {
           } catch (err) {
             console.error("ScheduleTimeoutError", err);
           } finally {
-            schedulerRegistry.timeCaches.delete(timeKey);
+            schedulerRegistry.clearTimeoutByKey(timeKey);
           }
         }, delay);
         schedulerRegistry.registerTime(timeKey, jobName);
