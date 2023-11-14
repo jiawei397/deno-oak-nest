@@ -6,6 +6,9 @@ import { AsyncModule } from "./asyncModule/async.module.ts";
 import { LoggingInterceptor } from "./interceptor/log.interceptor.ts";
 import { UserModule } from "./user/user.module.ts";
 
+// import { AuthGuard } from "./guards/auth.guard.ts";
+// import { RoleService } from "./user/services/role.service.ts";
+
 @Module({
   imports: [
     // ScheduleModule.forRoot(),
@@ -22,6 +25,7 @@ import { UserModule } from "./user/user.module.ts";
     //   useClass: LoggingInterceptor,
     //   // useValue: new LoggingInterceptor(),
     // },
+    // RoleService,
   ],
 })
 export class AppModule {}

@@ -1,10 +1,11 @@
-import { Cache, Inject, Injectable } from "@nest";
+import { assert, Cache, Inject, Injectable } from "@nest";
 import { delay } from "../../deps.ts";
 
 @Injectable()
 export class RoleService {
   constructor(@Inject("CONNECTION") private readonly connection: string) {
-    // assert(connection === "connected", 'connection is not "connected"');
+    console.count("RoleService");
+    assert(this.connection === "connected", 'connection is not "connected"');
   }
 
   @Cache(10000)
