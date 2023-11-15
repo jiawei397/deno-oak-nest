@@ -1558,13 +1558,27 @@ export function createCommonTests(
       const port = await getPort();
       await app.listen({ port });
 
-      const res = await fetch(`http://localhost:${port}/`, {
-        method: "POST",
-        body: data,
-      });
-      assertEquals(res.status, 200);
-      assertEquals(await res.text(), "hello world");
-      assertEquals(callStack, [1]);
+      {
+        const res = await fetch(`http://localhost:${port}/`, {
+          method: "POST",
+          body: data,
+        });
+        assertEquals(res.status, 200);
+        assertEquals(await res.text(), "hello world");
+        assertEquals(callStack, [1]);
+
+        callStack.length = 0;
+      }
+
+      {
+        const res = await fetch(`http://localhost:${port}/`, {
+          method: "POST",
+          body: JSON.stringify({ a: 1 }),
+        });
+        assertEquals(res.status, 500);
+        await res.body?.cancel();
+        assertEquals(callStack, []);
+      }
 
       callStack.length = 0;
       await app.close();
