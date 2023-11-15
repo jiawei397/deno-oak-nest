@@ -1272,10 +1272,10 @@ export function createCommonTests(
 
       app.get("/", async (req, res) => {
         callStack.push(1);
-        assertEquals(await req.cookies(), { a: "1", b: "2" });
-        assertEquals(await req.cookie("a"), "1");
-        assertEquals(await req.cookie("b"), "2");
-        assert(!await req.cookie("c"));
+        assertEquals(await req.cookies.getAll(), { a: "1", b: "2" });
+        assertEquals(await req.cookies.get("a"), "1");
+        assertEquals(await req.cookies.get("b"), "2");
+        assert(!await req.cookies.get("c"));
 
         const headers = req.headers();
         assertEquals(headers.get("a"), "3");

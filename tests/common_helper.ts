@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any require-await
 import {
   type Context,
+  ICookies,
   type Request,
   type Response,
 } from "../src/interfaces/context.interface.ts";
@@ -40,7 +41,32 @@ export type MockOptions = {
 };
 
 export const createMockContext = (options: MockOptions): Context => {
+  const currentCookies = options.cookies || {};
+  const mockCookies: ICookies = {
+    async getAll(): Promise<Record<string, string>> {
+      return currentCookies;
+    },
+    async get(name: string): Promise<string | false | undefined> {
+      return currentCookies[name];
+    },
+    async has(name: string): Promise<boolean> {
+      return currentCookies[name] !== undefined;
+    },
+    async set(name: string, value: string | null): Promise<ICookies> {
+      if (value === null) {
+        delete currentCookies[name];
+        return this;
+      }
+      currentCookies[name] = value;
+      return this;
+    },
+    delete(name: string): ICookies {
+      delete currentCookies[name];
+      return this;
+    },
+  };
   const mockRequest: Request = {
+    cookies: mockCookies,
     startTime: Date.now(),
     method: options.method,
     url: options.path.startsWith("http")
@@ -52,12 +78,6 @@ export const createMockContext = (options: MockOptions): Context => {
     },
     headers() {
       return new Headers(options.reqHeaders);
-    },
-    async cookies() {
-      return { ...options.cookies };
-    },
-    async cookie(name: string) {
-      return options.cookies?.[name];
     },
     params() {
       return { ...options.params };
@@ -93,6 +113,7 @@ export const createMockContext = (options: MockOptions): Context => {
     },
   };
   const mockResponse: Response = {
+    cookies: mockCookies,
     body: options.body?.value,
     headers: new Headers(options.body?.headers),
     status: 200,
@@ -107,6 +128,7 @@ export const createMockContext = (options: MockOptions): Context => {
   return {
     request: mockRequest,
     response: mockResponse,
+    cookies: mockCookies,
   };
 };
 

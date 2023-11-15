@@ -18,6 +18,7 @@ import { Controller, Get, Post } from "./controller.ts";
 import {
   Body,
   ControllerName,
+  Cookie,
   Cookies,
   Form,
   getTransNumOrBoolOrArray,
@@ -32,6 +33,7 @@ import {
   Res,
   transAndValidateByCls,
 } from "./method.ts";
+import { type ICookies } from "../interfaces/context.interface.ts";
 
 Deno.test("getTransNumOrBoolOrArray", () => {
   assertEquals(getTransNumOrBoolOrArray(Number, "1"), 1);
@@ -528,16 +530,16 @@ Deno.test("Cookies", async () => {
   class A {
     @Get("a")
     async a(
-      @Cookies() cookie: any,
-      @Cookies("a") a: string,
-      @Cookies("c") c: string,
-      @Cookies("c") c1: number,
-      @Cookies("d") d: string,
+      @Cookies() cookies: ICookies,
+      @Cookie("a") a: string,
+      @Cookie("c") c: string,
+      @Cookie("c") c1: number,
+      @Cookie("d") d: string,
     ) {
       callStack.push(1);
-      assertEquals(cookie, mockedCookie);
-      assertEquals(await cookie["a"], "b");
-      assertEquals(await cookie["c"], "4");
+      assertEquals(await cookies.getAll(), mockedCookie);
+      assertEquals(await cookies.get("a"), "b");
+      assertEquals(await cookies.get("c"), "4");
       assertEquals(a, "b");
       assertEquals(c, "4");
       assertEquals(c1, 4);

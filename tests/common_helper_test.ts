@@ -91,9 +91,9 @@ Deno.test("createMockContext - returns expected context object", async (t) => {
       ctx.request.header("User-Agent"),
       options.reqHeaders?.["User-Agent"],
     );
-    assertEquals(await ctx.request.cookies(), options.cookies);
+    assertEquals(await ctx.request.cookies.getAll(), options.cookies);
     assertEquals(
-      await ctx.request.cookie("sessionId"),
+      await ctx.request.cookies.get("sessionId"),
       options.cookies?.sessionId,
     );
     assertEquals(ctx.request.params(), options.params);
