@@ -10,8 +10,8 @@ Add import map in `deno.json`:
 ```json
 {
   "imports": {
-    "@nest": "https://deno.land/x/deno_nest@v3.7.1/mod.ts",
-    "@nest/hono": "https://deno.land/x/deno_nest@v3.7.1/modules/hono/mod.ts",
+    "@nest": "https://deno.land/x/deno_nest@v3.8.0/mod.ts",
+    "@nest/hono": "https://deno.land/x/deno_nest@v3.8.0/modules/hono/mod.ts",
     "hono/": "https://deno.land/x/hono@v3.9.1/",
     "std/": "https://deno.land/std@0.202.0/",
     "date_log": "https://deno.land/x/date_log@v1.1.1/mod.ts"
