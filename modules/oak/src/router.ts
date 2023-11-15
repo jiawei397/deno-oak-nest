@@ -9,6 +9,7 @@ import {
   IRouter,
   MiddlewareHandler,
   NotFoundHandler,
+  RouterOptions,
 } from "../../../src/interfaces/route.interface.ts";
 import { joinPath } from "../../../src/utils.ts";
 import {
@@ -24,9 +25,11 @@ export class OakRouter implements IRouter {
   private router: OakOriginRouter;
   private app: OakApplication;
 
-  constructor(options?: { strict?: boolean }) {
+  constructor(options?: RouterOptions) {
     this.router = new OakOriginRouter({ strict: options?.strict ?? false });
-    this.app = new OakApplication();
+    this.app = new OakApplication({
+      keys: options?.keys,
+    });
   }
 
   useOriginMiddleware(fn: OakMiddleware, path?: string) {

@@ -1,6 +1,7 @@
 import { Status } from "../../../deps.ts";
 import { Context } from "../../../src/interfaces/context.interface.ts";
 import { OakContext } from "../deps.ts";
+import { NestCookies } from "./cookies.ts";
 import { NestRequest } from "./request.ts";
 import { NestResponse } from "./response.ts";
 
@@ -9,10 +10,12 @@ const nestContextKey = "NEST_CONTEXT";
 export class NestContext implements Context {
   request: NestRequest;
   response: NestResponse;
+  cookies: NestCookies;
 
   constructor(context: OakContext) {
-    this.request = new NestRequest(context);
-    this.response = new NestResponse(context);
+    this.cookies = new NestCookies(context);
+    this.request = new NestRequest(context, this.cookies);
+    this.response = new NestResponse(context, this.cookies);
   }
 
   static getInstance(context: OakContext, status?: Status): NestContext {

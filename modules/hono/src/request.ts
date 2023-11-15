@@ -1,6 +1,6 @@
-// deno-lint-ignore-file require-await
 import { Request } from "../../../src/interfaces/context.interface.ts";
-import { getCookie, HonoContext, HonoRequest } from "../deps.ts";
+import { HonoContext, HonoRequest } from "../deps.ts";
+import { NestCookies } from "./cookies.ts";
 
 export class NestRequest implements Request {
   originalRequest: HonoRequest;
@@ -9,7 +9,7 @@ export class NestRequest implements Request {
   // deno-lint-ignore no-explicit-any
   states: Record<string, any> = {};
 
-  constructor(context: HonoContext) {
+  constructor(context: HonoContext, public cookies: NestCookies) {
     this.originalContext = context;
     this.originalRequest = context.req;
   }
@@ -51,17 +51,6 @@ export class NestRequest implements Request {
    */
   header(name: string): string | undefined {
     return this.originalRequest.header(name);
-  }
-
-  async cookies(): Promise<Record<string, string>> {
-    return getCookie(this.originalContext);
-  }
-
-  /**
-   * Get a specific cookie value
-   */
-  async cookie(name: string): Promise<string | undefined> {
-    return getCookie(this.originalContext, name);
   }
 
   /**

@@ -2,6 +2,7 @@
 import { BodyParamValidationException } from "../../../src/exceptions.ts";
 import { Request } from "../../../src/interfaces/context.interface.ts";
 import { OakContext, OakRequest } from "../deps.ts";
+import { NestCookies } from "./cookies.ts";
 
 export class NestRequest implements Request {
   originalRequest: OakRequest;
@@ -9,10 +10,12 @@ export class NestRequest implements Request {
   startTime = Date.now();
 
   states: Record<string, any> = {};
+  cookies: NestCookies;
 
-  constructor(context: OakContext) {
+  constructor(context: OakContext, cookies: NestCookies) {
     this.originalContext = context;
     this.originalRequest = context.request;
+    this.cookies = cookies;
   }
 
   getOriginalRequest<T>(): T {
@@ -98,21 +101,6 @@ export class NestRequest implements Request {
    */
   header(name: string): string | undefined {
     return this.originalRequest.headers.get(name) || undefined;
-  }
-
-  async cookies(): Promise<Record<string, string>> {
-    const cookies: Record<string, string> = {};
-    for await (const [name, value] of this.originalContext.cookies.entries()) {
-      cookies[name] = value;
-    }
-    return cookies;
-  }
-
-  /**
-   * Get a specific cookie value
-   */
-  cookie(name: string): Promise<string | undefined> {
-    return this.originalContext.cookies.get(name);
   }
 
   /**

@@ -1,16 +1,19 @@
 import { Status, STATUS_TEXT } from "../../../deps.ts";
 import { Response } from "../../../src/interfaces/context.interface.ts";
 import { type OakContext } from "../deps.ts";
+import { NestCookies } from "./cookies.ts";
 
 export class NestResponse implements Response {
   body: string | object | number | boolean | null;
   headers: Headers = new Headers();
   status: Status;
   originalContext: OakContext;
+  cookies: NestCookies;
 
-  constructor(context: OakContext) {
+  constructor(context: OakContext, cookies: NestCookies) {
     this.originalContext = context;
     this.status = Status.OK;
+    this.cookies = cookies;
   }
 
   get statusText() {

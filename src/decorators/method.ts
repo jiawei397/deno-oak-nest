@@ -14,7 +14,7 @@ import type {
   ArrayItemType,
   FormDataOptions,
 } from "../interfaces/param.interface.ts";
-import { Context } from "../interfaces/context.interface.ts";
+import { Context, CookiesGetOptions } from "../interfaces/context.interface.ts";
 import { parseSearchParams } from "../utils.ts";
 import { BodyParamValidationException } from "../exceptions.ts";
 
@@ -260,19 +260,25 @@ export const Host = createParamDecorator((ctx: Context) => {
   return ctx.request.header("host");
 });
 
-export function Cookies(key?: string) {
+export function Cookie(key: string, options?: CookiesGetOptions) {
   return createParamDecoratorWithLowLevel(
     async (ctx: Context, target: any, methodName: string, index: number) => {
-      if (key) {
-        const val = await ctx.request.cookie(key);
-        return parseNumOrBool(val, target, methodName, index);
+      const val = await ctx.cookies.get(key, options);
+      if (!val) {
+        return val;
       }
-      return ctx.request.cookies();
+      return parseNumOrBool(val, target, methodName, index);
     },
   );
 }
 
-export const Cookie = Cookies;
+export function Cookies() {
+  return createParamDecoratorWithLowLevel(
+    (ctx: Context) => {
+      return ctx.cookies;
+    },
+  );
+}
 
 // export function Session() {
 //   return createParamDecoratorWithLowLevel((ctx: IContext) => {

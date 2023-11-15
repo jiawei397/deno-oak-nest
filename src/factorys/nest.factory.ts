@@ -11,7 +11,7 @@ export class NestFactory {
     Router: IRouterConstructor,
     options?: FactoryCreateOptions,
   ) {
-    const router = new Router({ strict: options?.strict });
+    const router = new Router(options);
     const app = new Application(router);
     if (options?.logger !== undefined) {
       app.useLogger(options.logger);

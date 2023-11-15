@@ -6,6 +6,7 @@ import {
   IRouter,
   MiddlewareHandler,
   NotFoundHandler,
+  RouterOptions,
 } from "../../../src/interfaces/route.interface.ts";
 import {
   Hono,
@@ -18,9 +19,11 @@ import { NestContext } from "./context.ts";
 
 export class HonoRouter implements IRouter {
   private app: Hono;
+  keys?: string[];
 
-  constructor(options?: { strict?: boolean }) {
+  constructor(options?: RouterOptions) {
     this.app = new Hono({ strict: options?.strict ?? false });
+    this.keys = options?.keys;
   }
 
   private handle(fn: MiddlewareHandler) {

@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any ban-types ban-types no-explicit-any
 import { LoggerService } from "./log.interface.ts";
+import { RouterOptions } from "./route.interface.ts";
 
 export interface InjectedData {
   fn: Function;
@@ -24,8 +25,7 @@ export interface StaticOptions {
   prefix?: string;
 }
 
-export type FactoryCreateOptions = {
-  strict?: boolean;
+export type FactoryCreateOptions = RouterOptions & {
   cache?: Map<any, any>;
   logger?: LoggerService | false;
 };

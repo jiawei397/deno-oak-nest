@@ -4,13 +4,12 @@ import { Status } from "../../deps.ts";
 export interface Request {
   startTime: number;
   getOriginalRequest<T>(): T;
+  cookies: ICookies;
   get url(): string;
   get method(): string;
   states: Record<string, any>;
   headers(): Headers;
   header(name: string): string | undefined;
-  cookies(): Promise<Record<string, string>>;
-  cookie(name: string): Promise<string | undefined>;
   params(): Record<string, string>;
   param(name: string): string | undefined;
   /**
@@ -27,7 +26,67 @@ export interface Request {
   // form(): Promise<URLSearchParams>;
 }
 
+export interface CookiesGetOptions {
+  /**
+   * When signed is true, you must provide a secret string `signedSecret` to be used for signing in `Hono` or set `keys` when app is created.
+   * Such as:
+   * ```ts
+   * const app = await NestFactory.create(AppModule, Router, {
+   *   keys: ["nest"],
+   * });
+   * ```
+   */
+  signed?: boolean;
+  /**
+   * A secret key that can be used to verify the integrity of the cookie's value.
+   *
+   * @warning It only work in `Hono` when `signed` is `true`. Its order is before than `keys` when app is created.
+   *
+   * But will be ignored in `oak` because it only support set by `NestFactory.create` keys options.
+   */
+  signedSecret?: string;
+}
+
+export interface CookiesSetDeleteOptions extends CookiesGetOptions {
+  domain?: string;
+  expires?: Date;
+  httpOnly?: boolean;
+  /**
+   * For use in situations where requests are presented to Deno as "insecure"
+   * but are otherwise secure and so secure cookies can be treated as secure.
+   * @warning This only work in `oak`, not work in `Hono`.
+   */
+  ignoreInsecure?: boolean;
+  maxAge?: number;
+  // overwrite?: boolean;
+  path?: string;
+  secure?: boolean;
+  sameSite?: "Strict" | "Lax" | "None";
+}
+
+export interface ICookies {
+  getAll(): Promise<Record<string, string>>;
+  /**
+   * Get a specific cookie value
+   * @returns When signed is true, if the signature is invalid, it will return `false`. Otherwise, it will return the cookie value.
+   */
+  get(
+    name: string,
+    options?: CookiesGetOptions,
+  ): Promise<string | false | undefined>;
+
+  has(name: string, options?: CookiesGetOptions): Promise<boolean>;
+
+  set(
+    name: string,
+    value: string | null,
+    options?: CookiesSetDeleteOptions,
+  ): Promise<ICookies>;
+  delete(name: string, options?: CookiesSetDeleteOptions): ICookies;
+}
+
 export interface Response {
+  cookies: ICookies;
   getOriginalContext<T>(): T;
   body: string | object | number | boolean | null;
   headers: Headers;
@@ -46,4 +105,5 @@ export interface Response {
 export interface Context {
   request: Request;
   response: Response;
+  cookies: ICookies;
 }

@@ -1,6 +1,7 @@
 import { Status, STATUS_TEXT } from "../../../deps.ts";
 import { Response } from "../../../src/interfaces/context.interface.ts";
 import { type HonoContext, HonoResponse } from "../deps.ts";
+import { NestCookies } from "./cookies.ts";
 
 export class NestResponse implements Response {
   body: string | object | number | boolean | null;
@@ -8,7 +9,7 @@ export class NestResponse implements Response {
   status: Status;
   originalContext: HonoContext;
 
-  constructor(context: HonoContext) {
+  constructor(context: HonoContext, public cookies: NestCookies) {
     this.originalContext = context;
     this.status = Status.OK;
   }

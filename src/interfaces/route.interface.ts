@@ -55,4 +55,8 @@ export interface RouterOptions {
   /** Determines if routes are matched strictly, where the trailing `/` is not
    * optional.  Defaults to `false`. */
   strict?: boolean;
+
+  /** An initial set of keys to be used for signing
+   * cookies produced by the application. */
+  keys?: string[];
 }
