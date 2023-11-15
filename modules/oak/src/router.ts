@@ -112,7 +112,7 @@ export class OakRouter implements IRouter {
     });
   }
 
-  private serveStaticAssets(
+  private async serveStaticAssets(
     context: OakContext,
     options: StaticOptions,
   ) {
@@ -127,28 +127,17 @@ export class OakRouter implements IRouter {
     }
     const prefixWithoutSlash = joinPath(prefix || "/");
     const root = resolve(Deno.cwd(), baseDir!);
-    const index = "index.html"; // TODO: options.index;
-    if (!prefixWithoutSlash && (pathname === "/" || pathname === "")) {
-      return send(context, "", {
+    const index = "index.html"; // TODO: options.index, `Hono` not support this option, so it`s not a good idea to support it.
+    const formattedPath = pathname.replace(prefixWithoutSlash, "");
+    try {
+      await send(context, formattedPath, {
         ...otherOptions,
         index,
         root,
       });
+    } catch {
+      context.response.status = 404;
     }
-
-    const formattedPath = pathname.replace(prefixWithoutSlash, "");
-    const sendFile = async () => {
-      try {
-        await send(context, formattedPath, {
-          ...otherOptions,
-          index,
-          root,
-        });
-      } catch {
-        context.response.status = 404;
-      }
-    };
-    return sendFile();
   }
 
   /**
