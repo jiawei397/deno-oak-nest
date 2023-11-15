@@ -41,12 +41,15 @@ export function createCommonTests(
   type: "oak" | "hono",
 ) {
   let firstPort = 8000;
-  async function createApp(module: ModuleType, apiPrefix?: string) {
-    const app = await NestFactory.create(module, Router);
+  async function createApp(module: ModuleType, options?: {
+    apiPrefix?: string;
+    keys?: string[];
+  }) {
+    const app = await NestFactory.create(module, Router, options);
     const port = await getPort();
     firstPort++;
-    if (apiPrefix) {
-      app.setGlobalPrefix(apiPrefix);
+    if (options?.apiPrefix) {
+      app.setGlobalPrefix(options.apiPrefix);
     }
     await app.listen({ port });
     const baseUrl = `http://localhost:${port}`;
@@ -79,7 +82,9 @@ export function createCommonTests(
         @Module({})
         class AppModule {}
 
-        const { app, baseUrl } = await createApp(AppModule, "/api");
+        const { app, baseUrl } = await createApp(AppModule, {
+          apiPrefix: "/api",
+        });
 
         app.get("/", (_, res) => {
           callStack.push(1);
@@ -118,7 +123,9 @@ export function createCommonTests(
         })
         class AppModule {}
 
-        const { app, baseUrl } = await createApp(AppModule, "/api");
+        const { app, baseUrl } = await createApp(AppModule, {
+          apiPrefix: "/api",
+        });
 
         const res = await fetch(`${baseUrl}/api`);
         assertEquals(res.status, 200);
@@ -143,7 +150,9 @@ export function createCommonTests(
           })
           class AppModule {}
 
-          const { app, baseUrl } = await createApp(AppModule, "/api");
+          const { app, baseUrl } = await createApp(AppModule, {
+            apiPrefix: "/api",
+          });
 
           const res = await fetch(`${baseUrl}/api`);
           assertEquals(res.status, 200);
@@ -166,7 +175,9 @@ export function createCommonTests(
         })
         class AppModule {}
 
-        const { app, baseUrl } = await createApp(AppModule, "/api");
+        const { app, baseUrl } = await createApp(AppModule, {
+          apiPrefix: "/api",
+        });
 
         const res = await fetch(`${baseUrl}/api`);
         assertEquals(res.status, 500);
@@ -1182,6 +1193,7 @@ export function createCommonTests(
   Deno.test(`${type} request methods`, {
     sanitizeOps: false,
     sanitizeResources: false,
+    // only: true,
   }, async (t) => {
     @Module({})
     class AppModule {}
@@ -1266,7 +1278,42 @@ export function createCommonTests(
       await app.close();
     });
 
-    await t.step("cookies and headers", async () => {
+    await t.step("req headers", async () => {
+      const callStack: number[] = [];
+      const { app, baseUrl } = await createApp(AppModule);
+
+      app.get("/", (req, res) => {
+        callStack.push(1);
+
+        const headers = req.headers();
+        assertEquals(headers.get("a"), "3");
+        assertEquals(headers.get("b"), "4");
+        assertEquals(req.header("a"), "3");
+        assertEquals(req.header("b"), "4");
+        assert(!req.header("c"));
+
+        res.headers.set("a", "3");
+        res.headers.set("c", "4");
+        res.body = "hello world";
+      });
+
+      const res = await fetch(`${baseUrl}`, {
+        headers: {
+          a: "3",
+          b: "4",
+        },
+      });
+      assertEquals(res.status, 200);
+      assertEquals(await res.text(), "hello world");
+      assertEquals(res.headers.get("a"), "3");
+      assertEquals(res.headers.get("c"), "4");
+
+      assertEquals(callStack, [1]);
+      callStack.length = 0;
+      await app.close();
+    });
+
+    await t.step("cookies response", async () => {
       const callStack: number[] = [];
       const { app, baseUrl } = await createApp(AppModule);
 
@@ -1277,27 +1324,175 @@ export function createCommonTests(
         assertEquals(await req.cookies.get("b"), "2");
         assert(!await req.cookies.get("c"));
 
-        const headers = req.headers();
-        assertEquals(headers.get("a"), "3");
-        assertEquals(headers.get("b"), "4");
-        assertEquals(req.header("a"), "3");
-        assertEquals(req.header("b"), "4");
-        assert(!req.header("c"));
-
+        // `Hono` and `oak` default set cookie may not be same
+        await res.cookies.set("a", "3", { httpOnly: true, path: "/" });
+        await res.cookies.set("c", "4", { httpOnly: true, path: "/" });
+        res.cookies.delete("b", { path: "/" });
+        res.cookies.delete("d", { path: "/", sameSite: "Lax" });
+        await res.cookies.set("e", "5");
         res.body = "hello world";
       });
 
       const res = await fetch(`${baseUrl}`, {
         headers: {
           cookie: "a=1;b=2",
-          a: "3",
-          b: "4",
         },
       });
       assertEquals(res.status, 200);
       assertEquals(await res.text(), "hello world");
+      // `Hono` response cookie is uppercase, `oak` is lowercase
+      const cookies = res.headers.getSetCookie().map((str) =>
+        str.toLowerCase()
+      );
+      console.log(cookies);
+      assertEquals(cookies[0], "a=3; path=/; httponly");
+      assertEquals(cookies[1], "c=4; path=/; httponly");
+      assertEquals(cookies[2].startsWith("b=;"), true);
+      assertEquals(cookies[3].startsWith("d=;"), true);
+      assertEquals(cookies[4].startsWith("e=5"), true);
 
       assertEquals(callStack, [1]);
+      callStack.length = 0;
+      await app.close();
+    });
+
+    await t.step("cookies signed response", async () => {
+      const callStack: number[] = [];
+      const oakCookies = [
+        "a=3; path=/; httponly",
+        "a.sig=W14zAyPtyOtA6FsKT4gSgAn6uE8dDU4RimHHCXqcPHE; path=/; httponly",
+        "c=4; path=/; samesite=lax; httponly",
+        "c.sig=-_8zuY1JogbWcTrAoyHyjxBiuYWHMtftVvRgR4V99co; path=/; samesite=lax; httponly",
+      ];
+      const honoCookies = [
+        "a=3.iKQ7G4720ukAeXNj2iH9K7KTUdMCI4n%2Bsx%2BxNAqU2uI%3D; Path=/; HttpOnly",
+        "c=4.xNz2wML6%2FCO9XuGNsVmcm3gBr62QIRT7qNVMR3p29Qo%3D; Path=/; HttpOnly; SameSite=Lax",
+      ];
+      const { app, baseUrl } = await createApp(AppModule, {
+        keys: ["secret"],
+      });
+
+      app.get("/", async (req, res) => {
+        callStack.push(1);
+        // `Hono` and `oak` default set cookie may not be same
+        await res.cookies.set("a", "3", {
+          httpOnly: true,
+          path: "/",
+          signed: true,
+        });
+        await res.cookies.set("c", "4", {
+          httpOnly: true,
+          path: "/",
+          signed: true,
+          signedSecret: "secret2",
+          sameSite: "Lax",
+        });
+        res.body = "hello world";
+      });
+
+      app.get("/cookie", async (req, res) => {
+        callStack.push(2);
+        // `Hono` and `oak` default set cookie may not be same
+        if (type === "hono") {
+          assertEquals(
+            await res.cookies.get("a"),
+            decodeURIComponent(honoCookies[0].split(";")[0].split("=")[1]),
+          );
+          assertEquals(await res.cookies.get("a", { signed: true }), "3");
+          assertEquals(
+            await res.cookies.get("a", { signed: true, signedSecret: "abcd" }),
+            false,
+          );
+          assertEquals(
+            await res.cookies.get("c"),
+            decodeURIComponent(honoCookies[1].split(";")[0].split("=")[1]),
+          );
+          assertEquals(await res.cookies.get("c", { signed: true }), false);
+          assertEquals(
+            await res.cookies.get("c", {
+              signed: true,
+              signedSecret: "secret2",
+            }),
+            "4",
+          );
+
+          assertEquals(await res.cookies.get("b"), undefined);
+          assertEquals(await res.cookies.get("b", { signed: true }), undefined);
+        } else if (type === "oak") {
+          assertEquals(await res.cookies.get("a"), "3");
+          assertEquals(await res.cookies.get("a", { signed: true }), "3");
+          assertEquals(
+            await res.cookies.get("a", { signed: true, signedSecret: "abcd" }), // this is different from hono, it will not check signedSecret
+            "3",
+          );
+          assertEquals(await res.cookies.get("b"), undefined);
+          assertEquals(await res.cookies.get("b", { signed: true }), undefined);
+          assertEquals(await res.cookies.get("c"), "4");
+          assertEquals(await res.cookies.get("c", { signed: true }), "4");
+          assertEquals(
+            await res.cookies.get("c", {
+              signed: true,
+              signedSecret: "secret2",
+            }),
+            "4",
+          );
+        }
+        res.body = "hello world";
+      });
+
+      app.get("/lostOakSig", async (req, res) => {
+        // only test oak
+        callStack.push(3);
+        assertEquals(await res.cookies.get("a"), "3");
+        assertEquals(await res.cookies.get("a", { signed: true }), false);
+        assertEquals(await res.cookies.get("b"), undefined);
+        assertEquals(await res.cookies.get("b", { signed: true }), undefined);
+        res.body = "hello world";
+      });
+
+      {
+        const res = await fetch(`${baseUrl}`);
+        assertEquals(res.status, 200);
+        assertEquals(await res.text(), "hello world");
+        if (type === "oak") {
+          assertEquals(res.headers.getSetCookie(), oakCookies);
+        } else if (type === "hono") {
+          assertEquals(
+            res.headers.getSetCookie(),
+            honoCookies,
+          );
+        }
+        assertEquals(callStack, [1]);
+        callStack.length = 0;
+      }
+
+      { // test with cookie
+        const res = await fetch(`${baseUrl}/cookie`, {
+          headers: {
+            "cookie": type === "hono"
+              ? honoCookies.join(";")
+              : oakCookies.join(";"),
+          },
+        });
+        assertEquals(callStack, [2]);
+        assertEquals(res.status, 200);
+        assertEquals(await res.text(), "hello world");
+
+        callStack.length = 0;
+      }
+
+      if (type === "oak") { // test lost oak sig
+        const res = await fetch(`${baseUrl}/lostOakSig`, {
+          headers: {
+            "cookie": oakCookies[0],
+          },
+        });
+        assertEquals(callStack, [3]);
+        assertEquals(res.status, 200);
+        assertEquals(await res.text(), "hello world");
+        callStack.length = 0;
+      }
+
       callStack.length = 0;
       await app.close();
     });
