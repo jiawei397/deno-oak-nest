@@ -25,11 +25,13 @@ export class NestCookies implements ICookies {
     return getCookie(this.context);
   }
 
-  private getSignedSecret(options?: CookiesGetOptions): string | undefined {
+  private getSignedSecret(
+    options?: CookiesGetOptions,
+  ): string | false | undefined {
     const { signed, signedSecret } = options ?? {};
     if (signed && !signedSecret) {
       if (!this.keys) {
-        throw new Error("Signed cookies require a secret to be provided");
+        return false;
       }
       return this.keys.join("_");
     }
@@ -42,6 +44,10 @@ export class NestCookies implements ICookies {
     options?: CookiesGetOptions,
   ): Promise<string | false | undefined> {
     const secret = this.getSignedSecret(options);
+    if (secret === false) {
+      console.warn("Signed cookies require a secret to be provided");
+      return false;
+    }
     if (secret) {
       return getSignedCookie(this.context, secret, name);
     } else {
@@ -55,7 +61,10 @@ export class NestCookies implements ICookies {
     options?: CookiesSetDeleteOptions,
   ): Promise<ICookies> {
     const secret = this.getSignedSecret(options);
-    if (secret) {
+    if (secret !== undefined) {
+      if (secret === false) {
+        throw new Error("Signed cookies require a secret to be provided");
+      }
       await setSignedCookie(this.context, name, value, secret, options);
     } else {
       setCookie(this.context, name, value, options);

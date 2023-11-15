@@ -48,8 +48,10 @@ export class NestCookies implements ICookies {
     options?: CookiesSetDeleteOptions,
   ): Promise<ICookies> {
     const { signed = false, signedSecret, sameSite } = options ?? {};
-    if (signed && signedSecret) {
-      console.warn("signedSecret will be ignored");
+    if (signed) {
+      if (signedSecret) {
+        console.warn("signedSecret will be ignored");
+      }
     }
     const site = sameSite
       ? sameSite.toLowerCase() as "strict" | "lax" | "none"

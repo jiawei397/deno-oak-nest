@@ -27,6 +27,7 @@ import { findUnusedPort } from "./common_helper.ts";
 import { assert, assertEquals, assertNotStrictEquals } from "./test_deps.ts";
 import { BadRequestException } from "../src/exceptions.ts";
 import { APP_GUARD, APP_INTERCEPTOR } from "../src/constants.ts";
+import { assertRejects } from "std/assert/assert_rejects.ts";
 
 let firstPort = 8000;
 
@@ -1323,6 +1324,9 @@ export function createCommonTests(
         assertEquals(await req.cookies.get("a"), "1");
         assertEquals(await req.cookies.get("b"), "2");
         assert(!await req.cookies.get("c"));
+        assertEquals(await req.cookies.get("a", { signed: true }), false);
+        assertEquals(await req.cookies.has("a"), true);
+        assertEquals(await req.cookies.has("c"), false);
 
         // `Hono` and `oak` default set cookie may not be same
         await res.cookies.set("a", "3", { httpOnly: true, path: "/" });
@@ -1330,6 +1334,9 @@ export function createCommonTests(
         res.cookies.delete("b", { path: "/" });
         res.cookies.delete("d", { path: "/", sameSite: "Lax" });
         await res.cookies.set("e", "5");
+        await assertRejects(() => {
+          return res.cookies.set("f", "6", { signed: true });
+        }, "cookies may be error when no keys and signedKey set");
         res.body = "hello world";
       });
 
@@ -1344,7 +1351,6 @@ export function createCommonTests(
       const cookies = res.headers.getSetCookie().map((str) =>
         str.toLowerCase()
       );
-      console.log(cookies);
       assertEquals(cookies[0], "a=3; path=/; httponly");
       assertEquals(cookies[1], "c=4; path=/; httponly");
       assertEquals(cookies[2].startsWith("b=;"), true);
@@ -1392,13 +1398,22 @@ export function createCommonTests(
 
       app.get("/cookie", async (req, res) => {
         callStack.push(2);
+        assertEquals(await res.cookies.get("b"), undefined);
+        assertEquals(await res.cookies.get("b", { signed: true }), undefined);
+        assertEquals(await res.cookies.get("a", { signed: true }), "3");
+        assertEquals(
+          await res.cookies.get("c", {
+            signed: true,
+            signedSecret: "secret2",
+          }),
+          "4",
+        );
         // `Hono` and `oak` default set cookie may not be same
         if (type === "hono") {
           assertEquals(
             await res.cookies.get("a"),
             decodeURIComponent(honoCookies[0].split(";")[0].split("=")[1]),
           );
-          assertEquals(await res.cookies.get("a", { signed: true }), "3");
           assertEquals(
             await res.cookies.get("a", { signed: true, signedSecret: "abcd" }),
             false,
@@ -1408,34 +1423,14 @@ export function createCommonTests(
             decodeURIComponent(honoCookies[1].split(";")[0].split("=")[1]),
           );
           assertEquals(await res.cookies.get("c", { signed: true }), false);
-          assertEquals(
-            await res.cookies.get("c", {
-              signed: true,
-              signedSecret: "secret2",
-            }),
-            "4",
-          );
-
-          assertEquals(await res.cookies.get("b"), undefined);
-          assertEquals(await res.cookies.get("b", { signed: true }), undefined);
         } else if (type === "oak") {
           assertEquals(await res.cookies.get("a"), "3");
-          assertEquals(await res.cookies.get("a", { signed: true }), "3");
           assertEquals(
             await res.cookies.get("a", { signed: true, signedSecret: "abcd" }), // this is different from hono, it will not check signedSecret
             "3",
           );
-          assertEquals(await res.cookies.get("b"), undefined);
-          assertEquals(await res.cookies.get("b", { signed: true }), undefined);
           assertEquals(await res.cookies.get("c"), "4");
           assertEquals(await res.cookies.get("c", { signed: true }), "4");
-          assertEquals(
-            await res.cookies.get("c", {
-              signed: true,
-              signedSecret: "secret2",
-            }),
-            "4",
-          );
         }
         res.body = "hello world";
       });
