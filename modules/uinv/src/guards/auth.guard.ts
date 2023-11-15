@@ -119,9 +119,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
     }
 
     async findToken(context: Context) {
-      let token: string | null | undefined = await context.request.cookie(
-        tokenField,
-      );
+      let token = await context.cookies.get(tokenField);
       if (isDebug && !token) { //开发时，找不到再到headers中找
         token = context.request.header(tokenField);
       }

@@ -27,7 +27,7 @@ export interface CookiesSetDeleteOptions {
    * A secret key that can be used to verify the integrity of the cookie's value.
    *
    * @warning It only work in `Hono`, and is required when `signed` is `true`.
-   * But not work in `oak` because it must set by ``.
+   * But not work in `oak` because it must set by `NestFactory.create` keys.
    */
   signedSecret?: string;
 }
