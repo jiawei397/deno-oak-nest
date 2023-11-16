@@ -102,6 +102,34 @@ Deno.test("self key", async () => {
   clearCacheTimeout();
 });
 
+Deno.test("method params is object, key will use params", async () => {
+  const callStacks: number[] = [];
+
+  interface User {
+    a: number;
+  }
+
+  class A {
+    @Cache(200)
+    method(id: number, _obj: User) {
+      callStacks.push(1);
+      return id;
+    }
+  }
+
+  const a = new A();
+  const p1 = a.method(1, { a: 1 });
+  const p2 = a.method(1, { a: 1 });
+  assert(p1 === p2);
+  assertEquals(callStacks, [1]);
+
+  const p3 = a.method(1, { a: 2 });
+  assert(p3 === p2);
+  assertEquals(callStacks, [1, 1]);
+
+  clearCacheTimeout();
+});
+
 Deno.test("clearCache", async () => {
   const callStacks: number[] = [];
   const cacheKey = "test";
