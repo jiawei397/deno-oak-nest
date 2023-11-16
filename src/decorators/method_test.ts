@@ -788,7 +788,7 @@ Deno.test("form", async (t) => {
       assertEquals(form.e, 1);
       assert(typeof form.e === "number");
 
-      assertEquals(form.f, ["f1", "f2"]);
+      assertEquals(form.f, ["f1", "f2", "f3"]);
     }
   }
 
@@ -803,6 +803,7 @@ Deno.test("form", async (t) => {
     mockedData.set("e", "1");
     mockedData.append("f", "f1");
     mockedData.append("f", "f2");
+    mockedData.append("f", "f3");
 
     const ctx = createMockContext({
       path: "/a",
