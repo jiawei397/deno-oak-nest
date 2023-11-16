@@ -34,7 +34,6 @@ export class NestCookies implements ICookies {
     });
     if (signed && val === undefined) {
       const has = await this.has(name, { signed: false });
-      console.log("name", name, "has", has);
       if (has) {
         return false;
       }

@@ -1,7 +1,28 @@
-import { Controller, Cookie, Cookies, Get, type ICookies } from "@nest";
+import {
+  Controller,
+  Cookie,
+  Cookies,
+  Get,
+  type ICookies,
+  Req,
+  type Request,
+  Res,
+  type Response,
+} from "@nest";
 
 @Controller("")
 export class AppController {
+  @Get("/req")
+  req(@Req() req: Request) {
+    return req.cookies.getAll();
+  }
+
+  @Get("/res")
+  res(@Res() res: Response) {
+    res.cookies.set("DENO_COOKIE_TEST", "abc", { path: "/" });
+    return "ok";
+  }
+
   @Get("/")
   getAllCookies(@Cookies() cookies: ICookies) {
     return cookies.getAll();
@@ -19,7 +40,7 @@ export class AppController {
   @Get("/test")
   getTest(@Cookie("DENO_COOKIE_TEST") test: string) {
     return {
-      DENO_COOKIE_USER_ID: test,
+      DENO_COOKIE_TEST: test,
     };
   }
 
@@ -30,7 +51,7 @@ export class AppController {
     }) test: string,
   ) {
     return {
-      DENO_COOKIE_USER_ID: test, // to be `false`
+      DENO_COOKIE_TEST: test, // to be `false`
     };
   }
 
@@ -56,7 +77,7 @@ export class AppController {
     @Cookie("DENO_COOKIE_USER_ID", {
       signed: true,
       signedSecret: "abcdefg",
-    }) id: string,
+    }) id: number,
   ) {
     return {
       DENO_COOKIE_USER_ID: id,

@@ -40,9 +40,9 @@
     },
     {
       "request": "launch",
-      "name": "scheduler",
+      "name": "cookie",
       "type": "node",
-      "program": "${workspaceFolder}/modules/scheduler/example/main.ts",
+      "program": "${workspaceFolder}/example/cookie/src/main.ts",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "deno",
       "runtimeArgs": [
@@ -50,7 +50,24 @@
         "--inspect-brk",
         "-A",
         "--config",
-        "modules/scheduler/deno.json",
+        "example/cookie/deno.json",
+        "--unstable"
+      ],
+      "attachSimplePort": 9229
+    },
+    {
+      "request": "launch",
+      "name": "schedule",
+      "type": "node",
+      "program": "${workspaceFolder}/modules/schedule/example/main.ts",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--inspect-brk",
+        "-A",
+        "--config",
+        "modules/schedule/deno.json",
         "--unstable"
       ],
       "attachSimplePort": 9229

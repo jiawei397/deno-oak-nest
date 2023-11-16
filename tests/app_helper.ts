@@ -1374,6 +1374,10 @@ export function createCommonTests(
         "a=3.iKQ7G4720ukAeXNj2iH9K7KTUdMCI4n%2Bsx%2BxNAqU2uI%3D; Path=/; HttpOnly",
         "c=4.xNz2wML6%2FCO9XuGNsVmcm3gBr62QIRT7qNVMR3p29Qo%3D; Path=/; HttpOnly; SameSite=Lax",
       ];
+      const honoCookies2 = [
+        "a=3.add.iKQ7G4720ukAeXNj2iH9K7KTUdMCI4n%2Bsx%2BxNAqU2uI%3D; Path=/; HttpOnly",
+        "c=4.xNz2wML6%2FCO9XuGNsVmcm3gBr62QIRT7qNVMR3p29Qo%3D.add; Path=/; HttpOnly; SameSite=Lax",
+      ];
       const { app, baseUrl } = await createApp(AppModule, {
         keys: ["secret"],
       });
@@ -1445,6 +1449,26 @@ export function createCommonTests(
         res.body = "hello world";
       });
 
+      app.get("/notRightHono", async (req, res) => {
+        // only test hono
+        callStack.push(4);
+        assertEquals(
+          await res.cookies.get("a"),
+          decodeURIComponent(honoCookies2[0].split(";")[0].split("=")[1]),
+        );
+        assertEquals(await res.cookies.get("a", { signed: true }), false);
+        assertEquals(
+          await res.cookies.get("b"),
+          undefined,
+        );
+        assertEquals(
+          await res.cookies.get("c"),
+          decodeURIComponent(honoCookies2[1].split(";")[0].split("=")[1]),
+        );
+        assertEquals(await res.cookies.get("c", { signed: true }), false);
+        res.body = "hello world";
+      });
+
       {
         const res = await fetch(`${baseUrl}`);
         assertEquals(res.status, 200);
@@ -1473,6 +1497,18 @@ export function createCommonTests(
         assertEquals(res.status, 200);
         assertEquals(await res.text(), "hello world");
 
+        callStack.length = 0;
+      }
+
+      if (type === "hono") { // test not right hono sig
+        const res = await fetch(`${baseUrl}/notRightHono`, {
+          headers: {
+            "cookie": honoCookies2.join(";"),
+          },
+        });
+        assertEquals(callStack, [4]);
+        assertEquals(res.status, 200);
+        assertEquals(await res.text(), "hello world");
         callStack.length = 0;
       }
 

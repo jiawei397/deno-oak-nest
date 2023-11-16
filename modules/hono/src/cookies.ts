@@ -15,8 +15,8 @@ import {
 export class NestCookies implements ICookies {
   constructor(public context: HonoContext, public keys?: string[]) {}
 
-  async has(name: string): Promise<boolean> {
-    const val = await this.get(name);
+  async has(name: string, options?: CookiesGetOptions): Promise<boolean> {
+    const val = await this.get(name, options);
     return val !== undefined;
   }
 
@@ -38,7 +38,6 @@ export class NestCookies implements ICookies {
     return signedSecret;
   }
 
-  // deno-lint-ignore require-await
   async get(
     name: string,
     options?: CookiesGetOptions,
@@ -49,7 +48,13 @@ export class NestCookies implements ICookies {
       return false;
     }
     if (secret) {
-      return getSignedCookie(this.context, secret, name);
+      const val = await getSignedCookie(this.context, secret, name);
+      if (val === undefined) {
+        if (await this.has(name, { signed: false })) {
+          return false;
+        }
+      }
+      return val;
     } else {
       return getCookie(this.context, name);
     }
