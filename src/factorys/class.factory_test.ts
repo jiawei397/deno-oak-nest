@@ -306,6 +306,10 @@ Deno.test("initProvider", async (t) => {
 
 Deno.test("mapRoute without controller route", async () => {
   class A {
+    get a() {
+      return "abcd";
+    }
+
     @Get("/a")
     method1() {}
 
