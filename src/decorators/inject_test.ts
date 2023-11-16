@@ -99,4 +99,12 @@ Deno.test("isSingleton", async (t) => {
 
     assertEquals(isSingleton(A), true);
   });
+
+  await t.step("singleton not function", () => {
+    class A {}
+
+    const a = new A();
+    // deno-lint-ignore no-explicit-any
+    assertEquals(isSingleton(a as any), true);
+  });
 });
