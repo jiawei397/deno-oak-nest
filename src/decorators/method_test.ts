@@ -48,6 +48,7 @@ Deno.test("getTransNumOrBoolOrArray", () => {
     true,
     false,
   ]);
+  assertEquals(getTransNumOrBoolOrArray(Array, ["1", "2"], "number"), [1, 2]);
 });
 
 Deno.test("body", async (t) => {
