@@ -1,5 +1,10 @@
 // deno-lint-ignore-file require-await
-import { assert, assertEquals, delay } from "../../tests/test_deps.ts";
+import {
+  assert,
+  assertEquals,
+  assertRejects,
+  delay,
+} from "../../tests/test_deps.ts";
 import { Cache, clearCacheTimeout } from "./cache.ts";
 
 Deno.test("cache hit", async () => {
@@ -22,6 +27,8 @@ Deno.test("cache hit", async () => {
   }
 
   const a = new A();
+
+  Deno.env.set("DEBUG", "true");
 
   const p1 = a.method(1);
   const p2 = a.method(1);
@@ -48,6 +55,8 @@ Deno.test("cache hit", async () => {
   await p6;
 
   clearCacheTimeout();
+
+  Deno.env.delete("DEBUG");
 });
 
 Deno.test("self key", async () => {
@@ -125,6 +134,63 @@ Deno.test("method params is object, key will use params", async () => {
 
   const p3 = a.method(1, { a: 2 });
   assert(p3 === p2);
+  assertEquals(callStacks, [1, 1]);
+
+  clearCacheTimeout();
+});
+
+Deno.test("method throw error, will not cache", async () => {
+  const callStacks: number[] = [];
+
+  class A {
+    @Cache(200)
+    method(id: number) {
+      callStacks.push(1);
+      if (id === 1) {
+        throw new Error("id is 1");
+      }
+      return id;
+    }
+  }
+
+  const a = new A();
+  let error;
+  try {
+    a.method(1);
+  } catch (e) {
+    error = e;
+  }
+  assert(error);
+  assertEquals(callStacks, [1]);
+
+  error = null;
+  try {
+    a.method(1);
+  } catch (err) {
+    error = err;
+  }
+  assert(error);
+  assertEquals(callStacks, [1, 1]);
+
+  clearCacheTimeout();
+});
+
+Deno.test("method reject promise, will not cache", async () => {
+  const callStacks: number[] = [];
+
+  class A {
+    @Cache(200)
+    method(_id: number) {
+      callStacks.push(1);
+      return Promise.reject("error");
+    }
+  }
+
+  const a = new A();
+  await assertRejects(() => a.method(1));
+  assertEquals(callStacks, [1]);
+
+  await assertRejects(() => a.method(1));
   assertEquals(callStacks, [1, 1]);
 
   clearCacheTimeout();
