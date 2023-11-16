@@ -138,6 +138,26 @@ Deno.test("body", async (t) => {
     callStack.length = 0;
   });
 
+  await t.step("post json number with json header", async () => {
+    const ctx = createMockContext({
+      path: "/a",
+      method: "POST",
+      reqHeaders: {
+        "content-type": "application/json",
+      },
+      body: {
+        type: "json",
+        value: Promise.resolve(1),
+      },
+    });
+
+    await mockCallMethod(app, ctx);
+    assertEquals(ctx.response.status, 400);
+
+    assertEquals(callStack, []);
+    callStack.length = 0;
+  });
+
   await t.step("post normal body", async () => {
     const ctx = createMockContext({
       path: "/b",
