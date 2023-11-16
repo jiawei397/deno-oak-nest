@@ -9,15 +9,31 @@ import { Get, Post } from "../decorators/controller.ts";
 import { Module } from "../decorators/module.ts";
 import { NestFactory } from "./nest.factory.ts";
 
-Deno.test("NestFactory", async () => {
+Deno.test("NestFactory", async (t) => {
   @Module({
     imports: [],
     controllers: [],
   })
   class AppModule {}
 
-  const app = await NestFactory.create(AppModule, MockRouter);
-  assert(app instanceof Application);
+  await t.step("create", async () => {
+    const app = await NestFactory.create(AppModule, MockRouter);
+    assert(app instanceof Application);
+  });
+
+  await t.step("create with logger false", async () => {
+    const app = await NestFactory.create(AppModule, MockRouter, {
+      logger: false,
+    });
+    assert(app instanceof Application);
+  });
+
+  await t.step("create with logger console", async () => {
+    const app = await NestFactory.create(AppModule, MockRouter, {
+      logger: console,
+    });
+    assert(app instanceof Application);
+  });
 });
 
 Deno.test("add with prefix", async (t) => {
