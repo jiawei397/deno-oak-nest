@@ -1,4 +1,4 @@
-import { getInjectData, Inject, Injectable } from "./inject.ts";
+import { getInjectData, Inject, Injectable, isSingleton } from "./inject.ts";
 import { assert, assertEquals } from "../../tests/test_deps.ts";
 import { factory } from "../factorys/class.factory.ts";
 import { Scope } from "../interfaces/scope-options.interface.ts";
@@ -75,4 +75,28 @@ Deno.test("Injectable singleton false", async (t) => {
   });
 
   factory.globalCaches.clear();
+});
+
+Deno.test("isSingleton", async (t) => {
+  await t.step("not singleton", () => {
+    @Injectable({
+      scope: Scope.TRANSIENT,
+    })
+    class A {}
+
+    assertEquals(isSingleton(A), false);
+  });
+
+  await t.step("singleton", () => {
+    @Injectable()
+    class A {}
+
+    assertEquals(isSingleton(A), true);
+  });
+
+  await t.step("singleton default", () => {
+    class A {}
+
+    assertEquals(isSingleton(A), true);
+  });
 });
