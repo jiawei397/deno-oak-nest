@@ -13,6 +13,7 @@
     "dev:postgres": "deno task --cwd=modules/postgres dev",
     "dev:redis": "deno task --cwd=modules/redis dev",
     "dev:schedule": "deno task --cwd=modules/schedule dev",
+    "dev:alias": "deno task --cwd=example/alias start",
     "dev:auth": "deno task --cwd=example/auth start",
     "dev:cookie": "deno task --cwd=example/cookie start",
     "dev:lifecycle": "deno run -A example/lifecycle/main.ts",
