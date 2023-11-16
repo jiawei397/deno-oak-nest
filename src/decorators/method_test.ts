@@ -2,6 +2,7 @@
 import {
   assert,
   assertEquals,
+  assertRejects,
   IsEnum,
   IsNumber,
   IsOptional,
@@ -34,6 +35,7 @@ import {
   transAndValidateByCls,
 } from "./method.ts";
 import { type ICookies } from "../interfaces/context.interface.ts";
+import { Reflect } from "../../deps.ts";
 
 Deno.test("getTransNumOrBoolOrArray", () => {
   assertEquals(getTransNumOrBoolOrArray(Number, "1"), 1);
@@ -670,6 +672,30 @@ Deno.test("transAndValidateByCls", async (t) => {
     } catch (error) {
       assertEquals(error.message, "status must be a valid enum value");
     }
+  });
+
+  await t.step("trans with other metas", async () => {
+    function Property2(): PropertyDecorator {
+      return (target: any, propertyKey: any) => {
+        const designType = Reflect.getMetadata(
+          "design:type",
+          target,
+          propertyKey,
+        );
+        Reflect.defineMetadata(propertyKey, designType, target);
+      };
+    }
+
+    class A {
+      @IsNumber()
+      @Property2()
+      age: number;
+    }
+    await assertRejects(() =>
+      transAndValidateByCls(A, {
+        age: "12",
+        status: "1",
+      }), "age is not trans");
   });
 });
 
