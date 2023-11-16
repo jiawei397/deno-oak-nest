@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import {
   assert,
   assertEquals,
@@ -67,9 +68,20 @@ Deno.test("factory.create with providers", async () => {
     }
   }
 
+  const scope = {
+    name: "bcd",
+  };
+  const obj = {
+    fn: function (...args: string[]) {
+      return (this as unknown as typeof scope).name + args.join("");
+    },
+    scope,
+    params: ["a", "e"],
+  };
+
   @Injectable()
   class B {
-    constructor(public readonly c: C) {
+    constructor(public readonly c: C, @Inject(obj) public readonly d: string) {
       callStack.push(2);
     }
   }
@@ -88,6 +100,7 @@ Deno.test("factory.create with providers", async () => {
   assertNotEquals(a.b.c, a.c);
   assertEquals(a.c.getParent(), A, "C should record the parent class A");
   assertEquals(a.b.c.getParent(), B, "C should record the parent class B");
+  assertEquals(a.b.d, "bcdae", "should call the fn");
 
   assertEquals(callStack, [1, 1, 2]);
 
@@ -99,6 +112,13 @@ Deno.test("factory.create with providers", async () => {
   assertEquals(callStack, [1, 1, 2]);
 
   factory.globalCaches.clear();
+});
+
+Deno.test("factory getInstance", async () => {
+  await assertRejects(() => factory.getInstance(null as any));
+  await assertRejects(() => factory.getInstance(undefined as any));
+  await assertRejects(() => factory.getInstance("a" as any));
+  await assertRejects(() => factory.getInstance(true as any));
 });
 
 Deno.test("initProvider", async (t) => {
@@ -322,6 +342,8 @@ Deno.test("mapRoute without controller route", async () => {
 Deno.test("mapRoute with controller route", async () => {
   @Controller("/user")
   class A {
+    name = "abcd";
+
     @Get("/a")
     method1() {}
 
