@@ -92,3 +92,59 @@ export class LocalStore implements ICacheStore {
     return localStorage.length;
   }
 }
+
+export class KVStore implements ICacheStore {
+  kv: Deno.Kv;
+
+  static KEY = "cacheStore";
+
+  async init(key?: string) {
+    if (key) {
+      KVStore.KEY = key;
+    }
+    this.kv = await Deno.openKv();
+  }
+
+  async get<T = any>(key: string): Promise<T | undefined> {
+    const res = await this.kv.get([KVStore.KEY, key]);
+    return (res.value ?? undefined) as T;
+  }
+
+  async set(key: string, value: any, options?: { ttl: number } | undefined) {
+    await this.kv.set([KVStore.KEY, key], value, {
+      expireIn: options?.ttl ? options.ttl * 1000 : undefined,
+    });
+  }
+
+  async delete(key: string) {
+    await this.kv.delete([KVStore.KEY, key]);
+  }
+
+  async clear() {
+    const entries = this.kv.list({ prefix: [KVStore.KEY] });
+    for await (const entry of entries) {
+      await this.kv.delete(entry.key);
+    }
+  }
+
+  async has(key: string): Promise<boolean> {
+    const res = await this.kv.get([KVStore.KEY, key]);
+    return res.value !== null;
+  }
+
+  /**
+   * @warning It is not a good idea to use this method in production.
+   */
+  async size(): Promise<number> {
+    const entries = this.kv.list({ prefix: [KVStore.KEY] });
+    let count = 0;
+    for await (const _entry of entries) {
+      count++;
+    }
+    return count;
+  }
+
+  close() {
+    this.kv.close();
+  }
+}

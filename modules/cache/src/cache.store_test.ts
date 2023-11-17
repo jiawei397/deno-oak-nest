@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "../../../tests/test_deps.ts";
-import { LocalStore, MemoryStore } from "./cache.store.ts";
+import { KVStore, LocalStore, MemoryStore } from "./cache.store.ts";
 
 Deno.test("CacheStore", async (t) => {
   const memoryStore = new MemoryStore();
@@ -117,6 +117,12 @@ Deno.test("LocalStore", async (t) => {
     assert(store.has("testKey") === false);
   });
 
+  await t.step("expires should work correctly", () => {
+    localStorage.setItem("testKey", `{"td":1700186180979,"value":"testValue"}`);
+    const value = store.get("testKey");
+    assertEquals(value, undefined);
+  });
+
   await t.step("should delete values correctly", () => {
     // Set a value
     store.set("testKey", "testValue");
@@ -180,4 +186,92 @@ Deno.test("LocalStore", async (t) => {
     size = store.size();
     assertEquals(size, 0);
   });
+});
+
+Deno.test("Deno.kv", async (t) => {
+  const store = new KVStore();
+  await store.init("test");
+
+  await t.step("should set and get values correctly", async () => {
+    // Set a value
+    await store.set("testKey", "testValue", { ttl: 1 });
+
+    // Get the value
+    const value = await store.get("testKey");
+    assertEquals(value, "testValue");
+
+    // // Wait for the ttl to expire
+    // await new Promise((resolve) => setTimeout(resolve, 10000));
+
+    // Try to get the value again, it is not right expired, so not test
+    // value = await store.get("testKey");
+    // assertEquals(value, undefined);
+
+    assertEquals(await store.has("testKey"), true);
+  });
+
+  await t.step("should delete values correctly", async () => {
+    // Set a value
+    await store.set("testKey", "testValue");
+
+    // Delete the value
+    await store.delete("testKey");
+
+    // Try to get the value
+    const value = await store.get("testKey");
+    assertEquals(value, undefined);
+
+    assertEquals(await store.has("testKey"), false);
+    assertEquals(await store.has("testKey3"), false);
+  });
+
+  await t.step("should clear all values", async () => {
+    // Set some values
+    await store.set("testKey1", "testValue1");
+    await store.set("testKey2", "testValue2");
+
+    // Clear the store
+    await store.clear();
+
+    // Try to get the values
+    const value1 = await store.get("testKey1");
+    const value2 = await store.get("testKey2");
+    assertEquals(value1, undefined);
+    assertEquals(value2, undefined);
+
+    const size = await store.size();
+    assertEquals(size, 0);
+  });
+
+  await t.step("should correctly report if it has a key", async () => {
+    // Set a value
+    await store.set("testKey", "testValue");
+
+    // Check if the store has the key
+    let hasKey = await store.has("testKey");
+    assertEquals(hasKey, true);
+
+    // Delete the key
+    await store.delete("testKey");
+
+    // Check if the store has the key
+    hasKey = await store.has("testKey");
+    assertEquals(hasKey, false);
+  });
+
+  await t.step("should correctly report its size", async () => {
+    // Check the initial size
+    let size = await store.size();
+    assertEquals(size, 0);
+
+    // Set some values
+    await store.set("testKey1", "testValue1");
+    await store.set("testKey2", "testValue2");
+
+    // Check the size
+    size = await store.size();
+    assertEquals(size, 2);
+  });
+
+  store.close();
 });

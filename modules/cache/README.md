@@ -65,4 +65,4 @@ More can see the example dir.
 ## TODO
 
 - [x] store
-- [ ] Deno.kv
+- [x] Deno.kv
