@@ -8,6 +8,7 @@ import {
 } from "./interfaces/module.interface.ts";
 import {
   collectModuleDeps,
+  getChildModuleArr,
   isClassProvider,
   isExistingProvider,
   isFactoryProvider,
@@ -166,6 +167,17 @@ Deno.test("collect module order", async (t) => {
     }
   }
 
+  await t.step("collectModuleDeps not module", async () => {
+    class AppModule {}
+    const moduleMap = new Map<ModuleType, CollectResult>();
+    const res = await collectModuleDeps(
+      AppModule,
+      moduleMap,
+    );
+    assertEquals(res, null);
+    assertEquals(moduleMap.size, 0);
+  });
+
   await t.step("module deps", async () => {
     @Module({
       imports: [DynModule.register()],
@@ -255,4 +267,11 @@ Deno.test("collect module order", async (t) => {
       AppModule,
     ]);
   });
+});
+
+Deno.test("getChildModuleArr", () => {
+  const moduleDepsMap: Map<ModuleType, CollectResult> = new Map();
+  const module = class TestModule {};
+  const arr = getChildModuleArr(moduleDepsMap, module);
+  assertEquals(arr, []);
 });

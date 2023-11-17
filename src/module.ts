@@ -117,7 +117,7 @@ export async function collectModuleDeps(
   return moduleKey;
 }
 
-function getChildModuleArr(
+export function getChildModuleArr(
   moduleDepsMap: Map<ModuleType, CollectResult>,
   module: ModuleType,
 ): ModuleType[] {
