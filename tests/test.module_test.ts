@@ -8,6 +8,7 @@ import { Context } from "../src/interfaces/context.interface.ts";
 import { UseGuards } from "../src/guard.ts";
 import { ExceptionFilter } from "../src/interfaces/filter.interface.ts";
 import { Catch, UseFilters } from "../src/filter.ts";
+import { Scope } from "../src/interfaces/scope-options.interface.ts";
 
 @Injectable()
 class B {
@@ -30,22 +31,67 @@ class A {
   }
 }
 
-Deno.test("test origin only with controller", async () => {
+Deno.test("test origin only with controller", async (t) => {
   const moduleRef = await createTestingModule({
     controllers: [A],
     // providers: [B],
   })
     .compile();
-  const a = await moduleRef.get(A);
-  assert(a instanceof A);
-  const b = await moduleRef.get(B);
-  assert(b instanceof B);
-  assert(a["b"] === b);
-  assertEquals(a.find(), "b");
 
-  class C {}
-  const c = await moduleRef.get(C);
-  assertEquals(c, null);
+  await t.step("test origin", async () => {
+    const a = await moduleRef.get(A);
+    assert(a instanceof A);
+    const b = await moduleRef.get(B);
+    assert(b instanceof B);
+    assert(a["b"] === b);
+    assertEquals(a.find(), "b");
+
+    class C {}
+    const c = await moduleRef.get(C);
+    assertEquals(c, null);
+  });
+
+  await t.step("test parent", async () => {
+    const parent = class {};
+    const a = await moduleRef.get(A, parent);
+    assertEquals(a, null);
+  });
+
+  await t.step("test parent with provider", async () => {
+    @Injectable({
+      scope: Scope.TRANSIENT,
+    })
+    class LoggerService {}
+
+    @Controller("")
+    class A {
+      constructor(private loggerService: LoggerService) {}
+    }
+
+    @Controller("")
+    class B {
+      constructor(private loggerService: LoggerService) {}
+    }
+
+    const moduleRef = await createTestingModule({
+      controllers: [A, B],
+    }).compile();
+    const loggerService = await moduleRef.get(LoggerService, A);
+    const loggerService2 = await moduleRef.get(LoggerService, B);
+
+    assert(loggerService);
+    assert(loggerService2);
+    assert(loggerService instanceof LoggerService);
+    assert(loggerService2 instanceof LoggerService);
+    assert(loggerService !== loggerService2, "service is not singleton");
+
+    const a = await moduleRef.get(A);
+    const b = await moduleRef.get(B);
+    assert(a instanceof A);
+    assert(b instanceof B);
+    assert(a["loggerService"] === loggerService);
+    assert(b["loggerService"] === loggerService2);
+  });
 });
 
 Deno.test("test origin with providers", async () => {
