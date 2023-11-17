@@ -146,20 +146,22 @@ export class TestModule {
           arr[index] = value;
         }
       }
-      for (const key in instance) {
-        if (typeof instance[key] !== "function") {
-          continue;
-        }
-        const arr = Reflect.getMetadata(key, instance[key]) as
-          | Array<T | Constructor<T>>
-          | null;
-        if (arr) {
-          const index = arr.findIndex((item) => item === filter);
-          if (index !== -1) {
-            arr[index] = value;
+      Object.getOwnPropertyNames(Object.getPrototypeOf(instance)).forEach(
+        (name) => {
+          if (typeof instance[name] !== "function" || name === "constructor") {
+            return;
           }
-        }
-      }
+          const arr = Reflect.getMetadata(key, instance[name]) as
+            | Array<T | Constructor<T>>
+            | null;
+          if (arr) {
+            const index = arr.findIndex((item) => item === filter);
+            if (index !== -1) {
+              arr[index] = value;
+            }
+          }
+        },
+      );
     }));
     return this;
   }

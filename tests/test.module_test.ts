@@ -118,23 +118,34 @@ Deno.test("test origin with providers", async () => {
   assertEquals(a.find(), "b");
 });
 
-Deno.test("overrideProvider", async () => {
+Deno.test("overrideProvider", async (t) => {
   const d = {
     findAll() {
       return "d";
     },
   };
-  const moduleRef = await createTestingModule({
-    controllers: [A],
-  }).overrideProvider(B, d)
-    .compile();
-  const a = await moduleRef.get(A);
-  assert(a instanceof A);
-  const b = await moduleRef.get(B);
-  assert(!(b instanceof B));
-  assert(a["b"] === b);
-  assert(b === d);
-  assertEquals(a.find(), "d");
+  await t.step("override provider success", async () => {
+    const moduleRef = await createTestingModule({
+      controllers: [A],
+    }).overrideProvider(B, d)
+      .compile();
+    const a = await moduleRef.get(A);
+    assert(a instanceof A);
+    const b = await moduleRef.get(B);
+    assert(!(b instanceof B));
+    assert(a["b"] === b);
+    assert(b === d);
+    assertEquals(a.find(), "d");
+  });
+
+  await t.step("provider alone", async () => {
+    const moduleRef = await createTestingModule({
+      providers: [B],
+    }).overrideProvider(B, d)
+      .compile();
+    const b = await moduleRef.get(B);
+    assert(b === d);
+  });
 });
 
 Deno.test("change provider self", async () => {
@@ -250,6 +261,21 @@ Deno.test("override guard", async (t) => {
 
     await app.close();
   });
+
+  await t.step("override guard with no controllers", async () => {
+    @Injectable()
+    class AuthGuard2 implements CanActivate {
+      async canActivate(_context: Context): Promise<boolean> {
+        return false;
+      }
+    }
+    await createTestingModule({}).overrideGuard(
+      AuthGuard,
+      AuthGuard2,
+    ).compile();
+
+    assert(true, "no error");
+  });
 });
 
 Deno.test("override exception filter", async (t) => {
@@ -292,6 +318,43 @@ Deno.test("override exception filter", async (t) => {
   });
 
   await t.step("override exception filter", async () => {
+    @Catch()
+    class AnyExceptionFilter2 implements ExceptionFilter {
+      catch(_exception: any, context: Context) {
+        callStack.push(3);
+        context.response.status = 405;
+      }
+    }
+
+    const moduleRef = await createTestingModule({
+      controllers: [TestController],
+    }).overrideFilter(AnyExceptionFilter, AnyExceptionFilter2).compile();
+
+    const app = moduleRef.createNestApplication();
+    await app.init();
+
+    const res = await fetch(`http://localhost:${app.port}/`);
+    assertEquals(res.status, 405);
+    res.body?.cancel();
+
+    assertEquals(callStack, [2, 3]);
+
+    callStack.length = 0;
+
+    await app.close();
+  });
+
+  await t.step("override exception filter in method", async () => {
+    @Controller("")
+    class TestController {
+      @UseFilters(AnyExceptionFilter)
+      @Get("/")
+      a() {
+        callStack.push(2);
+        throw new Error("test");
+      }
+    }
+
     @Catch()
     class AnyExceptionFilter2 implements ExceptionFilter {
       catch(_exception: any, context: Context) {
