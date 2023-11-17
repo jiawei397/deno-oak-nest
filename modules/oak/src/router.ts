@@ -23,7 +23,7 @@ import { NestContext } from "./context.ts";
 
 export class OakRouter implements IRouter {
   private router: OakOriginRouter;
-  private app: OakApplication;
+  protected app: OakApplication;
 
   constructor(options?: RouterOptions) {
     this.router = new OakOriginRouter({ strict: options?.strict ?? false });
