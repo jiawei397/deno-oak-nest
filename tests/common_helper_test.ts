@@ -91,11 +91,6 @@ Deno.test("createMockContext - returns expected context object", async (t) => {
       ctx.request.header("User-Agent"),
       options.reqHeaders?.["User-Agent"],
     );
-    assertEquals(await ctx.request.cookies.getAll(), options.cookies);
-    assertEquals(
-      await ctx.request.cookies.get("sessionId"),
-      options.cookies?.sessionId,
-    );
     assertEquals(ctx.request.params(), options.params);
     assertEquals(ctx.request.param("id"), options.params?.id);
     assertEquals(ctx.request.queries("search"), [options.queries?.search]);
@@ -109,6 +104,43 @@ Deno.test("createMockContext - returns expected context object", async (t) => {
     assertEquals(ctx.response.status, 200);
     assertEquals(ctx.response.statusText, "");
     assertEquals(ctx.response.render(), undefined);
+  });
+
+  await t.step("cookies", async () => {
+    assertEquals(ctx.request.cookies, ctx.response.cookies);
+    assertEquals(ctx.cookies, ctx.request.cookies);
+
+    const cookies = ctx.cookies;
+
+    assertEquals(await cookies.getAll(), options.cookies);
+    assertEquals(
+      await cookies.get("sessionId"),
+      options.cookies!.sessionId,
+    );
+    assertEquals(
+      await cookies.get("sessionId2"),
+      undefined,
+    );
+    assertEquals(await cookies.has("sessionId"), true);
+    await cookies.set("sessionId", "456");
+    assertEquals(
+      await cookies.get("sessionId"),
+      "456",
+    );
+    await cookies.set("sessionId", null);
+    assertEquals(
+      await cookies.get("sessionId"),
+      undefined,
+    );
+
+    await cookies.set("sessionId", "456");
+    cookies.delete("sessionId");
+    assertEquals(
+      await cookies.get("sessionId"),
+      undefined,
+    );
+
+    assertEquals(await cookies.has("sessionId"), false);
   });
 
   await t.step("context - not implement", async () => {
