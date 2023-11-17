@@ -13,6 +13,8 @@ import { NestInterceptor } from "../src/interfaces/interceptor.interface.ts";
 import { Next } from "../src/interfaces/middleware.interface.ts";
 import { APP_INTERCEPTOR } from "../src/constants.ts";
 import { UseInterceptors } from "../src/interceptor.ts";
+import { DynamicModule } from "../src/interfaces/module.interface.ts";
+import { Module } from "../src/decorators/module.ts";
 
 @Injectable()
 class B {
@@ -95,6 +97,10 @@ Deno.test("test origin only with controller", async (t) => {
     assert(b instanceof B);
     assert(a["loggerService"] === loggerService);
     assert(b["loggerService"] === loggerService2);
+
+    const c = class {};
+    const res = await moduleRef.get(c, A);
+    assertEquals(res, null);
   });
 });
 
@@ -375,6 +381,93 @@ Deno.test("override interceptor", async (t) => {
     assertEquals(callStack, [4, 3, 5]);
 
     callStack.length = 0;
+
+    await app.close();
+  });
+});
+
+Deno.test("override module", async (t) => {
+  const callStack: number[] = [];
+
+  @Controller("a")
+  class A {
+    @Get("/")
+    a() {
+      callStack.push(1);
+      return "a";
+    }
+  }
+
+  @Module({
+    controllers: [A],
+  })
+  class ModuleA {}
+
+  await t.step("test origin", async () => {
+    const moduleRef = await createTestingModule({
+      imports: [ModuleA],
+    }).compile();
+    const app = moduleRef.createNestApplication();
+    await app.init();
+
+    const res = await fetch(`http://localhost:${app.port}/a`);
+    assertEquals(res.status, 200);
+    assertEquals(await res.text(), "a");
+    assertEquals(callStack, [1]);
+
+    callStack.length = 0;
+
+    await app.close();
+  });
+
+  await t.step("override module", async () => {
+    @Controller("b")
+    class B {
+      @Get("/")
+      b() {
+        callStack.push(2);
+        return "b";
+      }
+    }
+
+    @Module({
+      controllers: [B],
+    })
+    class ModuleB {}
+
+    const moduleRef = await createTestingModule({
+      imports: [ModuleA],
+    }).overrideModule(ModuleA, ModuleB).compile();
+
+    const app = moduleRef.createNestApplication();
+    await app.init();
+
+    const res = await fetch(`http://localhost:${app.port}/b`);
+    assertEquals(res.status, 200);
+    assertEquals(await res.text(), "b");
+    assertEquals(callStack, [2]);
+
+    callStack.length = 0;
+
+    await app.close();
+  });
+
+  await t.step("override module with no imports", async () => {
+    @Module({})
+    class ModuleB {}
+
+    const moduleRef = await createTestingModule({}).overrideModule(
+      ModuleA,
+      ModuleB,
+    ).compile();
+
+    const app = moduleRef.createNestApplication();
+    await app.init();
+
+    const res = await fetch(`http://localhost:${app.port}/a`);
+    assertEquals(res.status, 404);
+    await res.body?.cancel();
+    assertEquals(callStack, []);
 
     await app.close();
   });
