@@ -894,3 +894,48 @@ Deno.test("response 304", async (t) => {
     assertEquals(ctx.response.body, null);
   });
 });
+
+Deno.test("enableShutdownHooks", async (t) => {
+  const app = createMockApp();
+  const originalAddSignalListener = Deno.addSignalListener;
+  const originalRemoveSignalListener = Deno.removeSignalListener;
+
+  await t.step("default signal", () => {
+    const callStacks: number[] = [];
+    Deno.addSignalListener = (signal: string, callback: () => void) => {
+      callStacks.push(1);
+      addEventListener(signal, callback);
+    };
+
+    Deno.removeSignalListener = () => {
+      callStacks.push(2);
+    };
+
+    const res = app.enableShutdownHooks();
+    assertEquals(res, app);
+    dispatchEvent(new Event("SIGINT"));
+    assertEquals(callStacks, [1, 2]);
+  });
+
+  await t.step("multiple signal", () => {
+    const callStacks: number[] = [];
+    Deno.addSignalListener = (signal: string, callback: () => void) => {
+      callStacks.push(1);
+      addEventListener(signal, callback);
+    };
+
+    Deno.removeSignalListener = () => {
+      callStacks.push(2);
+    };
+
+    const res = app.enableShutdownHooks(["SIGINT", "SIGTERM"]);
+    assertEquals(res, app);
+    dispatchEvent(new Event("SIGINT"));
+    dispatchEvent(new Event("SIGTERM"));
+    assertEquals(callStacks, [1, 1, 2]);
+  });
+
+  // reset
+  Deno.addSignalListener = originalAddSignalListener;
+  Deno.removeSignalListener = originalRemoveSignalListener;
+});
