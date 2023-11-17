@@ -166,9 +166,10 @@ export function getMethodPaths(params: MethodPathOptions) {
     methodAliasOptions,
   } = params;
 
-  const methodAlias = methodAliasOptions?.isAliasOnly
-    ? (methodAliasOptions?.alias || methodPath)
-    : methodAliasOptions?.alias;
+  let methodAlias = methodAliasOptions?.alias;
+  if (methodAliasOptions?.isAliasOnly && !methodAlias) {
+    methodAlias = methodPath;
+  }
   const originPath = methodAliasOptions?.isAliasOnly
     ? undefined
     : controllerPathWithPrefix &&

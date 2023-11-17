@@ -578,4 +578,22 @@ Deno.test("getMethodPaths", async (t) => {
     assertEquals(originPath, undefined);
     assertEquals(aliasPath, "/:id-alias");
   });
+
+  await t.step("has prefix, isAliasOnly, but no alias", () => {
+    const params: MethodPathOptions = {
+      controllerPathWithPrefix: "/api/users",
+      controllerPath: "/users",
+      controllerAliasPath: "/users-alias",
+      methodPath: "/:id",
+      methodAliasOptions: {
+        // alias: "/:id-alias",
+        isAliasOnly: true,
+      },
+    };
+
+    const { originPath, aliasPath } = getMethodPaths(params);
+
+    assertEquals(originPath, undefined);
+    assertEquals(aliasPath, "/:id");
+  });
 });
