@@ -1,5 +1,5 @@
 // deno-lint-ignore-file require-await no-unused-vars
-import { assert, assertEquals } from "../tests/test_deps.ts";
+import { assert, assertEquals, assertRejects } from "../tests/test_deps.ts";
 import {
   createMockApp,
   createMockContext,
@@ -10,6 +10,7 @@ import { Injectable } from "./decorators/inject.ts";
 import { UseGuards } from "./guard.ts";
 import {
   checkByInterceptors,
+  compose,
   getInterceptors,
   UseInterceptors,
 } from "./interceptor.ts";
@@ -468,5 +469,96 @@ Deno.test("interceptors and guard", async (t) => {
     assertEquals(callStack, [4, 1]);
 
     callStack.length = 0;
+  });
+});
+
+Deno.test("compose", async (t) => {
+  await t.step("compose should call interceptors in order", async () => {
+    const callStacks: number[] = [];
+
+    const mockInterceptors = [
+      {
+        intercept: async (context: Context, next: Next) => {
+          callStacks.push(1);
+          await next();
+          callStacks.push(4);
+        },
+      },
+      {
+        intercept: async (context: Context, next: Next) => {
+          callStacks.push(2);
+          await next();
+          callStacks.push(3);
+        },
+      },
+    ];
+
+    const next = async () => {
+      callStacks.push(0);
+    };
+    const context = createMockContext({
+      path: "/a",
+      method: "GET",
+    });
+
+    const composedInterceptors = compose(mockInterceptors);
+    await composedInterceptors(context, next);
+
+    assertEquals(callStacks, [1, 2, 0, 3, 4]);
+  });
+
+  await t.step(
+    "compose should throw error if next() called multiple times",
+    () => {
+      const mockInterceptors = [
+        {
+          intercept: async (context: Context, next: Next) => {
+            await next();
+          },
+        },
+      ];
+
+      const next = async () => {
+        await next();
+      };
+      const context = createMockContext({
+        path: "/a",
+        method: "GET",
+      });
+
+      const composedInterceptors = compose(mockInterceptors);
+      assertRejects(() => composedInterceptors(context, next));
+    },
+  );
+
+  await t.step("compose should call next() if interceptors is empty", () => {
+    const callStacks: number[] = [];
+    const mockInterceptors: NestInterceptor[] = [];
+
+    const next = async () => {
+      callStacks.push(1);
+      return;
+    };
+    const context = createMockContext({
+      path: "/a",
+      method: "GET",
+    });
+
+    const composedInterceptors = compose(mockInterceptors);
+    composedInterceptors(context, next);
+    assertEquals(callStacks, [1]);
+  });
+
+  await t.step("next is empty", () => {
+    const mockInterceptors: NestInterceptor[] = [];
+
+    const context = createMockContext({
+      path: "/a",
+      method: "GET",
+    });
+
+    const composedInterceptors = compose(mockInterceptors);
+    composedInterceptors(context);
+    assert(true, "next is empty");
   });
 });
