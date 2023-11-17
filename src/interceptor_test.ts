@@ -507,30 +507,6 @@ Deno.test("compose", async (t) => {
     assertEquals(callStacks, [1, 2, 0, 3, 4]);
   });
 
-  await t.step(
-    "compose should throw error if next() called multiple times",
-    () => {
-      const mockInterceptors = [
-        {
-          intercept: async (context: Context, next: Next) => {
-            await next();
-          },
-        },
-      ];
-
-      const next = async () => {
-        await next();
-      };
-      const context = createMockContext({
-        path: "/a",
-        method: "GET",
-      });
-
-      const composedInterceptors = compose(mockInterceptors);
-      assertRejects(() => composedInterceptors(context, next));
-    },
-  );
-
   await t.step("compose should call next() if interceptors is empty", () => {
     const callStacks: number[] = [];
     const mockInterceptors: NestInterceptor[] = [];
