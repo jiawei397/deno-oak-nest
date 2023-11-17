@@ -9,6 +9,10 @@ import { UseGuards } from "../src/guard.ts";
 import { ExceptionFilter } from "../src/interfaces/filter.interface.ts";
 import { Catch, UseFilters } from "../src/filter.ts";
 import { Scope } from "../src/interfaces/scope-options.interface.ts";
+import { NestInterceptor } from "../src/interfaces/interceptor.interface.ts";
+import { Next } from "../src/interfaces/middleware.interface.ts";
+import { APP_INTERCEPTOR } from "../src/constants.ts";
+import { UseInterceptors } from "../src/interceptor.ts";
 
 @Injectable()
 class B {
@@ -302,6 +306,73 @@ Deno.test("override exception filter", async (t) => {
     res.body?.cancel();
 
     assertEquals(callStack, [2, 3]);
+
+    callStack.length = 0;
+
+    await app.close();
+  });
+});
+
+Deno.test("override interceptor", async (t) => {
+  const callStack: number[] = [];
+
+  @Injectable()
+  class AnyInterceptor implements NestInterceptor {
+    async intercept(_ctx: Context, next: Next) {
+      callStack.push(1);
+      await next();
+      callStack.push(2);
+    }
+  }
+
+  @Controller("")
+  @UseInterceptors(AnyInterceptor)
+  class TestController {
+    @Get("/")
+    a() {
+      callStack.push(3);
+      return "a";
+    }
+  }
+
+  await t.step("test origin", async () => {
+    const moduleRef = await createTestingModule({
+      controllers: [TestController],
+    }).compile();
+    const app = moduleRef.createNestApplication();
+    await app.init();
+
+    const res = await fetch(`http://localhost:${app.port}/`);
+    assertEquals(res.status, 200);
+    assertEquals(await res.text(), "a");
+    assertEquals(callStack, [1, 3, 2]);
+
+    callStack.length = 0;
+
+    await app.close();
+  });
+
+  await t.step("override interceptor", async () => {
+    @Injectable()
+    class AnyInterceptor2 implements NestInterceptor {
+      async intercept(_ctx: Context, next: Next) {
+        callStack.push(4);
+        await next();
+        callStack.push(5);
+      }
+    }
+
+    const moduleRef = await createTestingModule({
+      controllers: [TestController],
+    }).overrideInterceptor(AnyInterceptor, AnyInterceptor2).compile();
+
+    const app = moduleRef.createNestApplication();
+    await app.init();
+
+    const res = await fetch(`http://localhost:${app.port}/`);
+    assertEquals(res.status, 200);
+    assertEquals(await res.text(), "a");
+    assertEquals(callStack, [4, 3, 5]);
 
     callStack.length = 0;
 
