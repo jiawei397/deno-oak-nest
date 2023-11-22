@@ -37,15 +37,14 @@ export type CacheFactory = () =>
   | CacheStoreMap
   | Promise<CacheStoreMap>;
 
+export type CacheStoreName = "memory" | "LRU" | "localStorage" | "KVStore";
+
 export interface CacheModuleOptions {
   /**
    * Cache storage manager.  Default is `memory`.
    */
   store?:
-    | "memory"
-    | "LRU"
-    | "localStorage"
-    | "KVStore"
+    | CacheStoreName
     | CacheStoreMap
     | CacheFactory;
   /**

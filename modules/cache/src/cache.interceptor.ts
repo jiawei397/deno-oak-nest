@@ -20,6 +20,7 @@ import type {
   CacheModuleOptions,
   CachePolicy,
   CacheStoreMap,
+  CacheStoreName,
   ICacheStore,
 } from "./cache.interface.ts";
 import { KVStore, LocalStore, MemoryStore } from "./cache.store.ts";
@@ -37,7 +38,7 @@ export function CacheKey(key: string) {
     Reflect.defineMetadata(META_CACHE_KEY_KEY, key, descriptor.value);
   };
 }
-export function SetCacheStore(key: "localStorage" | "memory" | string) {
+export function SetCacheStore(key: CacheStoreName | string) {
   return (_target: any, _methodName: string, descriptor: any) => {
     Reflect.defineMetadata(META_CACHE_STORE_KEY, key, descriptor.value);
   };
@@ -110,7 +111,7 @@ export class CacheInterceptor implements NestInterceptor {
   }
 
   async initStore(
-    storeName?: "localStorage" | "LRU" | "KVStore",
+    storeName?: CacheStoreName,
   ): Promise<void> {
     const ttl = this.cacheModuleOptions?.ttl;
     if (storeName === "localStorage") {
