@@ -4,19 +4,23 @@ import { ICacheStore, LocalValue } from "./cache.interface.ts";
 export class MemoryStore implements ICacheStore {
   cache: Map<string, any>;
   timeoutMap: Map<string, number>;
-  constructor() {
+  ttl?: number;
+
+  constructor(options?: { ttl?: number }) {
     this.cache = new Map();
     this.timeoutMap = new Map<string, number>();
+    this.ttl = options?.ttl;
   }
   get<T = any>(key: string): T {
     return this.cache.get(key);
   }
   set(key: string, value: any, options?: { ttl: number }) {
     this.cache.set(key, value);
-    if (options?.ttl) {
+    const ttl = options?.ttl ?? this.ttl;
+    if (ttl) {
       const st = setTimeout(() => {
         this.delete(key);
-      }, options.ttl * 1000);
+      }, ttl * 1000);
       this.timeoutMap.set(key, st);
     }
   }
@@ -42,9 +46,11 @@ export class MemoryStore implements ICacheStore {
 
 export class LocalStore implements ICacheStore {
   timeoutMap: Map<string, number>;
+  ttl?: number;
 
-  constructor() {
+  constructor(options?: { ttl?: number }) {
     this.timeoutMap = new Map<string, number>();
+    this.ttl = options?.ttl;
   }
 
   get(key: string) {
@@ -61,15 +67,16 @@ export class LocalStore implements ICacheStore {
     }
   }
   set(key: string, value: any, options?: { ttl: number }) {
+    const ttl = options?.ttl ?? this.ttl;
     const val: LocalValue = {
-      td: options?.ttl ? Date.now() + options.ttl * 1000 : undefined,
+      td: ttl ? Date.now() + ttl * 1000 : undefined,
       value,
     };
     localStorage.setItem(key, JSON.stringify(val));
-    if (options?.ttl) {
+    if (ttl) {
       const st = setTimeout(() => {
         this.delete(key);
-      }, options.ttl * 1000);
+      }, ttl * 1000);
       this.timeoutMap.set(key, st);
     }
   }
@@ -95,40 +102,46 @@ export class LocalStore implements ICacheStore {
 
 export class KVStore implements ICacheStore {
   kv: Deno.Kv;
+  ttl?: number;
+  baseKey: string;
 
-  static KEY = "cacheStore";
+  constructor(options?: {
+    ttl?: number;
+    baseKey?: string;
+  }) {
+    this.ttl = options?.ttl;
+    this.baseKey = options?.baseKey ?? "KVStore";
+  }
 
-  async init(key?: string) {
-    if (key) {
-      KVStore.KEY = key;
-    }
+  async init() {
     this.kv = await Deno.openKv();
   }
 
   async get<T = any>(key: string): Promise<T | undefined> {
-    const res = await this.kv.get([KVStore.KEY, key]);
+    const res = await this.kv.get([this.baseKey, key]);
     return (res.value ?? undefined) as T;
   }
 
   async set(key: string, value: any, options?: { ttl: number } | undefined) {
-    await this.kv.set([KVStore.KEY, key], value, {
-      expireIn: options?.ttl ? options.ttl * 1000 : undefined,
+    const ttl = options?.ttl ?? this.ttl;
+    await this.kv.set([this.baseKey, key], value, {
+      expireIn: ttl ? ttl * 1000 : undefined,
     });
   }
 
   async delete(key: string) {
-    await this.kv.delete([KVStore.KEY, key]);
+    await this.kv.delete([this.baseKey, key]);
   }
 
   async clear() {
-    const entries = this.kv.list({ prefix: [KVStore.KEY] });
+    const entries = this.kv.list({ prefix: [this.baseKey] });
     for await (const entry of entries) {
       await this.kv.delete(entry.key);
     }
   }
 
   async has(key: string): Promise<boolean> {
-    const res = await this.kv.get([KVStore.KEY, key]);
+    const res = await this.kv.get([this.baseKey, key]);
     return res.value !== null;
   }
 
@@ -136,7 +149,7 @@ export class KVStore implements ICacheStore {
    * @warning It is not a good idea to use this method in production.
    */
   async size(): Promise<number> {
-    const entries = this.kv.list({ prefix: [KVStore.KEY] });
+    const entries = this.kv.list({ prefix: [this.baseKey] });
     let count = 0;
     for await (const _entry of entries) {
       count++;

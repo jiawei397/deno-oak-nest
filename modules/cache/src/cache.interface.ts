@@ -25,7 +25,7 @@ export interface ICacheStore {
 
   has(key: string): Promise<boolean> | boolean;
 
-  size(): Promise<number> | number;
+  size: number | (() => Promise<number> | number);
 }
 
 export interface CacheStoreMap {
@@ -37,19 +37,17 @@ export type CacheFactory = () =>
   | CacheStoreMap
   | Promise<CacheStoreMap>;
 
-/**
- * Interface defining Cache Manager configuration options.
- *
- * @publicApi
- */
-export interface CacheManagerOptions {
+export interface CacheModuleOptions {
   /**
-   * Cache storage manager.  Default is `'memory'` (in-memory store).  See
-   * [Different stores](https://docs.nestjs.com/techniques/caching#different-stores)
-   * for more info.
+   * Cache storage manager.  Default is `memory`.
    */
-  store?: "memory" | "localStorage" | CacheStoreMap | CacheFactory;
-  defaultStore?: "memory" | "localStorage" | string;
+  store?:
+    | "memory"
+    | "LRU"
+    | "localStorage"
+    | "KVStore"
+    | CacheStoreMap
+    | CacheFactory;
   /**
    * Time to live - amount of time in seconds that a response is cached before it
    * is deleted. Subsequent request will call through the route handler and refresh
@@ -57,12 +55,25 @@ export interface CacheManagerOptions {
    */
   ttl?: number;
   /**
-   * Maximum number of responses to store in the cache.  Defaults to 100.
+   * Maximum number of responses to store in the cache.
+   * @default 1000
+   * @warning This option is only used when the store is set to `LRU`.
    */
   max?: number;
+  /**
+   * Maximum size of the cache.
+   * @default 1_000_000
+   * @warning This option is only used when the store is set to `LRU`.
+   */
   maxSize?: number;
+  /**
+   * A function to determine if a value is cacheable.  Defaults to only cache
+   */
   isCacheableValue?: (value: any) => boolean;
 
+  /**
+   * A function to determine the cache key.  Defaults to the request url.
+   */
   getCacheKey?: (params: {
     constructorName: string;
     methodName: string;
@@ -72,15 +83,16 @@ export interface CacheManagerOptions {
 
   /**
    * This options will be used to configure the cache-control header.
-   * @default "no-cache"
    */
   policy?: CachePolicy;
 
   isDebug?: boolean;
-}
 
-export interface CacheModuleOptions extends CacheManagerOptions {
-  [key: string]: any;
+  /**
+   * The key of the kv store base key.
+   * @warning This option is only used when the store is set to `KVStore`.
+   */
+  kvStoreBaseKey?: string;
 }
 
 export interface LocalValue {

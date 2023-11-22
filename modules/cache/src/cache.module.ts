@@ -7,6 +7,14 @@ import type { CacheModuleOptions } from "./cache.interface.ts";
 @Module({})
 export class CacheModule {
   static register(options?: CacheModuleOptions): DynamicModule {
+    if (options?.store && options.store !== "LRU") {
+      if (options.max !== undefined) {
+        console.warn("max option only work with LRU store");
+      }
+      if (options.maxSize !== undefined) {
+        console.warn("maxSize option only work with LRU store");
+      }
+    }
     return {
       module: CacheModule,
       providers: [
