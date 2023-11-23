@@ -7,7 +7,7 @@
   "deno.importMap": ".vscode/import_map.json",
   "deno.lint": true,
   "deno.unstable": true,
-  "deno.suggest.autoImports": true,
+  "typescript.suggest.autoImports": true,
   "code-runner.executorMap": {
     "javascript": "deno run -A --unstable ",
     "typescript": "deno run -A --unstable "
