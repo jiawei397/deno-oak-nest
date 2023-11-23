@@ -439,6 +439,9 @@ export class Application {
   private async initProviders(providers: Provider[], caches: FactoryCaches) {
     for (const provider of providers) {
       const instance = await factory.initProvider(provider, { caches });
+      if (!instance) { // if use factory or useValue, the instance may be undefined
+        continue;
+      }
       this.instances.add(instance);
       // register global interceptor, filter, guard
       if (isSpecialProvider(provider)) {

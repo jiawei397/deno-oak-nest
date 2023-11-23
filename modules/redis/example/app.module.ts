@@ -14,8 +14,7 @@ import { AppController } from "./app.controller.ts";
     CacheModule.register({
       ttl: 30,
       store: createStore,
-      // defaultStore: "localStorage",
-      defaultStore: "memory",
+      isDebug: true,
     }),
   ],
   controllers: [AppController],

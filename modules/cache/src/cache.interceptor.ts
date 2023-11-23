@@ -26,6 +26,7 @@ import type {
 import { KVStore, LocalStore, MemoryStore } from "./cache.store.ts";
 import { md5 } from "./cache.utils.ts";
 import { LRUCache } from "../deps.ts";
+import { OnModuleInit } from "../../../src/interfaces/module.interface.ts";
 
 export function CacheTTL(seconds: number) {
   return (_target: any, _methodName: string, descriptor: any) => {
@@ -51,13 +52,10 @@ export function SetCachePolicy(policy: CachePolicy) {
 }
 
 @Injectable()
-export class CacheInterceptor implements NestInterceptor {
+export class CacheInterceptor implements NestInterceptor, OnModuleInit {
   ttl: number;
   policy: CachePolicy;
-  // customCache?: ICacheStore;
-  // lruCache: LRUCache<string, any>;
-  // localCache?: LocalStore;
-  // defaultStore?: string;
+  storeName: string;
   memoryCache: MemoryStore;
   isDebug?: boolean;
   cacheMap: Map<string, ICacheStore>;
@@ -68,10 +66,29 @@ export class CacheInterceptor implements NestInterceptor {
     this.policy = cacheModuleOptions?.policy || "no-cache";
     this.isDebug = cacheModuleOptions?.isDebug ?? isDebug();
     this.cacheMap = new Map();
-    const store = new MemoryStore({ ttl: this.ttl });
-    this.memoryCache = store;
-    this.cacheMap.set("memory", store);
-    // this.initStore();
+  }
+
+  async onModuleInit() {
+    // init registered cache store
+    await this.initStore("memory");
+    const store = this.cacheModuleOptions?.store;
+    if (!store || store === "memory") {
+      return;
+    }
+    if (typeof store !== "string") {
+      let cacheMap: CacheStoreMap;
+      if (typeof store === "function") {
+        cacheMap = await store();
+      } else {
+        cacheMap = store;
+      }
+      this.cacheMap.set(cacheMap.name, cacheMap.store);
+      this.storeName = cacheMap.name;
+      this.log(`${cacheMap.name} inited`);
+    } else {
+      this.storeName = store;
+      await this.initStore(store);
+    }
   }
 
   joinArgs(args: any[]) {
@@ -88,31 +105,25 @@ export class CacheInterceptor implements NestInterceptor {
   async getCaches(
     func: any,
   ): Promise<{ storeName: string; caches: ICacheStore | undefined }> {
-    let storeName = Reflect.getOwnMetadata(META_CACHE_STORE_KEY, func);
-    if (
-      !storeName && this.cacheModuleOptions?.store &&
-      typeof this.cacheModuleOptions.store === "string"
-    ) {
-      storeName = this.cacheModuleOptions.store;
-    }
-    let caches = storeName ? this.cacheMap.get(storeName) : undefined;
+    const storeName: string =
+      Reflect.getOwnMetadata(META_CACHE_STORE_KEY, func) ||
+      this.storeName;
+    let caches = this.cacheMap.get(storeName);
     if (caches) {
       return {
         storeName,
         caches,
       };
     }
-    await this.initStore(storeName);
-    caches = storeName ? this.cacheMap.get(storeName) : undefined;
+    await this.initStore(storeName as CacheStoreName);
+    caches = this.cacheMap.get(storeName);
     return {
       storeName,
       caches,
     };
   }
 
-  async initStore(
-    storeName?: CacheStoreName,
-  ): Promise<void> {
+  async initStore(storeName: CacheStoreName): Promise<void> {
     const ttl = this.cacheModuleOptions?.ttl;
     if (storeName === "localStorage") {
       const store = new LocalStore({ ttl });
@@ -120,12 +131,13 @@ export class CacheInterceptor implements NestInterceptor {
       this.log("localStorage inited");
       return;
     }
-    // if (storeName === "memory") {
-    //   const store = new MemoryStore({ ttl });
-    //   this.cacheMap.set(storeName, store);
-    //   this.log("memory inited");
-    //   return;
-    // }
+    if (storeName === "memory") {
+      const memoryCache = new MemoryStore({ ttl });
+      this.memoryCache = memoryCache;
+      this.cacheMap.set("memory", memoryCache);
+      this.log("memory inited");
+      return;
+    }
     if (storeName === "LRU") {
       const store: ICacheStore = new LRUCache({
         max: this.cacheModuleOptions?.max || 1000,
@@ -153,21 +165,6 @@ export class CacheInterceptor implements NestInterceptor {
       await store.init();
       this.cacheMap.set(storeName, store);
       this.log("KVStore inited");
-      return;
-    }
-    const store = this.cacheModuleOptions?.store;
-    if (!store) {
-      return;
-    }
-    if (typeof store !== "string") {
-      let cacheMap: CacheStoreMap;
-      if (typeof store === "function") {
-        cacheMap = await store();
-      } else {
-        cacheMap = store;
-      }
-      this.cacheMap.set(cacheMap.name, cacheMap.store);
-      this.log(`${cacheMap.name} inited`);
       return;
     }
   }
@@ -279,6 +276,7 @@ export class CacheInterceptor implements NestInterceptor {
         }
       }
       if (!isCached && caches && storeName !== "memory") {
+        this.log(`[${storeName}] cache set key [${key}],`, val);
         await caches.set(key, val, { ttl });
         this.memoryCache.delete(key);
       }

@@ -18,11 +18,12 @@ import { Controller, Get, Post, UseInterceptors } from "@nest";
 import { CacheModule } from "./cache.module.ts";
 
 Deno.test("CacheInterceptor initStore", async (t) => {
-  await t.step("initStore default", async () => {
+  await t.step("onModuleInit default", async () => {
     const interceptor = new CacheInterceptor();
+    await interceptor.onModuleInit();
+
     assert(interceptor.memoryCache);
 
-    await interceptor.initStore();
     assert(true);
   });
 
@@ -60,19 +61,19 @@ Deno.test("CacheInterceptor initStore", async (t) => {
     caches.close();
   });
 
-  await t.step("initStore with store function", async () => {
+  await t.step("onModuleInit with store function", async () => {
     const interceptor = new CacheInterceptor({
       store: () => ({
         name: "test",
         store: new MemoryStore(),
       }),
     });
-    await interceptor.initStore();
+    await interceptor.onModuleInit();
     const caches = interceptor.cacheMap.get("test") as MemoryStore;
     assert(caches);
   });
 
-  await t.step("initStore with store object", async () => {
+  await t.step("onModuleInit with store object", async () => {
     const store = new MemoryStore();
     const interceptor = new CacheInterceptor({
       store: {
@@ -80,7 +81,7 @@ Deno.test("CacheInterceptor initStore", async (t) => {
         store,
       },
     });
-    await interceptor.initStore();
+    await interceptor.onModuleInit();
     const caches = interceptor.cacheMap.get("test") as MemoryStore;
     assert(caches);
     assert(caches === store);
@@ -312,6 +313,130 @@ Deno.test("getCacheKeyByOptions", async (t) => {
   });
 });
 
+Deno.test("response with other store", {
+  sanitizeOps: false,
+  sanitizeResources: false,
+  // only: true,
+}, async (t) => {
+  const callStacks: number[] = [];
+  const interceptor = new CacheInterceptor({
+    ttl: 10,
+    store: "LRU",
+    max: 100,
+    // isDebug: true,
+    maxSize: 100000,
+  });
+  await interceptor.onModuleInit();
+
+  const context = createMockContext({
+    method: "GET",
+    path: "http://localhost",
+  });
+  const next = async () => {
+    callStacks.push(1);
+    await delay(100);
+    context.response.body = "hello";
+  };
+
+  class A {
+    a() {}
+  }
+  const target = new A();
+  const options = {
+    target,
+    args: [],
+    methodName: "a",
+    methodType: "get",
+    fn: target.a,
+    next,
+  };
+
+  await t.step("first", async () => {
+    await interceptor.intercept(
+      context,
+      next,
+      options,
+    );
+    assertEquals(callStacks, [1]);
+    assertEquals(context.response.body, "hello");
+    callStacks.length = 0;
+  });
+
+  // should use LRU cache
+  await t.step("second", async () => {
+    await interceptor.intercept(
+      context,
+      next,
+      options,
+    );
+    assertEquals(callStacks, []);
+    assertEquals(context.response.body, "hello");
+    callStacks.length = 0;
+  });
+});
+
+Deno.test("response with other store, but sync", {
+  sanitizeOps: false,
+  sanitizeResources: false,
+  // only: true,
+}, async (t) => {
+  const callStacks: number[] = [];
+  const interceptor = new CacheInterceptor({
+    ttl: 10,
+    store: "LRU",
+    max: 100,
+    maxSize: 100000,
+  });
+  await interceptor.onModuleInit();
+
+  const context = createMockContext({
+    method: "GET",
+    path: "http://localhost",
+  });
+  const next = () => {
+    callStacks.push(1);
+    context.response.body = "hello";
+  };
+
+  class A {
+    a() {}
+  }
+  const target = new A();
+  const options = {
+    target,
+    args: [],
+    methodName: "a",
+    methodType: "get",
+    fn: target.a,
+    next,
+  };
+
+  await t.step("first", async () => {
+    await interceptor.intercept(
+      context,
+      next,
+      options,
+    );
+    assertEquals(callStacks, [1]);
+    assertEquals(context.response.body, "hello");
+    callStacks.length = 0;
+  });
+
+  await delay(100);
+
+  // should use LRU cache
+  await t.step("second", async () => {
+    await interceptor.intercept(
+      context,
+      next,
+      options,
+    );
+    assertEquals(callStacks, [1], "sync not work");
+    assertEquals(context.response.body, "hello");
+    callStacks.length = 0;
+  });
+});
+
 Deno.test("CacheInterceptor intercept", {
   sanitizeOps: false,
   sanitizeResources: false,
@@ -320,6 +445,7 @@ Deno.test("CacheInterceptor intercept", {
   await t.step("intercept with not GET method", async () => {
     const callStacks: number[] = [];
     const interceptor = new CacheInterceptor();
+    await interceptor.onModuleInit();
     const context = createMockContext({
       method: "OPTIONS",
       path: "https://pan.baidu.com/a",
@@ -357,6 +483,8 @@ Deno.test("CacheInterceptor intercept", {
       const interceptor = new CacheInterceptor({
         ttl: 1,
       });
+      await interceptor.onModuleInit();
+
       const context = createMockContext({
         method: "GET",
         path: "http://localhost",
@@ -412,6 +540,8 @@ Deno.test("CacheInterceptor intercept", {
       const interceptor = new CacheInterceptor({
         ttl: 1,
       });
+      await interceptor.onModuleInit();
+
       const context = createMockContext({
         method: "GET",
         path: "http://localhost",
@@ -472,6 +602,8 @@ Deno.test("CacheInterceptor intercept", {
         return val !== "hello";
       },
     });
+    await interceptor.onModuleInit();
+
     const context = createMockContext({
       method: "GET",
       path: "http://localhost",
@@ -525,6 +657,8 @@ Deno.test("CacheInterceptor intercept", {
       },
       store: "LRU",
     });
+    await interceptor.onModuleInit();
+
     const context = createMockContext({
       method: "GET",
       path: "http://localhost",
@@ -574,6 +708,8 @@ Deno.test("CacheInterceptor intercept", {
     const interceptor = new CacheInterceptor({
       ttl: 1,
     });
+    await interceptor.onModuleInit();
+
     const context = createMockContext({
       method: "GET",
       path: "http://localhost",
@@ -629,6 +765,8 @@ Deno.test("CacheInterceptor intercept", {
       ttl: 1,
       store: "LRU",
     });
+    await interceptor.onModuleInit();
+
     const context = createMockContext({
       method: "GET",
       path: "http://localhost",
@@ -678,198 +816,6 @@ Deno.test("CacheInterceptor intercept", {
     });
   });
 
-  await t.step("response with other store", async (it) => {
-    const callStacks: number[] = [];
-    const interceptor = new CacheInterceptor({
-      ttl: 1,
-      store: "LRU",
-      max: 100,
-      maxSize: 100000,
-    });
-    const context = createMockContext({
-      method: "GET",
-      path: "http://localhost",
-    });
-    const next = async () => {
-      callStacks.push(1);
-      await delay(100);
-      context.response.body = "hello";
-    };
-
-    class A {
-      a() {}
-    }
-    const target = new A();
-    const options = {
-      target,
-      args: [],
-      methodName: "a",
-      methodType: "get",
-      fn: target.a,
-      next,
-    };
-
-    await it.step("first", async () => {
-      await interceptor.intercept(
-        context,
-        next,
-        options,
-      );
-      assertEquals(callStacks, [1]);
-      assertEquals(context.response.body, "hello");
-      callStacks.length = 0;
-    });
-
-    // should use LRU cache
-    await it.step("second", async () => {
-      await interceptor.intercept(
-        context,
-        next,
-        options,
-      );
-      assertEquals(callStacks, []);
-      assertEquals(context.response.body, "hello");
-      callStacks.length = 0;
-    });
-  });
-
-  await t.step("response with other store, but sync", async (it) => {
-    const callStacks: number[] = [];
-    const interceptor = new CacheInterceptor({
-      ttl: 10,
-      store: "LRU",
-      max: 100,
-      maxSize: 100000,
-    });
-    const context = createMockContext({
-      method: "GET",
-      path: "http://localhost",
-    });
-    const next = () => {
-      callStacks.push(1);
-      context.response.body = "hello";
-    };
-
-    class A {
-      a() {}
-    }
-    const target = new A();
-    const options = {
-      target,
-      args: [],
-      methodName: "a",
-      methodType: "get",
-      fn: target.a,
-      next,
-    };
-
-    await it.step("first", async () => {
-      await interceptor.intercept(
-        context,
-        next,
-        options,
-      );
-      assertEquals(callStacks, [1]);
-      assertEquals(context.response.body, "hello");
-      callStacks.length = 0;
-    });
-
-    await delay(100);
-
-    // should use LRU cache
-    await it.step("second", async () => {
-      await interceptor.intercept(
-        context,
-        next,
-        options,
-      );
-      assertEquals(callStacks, [1], "sync not work");
-      assertEquals(context.response.body, "hello");
-      callStacks.length = 0;
-    });
-  });
-
-  await t.step("intercept with GET method", async () => {
-    const callStack: number[] = [];
-
-    @Controller("")
-    @UseInterceptors(CacheInterceptor)
-    class A {
-      @Get("/")
-      a() {
-        callStack.push(1);
-        return "hello";
-      }
-    }
-
-    const moduleRef = await createTestingModule({
-      controllers: [A],
-    }).compile();
-    const app = moduleRef.createNestApplication();
-    await app.init();
-
-    { // first
-      const res = await fetch(`http://localhost:${app.port}`);
-      assertEquals(res.status, 200);
-      assertEquals(await res.text(), "hello");
-      assertEquals(callStack, [1]);
-      callStack.length = 0;
-    }
-
-    // second
-    {
-      const res = await fetch(`http://localhost:${app.port}`);
-      assertEquals(res.status, 200);
-      assertEquals(await res.text(), "hello");
-      assertEquals(callStack, []);
-    }
-
-    callStack.length = 0;
-
-    await app.close();
-  });
-
-  await t.step("intercept with cache key", async () => {
-    const callStack: number[] = [];
-
-    @Controller("")
-    @UseInterceptors(CacheInterceptor)
-    class A {
-      @Get("/")
-      @CacheKey("test")
-      a() {
-        callStack.push(1);
-        return "hello";
-      }
-    }
-
-    const moduleRef = await createTestingModule({
-      controllers: [A],
-    }).compile();
-    const app = moduleRef.createNestApplication();
-    await app.init();
-
-    { // first
-      const res = await fetch(`http://localhost:${app.port}`);
-      assertEquals(res.status, 200);
-      assertEquals(await res.text(), "hello");
-      assertEquals(callStack, [1]);
-      callStack.length = 0;
-    }
-
-    // second
-    {
-      const res = await fetch(`http://localhost:${app.port}`);
-      assertEquals(res.status, 200);
-      assertEquals(await res.text(), "hello");
-      assertEquals(callStack, []);
-    }
-
-    callStack.length = 0;
-
-    await app.close();
-  });
-
   await t.step("intercept with CacheTTL", async () => {
     const callStack: number[] = [];
 
@@ -917,60 +863,91 @@ Deno.test("CacheInterceptor intercept", {
 
     await app.close();
   });
+});
 
-  // await t.step("intercept with LRU", async () => {
-  //   const callStack: number[] = [];
+Deno.test("intercept with GET method", {
+  sanitizeOps: false,
+  sanitizeResources: false,
+}, async (t) => {
+  const callStack: number[] = [];
 
-  //   @Controller("")
-  //   @UseInterceptors(CacheInterceptor)
-  //   class A {
-  //     @Get("/")
-  //     a() {
-  //       callStack.push(1);
-  //       return "a";
-  //     }
+  @Controller("")
+  @UseInterceptors(CacheInterceptor)
+  class A {
+    @Get("/")
+    a() {
+      callStack.push(1);
+      return "hello";
+    }
+  }
 
-  //     @Get("/b")
-  //     b() {
-  //       callStack.push(2);
-  //       return "b";
-  //     }
-  //   }
+  const moduleRef = await createTestingModule({
+    imports: [CacheModule.register()],
+    controllers: [A],
+  }).compile();
+  const app = moduleRef.createNestApplication();
+  await app.init();
 
-  //   const moduleRef = await createTestingModule({
-  //     imports: [CacheModule.register({
-  //       ttl: 5,
-  //       max: 1,
-  //       store: "LRU",
-  //     })],
-  //     controllers: [A],
-  //   }).compile();
-  //   const app = moduleRef.createNestApplication();
-  //   await app.init();
+  await t.step("first", async () => {
+    const res = await fetch(`http://localhost:${app.port}`);
+    assertEquals(res.status, 200);
+    assertEquals(await res.text(), "hello");
+    assertEquals(callStack, [1]);
+    callStack.length = 0;
+  });
 
-  //   await fetch(`http://localhost:${app.port}`);
+  await t.step("second", async () => {
+    const res = await fetch(`http://localhost:${app.port}`);
+    assertEquals(res.status, 200);
+    assertEquals(await res.text(), "hello");
+    assertEquals(callStack, []);
+  });
 
-  //   await fetch(`http://localhost:${app.port}/b`);
+  callStack.length = 0;
 
-  //   await fetch(`http://localhost:${app.port}`);
+  await app.close();
+});
 
-  //   await fetch(`http://localhost:${app.port}/b`);
+Deno.test("intercept with cache key", {
+  sanitizeOps: false,
+  sanitizeResources: false,
+}, async (t) => {
+  const callStack: number[] = [];
 
-  //   console.log(callStack);
-  //   assertEquals(callStack, [1, 2, 1]);
+  @Controller("")
+  @UseInterceptors(CacheInterceptor)
+  class A {
+    @Get("/")
+    @CacheKey("test")
+    a() {
+      callStack.push(1);
+      return "hello";
+    }
+  }
 
-  //   // second
-  //   await delay(1500);
-  //   callStack.length = 0;
-  //   {
-  //     const res = await fetch(`http://localhost:${app.port}/b`);
-  //     assertEquals(res.status, 200);
-  //     assertEquals(await res.text(), "b");
-  //     assertEquals(callStack, [2], "LRU ttl works");
-  //   }
+  const moduleRef = await createTestingModule({
+    imports: [CacheModule.register()],
+    controllers: [A],
+  }).compile();
+  const app = moduleRef.createNestApplication();
+  await app.init();
 
-  //   callStack.length = 0;
+  await t.step("first", async () => {
+    const res = await fetch(`http://localhost:${app.port}`);
+    assertEquals(res.status, 200);
+    assertEquals(await res.text(), "hello");
+    assertEquals(callStack, [1]);
+    callStack.length = 0;
+  });
 
-  //   await app.close();
-  // });
+  await t.step("second", async () => {
+    const res = await fetch(`http://localhost:${app.port}`);
+    assertEquals(res.status, 200);
+    assertEquals(await res.text(), "hello");
+    assertEquals(callStack, []);
+  });
+
+  callStack.length = 0;
+
+  await app.close();
 });
