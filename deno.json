@@ -19,6 +19,7 @@
     "dev:lifecycle": "deno run -A example/lifecycle/main.ts",
     "dev:interceptor": "deno run -A --watch example/interceptor/main.ts",
     "dev:decorator": "deno run -A --watch example/decorator/main.ts",
+    "dev:globalModule": "deno task --cwd=example/globalModule dev",
     "dev:dynamicModule": "deno task --cwd=example/dynamicModule dev",
     "dev:dynamicModule:prod": "deno task --cwd=example/dynamicModule start",
     "dev:log": "deno task --cwd=example/log dev",

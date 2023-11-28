@@ -20,5 +20,6 @@
   },
   "[markdown]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
-  }
+  },
+  "editor.inlineSuggest.showToolbar": "onHover"
 }

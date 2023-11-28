@@ -3,6 +3,8 @@ import { DynamicModule } from "../interfaces/module.interface.ts";
 import {
   defineModuleMetadata,
   getModuleMetadata,
+  Global,
+  isGlobalModule,
   isModule,
   Module,
   onModuleInit,
@@ -92,5 +94,57 @@ Deno.test("onModuleInit", async (t) => {
     const appService = new AppService();
     onModuleInit(appService);
     assertEquals(callStack, []);
+  });
+});
+
+Deno.test("global module", async (t) => {
+  await t.step("not global module", () => {
+    @Module({})
+    class NotGlobalModule {
+    }
+
+    assert(isModule(NotGlobalModule));
+    assert(!isGlobalModule(NotGlobalModule));
+  });
+
+  await t.step("isGlobalModule", () => {
+    @Global()
+    @Module({})
+    class GlobalModule {
+    }
+
+    assert(isModule(GlobalModule));
+    assert(isGlobalModule(GlobalModule));
+  });
+
+  await t.step("isGlobalModule with dynamic module and global", () => {
+    @Module({})
+    class AsyncModule {
+      static register(): DynamicModule {
+        return {
+          module: AsyncModule,
+          global: true,
+        };
+      }
+    }
+
+    const module = AsyncModule.register();
+    assert(isModule(module));
+    assert(isGlobalModule(module));
+  });
+
+  await t.step("isGlobalModule with dynamic module and not global", () => {
+    @Module({})
+    class AsyncModule {
+      static register(): DynamicModule {
+        return {
+          module: AsyncModule,
+        };
+      }
+    }
+
+    const module = AsyncModule.register();
+    assert(isModule(module));
+    assert(!isGlobalModule(module));
   });
 });

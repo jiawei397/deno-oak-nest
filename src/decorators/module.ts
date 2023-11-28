@@ -9,6 +9,7 @@ import type {
 
 export const MODULE_KEY = Symbol("module:isModule");
 export const onModuleInitedKey = Symbol("onModuleInited");
+export const MODULE_GLOBAL_KEY = Symbol("module:global");
 
 export function Module(metadata: ModuleMetadata): ClassDecorator {
   return (target: any) => {
@@ -20,11 +21,24 @@ export function Module(metadata: ModuleMetadata): ClassDecorator {
   };
 }
 
+export function Global(): ClassDecorator {
+  return (target) => {
+    Reflect.defineMetadata(MODULE_GLOBAL_KEY, true, target);
+  };
+}
+
 export function isModule(module: unknown): boolean {
   if (!module || (typeof module !== "function" && typeof module !== "object")) {
     return false;
   }
   return "module" in module || Reflect.hasOwnMetadata(MODULE_KEY, module);
+}
+
+export function isGlobalModule(module: ModuleType): boolean {
+  if (isDynamicModule(module)) {
+    return !!module.global;
+  }
+  return Reflect.hasOwnMetadata(MODULE_GLOBAL_KEY, module);
 }
 
 export function isDynamicModule(module: ModuleType): module is DynamicModule {

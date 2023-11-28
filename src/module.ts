@@ -2,6 +2,7 @@ import { Constructor } from "./interfaces/type.interface.ts";
 import {
   getModuleMetadata,
   isDynamicModule,
+  isGlobalModule,
   isModule,
 } from "./decorators/module.ts";
 import { CollectResult, ModuleType } from "./interfaces/module.interface.ts";
@@ -62,7 +63,7 @@ export async function collectModuleDeps(
       providerArr: [],
       exportsArr: [],
       cache: new Map(),
-      global: isDynamic && !!rootModule.global,
+      global: isGlobalModule(rootModule),
     }!;
     moduleDepsMap.set(moduleKey, data);
   }
