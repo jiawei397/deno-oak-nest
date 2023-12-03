@@ -7,6 +7,7 @@ import {
   getCronInstance,
   getMethodPaths,
   getReadableStream,
+  getSSEStream,
   joinPath,
   MethodPathOptions,
   parseSearch,
@@ -174,18 +175,198 @@ test("setCacheControl", async (t) => {
   );
 });
 
-Deno.test("getReadableStream should return a readable stream with the given message", async () => {
-  const message = "Hello, world!";
-  const { body, write, end } = getReadableStream();
-  write(message);
-  end("end");
+Deno.test("getReadableStream", async (t) => {
+  await t.step(
+    "should return a readable stream with the given message",
+    async () => {
+      const message = "Hello, world!";
+      const { body, write, end } = getReadableStream();
+      write(message);
+      end("end");
 
-  const reader = body.getReader();
-  const result = await reader.read();
-  const decoder = new TextDecoder();
-  const text = decoder.decode(result.value);
+      const reader = body.getReader();
+      const result = await reader.read();
+      const decoder = new TextDecoder();
+      const text = decoder.decode(result.value);
+      assertEquals(text, message);
+    },
+  );
 
-  assertEquals(text, message);
+  await t.step("the readable stream should be cancelable", () => {
+    const callStack: number[] = [];
+    const message = "Hello, world!";
+    const { body, write, end } = getReadableStream({
+      cancel: () => {
+        console.log("cancel");
+        callStack.push(1);
+        clearTimeout(st);
+      },
+    });
+
+    const st = setTimeout(() => {
+      write(message);
+      end("end");
+    }, 1000);
+
+    const reader = body.getReader();
+    reader.cancel();
+    assertEquals(callStack, [1]);
+  });
+
+  await t.step("the readable stream with error", () => {
+    const { body, end } = getReadableStream();
+    const reader = body.getReader();
+    reader.cancel();
+    end("end");
+    assert(true, "should not throw error");
+  });
+});
+
+Deno.test("getSSEStream", async (t) => {
+  await t.step("write string", async () => {
+    const { body, write, end } = getSSEStream();
+
+    const callStack: number[] = [];
+    let eventId = 1;
+    const st = setInterval(() => {
+      if (eventId == 2) {
+        callStack.push(2);
+        clearInterval(st);
+        end();
+        return;
+      }
+      callStack.push(1);
+      write({
+        data: "hello",
+        event: "myEvent",
+        id: eventId++,
+        retry: 5000,
+      });
+    }, 10);
+
+    const reader = body.getReader();
+    const decoder = new TextDecoder();
+    {
+      const result = await reader.read();
+      const text = decoder.decode(result.value);
+      assertEquals(text, "retry: 5000\n");
+    }
+
+    {
+      const result = await reader.read();
+      const text = decoder.decode(result.value);
+      assertEquals(text, "id: 1\n");
+    }
+
+    {
+      const result = await reader.read();
+      const text = decoder.decode(result.value);
+      assertEquals(text, "event: myEvent\n");
+    }
+
+    {
+      const result = await reader.read();
+      const text = decoder.decode(result.value);
+      assertEquals(text, `data: hello\n`);
+    }
+
+    {
+      const result = await reader.read();
+      assertEquals(result.done, true);
+    }
+
+    assertEquals(callStack, [1, 2]);
+  });
+
+  await t.step("write object", async () => {
+    const { body, write, end } = getSSEStream();
+
+    const callStack: number[] = [];
+    let eventId = 1;
+    const st = setInterval(() => {
+      if (eventId == 2) {
+        callStack.push(2);
+        clearInterval(st);
+        end();
+        return;
+      }
+      callStack.push(1);
+      write({
+        data: { hello: "world" },
+        event: "myEvent",
+        id: eventId++,
+        retry: 5000,
+      });
+    }, 10);
+
+    const reader = body.getReader();
+    const decoder = new TextDecoder();
+    {
+      const result = await reader.read();
+      const text = decoder.decode(result.value);
+      assertEquals(text, "retry: 5000\n");
+    }
+
+    {
+      const result = await reader.read();
+      const text = decoder.decode(result.value);
+      assertEquals(text, "id: 1\n");
+    }
+
+    {
+      const result = await reader.read();
+      const text = decoder.decode(result.value);
+      assertEquals(text, "event: myEvent\n");
+    }
+
+    {
+      const result = await reader.read();
+      const text = decoder.decode(result.value);
+      assertEquals(text, `data: {"hello":"world"}\n`);
+    }
+
+    {
+      const result = await reader.read();
+      assertEquals(result.done, true);
+    }
+
+    assertEquals(callStack, [1, 2]);
+  });
+
+  await t.step("write with simple data", async () => {
+    const { body, write, end } = getSSEStream();
+
+    const callStack: number[] = [];
+    let eventId = 1;
+    const st = setInterval(() => {
+      if (eventId == 2) {
+        callStack.push(2);
+        clearInterval(st);
+        end();
+        return;
+      }
+      eventId++;
+      callStack.push(1);
+      write({
+        data: "hello",
+      });
+    }, 10);
+
+    const reader = body.getReader();
+    const decoder = new TextDecoder();
+    {
+      const result = await reader.read();
+      const text = decoder.decode(result.value);
+      assertEquals(text, `data: hello\n`);
+    }
+
+    {
+      const result = await reader.read();
+      assertEquals(result.done, true);
+    }
+
+    assertEquals(callStack, [1, 2]);
+  });
 });
 
 Deno.test("joinPath", () => {

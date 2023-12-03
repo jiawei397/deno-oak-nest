@@ -6,6 +6,7 @@ export const META_PATH_KEY = Symbol("meta:path");
 export const META_ALIAS_KEY = Symbol("meta:alias");
 export const META_HTTP_CODE_KEY = Symbol("meta:http:code");
 export const META_HEADER_KEY = Symbol("meta:header");
+export const SSE_KEY = Symbol("sse");
 
 export const Controller = (
   path: string,
@@ -56,22 +57,39 @@ export function HttpCode(code: number): MethodDecorator {
   };
 }
 
+function addHeader(
+  key: string,
+  val: string,
+  // deno-lint-ignore no-explicit-any
+  descriptor: TypedPropertyDescriptor<any>,
+) {
+  const map = Reflect.getMetadata(META_HEADER_KEY, descriptor.value) || {};
+  map[key] = val;
+  Reflect.defineMetadata(META_HEADER_KEY, map, descriptor.value);
+}
+
 export function Header(key: string, val: string): MethodDecorator {
   return (_target, _property, descriptor) => {
-    const map = Reflect.getMetadata(META_HEADER_KEY, descriptor.value) || {};
-    map[key] = val;
-    Reflect.defineMetadata(META_HEADER_KEY, map, descriptor.value);
+    addHeader(key, val, descriptor);
   };
 }
 
 export function Redirect(location: string, status = 302): MethodDecorator {
   return (_target, _property, descriptor) => {
-    Reflect.defineMetadata(META_HTTP_CODE_KEY, status, descriptor.value);
-    const map = Reflect.getMetadata(META_HEADER_KEY, descriptor.value) || {};
-    map["Location"] = location;
-    Reflect.defineMetadata(META_HEADER_KEY, map, descriptor.value);
-
+    addHeader("Location", location, descriptor);
     // set status
     Reflect.defineMetadata(META_HTTP_CODE_KEY, status, descriptor.value);
+  };
+}
+
+export function Sse(options?: {
+  retry?: number;
+  event?: string;
+}): MethodDecorator {
+  return (_target, _property, descriptor) => {
+    Reflect.defineMetadata(SSE_KEY, options, descriptor.value);
+    addHeader("Content-Type", "text/event-stream", descriptor);
+    addHeader("Connection", "keep-alive", descriptor);
+    addHeader("Cache-Control", "no-cache", descriptor);
   };
 }

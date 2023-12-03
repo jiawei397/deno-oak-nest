@@ -10,3 +10,13 @@ export type AliasOptions = {
    */
   isAliasOnly?: boolean;
 };
+
+export interface SSEOptions {
+  retry?: number;
+  event?: string;
+}
+
+export interface SSEMessageEvent extends SSEOptions {
+  data: string | object;
+  id?: string | number;
+}

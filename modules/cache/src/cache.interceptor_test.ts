@@ -362,8 +362,7 @@ Deno.test("response with other store", {
     callStacks.length = 0;
   });
 
-  // should use LRU cache
-  await t.step("second", async () => {
+  await t.step("second should use LRU cache", async () => {
     await interceptor.intercept(
       context,
       next,

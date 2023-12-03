@@ -2,7 +2,10 @@ import { Context } from "./interfaces/context.interface.ts";
 import { APP_CRON, APP_CRON_INSTANCE } from "./constants.ts";
 import { Reflect } from "../deps.ts";
 import { Constructor, Instance } from "./interfaces/type.interface.ts";
-import { AliasOptions } from "./interfaces/controller.interface.ts";
+import {
+  AliasOptions,
+  SSEMessageEvent,
+} from "./interfaces/controller.interface.ts";
 
 export function isDebug() {
   return Deno.env.get("DEBUG") === "true";
@@ -48,14 +51,6 @@ export function parseSearchParams(search: URLSearchParams) {
   return map;
 }
 
-export interface ReadableStreamResult {
-  body: ReadableStream;
-  /** write message to stream, but it may cause error if the connection closed before */
-  write(message: string): void;
-  /** write last message and end signal to stream, but it may cause error if the connection closed before */
-  end(message?: string): void;
-}
-
 export function setCacheControl(context: Context) {
   // cache-control see https://cloud.tencent.com/developer/section/1189911
   const requestCacheControl = context.request.header("Cache-Control");
@@ -80,25 +75,87 @@ export function setCacheControl(context: Context) {
   }
 }
 
-export function getReadableStream(): ReadableStreamResult {
+export function getReadableStream(
+  options?: ReadableStreamOptions,
+): ReadableStreamResult {
   let controller: ReadableStreamDefaultController;
   const body = new ReadableStream({
     start(_controller) {
       controller = _controller;
     },
+    cancel: options?.cancel,
   });
   const te = new TextEncoder();
+  const write = (message: string) => {
+    try {
+      controller.enqueue(te.encode(message));
+    } catch (err) {
+      console.error("write", err);
+    }
+  };
   return {
     body,
-    write(message: string) {
-      controller.enqueue(te.encode(message));
-    },
+    write,
     end(message?: string) {
       if (message) {
-        controller.enqueue(te.encode(message));
+        write(message);
       }
-      controller.close();
+      try {
+        controller.close();
+      } catch (err) {
+        console.error("end", err);
+      }
     },
+  };
+}
+
+export interface ReadableStreamResult {
+  body: ReadableStream;
+  /** write message to stream, but it may log error if the connection closed before */
+  write(message: string): void;
+  /** write last message and end signal to stream, but it may log error if the connection closed before */
+  end(message?: string): void;
+}
+
+export interface ReadableSSEStreamResult {
+  body: ReadableStream;
+  /** write message to stream, but it may log error if the connection closed before */
+  write(messageEvent: SSEMessageEvent): void;
+  /**
+   * write last message and end signal to stream, but it may log error if the connection closed before
+   * @warning SSEStream should be closed by client, so you should use `cancel` option to receive the event, not use `end` method directly.
+   */
+  end(): void;
+}
+
+export interface ReadableStreamOptions {
+  /**
+   * If the client close the connection, the `cancel` will be called.
+   */
+  cancel?: ReadableStreamErrorCallback;
+}
+
+export function getSSEStream(
+  options?: ReadableStreamOptions,
+): ReadableSSEStreamResult {
+  const { body, write, end } = getReadableStream(options);
+  return {
+    body,
+    write(messageEvent: SSEMessageEvent) {
+      const { data, event, id, retry } = messageEvent;
+      if (retry) {
+        write(`retry: ${retry}\n`);
+      }
+      if (id !== undefined) {
+        write(`id: ${id}\n`);
+      }
+      if (event) {
+        write(`event: ${event}\n`);
+      }
+      const dataStr = typeof data === "string" ? data : JSON.stringify(data);
+      write(`data: ${dataStr}\n`);
+    },
+    end,
   };
 }
 
