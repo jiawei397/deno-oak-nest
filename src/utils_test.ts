@@ -267,7 +267,7 @@ Deno.test("getSSEStream", async (t) => {
     {
       const result = await reader.read();
       const text = decoder.decode(result.value);
-      assertEquals(text, `data: hello\n`);
+      assertEquals(text, `data: hello\n\n`);
     }
 
     {
@@ -322,7 +322,7 @@ Deno.test("getSSEStream", async (t) => {
     {
       const result = await reader.read();
       const text = decoder.decode(result.value);
-      assertEquals(text, `data: {"hello":"world"}\n`);
+      assertEquals(text, `data: {"hello":"world"}\n\n`);
     }
 
     {
@@ -357,7 +357,7 @@ Deno.test("getSSEStream", async (t) => {
     {
       const result = await reader.read();
       const text = decoder.decode(result.value);
-      assertEquals(text, `data: hello\n`);
+      assertEquals(text, `data: hello\n\n`);
     }
 
     {

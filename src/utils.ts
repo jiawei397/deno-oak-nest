@@ -153,7 +153,7 @@ export function getSSEStream(
         write(`event: ${event}\n`);
       }
       const dataStr = typeof data === "string" ? data : JSON.stringify(data);
-      write(`data: ${dataStr}\n`);
+      write(`data: ${dataStr}\n\n`);
     },
     end,
   };

@@ -11,12 +11,27 @@ export type AliasOptions = {
   isAliasOnly?: boolean;
 };
 
-export interface SSEOptions {
-  retry?: number;
-  event?: string;
-}
-
-export interface SSEMessageEvent extends SSEOptions {
+export interface SSEMessageEvent {
   data: string | object;
+  /**
+   * The event id.
+   */
   id?: string | number;
+  /**
+   * Retry time in milliseconds for reconnection, unit is milliseconds.
+   */
+  retry?: number;
+  /**
+   * The event name, if not set, the event name will be `message`.
+   * If the event name is set too, the event name will be used as the event name.
+   *
+   *  @example
+   * ```ts
+   * const eventSource = new EventSource("http://localhost:2000/sse");
+   * eventSource.addEventListener("myEvent", (event) => {
+   *  console.log(event.data);
+   * });
+   * ```
+   */
+  event?: string;
 }

@@ -82,12 +82,8 @@ export function Redirect(location: string, status = 302): MethodDecorator {
   };
 }
 
-export function Sse(options?: {
-  retry?: number;
-  event?: string;
-}): MethodDecorator {
+export function Sse(): MethodDecorator {
   return (_target, _property, descriptor) => {
-    Reflect.defineMetadata(SSE_KEY, options, descriptor.value);
     addHeader("Content-Type", "text/event-stream", descriptor);
     addHeader("Connection", "keep-alive", descriptor);
     addHeader("Cache-Control", "no-cache", descriptor);
