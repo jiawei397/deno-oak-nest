@@ -20,7 +20,7 @@ the version recommended by `Nest`, as it has undergone thorough unit testing.
 ## Usage & Guide
 
 To view our documentation, please visit
-[official site](https://nests.deno.dev/).
+[official site](https://nests.deno.dev/en-US).
 
 ## TODO
 
