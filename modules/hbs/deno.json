@@ -1,0 +1,19 @@
+{
+  "lock": false,
+  "tasks": {
+    "dev": "deno run  -A --watch example/main.ts",
+    "start": "deno run -A example/main.ts"
+  },
+  "compilerOptions": {
+    "removeComments": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false
+  },
+  "imports": {
+    "@nest": "../../mod.ts",
+    "@nest/hono": "../../modules/hono/mod.ts",
+    "hono/": "https://deno.land/x/hono@v3.9.1/",
+    "@nest/hbs": "./mod.ts"
+  }
+}
