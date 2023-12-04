@@ -6,6 +6,7 @@
     "dev:hono": "deno task --cwd=modules/hono dev",
     "dev:cache": "deno task --cwd=modules/cache dev",
     "dev:cors": "deno task --cwd=modules/cors dev",
+    "dev:ejs": "deno task --cwd=modules/ejs start",
     "dev:es": "deno task --cwd=modules/elasticsearch dev",
     "dev:mongo": "deno task --cwd=modules/mongo dev",
     "dev:mysql": "deno task --cwd=modules/mysql dev",

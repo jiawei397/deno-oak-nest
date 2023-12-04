@@ -7,6 +7,7 @@
     "@nest/cors": "../modules/cors/mod.ts",
     "@nest/hono": "../modules/hono/mod.ts",
     "@nest/cache": "../modules/cache/mod.ts",
+    "@nest/ejs": "../modules/ejs/mod.ts",
     "@nest/elasticsearch": "../modules/elasticsearch/mod.ts",
     "@nest/oak": "../modules/oak/mod.ts",
     "@nest/mongo": "../modules/mongo/mod.ts",
