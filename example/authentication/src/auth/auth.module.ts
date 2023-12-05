@@ -10,7 +10,7 @@ import { jwtConstants } from "./auth.constants.ts";
       global: true,
       secret: jwtConstants.secret,
       signOptions: {
-        expiresIn: 60,
+        expiresIn: 600,
       },
     }),
     UsersModule,
