@@ -11,10 +11,10 @@ Add import map in `deno.json`:
 ```json
 {
   "imports": {
-    "@nest": "https://deno.land/x/deno_nest@v3.11.0/mod.ts",
-    "@nest/hono": "https://deno.land/x/deno_nest@v3.11.0/modules/hono/mod.ts",
+    "@nest": "https://deno.land/x/deno_nest@v3.12.0/mod.ts",
+    "@nest/hono": "https://deno.land/x/deno_nest@v3.12.0/modules/hono/mod.ts",
     "hono/": "https://deno.land/x/hono@v3.11.1/",
-    "@nest/ejs": "https://deno.land/x/deno_nest@v3.11.0/modules/ejs/mod.ts"
+    "@nest/ejs": "https://deno.land/x/deno_nest@v3.12.0/modules/ejs/mod.ts"
   }
 }
 ```
