@@ -1,4 +1,4 @@
-// deno install --allow-env --allow-run --allow-net --allow-read --allow-write --import-map ./cli/import_map.json -n dest  -f ./cli/main.ts
+// deno install --allow-env --allow-run --allow-net --allow-read --allow-write --import-map ./cli/import_map.json -n nests  -f ./cli/main.ts
 import { Input, Select } from "cliffy/prompt/mod.ts";
 import { Command } from "cliffy/command/mod.ts";
 import { colors } from "cliffy/ansi/colors.ts";
@@ -38,7 +38,7 @@ $ deno task dev
 
 if (import.meta.main) {
   await new Command()
-    .name("nest")
+    .name("nests")
     .description("The Nest CLI of Deno.")
     .meta("deno", Deno.version.deno)
     .meta("v8", Deno.version.v8)

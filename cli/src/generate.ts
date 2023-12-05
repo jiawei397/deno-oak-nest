@@ -2,10 +2,6 @@ import { ensureDir } from "std/fs/ensure_dir.ts";
 import { Input, Select } from "cliffy/prompt/mod.ts";
 import { Command } from "cliffy/command/mod.ts";
 import { colors } from "cliffy/ansi/colors.ts";
-
-const info = colors.bold.blue;
-const error = colors.bold.red;
-
 import {
   getController,
   getDecorator,
@@ -17,40 +13,24 @@ import {
   getService,
 } from "./generate_utils.ts";
 
+const info = colors.bold.blue;
+const error = colors.bold.red;
+
 const GenerateTypes = {
-  "ExceptionFilter": "exceptionFilter",
-  "Controller": "controller",
-  "Decorator": "decorator",
-  "Interceptor": "interceptor",
-  "Guard": "guard",
-  "Middleware": "middleware",
-  "Module": "module",
-  "Service": "service",
+  "exceptionFilter": getExceptionFilter,
+  "controller": getController,
+  "decorator": getDecorator,
+  "interceptor": getInterceptor,
+  "guard": getGuard,
+  "middleware": getMiddleware,
+  "module": getModule,
+  "service": getService,
 };
 
 type GenerateType = keyof typeof GenerateTypes;
 
 function getGenerateBody(type: GenerateType, name: string): string {
-  switch (type) {
-    case "Controller":
-      return getController(name);
-    case "Service":
-      return getService(name);
-    case "Module":
-      return getModule(name);
-    case "Middleware":
-      return getMiddleware(name);
-    case "Guard":
-      return getGuard(name);
-    case "ExceptionFilter":
-      return getExceptionFilter(name);
-    case "Interceptor":
-      return getInterceptor(name);
-    case "Decorator":
-      return getDecorator(name);
-    default:
-      return "";
-  }
+  return GenerateTypes[type](name);
 }
 
 //将文件名转换，比如UserInfo转换为user_info
@@ -86,10 +66,11 @@ export async function generate(type: GenerateType, name: string) {
 
 export function generateCommand() {
   return new Command().description("Generate a Nest element.")
-    .arguments("[element:string]")
+    .arguments("[element:string] [name:string]")
     // deno-lint-ignore no-explicit-any
     .action(async (_options: unknown, ...args: any[]) => {
-      let type: GenerateType = args[0] as GenerateType;
+      let type: GenerateType | undefined = args[0];
+      let name: string | undefined = args[1];
       if (!type) {
         type = await Select.prompt({
           message: `Which Nest element would you like to create?`,
@@ -103,12 +84,12 @@ export function generateCommand() {
           return;
         }
       }
-      const name: string = await Input.prompt({
-        message: `What name would you like to use for the ${
-          GenerateTypes[type]
-        }?`,
-        minLength: 1,
-      });
+      if (!name) {
+        name = await Input.prompt({
+          message: `What name would you like to use for the ${type}?`,
+          minLength: 1,
+        });
+      }
       await generate(type, name);
     });
 }
