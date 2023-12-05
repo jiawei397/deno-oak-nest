@@ -17,6 +17,7 @@
     "dev:schedule": "deno task --cwd=modules/schedule dev",
     "dev:alias": "deno task --cwd=example/alias start",
     "dev:auth": "deno task --cwd=example/auth start",
+    "dev:authentication": "deno task --cwd=example/authentication start",
     "dev:cookie": "deno task --cwd=example/cookie start",
     "dev:lifecycle": "deno run -A example/lifecycle/main.ts",
     "dev:interceptor": "deno run -A --watch example/interceptor/main.ts",
