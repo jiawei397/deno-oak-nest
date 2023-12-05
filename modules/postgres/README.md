@@ -17,7 +17,7 @@ Add import map in `deno.json`:
     "@nest": "https://deno.land/x/deno_nest@v3.11.0/mod.ts",
     "@nest/hono": "https://deno.land/x/deno_nest@v3.11.0/modules/hono/mod.ts",
     "@nest/postgres": "https://deno.land/x/deno_nest@v3.11.0/modules/postgres/mod.ts",
-    "hono/": "https://deno.land/x/hono@v3.9.1/",
+    "hono/": "https://deno.land/x/hono@v3.11.1/",
     "postgres/": "https://deno.land/x/postgres@v0.17.0/"
   }
 }

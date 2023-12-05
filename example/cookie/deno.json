@@ -14,7 +14,7 @@
     "std/": "https://deno.land/std@0.202.0/",
     "@nest": "../../mod.ts",
     "@nest/hono": "../../modules/hono/mod.ts",
-    "hono/": "https://deno.land/x/hono@v3.9.1/",
+    "hono/": "https://deno.land/x/hono@v3.11.1/",
     "@nest/oak": "../../modules/oak/mod.ts",
     "oak": "https://deno.land/x/oak@v12.6.1/mod.ts"
   }

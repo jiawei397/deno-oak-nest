@@ -22,7 +22,8 @@ export class NestResponse implements Response {
     return this.originalContext as T;
   }
 
-  render(): HonoResponse {
+  // deno-lint-ignore require-await
+  async render(): Promise<HonoResponse> {
     const body = this.body;
     if (body && body instanceof HonoResponse) {
       return body;
@@ -49,7 +50,8 @@ export class NestResponse implements Response {
       typeof body === "object" || typeof body === "number" ||
       typeof body === "boolean"
     ) {
-      return context.json(body);
+      // deno-lint-ignore no-explicit-any
+      return context.json(body as any);
     }
     if (contextType && contextType.includes("text/plain")) {
       return context.text(body);

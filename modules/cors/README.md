@@ -11,7 +11,7 @@ Add import map in `deno.json`:
     "@nest": "https://deno.land/x/deno_nest@v3.11.0/mod.ts",
     "@nest/hono": "https://deno.land/x/deno_nest@v3.11.0/modules/hono/mod.ts",
     "@nest/cors": "https://deno.land/x/deno_nest@v3.11.0/modules/cors/mod.ts",
-    "hono/": "https://deno.land/x/hono@v3.9.1/"
+    "hono/": "https://deno.land/x/hono@v3.11.1/"
   }
 }
 ```

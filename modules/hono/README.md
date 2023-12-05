@@ -11,7 +11,7 @@ Add import map in `deno.json`:
   "imports": {
     "@nest": "https://deno.land/x/deno_nest@v3.11.0/mod.ts",
     "@nest/hono": "https://deno.land/x/deno_nest@v3.11.0/modules/hono/mod.ts",
-    "hono/": "https://deno.land/x/hono@v3.9.1/",
+    "hono/": "https://deno.land/x/hono@v3.11.1/",
     "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts"
   }
 }
