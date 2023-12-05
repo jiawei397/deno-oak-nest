@@ -8,6 +8,10 @@ export class AppController {
   hello() {
     return {
       message: "Hello ejs",
+      user: {
+        name: "Tom",
+        age: 18,
+      },
     };
   }
 }
