@@ -6,6 +6,13 @@ import { SignInDto } from "./auth.dto.ts";
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  /**
+   * login
+   * @example
+   * ```bash
+   * curl -X POST http://localhost:2000/auth/login -d '{"username": "john", "password": "changeme"}' -H "Content-Type: application/json"
+   * ```
+   */
   @Post("login")
   signIn(@Body() signInDto: SignInDto) {
     return this.authService.signIn(signInDto.username, signInDto.password);
