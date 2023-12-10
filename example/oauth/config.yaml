@@ -1,0 +1,7 @@
+port: 4000
+clientId: "xxx"
+clientSecret: "xxx"
+jwtSecret: "DO NOT USE THIS VALUE. INSTEAD, CREATE A COMPLEX SECRET AND KEEP IT SAFE OUTSIDE OF THE SOURCE CODE."
+jwtExpiration: 604800 # 7d
+tokenKey: "githubToken"
+redirectBaseURL: "http://localhost:4000"

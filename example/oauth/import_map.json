@@ -1,0 +1,11 @@
+{
+  "imports": {
+    "std/": "https://deno.land/std@0.202.0/",
+    "@nest": "../../mod.ts",
+    "@nest/hono": "../../modules/hono/mod.ts",
+    "@nest/cors": "../../modules/cors/mod.ts",
+    "@nest/jwt": "../../modules/jwt/mod.ts",
+    "hono/": "https://deno.land/x/hono@v3.9.1/",
+    "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts"
+  }
+}

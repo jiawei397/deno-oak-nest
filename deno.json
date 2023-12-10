@@ -28,6 +28,7 @@
     "dev:dynamicModule": "deno task --cwd=example/dynamicModule dev",
     "dev:dynamicModule:prod": "deno task --cwd=example/dynamicModule start",
     "dev:log": "deno task --cwd=example/log dev",
+    "dev:oauth": "deno task --cwd=example/oauth start",
     "dev:upload": "deno run -A --watch example/upload/main.ts",
     "dev:provider": "deno run -A --watch example/provider/main.ts",
     "dev:static": "deno task --cwd=example/static start",

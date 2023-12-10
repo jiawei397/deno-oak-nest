@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GitHub OAuth</title>
+</head>
+
+<body>
+  <h1>
+    <a id="login" href="/api/user/login">GitHub OAuth</a>
+  </h1>
+  <div id="userInfo"></div>
+  <script>
+    fetch('/api/user/info')
+      .then(res => res.json())
+      .then(data => {
+        if (data.name) {
+          document.getElementById('login').style.display = 'none'
+          document.getElementById('userInfo').innerHTML = `
+            <h1>Hello ${data.name}</h1>
+            <img src="${data.avatar_url}" alt="avatar" />
+          `
+        }
+      })
+  </script>
+</body>
+
+</html>
