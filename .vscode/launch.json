@@ -127,7 +127,7 @@
       "request": "launch",
       "name": "test",
       "type": "node",
-      "program": "${workspaceFolder}/modules/cache/src/cache.interceptor_test.ts",
+      "program": "${workspaceFolder}/modules/hono/tests/hono_test.ts",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "deno",
       "runtimeArgs": [

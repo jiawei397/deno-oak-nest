@@ -123,6 +123,12 @@ export const createMockContext = (options: MockOptions): Context => {
       throw new Error("Function not implemented.");
     },
     render() {},
+    redirect(url: string, status?: number) {
+      if (status) {
+        this.status = status;
+      }
+      this.headers.set("location", url);
+    },
   };
 
   return {

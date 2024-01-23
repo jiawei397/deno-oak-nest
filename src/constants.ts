@@ -21,3 +21,5 @@ export const APP_CRON_INSTANCE = Symbol("APP_CRON_INSTANCE");
  * ```
  */
 export const INQUIRER = "INQUIRER";
+
+export const REDIRECT_BACK = Symbol("redirect backwards");

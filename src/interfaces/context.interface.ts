@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Status } from "../../deps.ts";
+import { REDIRECT_BACK } from "../constants.ts";
 
 export interface Request {
   startTime: number;
@@ -100,6 +101,8 @@ export interface Response {
    * @warning not recommended to call this method directly, unless you know what you are doing.
    */
   render(): any;
+
+  redirect(url: string | typeof REDIRECT_BACK, status?: number): void;
 }
 
 export interface Context {

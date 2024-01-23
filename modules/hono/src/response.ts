@@ -1,4 +1,5 @@
 import { Status, STATUS_TEXT } from "../../../deps.ts";
+import { REDIRECT_BACK } from "../../../src/constants.ts";
 import { Response } from "../../../src/interfaces/context.interface.ts";
 import { type HonoContext, HonoResponse } from "../deps.ts";
 import { NestCookies } from "./cookies.ts";
@@ -12,6 +13,26 @@ export class NestResponse implements Response {
   constructor(context: HonoContext, public cookies: NestCookies) {
     this.originalContext = context;
     this.status = Status.OK;
+  }
+
+  redirect(url: string | typeof REDIRECT_BACK, status?: number): void {
+    let location: string;
+    if (url === REDIRECT_BACK) {
+      const url = this.originalContext.req.header("Referer");
+      if (!url) {
+        const u = new URL(this.originalContext.req.url);
+        location = u.origin;
+      } else {
+        location = url;
+      }
+    } else {
+      location = url;
+    }
+    const context = this.originalContext;
+    const statusCode = status || 302;
+    this.status = statusCode;
+    context.status(statusCode);
+    this.body = context.redirect(location, statusCode);
   }
 
   get statusText() {

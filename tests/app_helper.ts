@@ -21,6 +21,9 @@ import {
   Patch,
   Post,
   Put,
+  REDIRECT_BACK,
+  Res,
+  type Response,
 } from "@nest";
 import { Max, Min } from "class_validator";
 import { findUnusedPort } from "./common_helper.ts";
@@ -2023,4 +2026,74 @@ export function createCommonTests(
     callStack.length = 0;
     await app.close();
   });
+
+  Deno.test(
+    `${type} redirect`,
+    { sanitizeOps: false, sanitizeResources: false },
+    async (t) => {
+      const callStack: number[] = [];
+
+      @Controller("")
+      class A {
+        @Get("/a")
+        redirect(@Res() res: Response) {
+          callStack.push(1);
+          res.redirect(REDIRECT_BACK);
+        }
+
+        @Get("/b")
+        redirect2(@Res() res: Response) {
+          callStack.push(2);
+          res.redirect("https://www.baidu.com");
+        }
+
+        @Get("/c")
+        redirect3(@Res() res: Response) {
+          callStack.push(3);
+          res.redirect("https://www.baidu.com", 301);
+        }
+      }
+
+      @Module({
+        controllers: [A],
+      })
+      class AppModule {}
+      const { app, baseUrl } = await createApp(AppModule);
+
+      await t.step("fetch a", async () => {
+        const res = await fetch(`${baseUrl}/a`, {
+          redirect: "manual",
+        });
+        assertEquals(callStack, [1]);
+        assertEquals(res.status, 302);
+        assertEquals(res.headers.get("location"), baseUrl);
+        await res.body?.cancel();
+        callStack.length = 0;
+      });
+
+      await t.step("fetch b", async () => {
+        const res = await fetch(`${baseUrl}/b`, {
+          redirect: "manual",
+        });
+        assertEquals(callStack, [2]);
+        assertEquals(res.status, 302);
+        assertEquals(res.headers.get("location"), "https://www.baidu.com");
+        await res.body?.cancel();
+        callStack.length = 0;
+      });
+
+      await t.step("fetch c", async () => {
+        const res = await fetch(`${baseUrl}/c`, {
+          redirect: "manual",
+        });
+        assertEquals(callStack, [3]);
+        assertEquals(res.status, 301);
+        assertEquals(res.headers.get("location"), "https://www.baidu.com");
+        await res.body?.cancel();
+        callStack.length = 0;
+      });
+
+      await app.close();
+    },
+  );
 }

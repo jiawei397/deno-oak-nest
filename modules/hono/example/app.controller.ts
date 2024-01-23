@@ -6,6 +6,7 @@ import {
   Params,
   Post,
   Query,
+  REDIRECT_BACK,
   Res,
   type Response,
 } from "@nest";
@@ -116,6 +117,11 @@ export class AppController {
   redirect(@Res() res: Response) {
     res.headers.set("Location", "https://www.baidu.com");
     res.status = 302;
+  }
+
+  @Get("/redirect2")
+  redirect2(@Res() res: Response) {
+    res.redirect(REDIRECT_BACK);
   }
 
   @Get("/originContext")

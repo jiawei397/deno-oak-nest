@@ -181,104 +181,118 @@ Deno.test("resolve will return not same", async () => {
   assert(d !== c);
 });
 
-Deno.test("e2e test", async () => {
-  const moduleRef = await createTestingModule({
-    controllers: [A],
-    // providers: [B],
-  })
-    .compile();
-  const app = moduleRef.createNestApplication();
-  await app.init();
-
-  const res = await fetch(`http://localhost:${app.port}/`);
-  assertEquals(res.status, 200);
-  assertEquals(await res.text(), "b");
-
-  await app.close();
-});
-
-Deno.test("override guard", async (t) => {
-  const callStack: number[] = [];
-
-  @Injectable()
-  class AuthGuard implements CanActivate {
-    async canActivate(_context: Context): Promise<boolean> {
-      callStack.push(1);
-      return true;
-    }
-  }
-
-  @Controller("")
-  @UseGuards(AuthGuard)
-  class TestController {
-    @Get("/")
-    a() {
-      callStack.push(2);
-      return "a";
-    }
-  }
-
-  await t.step("test origin", async () => {
+Deno.test(
+  "e2e test",
+  { sanitizeOps: false, sanitizeResources: false },
+  async () => {
     const moduleRef = await createTestingModule({
-      controllers: [TestController],
-    }).compile();
+      controllers: [A],
+      // providers: [B],
+    })
+      .compile();
     const app = moduleRef.createNestApplication();
     await app.init();
 
     const res = await fetch(`http://localhost:${app.port}/`);
     assertEquals(res.status, 200);
-    assertEquals(await res.text(), "a");
-    assertEquals(callStack, [1, 2]);
-
-    callStack.length = 0;
+    assertEquals(await res.text(), "b");
 
     await app.close();
-  });
+  },
+);
 
-  await t.step("override guard", async () => {
+Deno.test(
+  "override guard",
+  { sanitizeOps: false, sanitizeResources: false },
+  async (t) => {
+    const callStack: number[] = [];
+
     @Injectable()
-    class AuthGuard2 implements CanActivate {
+    class AuthGuard implements CanActivate {
       async canActivate(_context: Context): Promise<boolean> {
-        callStack.push(3);
-        return false;
+        callStack.push(1);
+        return true;
       }
     }
 
-    const moduleRef = await createTestingModule({
-      controllers: [TestController],
-    }).overrideGuard(AuthGuard, AuthGuard2).compile();
-
-    const app = moduleRef.createNestApplication();
-    await app.init();
-
-    const res = await fetch(`http://localhost:${app.port}/`);
-    assertEquals(res.status, 403);
-    res.body?.cancel();
-
-    assertEquals(callStack, [3]);
-
-    callStack.length = 0;
-
-    await app.close();
-  });
-
-  await t.step("override guard with no controllers", async () => {
-    @Injectable()
-    class AuthGuard2 implements CanActivate {
-      async canActivate(_context: Context): Promise<boolean> {
-        return false;
+    @Controller("")
+    @UseGuards(AuthGuard)
+    class TestController {
+      @Get("/")
+      a() {
+        callStack.push(2);
+        return "a";
       }
     }
-    await createTestingModule({}).overrideGuard(
-      AuthGuard,
-      AuthGuard2,
-    ).compile();
 
-    assert(true, "no error");
-  });
-});
+    await t.step(
+      "test origin",
+      async () => {
+        const moduleRef = await createTestingModule({
+          controllers: [TestController],
+        }).compile();
+        const app = moduleRef.createNestApplication();
+        await app.init();
 
-Deno.test("override exception filter", async (t) => {
+        const res = await fetch(`http://localhost:${app.port}/`);
+        assertEquals(res.status, 200);
+        assertEquals(await res.text(), "a");
+        assertEquals(callStack, [1, 2]);
+
+        callStack.length = 0;
+
+        await app.close();
+      },
+    );
+
+    await t.step("override guard", async () => {
+      @Injectable()
+      class AuthGuard2 implements CanActivate {
+        async canActivate(_context: Context): Promise<boolean> {
+          callStack.push(3);
+          return false;
+        }
+      }
+
+      const moduleRef = await createTestingModule({
+        controllers: [TestController],
+      }).overrideGuard(AuthGuard, AuthGuard2).compile();
+
+      const app = moduleRef.createNestApplication();
+      await app.init();
+
+      const res = await fetch(`http://localhost:${app.port}/`);
+      assertEquals(res.status, 403);
+      res.body?.cancel();
+
+      assertEquals(callStack, [3]);
+
+      callStack.length = 0;
+
+      await app.close();
+    });
+
+    await t.step("override guard with no controllers", async () => {
+      @Injectable()
+      class AuthGuard2 implements CanActivate {
+        async canActivate(_context: Context): Promise<boolean> {
+          return false;
+        }
+      }
+      await createTestingModule({}).overrideGuard(
+        AuthGuard,
+        AuthGuard2,
+      ).compile();
+
+      assert(true, "no error");
+    });
+  },
+);
+
+Deno.test("override exception filter", {
+  sanitizeOps: false,
+  sanitizeResources: false,
+}, async (t) => {
   const callStack: number[] = [];
 
   @Catch()
@@ -382,7 +396,10 @@ Deno.test("override exception filter", async (t) => {
   });
 });
 
-Deno.test("override interceptor", async (t) => {
+Deno.test("override interceptor", {
+  sanitizeOps: false,
+  sanitizeResources: false,
+}, async (t) => {
   const callStack: number[] = [];
 
   @Injectable()
@@ -449,89 +466,93 @@ Deno.test("override interceptor", async (t) => {
   });
 });
 
-Deno.test("override module", async (t) => {
-  const callStack: number[] = [];
+Deno.test(
+  "override module",
+  { sanitizeOps: false, sanitizeResources: false },
+  async (t) => {
+    const callStack: number[] = [];
 
-  @Controller("a")
-  class A {
-    @Get("/")
-    a() {
-      callStack.push(1);
-      return "a";
-    }
-  }
-
-  @Module({
-    controllers: [A],
-  })
-  class ModuleA {}
-
-  await t.step("test origin", async () => {
-    const moduleRef = await createTestingModule({
-      imports: [ModuleA],
-    }).compile();
-    const app = moduleRef.createNestApplication();
-    await app.init();
-
-    const res = await fetch(`http://localhost:${app.port}/a`);
-    assertEquals(res.status, 200);
-    assertEquals(await res.text(), "a");
-    assertEquals(callStack, [1]);
-
-    callStack.length = 0;
-
-    await app.close();
-  });
-
-  await t.step("override module", async () => {
-    @Controller("b")
-    class B {
+    @Controller("a")
+    class A {
       @Get("/")
-      b() {
-        callStack.push(2);
-        return "b";
+      a() {
+        callStack.push(1);
+        return "a";
       }
     }
 
     @Module({
-      controllers: [B],
+      controllers: [A],
     })
-    class ModuleB {}
+    class ModuleA {}
 
-    const moduleRef = await createTestingModule({
-      imports: [ModuleA],
-    }).overrideModule(ModuleA, ModuleB).compile();
+    await t.step("test origin", async () => {
+      const moduleRef = await createTestingModule({
+        imports: [ModuleA],
+      }).compile();
+      const app = moduleRef.createNestApplication();
+      await app.init();
 
-    const app = moduleRef.createNestApplication();
-    await app.init();
+      const res = await fetch(`http://localhost:${app.port}/a`);
+      assertEquals(res.status, 200);
+      assertEquals(await res.text(), "a");
+      assertEquals(callStack, [1]);
 
-    const res = await fetch(`http://localhost:${app.port}/b`);
-    assertEquals(res.status, 200);
-    assertEquals(await res.text(), "b");
-    assertEquals(callStack, [2]);
+      callStack.length = 0;
 
-    callStack.length = 0;
+      await app.close();
+    });
 
-    await app.close();
-  });
+    await t.step("override module", async () => {
+      @Controller("b")
+      class B {
+        @Get("/")
+        b() {
+          callStack.push(2);
+          return "b";
+        }
+      }
 
-  await t.step("override module with no imports", async () => {
-    @Module({})
-    class ModuleB {}
+      @Module({
+        controllers: [B],
+      })
+      class ModuleB {}
 
-    const moduleRef = await createTestingModule({}).overrideModule(
-      ModuleA,
-      ModuleB,
-    ).compile();
+      const moduleRef = await createTestingModule({
+        imports: [ModuleA],
+      }).overrideModule(ModuleA, ModuleB).compile();
 
-    const app = moduleRef.createNestApplication();
-    await app.init();
+      const app = moduleRef.createNestApplication();
+      await app.init();
 
-    const res = await fetch(`http://localhost:${app.port}/a`);
-    assertEquals(res.status, 404);
-    await res.body?.cancel();
-    assertEquals(callStack, []);
+      const res = await fetch(`http://localhost:${app.port}/b`);
+      assertEquals(res.status, 200);
+      assertEquals(await res.text(), "b");
+      assertEquals(callStack, [2]);
 
-    await app.close();
-  });
-});
+      callStack.length = 0;
+
+      await app.close();
+    });
+
+    await t.step("override module with no imports", async () => {
+      @Module({})
+      class ModuleB {}
+
+      const moduleRef = await createTestingModule({}).overrideModule(
+        ModuleA,
+        ModuleB,
+      ).compile();
+
+      const app = moduleRef.createNestApplication();
+      await app.init();
+
+      const res = await fetch(`http://localhost:${app.port}/a`);
+      assertEquals(res.status, 404);
+      await res.body?.cancel();
+      assertEquals(callStack, []);
+
+      await app.close();
+    });
+  },
+);

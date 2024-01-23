@@ -1,4 +1,12 @@
-import { Controller, Get, Params, Query, Res, type Response } from "@nest";
+import {
+  Controller,
+  Get,
+  Params,
+  Query,
+  REDIRECT_BACK,
+  Res,
+  type Response,
+} from "@nest";
 import { AppService } from "./app.service.ts";
 import { OakContext } from "@nest/oak";
 
@@ -10,6 +18,11 @@ export class AppController {
   @Get("/")
   hello() {
     return this.appService.hello();
+  }
+
+  @Get("/redirect")
+  redirect(@Res() res: Response) {
+    res.redirect(REDIRECT_BACK);
   }
 
   @Get("/hello/:name")
