@@ -2071,6 +2071,20 @@ export function createCommonTests(
         callStack.length = 0;
       });
 
+      await t.step("fetch a with referer", async () => {
+        const res = await fetch(`${baseUrl}/a`, {
+          redirect: "manual",
+          headers: {
+            referer: "https://www.baidu.com",
+          },
+        });
+        assertEquals(callStack, [1]);
+        assertEquals(res.status, 302);
+        assertEquals(res.headers.get("location"), "https://www.baidu.com");
+        await res.body?.cancel();
+        callStack.length = 0;
+      });
+
       await t.step("fetch b", async () => {
         const res = await fetch(`${baseUrl}/b`, {
           redirect: "manual",
