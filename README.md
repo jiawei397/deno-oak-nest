@@ -1,6 +1,6 @@
 # deno_nest
 
-[![deno version](https://img.shields.io/badge/deno-^1.37.0-blue?logo=deno)](https://github.com/denoland/deno)
+[![deno version](https://img.shields.io/badge/deno-^1.41.2-blue?logo=deno)](https://github.com/denoland/deno)
 [![Deno](https://github.com/jiawei397/deno-oak-nest/actions/workflows/deno.yml/badge.svg)](https://github.com/jiawei397/deno-oak-nest/actions/workflows/deno.yml)
 [![codecov](https://codecov.io/gh/jiawei397/deno-oak-nest/branch/master/graph/badge.svg?token=NKP41TU4SL)](https://codecov.io/gh/jiawei397/deno-oak-nest)
 
