@@ -1,6 +1,9 @@
 import { Status, STATUS_TEXT } from "../../../deps.ts";
 import { REDIRECT_BACK } from "../../../src/constants.ts";
-import { Response } from "../../../src/interfaces/context.interface.ts";
+import {
+  RedirectStatusCode,
+  Response,
+} from "../../../src/interfaces/context.interface.ts";
 import { type OakContext } from "../deps.ts";
 import { NestCookies } from "./cookies.ts";
 
@@ -25,7 +28,10 @@ export class NestResponse implements Response {
     return this.originalContext as T;
   }
 
-  redirect(url: string | typeof REDIRECT_BACK, status?: number): void {
+  redirect(
+    url: string | typeof REDIRECT_BACK,
+    status?: RedirectStatusCode,
+  ): void {
     let location: string;
     if (url === REDIRECT_BACK) {
       const url = this.originalContext.request.headers.get("Referer");

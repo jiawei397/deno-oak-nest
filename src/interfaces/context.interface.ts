@@ -2,6 +2,8 @@
 import { Status } from "../../deps.ts";
 import { REDIRECT_BACK } from "../constants.ts";
 
+export type RedirectStatusCode = 300 | 301 | 302 | 303 | 304 | 307 | 308;
+
 export interface Request {
   startTime: number;
   getOriginalRequest<T>(): T;
@@ -102,7 +104,10 @@ export interface Response {
    */
   render(): any;
 
-  redirect(url: string | typeof REDIRECT_BACK, status?: number): void;
+  redirect(
+    url: string | typeof REDIRECT_BACK,
+    status?: RedirectStatusCode,
+  ): void;
 }
 
 export interface Context {

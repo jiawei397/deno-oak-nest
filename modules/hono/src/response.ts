@@ -1,7 +1,9 @@
-import { RedirectStatusCode } from "hono/utils/http-status.ts";
 import { Status, STATUS_TEXT } from "../../../deps.ts";
 import { REDIRECT_BACK } from "../../../src/constants.ts";
-import { Response } from "../../../src/interfaces/context.interface.ts";
+import type {
+  RedirectStatusCode,
+  Response,
+} from "../../../src/interfaces/context.interface.ts";
 import { type HonoContext, HonoResponse } from "../deps.ts";
 import { NestCookies } from "./cookies.ts";
 
@@ -16,7 +18,10 @@ export class NestResponse implements Response {
     this.status = Status.OK;
   }
 
-  redirect(url: string | typeof REDIRECT_BACK, status?: number): void {
+  redirect(
+    url: string | typeof REDIRECT_BACK,
+    status?: RedirectStatusCode,
+  ): void {
     let location: string;
     if (url === REDIRECT_BACK) {
       const url = this.originalContext.req.header("Referer");
@@ -32,8 +37,8 @@ export class NestResponse implements Response {
     const context = this.originalContext;
     const statusCode = status || 302;
     this.status = statusCode;
-    context.status(statusCode as RedirectStatusCode);
-    this.body = context.redirect(location, statusCode as RedirectStatusCode);
+    context.status(statusCode);
+    this.body = context.redirect(location, statusCode);
   }
 
   get statusText() {
