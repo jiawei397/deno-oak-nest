@@ -8,3 +8,7 @@ export type NestMiddleware = (
   res: Response,
   next: Next,
 ) => Promise<any> | any;
+
+export type INestMiddleware = {
+  use: NestMiddleware;
+};

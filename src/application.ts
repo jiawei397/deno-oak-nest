@@ -24,7 +24,6 @@ import { ExceptionFilters } from "./interfaces/filter.interface.ts";
 import { ControllerMethod, NestGuards } from "./interfaces/guard.interface.ts";
 import { NestUseInterceptors } from "./interfaces/interceptor.interface.ts";
 import { LoggerService } from "./interfaces/log.interface.ts";
-import { NestMiddleware } from "./interfaces/middleware.interface.ts";
 import { CollectResult, ModuleType } from "./interfaces/module.interface.ts";
 import { Provider } from "./interfaces/provider.interface.ts";
 import { IRouter, RouteMap } from "./interfaces/route.interface.ts";
@@ -41,6 +40,10 @@ import {
   getMethodPaths,
   storeCronInstance,
 } from "./utils.ts";
+import {
+  INestMiddleware,
+  NestMiddleware,
+} from "./interfaces/middleware.interface.ts";
 
 export class Application {
   private apiPrefix = "";
@@ -82,12 +85,37 @@ export class Application {
     });
   }
 
-  use(...middlewares: NestMiddleware[]): void {
-    middlewares.forEach((middleware) => {
-      this.router.use(async (ctx, next) => {
-        await middleware(ctx.request, ctx.response, next); // TODO: is need return?
-      });
-    });
+  isConstructorMiddleware(
+    middleware: NestMiddleware | Constructor<INestMiddleware>,
+  ): middleware is Constructor<INestMiddleware> {
+    return typeof middleware === "function" && middleware.prototype &&
+      "use" in middleware.prototype;
+  }
+
+  /**
+   * use middlewares
+   *
+   * @warning If use `class` middleware, the `use` method is `async` and should use `await` outside the `use` method.
+   * Such as:
+   * ```ts
+   * await app.use(SessionMiddleware)
+   * ```
+   */
+  async use(
+    ...middlewares: (NestMiddleware | Constructor<INestMiddleware>)[]
+  ): Promise<void> {
+    for (const middleware of middlewares) {
+      if (this.isConstructorMiddleware(middleware)) {
+        const mid = await factory.getInstance<INestMiddleware>(middleware);
+        this.router.use(async (ctx, next) => {
+          await mid.use(ctx.request, ctx.response, next);
+        });
+      } else {
+        this.router.use(async (ctx, next) => {
+          await middleware(ctx.request, ctx.response, next);
+        });
+      }
+    }
   }
 
   /**
