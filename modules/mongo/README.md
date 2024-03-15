@@ -12,7 +12,7 @@ Add import map in `deno.json`:
     "@nest": "https://deno.land/x/deno_nest@v3.13.0/mod.ts",
     "@nest/hono": "https://deno.land/x/deno_nest@v3.13.0/modules/hono/mod.ts",
     "@nest/mongo": "https://deno.land/x/deno_nest@v3.13.0/modules/mongo/mod.ts",
-    "hono/": "https://deno.land/x/hono@v3.11.1/",
+    "hono/": "https://deno.land/x/hono@v4.1.0/",
     "deno_mongo_schema": "https://deno.land/x/deno_mongo_schema@v1.0.3/mod.ts",
     "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts"
   }

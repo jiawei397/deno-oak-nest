@@ -14,7 +14,7 @@
     "@nest": "../../mod.ts",
     "@nest/hono": "../../modules/hono/mod.ts",
     "@nest/jwt": "../../modules/jwt/mod.ts",
-    "hono/": "https://deno.land/x/hono@v3.11.1/",
+    "hono/": "https://deno.land/x/hono@v4.1.0/",
     "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts"
   }
 }

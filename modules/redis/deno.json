@@ -14,7 +14,7 @@
     "@nest/hono": "../hono/mod.ts",
     "@nest/cache": "../cache/mod.ts",
     "@nest/redis": "./mod.ts",
-    "hono/": "https://deno.land/x/hono@v3.11.1/",
+    "hono/": "https://deno.land/x/hono@v4.1.0/",
     "redis": "https://deno.land/x/redis@v0.29.3/mod.ts" 
    }
 }

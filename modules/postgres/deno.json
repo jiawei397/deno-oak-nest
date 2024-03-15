@@ -13,7 +13,7 @@
     "@nest": "../../mod.ts",
     "@nest/hono": "../hono/mod.ts",
     "@nest/postgres": "./mod.ts",
-    "hono/": "https://deno.land/x/hono@v3.11.1/",
+    "hono/": "https://deno.land/x/hono@v4.1.0/",
     "postgres/": "https://deno.land/x/postgres@v0.17.0/"
   }
 }

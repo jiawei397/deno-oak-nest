@@ -14,6 +14,6 @@
     "std/": "https://deno.land/std@0.202.0/",
     "@nest": "../../mod.ts",
     "@nest/hono": "../../modules/hono/mod.ts",
-    "hono/": "https://deno.land/x/hono@v3.11.1/"
+    "hono/": "https://deno.land/x/hono@v4.1.0/"
   }
 }

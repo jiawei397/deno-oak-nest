@@ -113,7 +113,7 @@ async function writeImportMap(name: string) {
   const realPath = join(name, "import_map.json");
   const content = await Deno.readTextFile(realPath);
   // "@nest/hono": "https://deno.land/x/deno_nest@v3.1.1/modules/hono/mod.ts",
-  // "hono/": "https://deno.land/x/hono@v3.11.1/",
+  // "hono/": "https://deno.land/x/hono@v4.1.0/",
   const newContent = content.replace(/\"hono\/\"/, `"oak"`).replaceAll(
     "hono",
     "oak",

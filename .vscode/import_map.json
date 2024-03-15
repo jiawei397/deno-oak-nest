@@ -21,7 +21,7 @@
     "@nest/tests": "../tests/mod.ts",
     "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts",
     "std/": "https://deno.land/std@0.202.0/",
-    "hono/": "https://deno.land/x/hono@v3.11.1/",
+    "hono/": "https://deno.land/x/hono@v4.1.0/",
     "oak": "https://deno.land/x/oak@v12.6.1/mod.ts",
     "mysql": "https://deno.land/x/mysql@v2.11.0/mod.ts",
     "postgres/": "https://deno.land/x/postgres@v0.17.0/",

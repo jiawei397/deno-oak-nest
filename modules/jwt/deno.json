@@ -13,6 +13,6 @@
     "@nest": "../../mod.ts",
     "@nest/hono": "../hono/mod.ts",
     "@nest/jwt": "./mod.ts",
-    "hono/": "https://deno.land/x/hono@v3.11.1/"
+    "hono/": "https://deno.land/x/hono@v4.1.0/"
   }
 }

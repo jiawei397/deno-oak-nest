@@ -1,3 +1,4 @@
+import { RedirectStatusCode } from "hono/utils/http-status.ts";
 import { Status, STATUS_TEXT } from "../../../deps.ts";
 import { REDIRECT_BACK } from "../../../src/constants.ts";
 import { Response } from "../../../src/interfaces/context.interface.ts";
@@ -31,8 +32,8 @@ export class NestResponse implements Response {
     const context = this.originalContext;
     const statusCode = status || 302;
     this.status = statusCode;
-    context.status(statusCode);
-    this.body = context.redirect(location, statusCode);
+    context.status(statusCode as RedirectStatusCode);
+    this.body = context.redirect(location, statusCode as RedirectStatusCode);
   }
 
   get statusText() {

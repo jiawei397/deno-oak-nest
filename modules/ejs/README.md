@@ -13,7 +13,7 @@ Add import map in `deno.json`:
   "imports": {
     "@nest": "https://deno.land/x/deno_nest@v3.13.0/mod.ts",
     "@nest/hono": "https://deno.land/x/deno_nest@v3.13.0/modules/hono/mod.ts",
-    "hono/": "https://deno.land/x/hono@v3.11.1/",
+    "hono/": "https://deno.land/x/hono@v4.1.0/",
     "@nest/ejs": "https://deno.land/x/deno_nest@v3.13.0/modules/ejs/mod.ts"
   }
 }

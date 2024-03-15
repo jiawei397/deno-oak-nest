@@ -8,14 +8,13 @@ export {
 
 export {
   deleteCookie,
-  etag,
   getCookie,
   getSignedCookie,
-  serveStatic,
-  type ServeStaticOptions,
   setCookie,
   setSignedCookie,
-} from "hono/middleware.ts";
+} from "hono/helper.ts";
+
+export { etag, serveStatic } from "hono/middleware.ts";
 
 export const HonoResponse = Response;
 export type HonoResponse = Response;
