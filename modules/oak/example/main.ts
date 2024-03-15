@@ -8,6 +8,7 @@ app.setGlobalPrefix("/api");
 app.useStaticAssets("example/static", {
   prefix: "static",
 });
+app.enableShutdownHooks(["SIGINT"]);
 
 app.useOriginMiddleware(CORS());
 
