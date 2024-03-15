@@ -27,6 +27,7 @@ import {
 } from "./interfaces/module.interface.ts";
 import { Module } from "./decorators/module.ts";
 import { Res } from "./decorators/method.ts";
+import { delay } from "std/async/delay.ts";
 
 Deno.test("module init", async (t) => {
   const callStack: number[] = [];
@@ -938,4 +939,6 @@ Deno.test("enableShutdownHooks", async (t) => {
   // reset
   Deno.addSignalListener = originalAddSignalListener;
   Deno.removeSignalListener = originalRemoveSignalListener;
+
+  await delay(1000);
 });

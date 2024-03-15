@@ -138,10 +138,15 @@ export class Application {
    * @param [signal] The signal which caused the shutdown.
    */
   async close(signal?: ShutdownSignal) {
+    this.log("Closing Nest application...");
+    this.log("Module destroy start...");
     await this.onModuleDestroy().catch(this.log.bind(this));
+    this.log("Before application shutdown start...");
     await this.beforeApplicationShutdown(signal);
     this.abortController.abort();
+    this.log("Application shutdown...");
     await this.onApplicationShutdown(signal);
+    this.log("Nest application closed complete");
   }
 
   /**
@@ -156,13 +161,20 @@ export class Application {
   public enableShutdownHooks(signals: ShutdownSignal[] = ["SIGINT"]): this {
     let currentSignal: ShutdownSignal | "" = "";
     new Set(signals).forEach((signal) => {
-      const callback = () => {
+      const callback = async () => {
         if (currentSignal) {
           return;
         }
         currentSignal = signal;
         Deno.removeSignalListener(signal, callback);
-        this.close(signal);
+        this.log(`${signal} received`);
+        await this.close(signal);
+        this.log(`The Deno process will shutdown in 500ms.`);
+        setTimeout(() => {
+          if (Deno.env.get("DENO_ENV") !== "test") {
+            Deno.exit();
+          }
+        }, 500);
       };
       Deno.addSignalListener(signal, callback);
     });
