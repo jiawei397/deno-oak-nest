@@ -11,6 +11,15 @@ export type ParamDecoratorCallback = (
 
 export interface FormDataOptions {
   maxFileSize?: number;
+  /**
+   * If true, will not throw error when validate failed, but still can get the fields which is transformed.
+   *
+   * If you want to skip validate, you may use `interface` or `type` to define the fields, or use the `class DTO` like this:
+   * ```ts
+   * async sigin(@Form() fields: typeof SigninDto.prototype) { }
+   * ```
+   */
+  ignoreValidate?: boolean;
 }
 
 export type ArrayItemType = "boolean" | "number" | "string";

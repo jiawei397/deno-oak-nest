@@ -922,6 +922,57 @@ Deno.test("form not pass", async (t) => {
   });
 });
 
+Deno.test("form use ignoreValidate", async (t) => {
+  const callStack: number[] = [];
+
+  // deno-lint-ignore no-unused-vars
+  class Dto {
+    @IsString()
+    a: string;
+
+    @Property()
+    @IsNumber()
+    @Max(10)
+    b: number;
+  }
+
+  @Controller("")
+  class A {
+    @Post("a")
+    a(@Form({ ignoreValidate: true }) body: Dto) {
+      callStack.push(1);
+      assertEquals(body, {
+        a: "a",
+        b: 20,
+      }, "ignore validate, but translate to number");
+      return body;
+    }
+  }
+
+  const app = createMockApp();
+  app.addController(A);
+
+  await t.step("not valid but pass", async () => {
+    const fileMockData = new FormData();
+    fileMockData.set("a", "a");
+    fileMockData.set("b", "20");
+
+    const ctx = createMockContext({
+      path: "/a",
+      method: "POST",
+      body: {
+        type: "form-data",
+        value: fileMockData,
+      },
+    });
+    await mockCallMethod(app, ctx);
+    assertEquals(callStack, [1]);
+    assertEquals(ctx.response.status, 200);
+
+    callStack.length = 0;
+  });
+});
+
 Deno.test("form with file", async (t) => {
   const callStack: number[] = [];
 

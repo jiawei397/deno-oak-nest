@@ -320,7 +320,14 @@ export function Form(options: FormDataOptions = {}) {
           }
         }
       });
-      await transAndValidateParams(target, methodName, index, fields);
+
+      try {
+        await transAndValidateParams(target, methodName, index, fields);
+      } catch (error) {
+        if (!options.ignoreValidate) {
+          throw error;
+        }
+      }
       return fields;
     },
   );
