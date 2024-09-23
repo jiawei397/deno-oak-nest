@@ -1,7 +1,9 @@
 {
-  "lock": false,
+  "name": "@nest/cli",
+  "version": "0.0.1",
+  "exports": "./main.ts",
   "tasks": {
-    "install": "deno install --allow-env --allow-run --allow-net --allow-read --allow-write --import-map ./import_map.json -n dest  -f ./main.ts"
+    "install": "deno install -g --allow-env --allow-run --allow-net --allow-read --allow-write --import-map import_map.json -n dest  -f ./main.ts"
   },
   "importMap": "import_map.json"
 }

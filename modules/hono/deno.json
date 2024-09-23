@@ -1,18 +1,8 @@
 {
-  "lock": false,
+  "name": "@nest/hono",
+  "version": "0.0.1",
+  "exports": "./mod.ts",
   "tasks": {
     "dev": "deno run  -A --watch example/main.ts"
-  },
-  "compilerOptions": {
-    "removeComments": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "strictPropertyInitialization": false
-  },
-  "imports": {
-    "@nest": "../../mod.ts",
-    "@nest/hono": "./mod.ts",
-    "hono/": "https://deno.land/x/hono@v4.1.0/",
-    "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts"
   }
 }
