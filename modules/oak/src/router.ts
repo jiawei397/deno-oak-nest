@@ -14,7 +14,7 @@ import {
 import { joinPath } from "../../../src/utils.ts";
 import {
   OakApplication,
-  OakContext,
+  type OakContext,
   OakMiddleware,
   OakOriginRouter,
   send,
@@ -93,6 +93,7 @@ export class OakRouter implements IRouter {
 
   startServer(options: ListenOptions) {
     options.onListen!({
+      transport: 'tcp',
       port: options?.port ?? 8000,
       hostname: options?.hostname ?? "localhost",
     });

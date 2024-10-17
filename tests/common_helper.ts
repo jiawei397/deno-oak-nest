@@ -203,7 +203,7 @@ export class MockRouter implements IRouter {
   }
 
   startServer(options: ListenOptions) {
-    options.onListen?.({ hostname: "localhost", port: 3000 });
+    options.onListen?.({ hostname: "localhost", port: 3000, transport: "tcp" });
   }
 
   serveForStatic() {
