@@ -43,7 +43,7 @@ export async function validateParams(Cls: Constructor, value: object) {
   } catch (errors) {
     // console.debug(errors);
     const msgs: string[] = [];
-    errors.forEach((err: ValidationError) => {
+    (errors as ValidationError[]).forEach((err) => {
       if (err.constraints) {
         Object.values(err.constraints).forEach((element) => {
           msgs.push(element);

@@ -132,7 +132,7 @@ export interface ReadableStreamOptions {
   /**
    * If the client close the connection, the `cancel` will be called.
    */
-  cancel?: ReadableStreamErrorCallback;
+  cancel?: UnderlyingSourceCancelCallback;
 }
 
 export function getSSEStream(

@@ -7,7 +7,6 @@ const isObject = (fn: any) => fn && typeof fn === "object";
 export class HttpException extends Error {
   public response: any;
   public status: number;
-  public cause?: unknown;
 
   constructor(response: any, status: number, cause?: unknown) {
     super();
