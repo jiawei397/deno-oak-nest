@@ -8,7 +8,7 @@ import {
   type Response,
 } from "@nest";
 import { AppService } from "./app.service.ts";
-import { OakContext } from "@nest/oak";
+import { type OakContext } from "@nest/oak";
 
 @Controller("")
 export class AppController {

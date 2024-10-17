@@ -1,7 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import { BodyParamValidationException } from "../../../src/exceptions.ts";
 import { Request } from "../../../src/interfaces/context.interface.ts";
-import { OakContext, OakRequest } from "../deps.ts";
+import type { OakContext, OakRequest } from "../deps.ts";
 import { NestCookies } from "./cookies.ts";
 
 export class NestRequest implements Request {
@@ -31,14 +30,14 @@ export class NestRequest implements Request {
   }
 
   async json(): Promise<any> {
-    const body = this.originalRequest.body({ type: "json" });
-    const json = await body.value;
+    const body = this.originalRequest.body;
+    const json = await body.json();
     return json;
   }
 
   text(): Promise<string> {
-    const body = this.originalRequest.body({ type: "text" });
-    return body.value;
+    const body = this.originalRequest.body;
+    return body.text();
   }
 
   async formData(): Promise<FormData> {
@@ -51,42 +50,23 @@ export class NestRequest implements Request {
       throw new Error("Invalid content type");
     }
     if (contentType.includes("application/x-www-form-urlencoded")) {
-      const body = this.originalRequest.body({ type: "form" });
-      const result = await body.value;
+      const body = this.originalRequest.body;
+      const result = await body.form();
       const form = new FormData();
       for (const [key, value] of result.entries()) {
         form.set(key, value);
       }
       return form;
     }
-    const body = this.originalRequest.body({ type: "form-data" }).value;
-    const result = await body.read({});
-    const formData = new FormData();
-    Object.keys(result.fields).forEach((key) => {
-      formData.set(key, result.fields[key]);
-    });
+    const body = this.originalRequest.body;
+    const result = await body.formData();
+    return result;
     //
     // content:  undefined
     // contentType: 'application/octet-stream'
     // filename: '/var/folders/sq/0jfgh1js6cs8_31df82hx3jw0000gn/T/db9658e7/9b58f3ae6093b7f1a5289a9eaf1727a6e143c693.bin'
     // name: 'c'
     // originalName: 'hello.txt'
-    if (result.files) {
-      await Promise.all(result.files.map(async (file) => {
-        const content = file.content ||
-          (file.filename ? await Deno.readFile(file.filename) : null);
-        if (!content) {
-          throw new BodyParamValidationException("file content is null");
-        }
-        formData.append(
-          file.name,
-          new Blob([content], { type: "application/octet-stream" }),
-          file.originalName,
-        );
-      }));
-    }
-
-    return formData;
   }
 
   /**

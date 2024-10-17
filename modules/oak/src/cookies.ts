@@ -3,7 +3,7 @@ import {
   CookiesSetDeleteOptions,
   ICookies,
 } from "../../../src/interfaces/context.interface.ts";
-import { OakContext } from "../deps.ts";
+import { type OakContext } from "../deps.ts";
 
 export class NestCookies implements ICookies {
   constructor(private context: OakContext) {}
