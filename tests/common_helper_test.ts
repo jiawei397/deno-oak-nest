@@ -24,9 +24,10 @@ import type { Response } from "../src/interfaces/context.interface.ts";
 import { Res } from "../src/decorators/method.ts";
 
 Deno.test("findUnusedPort", async () => {
-  const listener1 = Deno.listen({ port: 3000 });
-  const port = await findUnusedPort(3000);
-  assertNotEquals(port, 3000);
+  const port1 = 4000;
+  const listener1 = Deno.listen({ port: port1 });
+  const port = await findUnusedPort(port1);
+  assertNotEquals(port, port1);
   listener1.close();
 });
 
