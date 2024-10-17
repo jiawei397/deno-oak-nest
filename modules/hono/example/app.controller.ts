@@ -12,7 +12,7 @@ import {
 } from "@nest";
 import { AppService } from "./app.service.ts";
 import { QueryDto, QueryWithoutPropDto, SaveDto } from "./app.dto.ts";
-import { HonoContext } from "@nest/hono";
+import { type HonoContext } from "@nest/hono";
 
 @Controller("")
 export class AppController {
