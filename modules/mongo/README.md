@@ -9,9 +9,9 @@ Add import map in `deno.json`:
 ```json
 {
   "imports": {
-    "@nest": "https://deno.land/x/deno_nest@v3.14.2/mod.ts",
-    "@nest/hono": "https://deno.land/x/deno_nest@v3.14.2/modules/hono/mod.ts",
-    "@nest/mongo": "https://deno.land/x/deno_nest@v3.14.2/modules/mongo/mod.ts",
+    "@nest": "https://deno.land/x/deno_nest@v3.15.0/mod.ts",
+    "@nest/hono": "https://deno.land/x/deno_nest@v3.15.0/modules/hono/mod.ts",
+    "@nest/mongo": "https://deno.land/x/deno_nest@v3.15.0/modules/mongo/mod.ts",
     "hono/": "https://deno.land/x/hono@v4.1.0/",
     "deno_mongo_schema": "https://deno.land/x/deno_mongo_schema@v1.0.3/mod.ts",
     "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts"
