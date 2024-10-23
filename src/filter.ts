@@ -117,7 +117,7 @@ export async function checkByFilters(
         try {
           return await filter.catch(tempError, context);
         } catch (err) {
-          tempError = err;
+          tempError = err as Error;
         }
       }
     }

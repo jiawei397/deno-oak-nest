@@ -631,7 +631,7 @@ Deno.test("transAndValidateByCls", async (t) => {
       assert(false, "should not reach here");
     } catch (error) {
       assertEquals(
-        error.message,
+        (error as Error).message,
         "age must be a number conforming to the specified constraints",
       );
     }
@@ -670,7 +670,7 @@ Deno.test("transAndValidateByCls", async (t) => {
       });
       assert(false, "should not reach here");
     } catch (error) {
-      assertEquals(error.message, "status must be a valid enum value");
+      assertEquals((error as Error).message, "status must be a valid enum value");
     }
   });
 

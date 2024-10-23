@@ -11,7 +11,7 @@ import { Router } from "../mod.ts";
 import { createCommonTests } from "../../../tests/app_helper.ts";
 import { findUnusedPort } from "../../../tests/common_helper.ts";
 import { assertEquals, assertThrows } from "../../../tests/test_deps.ts";
-import { OakContext } from "../deps.ts";
+import { type OakContext } from "../deps.ts";
 
 createCommonTests(Router, "oak");
 

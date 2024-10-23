@@ -5,8 +5,8 @@
   "imports": {
     "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts",
     "std/": "https://deno.land/std@0.202.0/",
-    "hono/": "https://deno.land/x/hono@v4.1.0/",
-    "oak": "https://deno.land/x/oak@v12.6.1/mod.ts",
+    "hono/": "https://deno.land/x/hono@v4.3.11/",
+    "oak": "https://deno.land/x/oak@v17.1.0/mod.ts",
     "mysql": "https://deno.land/x/mysql@v2.11.0/mod.ts",
     "postgres/": "https://deno.land/x/postgres@v0.17.0/",
     "redis": "https://deno.land/x/redis@v0.29.3/mod.ts",

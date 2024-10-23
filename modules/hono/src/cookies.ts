@@ -7,7 +7,7 @@ import {
   deleteCookie,
   getCookie,
   getSignedCookie,
-  HonoContext,
+  type HonoContext,
   setCookie,
   setSignedCookie,
 } from "../deps.ts";
