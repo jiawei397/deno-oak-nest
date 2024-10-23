@@ -96,7 +96,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
       } catch (e) {
         logger.error(
           "AuthGuard",
-          `调用getUserInfoByPrivateToken报错，错误信息为：${e.message}`,
+          `调用getUserInfoByPrivateToken报错，错误信息为：${(e as Error).message}`,
         );
       }
       return false;
@@ -185,7 +185,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
       } catch (e) {
         logger.error(
           "AuthGuard",
-          `checkExtTokenInfo error and message is ${e.message}`,
+          `checkExtTokenInfo error and message is ${(e as Error).message}`,
         );
       }
       return false;
@@ -238,7 +238,7 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
       } catch (e) {
         logger.error(
           "AuthGuard",
-          `checkExtTokenInfo报错，错误信息为：【${e.message}】`,
+          `checkExtTokenInfo报错，错误信息为：【${(e as Error).message}】`,
         );
         return false;
       }

@@ -1,4 +1,4 @@
-import { assertEquals } from "../../../tests/test_deps.ts";
+import { assertEquals } from "@nest/tests";
 import { OakRouter } from "./router.ts";
 
 Deno.test("OakRouter startServer error", async (t) => {

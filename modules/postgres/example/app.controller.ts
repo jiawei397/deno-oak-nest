@@ -1,5 +1,5 @@
 import { Controller, Get, Inject, Query } from "@nest/core";
-import { Client, POSTGRES_KEY } from "@nest/postgres";
+import { type Client, POSTGRES_KEY } from "@nest/postgres";
 
 @Controller("")
 export class AppController {

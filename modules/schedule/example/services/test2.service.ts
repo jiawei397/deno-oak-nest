@@ -1,5 +1,5 @@
 import { Injectable } from "@nest/core";
-import { TestService } from "./test.service.ts";
+import type { TestService } from "./test.service.ts";
 
 @Injectable()
 export class Test2Service {

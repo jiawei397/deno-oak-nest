@@ -1,5 +1,5 @@
 import { assert, Controller, Get, Inject, Query } from "@nest/core";
-import { Client, MYSQL_KEY } from "@nest/mysql";
+import { type Client, MYSQL_KEY } from "@nest/mysql";
 
 @Controller("")
 export class AppController {

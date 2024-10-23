@@ -1,18 +1,8 @@
 {
-  "lock": false,
+  "name": "@nest/elasticsearch",
+  "version": "0.0.1",
+  "exports": "./mod.ts",
   "tasks": {
     "dev": "deno run --watch -A example/main.ts"
-  },
-  "compilerOptions": {
-    "removeComments": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "strictPropertyInitialization": false
-  },
-  "imports": {
-    "@nest": "../../mod.ts",
-    "@nest/hono": "../hono/mod.ts",
-    "@nest/elasticsearch": "./mod.ts",
-    "hono/": "https://deno.land/x/hono@v4.1.0/"
   }
 }

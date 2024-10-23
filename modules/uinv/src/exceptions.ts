@@ -1,8 +1,6 @@
-import { HttpException } from "../../../src/exceptions.ts";
-import { Catch } from "../../../src/filter.ts";
-import { ExceptionFilter } from "../../../src/interfaces/filter.interface.ts";
-import { Context } from "../deps.ts";
-import { type Logger } from "./types.ts";
+import { HttpException, Catch, type ExceptionFilter } from "@nest/core";
+import type { Context } from "../deps.ts";
+import type { Logger } from "./types.ts";
 
 function getDefaultErrorBody(
   exception: unknown,

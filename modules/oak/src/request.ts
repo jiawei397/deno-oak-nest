@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
-import { Request } from "../../../src/interfaces/context.interface.ts";
+import type { Request } from "@nest/core";
 import type { OakContext, OakRequest } from "../deps.ts";
-import { NestCookies } from "./cookies.ts";
+import type { NestCookies } from "./cookies.ts";
 
 export class NestRequest implements Request {
   originalRequest: OakRequest;

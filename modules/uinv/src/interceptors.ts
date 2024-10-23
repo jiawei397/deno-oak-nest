@@ -4,7 +4,7 @@ import {
   type NestInterceptor,
   type Next,
 } from "../deps.ts";
-import { Logger } from "./types.ts";
+import type { Logger } from "./types.ts";
 
 /**
  * The difference between LogInterceptor and LogMiddleware is that the latter can capture 404 errors.

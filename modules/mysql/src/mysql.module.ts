@@ -1,6 +1,4 @@
-import { red, yellow } from "../../../deps.ts";
-import { Module } from "../../../src/decorators/module.ts";
-import { DynamicModule } from "../../../src/interfaces/module.interface.ts";
+import { type DynamicModule, Module, red, yellow } from "@nest/core";
 import { Client, type ClientConfig } from "../deps.ts";
 import { MYSQL_KEY } from "./mysql.constant.ts";
 
@@ -39,7 +37,7 @@ export class MysqlModule {
             this.client = client;
             return client;
           } catch (e) {
-            console.error("connect to mysql error", red(e.stack));
+            console.error("connect to mysql error", red((e as Error).stack || e as string));
           }
         },
       }],

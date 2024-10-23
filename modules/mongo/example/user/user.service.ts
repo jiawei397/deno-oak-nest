@@ -1,7 +1,7 @@
 import { Injectable } from "@nest/core";
-import { InjectModel, Model } from "deno_mongo_schema";
+import { InjectModel, type Model } from "deno_mongo_schema";
 import { User } from "./user.schema.ts";
-import { AddUserDto } from "./user.dto.ts";
+import type { AddUserDto } from "./user.dto.ts";
 
 @Injectable()
 export class UserService {

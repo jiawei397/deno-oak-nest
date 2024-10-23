@@ -1,4 +1,4 @@
-import { Context, createParamDecorator } from "../../deps.ts";
+import { type Context, createParamDecorator } from "../../deps.ts";
 
 export const UserParam = createParamDecorator(
   (ctx: Context) => {

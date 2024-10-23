@@ -1,7 +1,7 @@
 import { ES_KEY } from "./es.constant.ts";
 import { ElasticsearchService } from "./es.service.ts";
 import type { ElasticSearchOptions } from "./types.ts";
-import { DynamicModule, Module } from "../../../mod.ts";
+import { type DynamicModule, Module } from "@nest/core";
 
 @Module({})
 export class ElasticsearchModule {

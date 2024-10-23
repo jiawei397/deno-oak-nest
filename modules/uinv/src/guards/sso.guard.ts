@@ -1,14 +1,14 @@
 import { ajax } from "../tools/ajax.ts";
 import {
-  Context,
+  type Context,
   ForbiddenException,
-  Request,
+  type Request,
   UnauthorizedException,
 } from "../../deps.ts";
 import type { CanActivate } from "../../deps.ts";
 import type { SSOGuardOptions, SSOUserInfo } from "../types.ts";
 import { isDist, stringify } from "../tools/utils.ts";
-import { Injectable, Reflector, SetMetadata } from "../../../../mod.ts";
+import { Injectable, type Reflector, SetMetadata } from "@nest/core";
 
 const SSO_STATUS_META_KEY = "meta:sso:status";
 
@@ -119,7 +119,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
         try {
           userInfo = await this.getSSO(request);
         } catch (e) {
-          const msg = e.message || e;
+          const msg = e instanceof Error ? e.message : String(e);
           if (msg !== "Unauthorized") {
             logger.error("SSOGuard", `sso校验信息未通过，原因是：${msg}`);
           } else {

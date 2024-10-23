@@ -18,7 +18,7 @@ export class Cache extends Map {
     this.timeout = timeout;
   }
 
-  set(key: string | number, val: any, timeout?: number) {
+  override set(key: string | number, val: any, timeout?: number) {
     super.set.call(this, key, val);
     setTimeout(() => {
       this.delete(key);

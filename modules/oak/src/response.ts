@@ -1,11 +1,12 @@
-import { Status, STATUS_TEXT } from "../../../deps.ts";
-import { REDIRECT_BACK } from "../../../src/constants.ts";
 import {
-  RedirectStatusCode,
-  Response,
-} from "../../../src/interfaces/context.interface.ts";
-import { type OakContext } from "../deps.ts";
-import { NestCookies } from "./cookies.ts";
+  REDIRECT_BACK,
+  type RedirectStatusCode,
+  type Response,
+  Status,
+  STATUS_TEXT,
+} from "@nest/core";
+import type { OakContext } from "../deps.ts";
+import type { NestCookies } from "./cookies.ts";
 
 export class NestResponse implements Response {
   body: string | object | number | boolean | null;

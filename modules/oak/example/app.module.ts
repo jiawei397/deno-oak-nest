@@ -1,4 +1,4 @@
-import { Module } from "../../../mod.ts";
+import { Module } from "@nest/core";
 import { AppController } from "./app.controller.ts";
 
 @Module({

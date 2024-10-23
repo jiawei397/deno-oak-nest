@@ -1,5 +1,5 @@
 import { Client } from "../deps.ts";
-import { Inject, Injectable } from "../../../mod.ts";
+import { Inject, Injectable } from "@nest/core";
 import { ES_KEY } from "./es.constant.ts";
 import type { ElasticSearchOptions } from "./types.ts";
 

@@ -1,8 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import { assert } from "../../../deps.ts";
-import { Inject } from "../../../src/decorators/inject.ts";
-import { factory } from "../../../src/factorys/class.factory.ts";
-import { ICacheStore } from "../../cache/src/cache.interface.ts";
+import { assert, factory, Inject } from "@nest/core";
+import type { ICacheStore } from "@nest/cache";
 import type { Redis } from "../deps.ts";
 import { REDIS_KEY, REDIS_STORE_NAME } from "./redis.constant.ts";
 import { jsonParse, stringify } from "./utils.ts";

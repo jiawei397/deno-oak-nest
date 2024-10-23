@@ -14,7 +14,7 @@ export {
   ForbiddenException,
   Injectable,
   UnauthorizedException,
-} from "../../mod.ts";
+} from "@nest/core";
 export type {
   CanActivate,
   Context,
@@ -23,6 +23,6 @@ export type {
   Next,
   Request,
   Response,
-} from "../../mod.ts";
+} from "@nest/core";
 
 export { nanoid } from "https://deno.land/x/nanoid@v3.0.0/mod.ts";

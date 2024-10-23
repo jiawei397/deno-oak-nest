@@ -1,5 +1,5 @@
 import { assert, Controller, Get } from "@nest/core";
-import { ElasticsearchService } from "@nest/elasticsearch";
+import type { ElasticsearchService } from "@nest/elasticsearch";
 
 @Controller("")
 export class AppController {

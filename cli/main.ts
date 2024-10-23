@@ -2,7 +2,7 @@
 import { Input, Select } from "cliffy/prompt/mod.ts";
 import { Command } from "cliffy/command/mod.ts";
 import { colors } from "cliffy/ansi/colors.ts";
-import { createProject, Engine } from "./src/new.ts";
+import { createProject, type Engine } from "./src/new.ts";
 import { generateCommand } from "./src/generate.ts";
 
 const info = colors.bold.blue;

@@ -1,4 +1,4 @@
-import { AjaxData, Context, ICacheStore, Method } from "../deps.ts";
+import type { AjaxData, Context, ICacheStore, Method } from "../deps.ts";
 
 // deno-lint-ignore-file camelcase
 export type MsgCallback = (...msg: unknown[]) => unknown;

@@ -1,4 +1,4 @@
-import type { Constructor } from "../../../src/interfaces/type.interface.ts";
+import type { Constructor } from "@nest/core";
 export interface CronJob {
   cronTime: string;
   methodName: string | symbol;

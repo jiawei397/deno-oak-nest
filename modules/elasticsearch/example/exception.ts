@@ -1,4 +1,4 @@
-import { Catch, Context, ExceptionFilter } from "@nest/core";
+import { Catch, type Context, type ExceptionFilter } from "@nest/core";
 import { FetchError } from "../deps.ts";
 
 @Catch(FetchError)

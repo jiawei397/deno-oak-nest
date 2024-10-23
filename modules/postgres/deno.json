@@ -1,19 +1,11 @@
 {
-  "lock": false,
+  "name": "@nest/postgres",
+  "version": "0.0.1",
+  "exports": "./mod.ts",
   "tasks": {
     "dev": "deno run --watch -A example/main.ts"
   },
-  "compilerOptions": {
-    "removeComments": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "strictPropertyInitialization": false
-  },
   "imports": {
-    "@nest": "../../mod.ts",
-    "@nest/hono": "../hono/mod.ts",
-    "@nest/postgres": "./mod.ts",
-    "hono/": "https://deno.land/x/hono@v4.1.0/",
     "postgres/": "https://deno.land/x/postgres@v0.17.0/"
   }
 }

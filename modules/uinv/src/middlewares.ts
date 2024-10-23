@@ -1,5 +1,5 @@
-import { NestMiddleware } from "../deps.ts";
-import { Logger } from "./types.ts";
+import type { NestMiddleware } from "../deps.ts";
+import type { Logger } from "./types.ts";
 
 /**
  * The difference between LogInterceptor and LogMiddleware is that the latter can capture 404 errors, and it include the guard time.

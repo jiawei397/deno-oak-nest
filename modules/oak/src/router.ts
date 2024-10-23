@@ -1,21 +1,23 @@
-import { format, green, resolve, yellow } from "../../../deps.ts";
-import { NotImplementedException } from "../../../src/exceptions.ts";
 import {
-  ListenOptions,
-} from "../../../src/interfaces/application.interface.ts";
-import { StaticOptions } from "../../../src/interfaces/factory.interface.ts";
-import { Next } from "../../../src/interfaces/middleware.interface.ts";
-import {
-  IRouter,
-  MiddlewareHandler,
-  NotFoundHandler,
-  RouterOptions,
-} from "../../../src/interfaces/route.interface.ts";
-import { joinPath } from "../../../src/utils.ts";
+  format,
+  green,
+  type IRouter,
+  joinPath,
+  type ListenOptions,
+  type MiddlewareHandler,
+  type Next,
+  type NotFoundHandler,
+  NotImplementedException,
+  resolve,
+  type RouterOptions,
+  type StaticOptions,
+  yellow,
+} from "@nest/core";
+
 import {
   OakApplication,
   type OakContext,
-  OakMiddleware,
+  type OakMiddleware,
   OakOriginRouter,
   send,
 } from "../deps.ts";
@@ -93,7 +95,7 @@ export class OakRouter implements IRouter {
 
   startServer(options: ListenOptions) {
     options.onListen!({
-      transport: 'tcp',
+      transport: "tcp",
       port: options?.port ?? 8000,
       hostname: options?.hostname ?? "localhost",
     });

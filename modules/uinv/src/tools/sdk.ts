@@ -1,5 +1,5 @@
 import { nanoid } from "../../deps.ts";
-import {
+import type {
   AccessTokenResult,
   BaseResult,
   GetAccessTokenOptions,

@@ -1,9 +1,9 @@
-import {
+import type {
   CookiesGetOptions,
   CookiesSetDeleteOptions,
   ICookies,
-} from "../../../src/interfaces/context.interface.ts";
-import { type OakContext } from "../deps.ts";
+} from "@nest/core";
+import type { OakContext } from "../deps.ts";
 
 export class NestCookies implements ICookies {
   constructor(private context: OakContext) {}
