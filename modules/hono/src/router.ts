@@ -10,7 +10,7 @@ import {
 } from "../../../src/interfaces/route.interface.ts";
 import {
   Hono,
-  HonoContext,
+  type HonoContext,
   HonoMiddlewareHandler,
   HonoNext,
   serveStatic,

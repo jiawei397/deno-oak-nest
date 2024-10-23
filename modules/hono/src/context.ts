@@ -1,6 +1,6 @@
 import { Status } from "../../../deps.ts";
 import { Context } from "../../../src/interfaces/context.interface.ts";
-import { HonoContext } from "../deps.ts";
+import { type HonoContext } from "../deps.ts";
 import { NestCookies } from "./cookies.ts";
 import { NestRequest } from "./request.ts";
 import { NestResponse } from "./response.ts";

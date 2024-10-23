@@ -1,5 +1,5 @@
 import { Request } from "../../../src/interfaces/context.interface.ts";
-import { HonoContext, HonoRequest } from "../deps.ts";
+import type { HonoContext, HonoRequest } from "../deps.ts";
 import { NestCookies } from "./cookies.ts";
 
 export class NestRequest implements Request {

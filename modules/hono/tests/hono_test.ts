@@ -9,7 +9,7 @@ import {
   Res,
   type Response,
 } from "@nest";
-import { etag, HonoContext } from "../deps.ts";
+import { etag, type HonoContext } from "../deps.ts";
 import { findUnusedPort } from "../../../tests/common_helper.ts";
 import { assertEquals } from "../../../tests/test_deps.ts";
 
