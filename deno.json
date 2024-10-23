@@ -50,10 +50,22 @@
   },
   "importMap": "./.vscode/import_map.json",
   "workspace": [
-    "src",
-    "modules/hono",
+    "cli",
     "modules/cache",
     "modules/cors",
-    "cli"
+    "modules/ejs",
+    "modules/elasticsearch",
+    "modules/hbs",
+    "modules/hono",
+    "modules/jwt",
+    "modules/mongo",
+    "modules/mysql",
+    "modules/oak",
+    "modules/postgres",
+    "modules/redis",
+    "modules/schedule",
+    "modules/uinv",
+    "src",
+    "tests"
   ]
 }
