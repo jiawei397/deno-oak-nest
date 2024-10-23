@@ -1,4 +1,4 @@
-import { assert, Controller, Get, Inject, Query } from "@nest";
+import { assert, Controller, Get, Inject, Query } from "@nest/core";
 import { Client, MYSQL_KEY } from "@nest/mysql";
 
 @Controller("")

@@ -1,4 +1,4 @@
-import { SetMetadata } from "@nest";
+import { SetMetadata } from "@nest/core";
 
 export enum RoleAction {
   read = 1,

@@ -5,7 +5,7 @@ import {
   OnApplicationShutdown,
   OnModuleDestroy,
   OnModuleInit,
-} from "@nest";
+} from "@nest/core";
 
 @Injectable()
 export class AppService

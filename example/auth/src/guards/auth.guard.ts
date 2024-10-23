@@ -4,7 +4,7 @@ import {
   ForbiddenException,
   Injectable,
   Reflector,
-} from "@nest";
+} from "@nest/core";
 import { RoleService } from "../roles/role.service.ts";
 import { RoleAction } from "../roles/role.decorator.ts";
 

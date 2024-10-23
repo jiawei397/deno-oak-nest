@@ -1,4 +1,4 @@
-import { APP_GUARD, Module } from "@nest";
+import { APP_GUARD, Module } from "@nest/core";
 import { JwtModule } from "@nest/jwt";
 
 import { AuthController } from "./auth.controller.ts";

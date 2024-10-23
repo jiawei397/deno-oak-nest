@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-unused-vars
-import { APP_INTERCEPTOR, Module } from "@nest";
+import { APP_INTERCEPTOR, Module } from "@nest/core";
 import { CacheModule } from "@nest/cache";
 import { AppController } from "./app.controller.ts";
 import { AsyncModule } from "./asyncModule/async.module.ts";

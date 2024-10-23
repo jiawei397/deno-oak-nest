@@ -1,4 +1,4 @@
-import { Injectable } from "@nest";
+import { Injectable } from "@nest/core";
 import config from "../globals.ts";
 import { GithubToken, GitHubUserInfo } from "../types.ts";
 

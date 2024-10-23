@@ -1,6 +1,4 @@
 {
-  "version": "3.14.2",
-  "name": "@nest",
   "exports": "./mod.ts",
   "lock": false,
   "tasks": {
@@ -52,6 +50,7 @@
   },
   "importMap": "./.vscode/import_map.json",
   "workspace": [
+    "src",
     "modules/hono",
     "modules/cache",
     "modules/cors",

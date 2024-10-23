@@ -1,5 +1,5 @@
 // deno-lint-ignore-file require-await
-import { Controller, Get } from "@nest";
+import { Controller, Get } from "@nest/core";
 import { CatsService } from "./cats.service.ts";
 import { Cat } from "./cats.interface.ts";
 import { LogService } from "./log.service.ts";

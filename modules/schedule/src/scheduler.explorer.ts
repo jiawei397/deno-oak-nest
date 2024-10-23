@@ -1,6 +1,6 @@
 import { cron } from "../deps.ts";
 import { CronJob, schedulerRegistry, TimeJob } from "./scheduler.registry.ts";
-import { Reflect } from "../../../deps.ts";
+import { Reflect } from "../../../src/deps.ts";
 import { APP_CRON_INSTANCE } from "../../../src/constants.ts";
 
 export class ScheduleExplorer {

@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Status, STATUS_TEXT } from "../deps.ts";
+import { Status, STATUS_TEXT } from "./deps.ts";
 
 const isString = (fn: any) => typeof fn === "string";
 const isObject = (fn: any) => fn && typeof fn === "object";

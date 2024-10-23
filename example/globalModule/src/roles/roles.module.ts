@@ -1,4 +1,4 @@
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { ROLE_KEY } from "./roles.constant.ts";
 import { RolesService } from "./roles.service.ts";
 import { RolesController } from "./roles.controller.ts";

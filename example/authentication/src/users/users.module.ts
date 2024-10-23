@@ -1,4 +1,4 @@
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { UsersService } from "./users.service.ts";
 
 @Module({

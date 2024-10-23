@@ -1,4 +1,4 @@
-import { type Context, Controller, Get } from "@nest";
+import { type Context, Controller, Get } from "@nest/core";
 import { UserService } from "../services/user.service.ts";
 
 @Controller("v1/user", {

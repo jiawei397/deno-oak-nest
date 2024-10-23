@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-unused-vars
-import { NestFactory } from "@nest";
+import { NestFactory } from "@nest/core";
 import { CORS } from "@nest/cors";
 import { Router } from "@nest/hono";
 import { AppModule } from "./app.module.ts";

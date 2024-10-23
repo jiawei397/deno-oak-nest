@@ -24,7 +24,7 @@ You can change the `deno_mongo_schema` version for yourself.
 app.module.ts:
 
 ```typescript
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { MongoModule } from "@nest/mongo";
 import { UserModule } from "./user/user.module.ts";
 

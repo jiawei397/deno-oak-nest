@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nest";
+import { Inject, Injectable } from "@nest/core";
 import type { EnvConfig } from "./config.interface.ts";
 import { CONFIG_KEY } from "./config.constant.ts";
 

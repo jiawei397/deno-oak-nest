@@ -1,4 +1,4 @@
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { RoleService } from "./role.service.ts";
 
 @Module({

@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import type { InjectParams } from "../interfaces/factory.interface.ts";
-import { Reflect } from "../../deps.ts";
+import { Reflect } from "../deps.ts";
 import type { Constructor } from "../interfaces/type.interface.ts";
 import { Scope } from "../interfaces/scope-options.interface.ts";
 

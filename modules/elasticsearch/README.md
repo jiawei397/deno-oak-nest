@@ -20,7 +20,7 @@ Add import map in `deno.json`:
 Then use in `AppModule`:
 
 ```typescript
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { ElasticsearchModule } from "@nest/elasticsearch";
 import { AppController } from "./app.controller.ts";
 
@@ -38,7 +38,7 @@ export class AppModule {}
 Then can be used in AppController:
 
 ```ts
-import { assert, Controller, Get } from "@nest";
+import { assert, Controller, Get } from "@nest/core";
 import { ElasticsearchService } from "@nest/elasticsearch";
 
 @Controller("")

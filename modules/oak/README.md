@@ -23,7 +23,7 @@ version recommended by Nest, as it has undergone thorough unit testing.
 app.module.ts:
 
 ```typescript
-import { NestFactory } from "@nest";
+import { NestFactory } from "@nest/core";
 import { Router } from "@nest/oak";
 import { AppModule } from "./app.module.ts";
 

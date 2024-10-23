@@ -1,4 +1,4 @@
-import { Status } from "../../../deps.ts";
+import { Status } from "../../../src/deps.ts";
 import { Context } from "../../../src/interfaces/context.interface.ts";
 import { HonoContext } from "../deps.ts";
 import { NestCookies } from "./cookies.ts";

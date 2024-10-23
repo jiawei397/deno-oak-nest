@@ -1,4 +1,4 @@
-import { Injectable } from "@nest";
+import { Injectable } from "@nest/core";
 import { TestService } from "./test.service.ts";
 
 @Injectable()

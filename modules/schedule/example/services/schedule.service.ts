@@ -1,4 +1,4 @@
-import { assert, Injectable } from "@nest";
+import { assert, Injectable } from "@nest/core";
 import {
   Cron,
   CronExpression,

@@ -7,7 +7,7 @@ import {
   Header,
   UseFilters,
   UseInterceptors,
-} from "@nest";
+} from "@nest/core";
 import { AllExceptionsFilter, HttpExceptionFilter } from "./exception.ts";
 import { ErrorsInterceptor } from "./interceptor/errors.interceptor.ts";
 import { UserService } from "./user/services/user.service.ts";

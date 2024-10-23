@@ -1,4 +1,4 @@
-import { assert, Cache, Inject, Injectable } from "@nest";
+import { assert, Cache, Inject, Injectable } from "@nest/core";
 import { delay } from "../../deps.ts";
 
 @Injectable()

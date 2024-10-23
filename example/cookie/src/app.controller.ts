@@ -8,7 +8,7 @@ import {
   type Request,
   Res,
   type Response,
-} from "@nest";
+} from "@nest/core";
 
 @Controller("")
 export class AppController {

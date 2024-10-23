@@ -1,4 +1,4 @@
-import { type Context, createParamDecorator } from "@nest";
+import { type Context, createParamDecorator } from "@nest/core";
 
 export interface UserInfo {
   id: string;

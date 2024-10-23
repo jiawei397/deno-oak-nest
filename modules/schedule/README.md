@@ -20,7 +20,7 @@ Add import map in `deno.json`:
 app.module.ts:
 
 ```typescript
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { ScheduleModule } from "@nest/schedule";
 import { ScheduleService } from "./services/schedule.service.ts";
 import { Test2Service } from "./services/test2.service.ts";
@@ -45,7 +45,7 @@ export class AppModule {}
 Then `schedule.service.ts` may be like this:
 
 ```ts
-import { assert, Injectable } from "@nest";
+import { assert, Injectable } from "@nest/core";
 import { Cron, Interval, Timeout } from "@nest/schedule";
 import { TestService } from "./test.service.ts";
 

@@ -1,4 +1,4 @@
-import { Controller, Get, getSSEStream, Sse } from "@nest";
+import { Controller, Get, getSSEStream, Sse } from "@nest/core";
 
 @Controller("")
 export class AppController {

@@ -1,4 +1,4 @@
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { MongoModule } from "@nest/mongo";
 import { UserModule } from "./user/user.module.ts";
 

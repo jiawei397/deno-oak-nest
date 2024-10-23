@@ -8,7 +8,7 @@ import {
   NestFactory,
   Res,
   type Response,
-} from "@nest";
+} from "@nest/core";
 import { etag, HonoContext } from "../deps.ts";
 import { findUnusedPort } from "../../../tests/common_helper.ts";
 import { assertEquals } from "../../../tests/test_deps.ts";

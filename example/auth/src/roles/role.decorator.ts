@@ -1,4 +1,4 @@
-import { Context, createParamDecorator, SetMetadata } from "@nest";
+import { Context, createParamDecorator, SetMetadata } from "@nest/core";
 
 export enum RoleAction {
   read = 1,

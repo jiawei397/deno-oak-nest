@@ -1,4 +1,4 @@
-import { Controller, Get } from "@nest";
+import { Controller, Get } from "@nest/core";
 import { ConfigService } from "../config/config.service.ts";
 
 @Controller("/cats")

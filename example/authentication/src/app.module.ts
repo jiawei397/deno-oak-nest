@@ -1,4 +1,4 @@
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { AuthModule } from "./auth/auth.module.ts";
 import { AppController } from "./app.controller.ts";
 

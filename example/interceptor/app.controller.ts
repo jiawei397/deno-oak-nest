@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-unused-vars
-import { Controller, Get, UseInterceptors } from "@nest";
+import { Controller, Get, UseInterceptors } from "@nest/core";
 import {
   CacheInterceptor,
   ErrorsInterceptor,

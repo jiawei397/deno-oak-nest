@@ -14,7 +14,7 @@ import {
   SetCacheStore,
 } from "./cache.interceptor.ts";
 import { KVStore, MemoryStore } from "./cache.store.ts";
-import { Controller, Get, Post, UseInterceptors } from "@nest";
+import { Controller, Get, Post, UseInterceptors } from "@nest/core";
 import { CacheModule } from "./cache.module.ts";
 
 Deno.test("CacheInterceptor initStore", async (t) => {

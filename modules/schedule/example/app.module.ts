@@ -1,4 +1,4 @@
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { ScheduleModule } from "@nest/schedule";
 import { ScheduleService } from "./services/schedule.service.ts";
 import { Test2Service } from "./services/test2.service.ts";

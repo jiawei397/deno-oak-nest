@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from "@nest";
+import { Controller, Get, UseGuards } from "@nest/core";
 import { AuthGuard } from "./auth.guard.ts";
 import { User, type UserInfo } from "./decorators.ts";
 

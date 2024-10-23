@@ -1,4 +1,4 @@
-import { NestFactory } from "@nest";
+import { NestFactory } from "@nest/core";
 import { Router } from "@nest/oak";
 import { AppModule } from "./app.module.ts";
 

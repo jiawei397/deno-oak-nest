@@ -1,4 +1,4 @@
-import { DynamicModule, Module } from "@nest";
+import { DynamicModule, Module } from "@nest/core";
 import { ConfigService } from "./config.service.ts";
 import { ConfigOptions, EnvConfig } from "./config.interface.ts";
 import { CONFIG_KEY } from "./config.constant.ts";

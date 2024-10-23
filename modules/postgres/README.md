@@ -28,7 +28,7 @@ You can change the `postgres` version by yourself.
 Then `app.modules.ts`:
 
 ```typescript
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { PostgresModule } from "@nest/postgres";
 import { AppController } from "./app.controller.ts";
 
@@ -50,7 +50,7 @@ export class AppModule {}
 Then can be used in AppController:
 
 ```ts
-import { Controller, Get, Inject, Query } from "@nest";
+import { Controller, Get, Inject, Query } from "@nest/core";
 import { Client, POSTGRES_KEY } from "@nest/postgres";
 
 @Controller("")

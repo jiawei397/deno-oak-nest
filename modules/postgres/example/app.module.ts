@@ -1,4 +1,4 @@
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { PostgresModule } from "@nest/postgres";
 import { AppController } from "./app.controller.ts";
 

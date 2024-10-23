@@ -1,4 +1,4 @@
-import { assert, Injectable } from "@nest";
+import { assert, Injectable } from "@nest/core";
 import { RoleService } from "./role.service.ts";
 import { Cron, Interval, Timeout } from "../../../../modules/schedule/mod.ts";
 

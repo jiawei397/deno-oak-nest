@@ -1,4 +1,4 @@
-import { Status, STATUS_TEXT } from "../../../deps.ts";
+import { Status, STATUS_TEXT } from "../../../src/deps.ts";
 import { REDIRECT_BACK } from "../../../src/constants.ts";
 import type {
   RedirectStatusCode,

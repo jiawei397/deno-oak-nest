@@ -14,8 +14,8 @@ import {
   Query,
   Res,
   UseGuards,
-} from "@nest";
-import type { Context, Response } from "@nest";
+} from "@nest/core";
+import type { Context, Response } from "@nest/core";
 import { mockjs, nanoid } from "../../deps.ts";
 import { AuthGuard } from "../../guards/auth.guard.ts";
 import { AuthGuard2 } from "../../guards/auth2.guard.ts";

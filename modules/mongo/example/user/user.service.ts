@@ -1,4 +1,4 @@
-import { Injectable } from "@nest";
+import { Injectable } from "@nest/core";
 import { InjectModel, Model } from "deno_mongo_schema";
 import { User } from "./user.schema.ts";
 import { AddUserDto } from "./user.dto.ts";

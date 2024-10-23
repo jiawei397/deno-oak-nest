@@ -20,7 +20,7 @@ Add import map in `deno.json`:
 Then use in `AppModule`:
 
 ```typescript
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { CacheModule } from "@nest/cache";
 import { AppController } from "./app.controller.ts";
 
@@ -42,7 +42,7 @@ export class AppModule {}
 Then `CacheInterceptor` can be used in any Controllers, or in a specific method.
 
 ```ts
-import { Controller, Get, Params, Query, UseInterceptors } from "@nest";
+import { Controller, Get, Params, Query, UseInterceptors } from "@nest/core";
 import { CacheInterceptor, CacheTTL, SetCachePolicy } from "@nest/cache";
 
 @Controller("")

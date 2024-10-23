@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from "@nest";
+import { Body, Controller, Get, Post } from "@nest/core";
 import { JwtService } from "@nest/jwt";
 
 @Controller("")

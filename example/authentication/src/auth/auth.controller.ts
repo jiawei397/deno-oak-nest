@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, type Request } from "@nest";
+import { Body, Controller, Get, Post, Req, type Request } from "@nest/core";
 import { AuthService } from "./auth.service.ts";
 import { SignInDto } from "./auth.dto.ts";
 import { Public } from "./auth.decorator.ts";

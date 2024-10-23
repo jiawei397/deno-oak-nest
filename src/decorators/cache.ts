@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Reflect } from "../../deps.ts";
+import { Reflect } from "../deps.ts";
 import { isDebug } from "../utils.ts";
 
 export type GetCacheKey = (...args: any[]) => string;

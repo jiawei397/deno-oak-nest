@@ -1,4 +1,4 @@
-import { assert, Inject, Injectable } from "@nest";
+import { assert, Inject, Injectable } from "@nest/core";
 
 let num = 0;
 

@@ -5,7 +5,7 @@ function getUpperCaseName(name: string) {
 
 export function getController(name: string) {
   const controllerName = getUpperCaseName(name) + "Controller";
-  return `import { Controller, Get } from "@nest";
+  return `import { Controller, Get } from "@nest/core";
 
 @Controller("/${name}")
 export class ${controllerName} {
@@ -19,7 +19,7 @@ export class ${controllerName} {
 
 export function getService(name: string) {
   const serviceName = getUpperCaseName(name) + "Service";
-  return `import { Injectable } from "@nest";
+  return `import { Injectable } from "@nest/core";
   
 @Injectable()
 export class ${serviceName} {}
@@ -28,7 +28,7 @@ export class ${serviceName} {}
 
 export function getModule(name: string) {
   const moduleName = getUpperCaseName(name) + "Module";
-  return `import { Module } from "@nest";
+  return `import { Module } from "@nest/core";
 
 @Module({})
 export class ${moduleName} {}
@@ -37,7 +37,7 @@ export class ${moduleName} {}
 
 export function getMiddleware(name: string) {
   const middlewareName = getUpperCaseName(name) + "Middleware";
-  return `import { NestMiddleware } from "@nest";
+  return `import { NestMiddleware } from "@nest/core";
 
 export const ${middlewareName}: NestMiddleware = async (req, res, next) => {
   console.log("${middlewareName} before...");
@@ -49,7 +49,7 @@ export const ${middlewareName}: NestMiddleware = async (req, res, next) => {
 
 export function getGuard(name: string) {
   const guardName = getUpperCaseName(name) + "Guard";
-  return `import { CanActivate, type Context, Injectable } from "@nest";
+  return `import { CanActivate, type Context, Injectable } from "@nest/core";
 
 @Injectable()
 export class ${guardName} implements CanActivate {
@@ -62,7 +62,7 @@ export class ${guardName} implements CanActivate {
 
 export function getInterceptor(name: string) {
   const interceptorName = getUpperCaseName(name) + "Interceptor";
-  return `import { type Context, Injectable, NestInterceptor, Next } from "@nest";
+  return `import { type Context, Injectable, NestInterceptor, Next } from "@nest/core";
 
 @Injectable()
 export class ${interceptorName} implements NestInterceptor {
@@ -77,7 +77,7 @@ export class ${interceptorName} implements NestInterceptor {
 
 export function getExceptionFilter(name: string) {
   const exceptionFilterName = getUpperCaseName(name) + "ExceptionFilter";
-  return `import { Catch, type Context, ExceptionFilter, HttpException } from "@nest";
+  return `import { Catch, type Context, ExceptionFilter, HttpException } from "@nest/core";
 
 @Catch()
 export class ${exceptionFilterName}<T> implements ExceptionFilter {
@@ -96,7 +96,7 @@ export class ${exceptionFilterName}<T> implements ExceptionFilter {
 
 export function getDecorator(name: string) {
   const decoratorName = getUpperCaseName(name);
-  return `import { type Context, createParamDecorator } from "@nest";
+  return `import { type Context, createParamDecorator } from "@nest/core";
 
 export const ${decoratorName} = createParamDecorator((ctx: Context) => {
   return ctx.request.states.${name};

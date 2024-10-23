@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-unused-vars
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { CatsController } from "./cats/cats.controller.ts";
 import { CatsService } from "./cats/cats.service.ts";
 import { Cat } from "./cats/cats.interface.ts";

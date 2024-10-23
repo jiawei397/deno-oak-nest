@@ -20,7 +20,7 @@ Add import map in `deno.json`:
 Then use in `AppModule`:
 
 ```typescript
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { AppController } from "./app.controller.ts";
 import { JwtModule } from "@nest/jwt";
 
@@ -41,7 +41,7 @@ export class AppModule {}
 Then `JwtService` can be used in any Controllers.
 
 ````ts
-import { Body, Controller, Get, Post } from "@nest";
+import { Body, Controller, Get, Post } from "@nest/core";
 import { JwtService } from "@nest/jwt";
 
 @Controller("")

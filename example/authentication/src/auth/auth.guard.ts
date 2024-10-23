@@ -5,7 +5,7 @@ import {
   Reflector,
   type Request,
   UnauthorizedException,
-} from "@nest";
+} from "@nest/core";
 import { JwtService } from "@nest/jwt";
 import { IS_PUBLIC_KEY } from "./auth.decorator.ts";
 

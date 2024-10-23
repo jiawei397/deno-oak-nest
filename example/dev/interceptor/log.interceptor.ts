@@ -1,4 +1,4 @@
-import { type Context, Injectable, NestInterceptor, Next } from "@nest";
+import { type Context, Injectable, NestInterceptor, Next } from "@nest/core";
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {

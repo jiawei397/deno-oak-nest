@@ -1,4 +1,4 @@
-import { type DynamicModule, Module } from "@nest";
+import { type DynamicModule, Module } from "@nest/core";
 import { ASYNC_KEY } from "./async.constant.ts";
 import { AsyncService } from "./async.service.ts";
 

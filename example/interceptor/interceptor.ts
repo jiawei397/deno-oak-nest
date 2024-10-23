@@ -5,7 +5,7 @@ import {
   Injectable,
   type NestInterceptor,
   Next,
-} from "@nest";
+} from "@nest/core";
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {

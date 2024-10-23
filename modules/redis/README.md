@@ -21,7 +21,7 @@ Add import map in `deno.json`:
 app.module.ts:
 
 ```typescript
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { createStore, RedisModule } from "@nest/redis";
 import { CacheModule } from "@nest/cache";
 import { AppController } from "./app.controller.ts";
@@ -42,7 +42,7 @@ export class AppModule {}
 Then can be used in AppController:
 
 ```ts
-import { Controller, Get, Inject, UseInterceptors } from "@nest";
+import { Controller, Get, Inject, UseInterceptors } from "@nest/core";
 import { CacheInterceptor, SetCacheStore } from "@nest/cache";
 import { type Redis, REDIS_KEY, RedisService } from "@nest/redis";
 

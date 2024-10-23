@@ -1,4 +1,4 @@
-import { Controller } from "@nest";
+import { Controller } from "@nest/core";
 import { assert, createTestingModule } from "@nest/tests";
 import { LoggerService } from "./logger.service.ts";
 import { assertEquals } from "std/assert/assert_equals.ts";

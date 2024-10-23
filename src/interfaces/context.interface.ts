@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Status } from "../../deps.ts";
+import { Status } from "../deps.ts";
 import { REDIRECT_BACK } from "../constants.ts";
 
 export type RedirectStatusCode = 300 | 301 | 302 | 303 | 304 | 307 | 308;

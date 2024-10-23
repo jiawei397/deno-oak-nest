@@ -1,4 +1,4 @@
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { MysqlModule } from "@nest/mysql";
 import { AppController } from "./app.controller.ts";
 

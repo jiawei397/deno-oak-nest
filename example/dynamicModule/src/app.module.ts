@@ -1,4 +1,4 @@
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { ConfigModule } from "./config/config.module.ts";
 import { AppController } from "./app.controller.ts";
 

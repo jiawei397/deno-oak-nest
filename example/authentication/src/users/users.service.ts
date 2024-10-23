@@ -1,5 +1,5 @@
 // deno-lint-ignore-file require-await
-import { Injectable } from "@nest";
+import { Injectable } from "@nest/core";
 
 export type User = {
   userId: number;

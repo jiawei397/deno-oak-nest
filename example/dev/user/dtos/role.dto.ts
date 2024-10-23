@@ -1,4 +1,4 @@
-import { Property } from "@nest";
+import { Property } from "@nest/core";
 import { Max, Min } from "class_validator";
 
 export class RoleInfoDto {

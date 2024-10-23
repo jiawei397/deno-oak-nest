@@ -9,7 +9,7 @@ import {
   REDIRECT_BACK,
   Res,
   type Response,
-} from "@nest";
+} from "@nest/core";
 import { AppService } from "./app.service.ts";
 import { QueryDto, QueryWithoutPropDto, SaveDto } from "./app.dto.ts";
 import { HonoContext } from "@nest/hono";

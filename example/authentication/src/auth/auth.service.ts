@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from "@nest";
+import { Injectable, UnauthorizedException } from "@nest/core";
 import { UsersService } from "../users/users.service.ts";
 import { JwtService } from "@nest/jwt";
 

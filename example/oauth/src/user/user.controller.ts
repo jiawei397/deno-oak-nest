@@ -11,7 +11,7 @@ import {
   Res,
   type Response,
   UnauthorizedException,
-} from "@nest";
+} from "@nest/core";
 import { UserService } from "./user.service.ts";
 import { JwtService } from "@nest/jwt";
 import config from "../globals.ts";

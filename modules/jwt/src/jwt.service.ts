@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nest";
+import { Inject, Injectable } from "@nest/core";
 import type { JwtServiceOptions } from "./jwt.interface.ts";
 import { optionKey } from "./jwt.constant.ts";
 import { Payload, verify } from "../deps.ts";

@@ -1,4 +1,4 @@
-import { type Constructor, Inject, Injectable, INQUIRER, Scope } from "@nest";
+import { type Constructor, Inject, Injectable, INQUIRER, Scope } from "@nest/core";
 
 @Injectable({
   scope: Scope.TRANSIENT,

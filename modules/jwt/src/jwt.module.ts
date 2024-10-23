@@ -1,4 +1,4 @@
-import { DynamicModule, Module } from "@nest";
+import { DynamicModule, Module } from "@nest/core";
 import { JwtModuleOptions } from "./jwt.interface.ts";
 import { optionKey } from "./jwt.constant.ts";
 import { JwtService } from "./jwt.service.ts";

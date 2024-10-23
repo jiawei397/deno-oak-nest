@@ -1,4 +1,4 @@
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { JwtModule } from "@nest/jwt";
 import config from "../globals.ts";
 import { UserController } from "./user.controller.ts";

@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Query } from "@nest";
+import { Controller, Get, Inject, Query } from "@nest/core";
 import { Client, POSTGRES_KEY } from "@nest/postgres";
 
 @Controller("")

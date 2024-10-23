@@ -1,4 +1,4 @@
-import { Controller, Get, Params, Query, UseInterceptors } from "@nest";
+import { Controller, Get, Params, Query, UseInterceptors } from "@nest/core";
 import { CacheInterceptor, CacheTTL, SetCachePolicy } from "@nest/cache";
 
 @Controller("")

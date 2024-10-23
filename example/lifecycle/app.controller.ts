@@ -6,7 +6,7 @@ import {
   OnApplicationShutdown,
   OnModuleDestroy,
   OnModuleInit,
-} from "@nest";
+} from "@nest/core";
 import { AppService } from "./app.service.ts";
 
 @Controller("")

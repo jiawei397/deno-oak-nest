@@ -1,4 +1,4 @@
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { UserController } from "./user.controller.ts";
 
 @Module({

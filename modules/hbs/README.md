@@ -32,7 +32,7 @@ setBaseViewsDir("views/");
 Then can use `Render` decorator in `controller`:
 
 ```ts
-import { Controller, Get } from "@nest";
+import { Controller, Get } from "@nest/core";
 import { Render } from "@nest/hbs";
 
 @Controller("")

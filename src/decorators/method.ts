@@ -4,7 +4,7 @@ import {
   Reflect,
   validateOrReject,
   ValidationError,
-} from "../../deps.ts";
+} from "../deps.ts";
 import {
   createParamDecorator,
   createParamDecoratorWithLowLevel,

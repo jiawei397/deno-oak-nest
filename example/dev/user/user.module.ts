@@ -1,4 +1,4 @@
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { AsyncModule } from "../asyncModule/async.module.ts";
 import { RoleController } from "./controllers/role.controller.ts";
 import { UserController } from "./controllers/user.controller.ts";

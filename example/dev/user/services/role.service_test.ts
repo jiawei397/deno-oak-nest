@@ -1,4 +1,4 @@
-import { assert, clearCacheTimeout } from "@nest";
+import { assert, clearCacheTimeout } from "@nest/core";
 import { RoleService } from "./role.service.ts";
 import { assertEquals, createTestingModule } from "@nest/tests";
 

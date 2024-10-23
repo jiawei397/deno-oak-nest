@@ -1,4 +1,4 @@
-import { Injectable } from "@nest";
+import { Injectable } from "@nest/core";
 import { mockjs } from "../../deps.ts";
 import { LoggerService } from "./logger.service.ts";
 import { RoleService } from "./role.service.ts";

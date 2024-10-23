@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { blue, format, green, red, Reflect, yellow } from "../deps.ts";
+import { blue, format, green, red, Reflect, yellow } from "./deps.ts";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "./constants.ts";
 import {
   META_HEADER_KEY,

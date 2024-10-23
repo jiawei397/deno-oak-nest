@@ -23,7 +23,7 @@ You can change mysql version by yourself.
 Here is `app.module.ts`:
 
 ```typescript
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { MysqlModule } from "@nest/mysql";
 import { AppController } from "./app.controller.ts";
 
@@ -47,7 +47,7 @@ Then can be used in `AppController`:
 
 ```ts
 import { Client, MYSQL_KEY } from "@nest/mysql";
-import { Controller, Get, Inject, Query } from "@nest";
+import { Controller, Get, Inject, Query } from "@nest/core";
 
 @Controller("")
 export class AppController {

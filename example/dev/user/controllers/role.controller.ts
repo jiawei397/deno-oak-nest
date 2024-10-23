@@ -10,7 +10,7 @@ import {
   Res,
   type Response,
   UseInterceptors,
-} from "@nest";
+} from "@nest/core";
 import { RoleService } from "../services/role.service.ts";
 import { UserId } from "../../decorators/user.ts";
 import { RoleInfoDto } from "../dtos/role.dto.ts";

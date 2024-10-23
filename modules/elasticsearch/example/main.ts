@@ -1,4 +1,4 @@
-import { NestFactory } from "@nest";
+import { NestFactory } from "@nest/core";
 import { HonoRouter } from "@nest/hono";
 import { AppModule } from "./app.module.ts";
 import { HttpExceptionsFilter } from "./exception.ts";

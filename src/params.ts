@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Reflect } from "../deps.ts";
+import { Reflect } from "./deps.ts";
 import type { Context, Instance } from "./interfaces/mod.ts";
 import type { ParamDecoratorCallback } from "./interfaces/param.interface.ts";
 

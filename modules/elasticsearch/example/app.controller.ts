@@ -1,4 +1,4 @@
-import { assert, Controller, Get } from "@nest";
+import { assert, Controller, Get } from "@nest/core";
 import { ElasticsearchService } from "@nest/elasticsearch";
 
 @Controller("")

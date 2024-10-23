@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nest";
+import { Inject, Injectable } from "@nest/core";
 import { Cat } from "./cats.interface.ts";
 import { LogService } from "./log.service.ts";
 import { type Connection } from "../connection.ts";

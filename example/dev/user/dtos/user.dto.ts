@@ -1,4 +1,4 @@
-import { Property } from "@nest";
+import { Property } from "@nest/core";
 import { IsEnum, IsNumber, IsString, Max } from "class_validator";
 
 export class UploadDto {

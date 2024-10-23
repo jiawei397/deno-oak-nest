@@ -1,4 +1,4 @@
-import { assert, Inject, Injectable } from "@nest";
+import { assert, Inject, Injectable } from "@nest/core";
 import { RoleAction } from "./role.decorator.ts";
 import { User } from "./role.interface.ts";
 

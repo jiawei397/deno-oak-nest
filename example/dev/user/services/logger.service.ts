@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { type Constructor, Inject, Injectable, INQUIRER, Scope } from "@nest";
+import { type Constructor, Inject, Injectable, INQUIRER, Scope } from "@nest/core";
 
 interface ILogger {
   info(...messages: any[]): void;

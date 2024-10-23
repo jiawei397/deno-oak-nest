@@ -1,4 +1,4 @@
-import { Controller, Get } from "@nest";
+import { Controller, Get } from "@nest/core";
 
 @Controller("/v2/user", {
   isAliasOnly: true,

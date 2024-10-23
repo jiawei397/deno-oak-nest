@@ -1,4 +1,4 @@
-import { assert, Controller, Get, Inject, UseInterceptors } from "@nest";
+import { assert, Controller, Get, Inject, UseInterceptors } from "@nest/core";
 import { CacheInterceptor, SetCacheStore } from "@nest/cache";
 import { type Redis, REDIS_KEY, RedisService } from "@nest/redis";
 

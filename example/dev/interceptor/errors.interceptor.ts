@@ -1,4 +1,4 @@
-import { BadGatewayException, type Context, Injectable, Next } from "@nest";
+import { BadGatewayException, type Context, Injectable, Next } from "@nest/core";
 import type {
   NestInterceptor,
 } from "../../../src/interfaces/interceptor.interface.ts";

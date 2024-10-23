@@ -1,4 +1,4 @@
-import { Module } from "@nest";
+import { Module } from "@nest/core";
 import { createStore, RedisModule } from "@nest/redis";
 import { CacheModule } from "@nest/cache";
 import { AppController } from "./app.controller.ts";

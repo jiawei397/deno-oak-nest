@@ -6,7 +6,7 @@ import {
   Reflector,
   // deno-lint-ignore no-unused-vars
   UnauthorizedException,
-} from "@nest";
+} from "@nest/core";
 import { delay } from "../deps.ts";
 import { RoleService } from "../user/services/role.service.ts";
 

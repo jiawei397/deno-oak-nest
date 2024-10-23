@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Reflect } from "../deps.ts";
+import { Reflect } from "./deps.ts";
 import { ControllerMethod } from "./interfaces/guard.interface.ts";
 import { factory } from "./factorys/class.factory.ts";
 import {

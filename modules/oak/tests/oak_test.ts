@@ -5,7 +5,7 @@ import {
   NestFactory,
   Res,
   type Response,
-} from "@nest";
+} from "@nest/core";
 import { CORS } from "https://deno.land/x/oak_cors@v0.1.1/mod.ts";
 import { Router } from "../mod.ts";
 import { createCommonTests } from "../../../tests/app_helper.ts";

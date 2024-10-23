@@ -1,5 +1,5 @@
 import { IsNumber, IsString, Max } from "class_validator";
-import { Property } from "@nest";
+import { Property } from "@nest/core";
 
 export class UploadDto {
   @IsString()

@@ -24,7 +24,7 @@ import {
   REDIRECT_BACK,
   Res,
   type Response,
-} from "@nest";
+} from "../src/mod.ts";
 import { Max, Min } from "class_validator";
 import { findUnusedPort } from "./common_helper.ts";
 import { assert, assertEquals, assertNotStrictEquals } from "./test_deps.ts";

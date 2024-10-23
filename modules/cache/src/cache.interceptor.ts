@@ -8,7 +8,7 @@ import {
   NestInterceptorOptions,
   Next,
   Reflect,
-} from "../../../mod.ts";
+} from "@nest/core";
 import {
   META_CACHE_KEY_KEY,
   META_CACHE_POLICY_KEY,

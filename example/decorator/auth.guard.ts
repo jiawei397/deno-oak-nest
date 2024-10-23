@@ -1,4 +1,4 @@
-import { CanActivate, type Context, Injectable } from "@nest";
+import { CanActivate, type Context, Injectable } from "@nest/core";
 
 @Injectable()
 export class AuthGuard implements CanActivate {

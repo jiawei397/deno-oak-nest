@@ -1,5 +1,5 @@
 // deno-lint-ignore-file require-await
-import { CanActivate, Context } from "@nest";
+import { CanActivate, Context } from "@nest/core";
 
 export class AuthGuard2 implements CanActivate {
   async canActivate(_context: Context): Promise<boolean> {

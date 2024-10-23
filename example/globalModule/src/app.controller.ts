@@ -1,4 +1,4 @@
-import { Controller, Get } from "@nest";
+import { Controller, Get } from "@nest/core";
 import { RolesService } from "./roles/roles.service.ts";
 
 @Controller("")
