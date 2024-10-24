@@ -32,6 +32,7 @@
     "dev:static": "deno task --cwd=example/static start",
     "dev:sse": "deno task --cwd=example/sse start",
     "dev:stream": "deno task --cwd=example/stream start",
+    "cli": "cd cli && deno task install",
     "pm2": "pm2 start --name deno_nest example/main.ts --interpreter='deno' --interpreter-args='run --allow-net --allow-env --allow-write --allow-read --unstable'",
     "test": "DENO_ENV=test deno test --allow-env --allow-net --allow-write --allow-read --parallel --unstable-kv --ignore=example --coverage=cov_profile",
     "unit": "DENO_ENV=test deno test --allow-env --allow-net --allow-write --allow-read --parallel --unstable-kv",

@@ -1,7 +1,5 @@
-// deno install -g --allow-env --allow-run --allow-net --allow-read --allow-write --import-map ./cli/import_map.json -n nests  -f ./cli/main.ts
-import { Input, Select } from "@cliffy/prompt";
-import { Command } from "@cliffy/command";
-import { colors } from "@cliffy/ansi/colors";
+// deno install -g --allow-env --allow-run --allow-net --allow-read --allow-write -n nests  -f ./cli/main.ts
+import { Input, Select, Command, colors} from "./deps.ts";
 import { createProject, type Engine } from "./src/new.ts";
 import { generateCommand } from "./src/generate.ts";
 

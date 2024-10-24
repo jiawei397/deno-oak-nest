@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "exports": "./main.ts",
   "tasks": {
-    "install": "deno install -g --allow-env --allow-run --allow-net --allow-read --allow-write --import-map ./import_map.json -n nests  -f ./main.ts"
-  },
-  "importMap": "./import_map.json"
+    "install": "deno install -g --allow-env --allow-run --allow-net --allow-read --allow-write -n nests  -f ./main.ts"
+  }
 }

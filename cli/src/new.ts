@@ -1,6 +1,4 @@
-import { applyEdits, modify } from "jsonc";
-import { decompress } from "zip";
-import { join } from "@std/path";
+import { applyEdits, modify, decompress, path} from "../deps.ts";
 import denoConfig from "../../deno.json" with { type: "json" };
 
 const importMap = denoConfig.imports;
@@ -90,7 +88,7 @@ function modifyText(text: string, map: Record<string, string>) {
 
 async function writeDenoJson(name: string, denoJsonPath: string) {
   //   console.log(`[${denoJsonPath}] will be changed`);
-  const realPath = join(name, denoJsonPath);
+  const realPath = path.join(name, denoJsonPath);
   let text = await Deno.readTextFile(realPath);
   text = text.replace(templateName, name);
   const result = modifyText(text, {
@@ -100,7 +98,7 @@ async function writeDenoJson(name: string, denoJsonPath: string) {
 }
 
 async function writeReadme(name: string) {
-  const realPath = join(name, "README.md");
+  const realPath = path.join(name, "README.md");
   const doc = await Deno.readTextFile(realPath).catch((_) => null);
   if (!doc) {
     console.warn(`Not found【${realPath}】`);
@@ -112,7 +110,7 @@ async function writeReadme(name: string) {
 
 // 读取import_map.json文件，替换hono为oak
 async function writeImportMap(name: string) {
-  const realPath = join(name, "import_map.json");
+  const realPath = path.join(name, "import_map.json");
   const content = await Deno.readTextFile(realPath);
   // "@nest/hono": "https://deno.land/x/deno_nest@v3.1.1/modules/hono/mod.ts",
   // "hono/": "https://deno.land/x/hono@v4.1.0/",
@@ -126,7 +124,7 @@ async function writeImportMap(name: string) {
 }
 
 async function writeMain(name: string) {
-  const realPath = join(name, "src/main.ts");
+  const realPath = path.join(name, "src/main.ts");
   const content = await Deno.readTextFile(realPath);
   const newContent = content.replace(/@nest\/hono/g, "@nest/oak");
   await Deno.writeTextFile(realPath, newContent);

@@ -1,7 +1,4 @@
-import { ensureDir } from "@std/fs";
-import { Input, Select } from "@cliffy/prompt";
-import { Command } from "@cliffy/command";
-import { colors } from "@cliffy/ansi/colors";
+import { colors, Command, fs, Input, Select } from "../deps.ts";
 import {
   getController,
   getDecorator,
@@ -55,7 +52,7 @@ function calculateBytesAndKb(str: string) {
 
 export async function generate(type: GenerateType, name: string) {
   const dirname = getLowerCaseFileName(name);
-  await ensureDir(dirname);
+  await fs.ensureDir(dirname);
   const body = getGenerateBody(type, name);
   const fileName = getFileName(name, type);
 
@@ -89,6 +86,10 @@ export function generateCommand() {
           message: `What name would you like to use for the ${type}?`,
           minLength: 1,
         });
+        if (!name) {
+          console.error(error("The name must not be empty"));
+          return;
+        }
       }
       await generate(type, name);
     });
