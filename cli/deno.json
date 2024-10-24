@@ -3,12 +3,7 @@
   "version": "0.0.1",
   "exports": "./main.ts",
   "tasks": {
-    "install": "deno install -g --allow-env --allow-run --allow-net --allow-read --allow-write -n dest  -f ./main.ts"
+    "install": "deno install -g --allow-env --allow-run --allow-net --allow-read --allow-write --import-map ./import_map.json -n nests  -f ./main.ts"
   },
-  "imports": {
-    "std/": "https://deno.land/std@0.202.0/",
-    "cliffy/": "https://deno.land/x/cliffy@v1.0.0-rc.3/",
-    "zip": "https://deno.land/x/zip@v1.2.2/mod.ts",
-    "jsonc": "https://deno.land/x/jsonc@1/main.ts"
-  }
+  "importMap": "./import_map.json"
 }

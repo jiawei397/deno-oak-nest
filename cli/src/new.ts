@@ -1,6 +1,6 @@
 import { applyEdits, modify } from "jsonc";
 import { decompress } from "zip";
-import { join } from "std/path/mod.ts";
+import { join } from "@std/path";
 import denoConfig from "../../deno.json" with { type: "json" };
 
 const importMap = denoConfig.imports;

@@ -3,6 +3,6 @@
   "version": "0.0.1",
   "exports": "./mod.ts",
   "tasks": {
-    "dev": "deno run --unstable -A example/main.ts"
+    "dev": "deno run --unstable-kv -A example/main.ts"
   }
 }

@@ -1,7 +1,7 @@
-import { ensureDir } from "std/fs/ensure_dir.ts";
-import { Input, Select } from "cliffy/prompt/mod.ts";
-import { Command } from "cliffy/command/mod.ts";
-import { colors } from "cliffy/ansi/colors.ts";
+import { ensureDir } from "@std/fs";
+import { Input, Select } from "@cliffy/prompt";
+import { Command } from "@cliffy/command";
+import { colors } from "@cliffy/ansi/colors";
 import {
   getController,
   getDecorator,

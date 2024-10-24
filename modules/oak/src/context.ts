@@ -1,4 +1,4 @@
-import type { Context, Status } from "@nest/core";
+import type { Context, StatusCode } from "@nest/core";
 import type { OakContext } from "../deps.ts";
 import { NestCookies } from "./cookies.ts";
 import { NestRequest } from "./request.ts";
@@ -17,7 +17,7 @@ export class NestContext implements Context {
     this.response = new NestResponse(context, this.cookies);
   }
 
-  static getInstance(context: OakContext, status?: Status): NestContext {
+  static getInstance(context: OakContext, status?: StatusCode): NestContext {
     const nestContext = context.state[nestContextKey];
     if (nestContext) {
       return nestContext;

@@ -1,7 +1,7 @@
-// deno install --allow-env --allow-run --allow-net --allow-read --allow-write --import-map ./cli/import_map.json -n nests  -f ./cli/main.ts
-import { Input, Select } from "cliffy/prompt/mod.ts";
-import { Command } from "cliffy/command/mod.ts";
-import { colors } from "cliffy/ansi/colors.ts";
+// deno install -g --allow-env --allow-run --allow-net --allow-read --allow-write --import-map ./cli/import_map.json -n nests  -f ./cli/main.ts
+import { Input, Select } from "@cliffy/prompt";
+import { Command } from "@cliffy/command";
+import { colors } from "@cliffy/ansi/colors";
 import { createProject, type Engine } from "./src/new.ts";
 import { generateCommand } from "./src/generate.ts";
 
