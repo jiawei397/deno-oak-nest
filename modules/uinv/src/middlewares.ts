@@ -8,7 +8,7 @@ export function getLogMiddleware(options?: {
   logger?: Logger;
   logLevel?: "info" | "debug";
   isHeaderResponseTime?: boolean;
-}) {
+}): NestMiddleware {
   const logger = options?.logger ?? console;
   const logLevel = options?.logLevel ?? "info";
 

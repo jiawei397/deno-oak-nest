@@ -36,7 +36,7 @@ export class HttpException extends Error {
     objectOrError: any,
     description: string,
     statusCode: number,
-  ) {
+  ): any {
     if (!objectOrError) {
       return { statusCode, message: description };
     }

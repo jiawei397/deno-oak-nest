@@ -18,7 +18,7 @@ export class Cache extends Map {
     this.timeout = timeout;
   }
 
-  override set(key: string | number, val: any, timeout?: number) {
+  override set(key: string | number, val: any, timeout?: number): this {
     super.set.call(this, key, val);
     setTimeout(() => {
       this.delete(key);
@@ -78,24 +78,24 @@ export function jsonParse(str: string): any {
   }
 }
 
-export function delay(time: number) {
+export function delay(time: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, time);
   });
 }
 
-export function getIgnoreCaseRegExp(name: string) {
+export function getIgnoreCaseRegExp(name: string): RegExp {
   return new RegExp(["^", name, "$"].join(""), "i");
 }
 
 /**
  * 模糊查询正则
  */
-export function getVagueIgnoreCaseRegExp(name: string) {
+export function getVagueIgnoreCaseRegExp(name: string): RegExp {
   return new RegExp(name, "i");
 }
 
-export function formatDate(date: Date, fmt: string) {
+export function formatDate(date: Date, fmt: string): string {
   const o: any = {
     "M+": date.getMonth() + 1, //月份
     "d+": date.getDate(), //日

@@ -22,6 +22,7 @@ import {
   send,
 } from "../deps.ts";
 import { NestContext } from "./context.ts";
+import type { State } from "oak";
 
 export class OakRouter implements IRouter {
   private router: OakOriginRouter;
@@ -65,23 +66,23 @@ export class OakRouter implements IRouter {
     };
   }
 
-  get(path: string, fn: MiddlewareHandler) {
+  get(path: string, fn: MiddlewareHandler): OakOriginRouter<State> {
     return this.router.get(path, this.handle(fn));
   }
-  post(path: string, fn: MiddlewareHandler) {
+  post(path: string, fn: MiddlewareHandler): OakOriginRouter<State> {
     return this.router.post(path, this.handle(fn));
   }
-  put(path: string, fn: MiddlewareHandler) {
+  put(path: string, fn: MiddlewareHandler): OakOriginRouter<State> {
     return this.router.put(path, this.handle(fn));
   }
-  delete(path: string, fn: MiddlewareHandler) {
+  delete(path: string, fn: MiddlewareHandler): OakOriginRouter<State> {
     return this.router.delete(path, this.handle(fn));
   }
-  patch(path: string, fn: MiddlewareHandler) {
+  patch(path: string, fn: MiddlewareHandler): OakOriginRouter<State> {
     return this.router.patch(path, this.handle(fn));
   }
 
-  use(fn: MiddlewareHandler) {
+  use(fn: MiddlewareHandler): OakApplication<State> {
     return this.app.use((ctx: OakContext, next: () => Promise<unknown>) => {
       const nestCtx = NestContext.getInstance(ctx, 404);
       return fn(nestCtx, next as Next);
@@ -93,7 +94,7 @@ export class OakRouter implements IRouter {
     this.app.use(this.router.allowedMethods());
   }
 
-  startServer(options: ListenOptions) {
+  startServer(options: ListenOptions): Promise<void> {
     options.onListen!({
       transport: "tcp",
       port: options?.port ?? 8000,

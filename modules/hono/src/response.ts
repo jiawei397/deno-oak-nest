@@ -4,7 +4,7 @@ import {
   STATUS_TEXT,
   type StatusCode,
 } from "@nest/core";
-import type { RedirectStatusCode, Response } from "@nest/core";
+import type { RedirectStatusCode, Response, StatusText } from "@nest/core";
 import { type HonoContext, HonoResponse } from "../deps.ts";
 import type { NestCookies } from "./cookies.ts";
 
@@ -42,7 +42,7 @@ export class NestResponse implements Response {
     this.body = context.redirect(location, statusCode);
   }
 
-  get statusText() {
+  get statusText(): StatusText {
     return STATUS_TEXT[this.status];
   }
 

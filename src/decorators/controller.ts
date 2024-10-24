@@ -30,26 +30,39 @@ export enum Methods {
   OPTIONS = "options",
 }
 
-const createMappingDecorator =
-  (method: Methods) =>
-  (path: string, options?: AliasOptions): MethodDecorator => {
-    return (_target, _property, descriptor) => {
-      Reflect.defineMetadata(META_PATH_KEY, path, descriptor.value);
-      Reflect.defineMetadata(META_METHOD_KEY, method, descriptor.value);
-      if (!options) {
-        return;
-      }
-      Reflect.defineMetadata(META_ALIAS_KEY, options, descriptor.value);
-    };
-  };
+export type MappingDecoratorResult = (
+  path: string,
+  options?: AliasOptions,
+) => MethodDecorator;
 
-export const Get = createMappingDecorator(Methods.GET);
-export const Post = createMappingDecorator(Methods.POST);
-export const Delete = createMappingDecorator(Methods.DELETE);
-export const Put = createMappingDecorator(Methods.PUT);
-export const Head = createMappingDecorator(Methods.HEAD);
-export const Options = createMappingDecorator(Methods.OPTIONS);
-export const Patch = createMappingDecorator(Methods.PATCH);
+function createMappingDecorator(method: Methods): MappingDecoratorResult {
+  return (path, options) => (_target, _property, descriptor) => {
+    Reflect.defineMetadata(META_PATH_KEY, path, descriptor.value);
+    Reflect.defineMetadata(META_METHOD_KEY, method, descriptor.value);
+    if (!options) {
+      return;
+    }
+    Reflect.defineMetadata(META_ALIAS_KEY, options, descriptor.value);
+  };
+}
+
+export const Get: MappingDecoratorResult = createMappingDecorator(Methods.GET);
+export const Post: MappingDecoratorResult = createMappingDecorator(
+  Methods.POST,
+);
+export const Delete: MappingDecoratorResult = createMappingDecorator(
+  Methods.DELETE,
+);
+export const Put: MappingDecoratorResult = createMappingDecorator(Methods.PUT);
+export const Head: MappingDecoratorResult = createMappingDecorator(
+  Methods.HEAD,
+);
+export const Options: MappingDecoratorResult = createMappingDecorator(
+  Methods.OPTIONS,
+);
+export const Patch: MappingDecoratorResult = createMappingDecorator(
+  Methods.PATCH,
+);
 
 export function HttpCode(code: number): MethodDecorator {
   return (_target, _property, descriptor) => {

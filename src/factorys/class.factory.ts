@@ -134,7 +134,7 @@ export class ClassFactory {
       scope?: Scope;
       caches?: FactoryCaches;
     } = {},
-  ) {
+  ): Promise<any> {
     if (provider instanceof Function) { // same with class provider
       return this.create(provider, options);
     }
@@ -248,7 +248,7 @@ export class ClassFactory {
     return result;
   }
 
-  async getRouterArr(controllers: Constructor[]) {
+  async getRouterArr(controllers: Constructor[]): Promise<RouteItem[]> {
     const routerArr: RouteItem[] = [];
     await Promise.all(
       controllers.map(async (Cls) => {
@@ -293,4 +293,4 @@ export class ClassFactory {
   }
 }
 
-export const factory = new ClassFactory();
+export const factory: ClassFactory = new ClassFactory();

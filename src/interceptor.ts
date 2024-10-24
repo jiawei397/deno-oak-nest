@@ -12,11 +12,17 @@ import type { Next } from "./interfaces/middleware.interface.ts";
 import type { Constructor } from "./interfaces/type.interface.ts";
 export const META_INTERCEPTOR_KEY = Symbol("meta:interceptor");
 
-export function UseInterceptors(...interceptors: NestUseInterceptors) {
+export function UseInterceptors(
+  ...interceptors: NestUseInterceptors
+): (
+  target: any,
+  property?: string | symbol,
+  descriptor?: TypedPropertyDescriptor<any>,
+) => void {
   return function (
-    target: any,
-    _property?: string | symbol,
-    descriptor?: TypedPropertyDescriptor<any>,
+    target,
+    _property,
+    descriptor,
   ) {
     Reflect.defineMetadata(
       META_INTERCEPTOR_KEY,
@@ -55,12 +61,14 @@ export async function checkByInterceptors(
 }
 
 /** Compose multiple interceptors functions into a single interceptor function. */
-export function compose(interceptors: NestInterceptor[]) {
-  return function composedInterceptors(
-    context: Context,
-    next?: Next,
-    options?: NestInterceptorOptions,
-  ) {
+export function compose(
+  interceptors: NestInterceptor[],
+): (
+  context: Context,
+  next?: Next,
+  options?: NestInterceptorOptions,
+) => Promise<void> {
+  return function composedInterceptors(context, next, options) {
     let index = -1;
 
     async function dispatch(i: number): Promise<void> {

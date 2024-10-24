@@ -1,4 +1,9 @@
-import { Catch, type ExceptionFilter, HttpException } from "@nest/core";
+import {
+  Catch,
+  type Constructor,
+  type ExceptionFilter,
+  HttpException,
+} from "@nest/core";
 import type { Context } from "../deps.ts";
 import type { Logger } from "./types.ts";
 
@@ -28,7 +33,9 @@ function getDefaultErrorBody(
  * }));
  * ```
  */
-export const anyExceptionFilter = (options: ExceptionOptions = {}) => {
+export const anyExceptionFilter = (
+  options: ExceptionOptions = {},
+): Constructor<ExceptionFilter> => {
   const {
     logger = console,
     isDisableFormat404,
@@ -83,7 +90,7 @@ export const anyExceptionFilter = (options: ExceptionOptions = {}) => {
   return AllExceptionsFilter;
 };
 
-export function get404Message() {
+export function get404Message(): string {
   return `                
     <!DOCTYPE html>
     <html>

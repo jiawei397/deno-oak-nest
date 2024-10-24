@@ -10,7 +10,7 @@ export class NestFactory {
     rootModule: ModuleType,
     Router: IRouterConstructor,
     options?: FactoryCreateOptions,
-  ) {
+  ): Promise<Application> {
     const router = new Router(options);
     const app = new Application(router);
     if (options?.logger !== undefined) {

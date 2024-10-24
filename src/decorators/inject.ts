@@ -43,7 +43,7 @@ export const Injectable =
     }
   };
 
-export function isSingleton(Cls: Constructor) {
+export function isSingleton(Cls: Constructor): boolean {
   if (typeof Cls === "function") {
     const meta = Reflect.getMetadata(SINGLETON_MEAT_KEY, Cls);
     return meta !== Scope.TRANSIENT;

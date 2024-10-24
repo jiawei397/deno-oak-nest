@@ -4,6 +4,7 @@ import type { ICacheStore } from "@nest/cache";
 import type { Redis } from "../deps.ts";
 import { REDIS_KEY, REDIS_STORE_NAME } from "./redis.constant.ts";
 import { jsonParse, stringify } from "./utils.ts";
+import type { Integer } from "redis";
 
 export class RedisStore implements ICacheStore {
   key = "cache_store";
@@ -20,7 +21,7 @@ export class RedisStore implements ICacheStore {
     return jsonParse(data);
   }
 
-  getNewKey(key: string) {
+  getNewKey(key: string): string {
     return this.key + "_" + key;
   }
 
@@ -48,14 +49,14 @@ export class RedisStore implements ICacheStore {
         : undefined,
     );
   }
-  async delete(key: string) {
+  async delete(key: string): Promise<number> {
     const newKey = this.getNewKey(key);
     const result = await this.client.del(newKey);
     await this.client.srem(this.key, key);
     this.timeoutMap.delete(key);
     return result;
   }
-  async clear() {
+  async clear(): Promise<void> {
     const keys = await this.client.smembers(this.key);
     await this.client.del(this.key);
     await Promise.all(keys.map((key) => this.client.del(this.getNewKey(key))));
@@ -63,17 +64,20 @@ export class RedisStore implements ICacheStore {
       clearTimeout(st);
     }
   }
-  async has(key: string) {
+  async has(key: string): Promise<boolean> {
     const newKey = this.getNewKey(key);
     const num = await this.client.exists(newKey);
     return num === 1;
   }
-  size() {
+  size(): Promise<Integer> {
     return this.client.scard(this.key);
   }
 }
 
-export const createStore = async () => {
+export const createStore = async (): Promise<{
+  name: string;
+  store: RedisStore;
+}> => {
   return {
     name: REDIS_STORE_NAME,
     store: await factory.create(RedisStore),

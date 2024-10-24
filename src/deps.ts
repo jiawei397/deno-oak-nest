@@ -1,4 +1,9 @@
-export { STATUS_CODE, STATUS_TEXT, type StatusCode } from "@std/http";
+export {
+  STATUS_CODE,
+  STATUS_TEXT,
+  type StatusCode,
+  type StatusText,
+} from "@std/http";
 
 export { extname, resolve } from "@std/path";
 

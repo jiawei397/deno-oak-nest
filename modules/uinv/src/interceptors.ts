@@ -13,7 +13,7 @@ export function getLogInterceptor(options?: {
   logger?: Logger;
   logLevel?: "info" | "debug";
   isHeaderResponseTime?: boolean;
-}) {
+}): new () => NestInterceptor {
   const logger = options?.logger ?? console;
   const logLevel = options?.logLevel ?? "info";
 

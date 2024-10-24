@@ -1,17 +1,19 @@
 // deno-lint-ignore-file no-explicit-any require-await
-import {  Application} from "@nest/core";
+import { Application, NotImplementedException } from "@nest/core";
 import type {
-  Context, ICookies, Request, Response,
-  StatusCode,
+  Context,
+  ICookies,
   IRouter,
-  NotImplementedException,
+  ListenOptions,
   MethodType,
   MiddlewareHandler,
   NotFoundHandler,
-  ListenOptions
+  Request,
+  Response,
+  StatusCode,
 } from "@nest/core";
 
-export async function findUnusedPort(port: number) {
+export async function findUnusedPort(port: number): Promise<number> {
   try {
     const conn = await Deno.connect({ port });
     conn.close();
@@ -212,11 +214,11 @@ export class MockRouter implements IRouter {
   }
 }
 
-export function createMockRouter() {
+export function createMockRouter(): MockRouter {
   return new MockRouter();
 }
 
-export function createMockApp() {
+export function createMockApp(): Application {
   const router = createMockRouter();
   const app = new Application(router);
   app.useLogger(false);
@@ -227,7 +229,7 @@ export function createMockApp() {
 export async function mockCallMethod(
   app: Application,
   ctx: Context,
-) {
+): Promise<void> {
   await (app as any).routes();
 
   const url = ctx.request.url;

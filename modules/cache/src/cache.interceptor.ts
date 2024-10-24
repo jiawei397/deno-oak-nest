@@ -28,25 +28,33 @@ import { md5 } from "./cache.utils.ts";
 import { LRUCache } from "../deps.ts";
 import type { OnModuleInit } from "../../../src/interfaces/module.interface.ts";
 
-export function CacheTTL(seconds: number) {
+export function CacheTTL(
+  seconds: number,
+): (target: any, methodName: string, descriptor: any) => void {
   return (_target: any, _methodName: string, descriptor: any) => {
     Reflect.defineMetadata(META_CACHE_TTL_KEY, seconds, descriptor.value);
   };
 }
 
-export function CacheKey(key: string) {
+export function CacheKey(
+  key: string,
+): (target: any, methodName: string, descriptor: any) => void {
   return (_target: any, _methodName: string, descriptor: any) => {
     Reflect.defineMetadata(META_CACHE_KEY_KEY, key, descriptor.value);
   };
 }
-export function SetCacheStore(key: CacheStoreName | string) {
+export function SetCacheStore(
+  key: CacheStoreName | string,
+): (target: any, methodName: string, descriptor: any) => void {
   return (_target: any, _methodName: string, descriptor: any) => {
     Reflect.defineMetadata(META_CACHE_STORE_KEY, key, descriptor.value);
   };
 }
 
-export function SetCachePolicy(policy: CachePolicy) {
-  return (_target: any, _methodName: string, descriptor: any) => {
+export function SetCachePolicy(
+  policy: CachePolicy,
+): (target: any, methodName: string, descriptor: any) => void {
+  return (_target, _methodName, descriptor) => {
     Reflect.defineMetadata(META_CACHE_POLICY_KEY, policy, descriptor.value);
   };
 }
@@ -91,7 +99,7 @@ export class CacheInterceptor implements NestInterceptor, OnModuleInit {
     }
   }
 
-  joinArgs(args: any[]) {
+  joinArgs(args: any[]): string {
     const arr = args.map((arg) => {
       if (typeof arg === "object") {
         return JSON.stringify(arg);
@@ -227,7 +235,7 @@ export class CacheInterceptor implements NestInterceptor, OnModuleInit {
     context: Context,
     next: Next,
     options: NestInterceptorOptions,
-  ) {
+  ): Promise<void> {
     if (context.request.method !== "GET") { // only deal get request
       return next();
     }

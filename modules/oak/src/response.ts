@@ -2,8 +2,10 @@ import {
   REDIRECT_BACK,
   type RedirectStatusCode,
   type Response,
-  Status,
+  STATUS_CODE,
   STATUS_TEXT,
+  type StatusCode,
+  type StatusText,
 } from "@nest/core";
 import type { OakContext } from "../deps.ts";
 import type { NestCookies } from "./cookies.ts";
@@ -11,17 +13,17 @@ import type { NestCookies } from "./cookies.ts";
 export class NestResponse implements Response {
   body: string | object | number | boolean | null;
   headers: Headers = new Headers();
-  status: Status;
+  status: StatusCode;
   originalContext: OakContext;
   cookies: NestCookies;
 
   constructor(context: OakContext, cookies: NestCookies) {
     this.originalContext = context;
-    this.status = Status.OK;
+    this.status = STATUS_CODE.OK;
     this.cookies = cookies;
   }
 
-  get statusText() {
+  get statusText(): StatusText {
     return STATUS_TEXT[this.status];
   }
 

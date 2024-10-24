@@ -204,7 +204,7 @@ async function cors(
   }
 }
 
-export function CORS(options?: boolean | CorsOptions) {
+export function CORS(options?: boolean | CorsOptions): NestMiddleware {
   const middleware: NestMiddleware = async function (request, response, next) {
     if (options === false) { // not need cors
       return next();

@@ -24,7 +24,7 @@ import type {
 import { HonoRouter } from "@nest/hono";
 
 export class TestModule {
-  factoryCaches = new Map();
+  factoryCaches: Map<any, any> = new Map();
   data: ModuleMetadata;
   app: Application;
   rootModule: Constructor;
@@ -70,11 +70,14 @@ export class TestModule {
     }
     return map.get(constructor) || null;
   }
-  async resolve(constructor: Constructor, parentClass?: Type<any>) {
+  async resolve(
+    constructor: Constructor,
+    parentClass?: Type<any>,
+  ): Promise<any> {
     await this.getApp();
     return factory.getInstance(constructor, { parentClass });
   }
-  overrideProvider(provide: Provide, value: any) {
+  overrideProvider(provide: Provide, value: any): this {
     const data = this.data;
     if (!data.providers) {
       data.providers = [];
@@ -86,7 +89,7 @@ export class TestModule {
     return this;
   }
 
-  overrideModule(module: ModuleType, value: ModuleType) {
+  overrideModule(module: ModuleType, value: ModuleType): this {
     const data = this.data;
     if (!data.imports) {
       return this;
@@ -101,7 +104,7 @@ export class TestModule {
   overrideInterceptor(
     interceptor: NestInterceptor | Constructor<NestInterceptor>,
     value: NestInterceptor | Constructor<NestInterceptor>,
-  ) {
+  ): this {
     this.overrideInterceptorMap = this.overrideInterceptorMap || new Map();
     this.overrideInterceptorMap.set(interceptor, value);
     return this;
@@ -110,13 +113,13 @@ export class TestModule {
   overrideFilter(
     filter: ExceptionFilter | Constructor<ExceptionFilter>,
     value: ExceptionFilter | Constructor<ExceptionFilter>,
-  ) {
+  ): this {
     this.overrideFilterMap = this.overrideFilterMap || new Map();
     this.overrideFilterMap.set(filter, value);
     return this;
   }
 
-  overrideGuard(guard: NestGuard, value: NestGuard) {
+  overrideGuard(guard: NestGuard, value: NestGuard): this {
     this.overrideGuardMap = this.overrideGuardMap || new Map();
     this.overrideGuardMap.set(guard, value);
     return this;
@@ -176,7 +179,7 @@ export class TestModule {
     return this.app;
   }
 
-  async compile() {
+  async compile(): Promise<this> {
     const data = this.data;
 
     @Module({
@@ -220,7 +223,7 @@ export class TestModule {
     return this;
   }
 
-  createNestApplication() {
+  createNestApplication(): App {
     this.factoryCaches.clear();
     return new App(this.rootModule, this.factoryCaches);
   }
@@ -248,6 +251,6 @@ export class App {
   }
 }
 
-export function createTestingModule(data: ModuleMetadata) {
+export function createTestingModule(data: ModuleMetadata): TestModule {
   return new TestModule(data);
 }

@@ -1,13 +1,12 @@
-import type {
-  ListenOptions,
-} from "../../../src/interfaces/application.interface.ts";
-import type { StaticOptions } from "../../../src/interfaces/factory.interface.ts";
+// deno-lint-ignore-file no-explicit-any
 import type {
   IRouter,
+  ListenOptions,
   MiddlewareHandler,
   NotFoundHandler,
   RouterOptions,
-} from "../../../src/interfaces/route.interface.ts";
+  StaticOptions,
+} from "@nest/core";
 import {
   Hono,
   type HonoContext,
@@ -16,6 +15,8 @@ import {
   serveStatic,
 } from "../deps.ts";
 import { NestContext } from "./context.ts";
+
+type HonoMiddleware = Hono<any, { [x: string]: any }, "/">;
 
 export class HonoRouter implements IRouter {
   private app: Hono;
@@ -38,42 +39,42 @@ export class HonoRouter implements IRouter {
   get(
     path: string,
     fn: MiddlewareHandler,
-  ) {
+  ): HonoMiddleware {
     return this.app.get(path, this.handle(fn));
   }
   post(
     path: string,
     fn: MiddlewareHandler,
-  ) {
+  ): HonoMiddleware {
     return this.app.post(path, this.handle(fn));
   }
   put(
     path: string,
     fn: MiddlewareHandler,
-  ) {
+  ): HonoMiddleware {
     return this.app.put(path, this.handle(fn));
   }
   delete(
     path: string,
     fn: MiddlewareHandler,
-  ) {
+  ): HonoMiddleware {
     return this.app.delete(path, this.handle(fn));
   }
   patch(
     path: string,
     fn: MiddlewareHandler,
-  ) {
+  ): HonoMiddleware {
     return this.app.patch(path, this.handle(fn));
   }
 
-  use(fn: MiddlewareHandler) {
+  use(fn: MiddlewareHandler): HonoMiddleware {
     return this.app.use("*", async (ctx: HonoContext, next: HonoNext) => {
       const nestCtx = NestContext.getInstance(ctx, 404, this.keys);
       await fn(nestCtx, next);
     });
   }
 
-  useOriginMiddleware(fn: HonoMiddlewareHandler, path = "*") {
+  useOriginMiddleware(fn: HonoMiddlewareHandler, path = "*"): HonoMiddleware {
     return this.app.use(path, fn);
   }
 
@@ -90,11 +91,11 @@ export class HonoRouter implements IRouter {
     });
   }
 
-  startServer(options: ListenOptions) {
+  startServer(options: ListenOptions): Deno.HttpServer<Deno.NetAddr> {
     return Deno.serve(options, this.app.fetch);
   }
 
-  serveForStatic(staticOptions: StaticOptions) {
+  serveForStatic(staticOptions: StaticOptions): void {
     if (!staticOptions) {
       return;
     }

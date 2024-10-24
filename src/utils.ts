@@ -7,11 +7,11 @@ import type {
   SSEMessageEvent,
 } from "./interfaces/controller.interface.ts";
 
-export function isDebug() {
+export function isDebug(): boolean {
   return Deno.env.get("DEBUG") === "true";
 }
 
-export function parseSearch(search: string) {
+export function parseSearch(search: string): Record<string, string | string[]> {
   const str = search.startsWith("?") ? search.substring(1) : search;
   if (!str) {
     return {};
@@ -34,7 +34,9 @@ export function parseSearch(search: string) {
   return map;
 }
 
-export function parseSearchParams(search: URLSearchParams) {
+export function parseSearchParams(
+  search: URLSearchParams,
+): Record<string, string | string[]> {
   const map: Record<string, string | string[]> = {};
   search.forEach((v, k) => {
     const value = map[k];
@@ -159,7 +161,7 @@ export function getSSEStream(
   };
 }
 
-export function joinPath(...paths: string[]) {
+export function joinPath(...paths: string[]): string {
   if (paths.length === 0) {
     return "/";
   }
@@ -182,7 +184,7 @@ export function replaceAliasPath(
     controllerAliasPath?: string;
     method?: string;
   },
-) {
+): string {
   return joinPath(
     str.replace(/\$\{prefix\}/, options.prefix || "")
       .replace(/\$\{method\}/, options.method || "")
@@ -213,7 +215,10 @@ export type MethodPathOptions = {
   methodPath: string;
   methodAliasOptions?: AliasOptions;
 };
-export function getMethodPaths(params: MethodPathOptions) {
+export function getMethodPaths(params: MethodPathOptions): {
+  originPath: string | undefined;
+  aliasPath: string | undefined;
+} {
   const {
     apiPrefix = "",
     controllerPathWithPrefix,

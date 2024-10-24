@@ -2,17 +2,20 @@
 import { ajax } from "../tools/ajax.ts";
 import {
   type CanActivate,
+  type Constructor,
   type Context,
   type Request,
   UnauthorizedException,
-} from "../../deps.ts";
+} from "@nest/core";
 import type { AuthGuardOptions, Token, User } from "../types.ts";
 import { getFirstOriginByHost, isDist } from "../tools/utils.ts";
 
 /**
  * auth守卫
  */
-export function AuthGuard(options: AuthGuardOptions = {}) {
+export function AuthGuard(
+  options: AuthGuardOptions = {},
+): Constructor<CanActivate> {
   const {
     logger = console,
     authApi = Deno.env.get("authApi"),

@@ -11,10 +11,10 @@ export interface TimeJob {
 }
 
 class SchedulerRegistry {
-  cronMap = new Map<Constructor, CronJob[]>();
-  timeoutMap = new Map<Constructor, TimeJob[]>();
-  intervalMap = new Map<Constructor, TimeJob[]>();
-  timeCaches = new Map<string, number>();
+  cronMap: Map<Constructor, CronJob[]> = new Map();
+  timeoutMap: Map<Constructor, TimeJob[]> = new Map();
+  intervalMap: Map<Constructor, TimeJob[]> = new Map();
+  timeCaches: Map<string, number> = new Map();
   #timeNum = 0;
 
   private addJob<T>(
@@ -30,7 +30,7 @@ class SchedulerRegistry {
     }
   }
 
-  registerTime(timeKey: number, name?: string) {
+  registerTime(timeKey: number, name?: string): void {
     if (!name) {
       this.#timeNum++;
       name = this.#timeNum.toString();
@@ -38,7 +38,7 @@ class SchedulerRegistry {
     this.timeCaches.set(name, timeKey);
   }
 
-  clearTimeoutByKey(timeKey: number) {
+  clearTimeoutByKey(timeKey: number): void {
     this.timeCaches.forEach((key, name) => {
       if (key === timeKey) {
         this.clearTimeout(name);
@@ -46,7 +46,7 @@ class SchedulerRegistry {
     });
   }
 
-  clearIntervalByKey(timeKey: number) {
+  clearIntervalByKey(timeKey: number): void {
     this.timeCaches.forEach((key, name) => {
       if (key === timeKey) {
         this.clearInterval(name);
@@ -54,7 +54,7 @@ class SchedulerRegistry {
     });
   }
 
-  clearTimeout(name: string) {
+  clearTimeout(name: string): void {
     const key = this.timeCaches.get(name);
     if (key) {
       clearTimeout(key);
@@ -62,7 +62,7 @@ class SchedulerRegistry {
     }
   }
 
-  clearInterval(name: string) {
+  clearInterval(name: string): void {
     const key = this.timeCaches.get(name);
     if (key) {
       clearInterval(key);
@@ -70,30 +70,32 @@ class SchedulerRegistry {
     }
   }
 
-  addCronJob(target: Constructor, job: CronJob) {
+  addCronJob(target: Constructor, job: CronJob): void {
     this.addJob(target, job, this.cronMap);
   }
 
-  getCronJobs(target: Constructor) {
+  getCronJobs(target: Constructor): CronJob[] | undefined {
     return this.cronMap.get(target);
   }
 
-  addTimeoutJob(target: Constructor, job: TimeJob) {
+  addTimeoutJob(target: Constructor, job: TimeJob): void {
     this.addJob(target, job, this.timeoutMap);
   }
 
-  getTimeoutJobs(target?: Constructor) {
+  getTimeoutJobs(
+    target?: Constructor,
+  ): TimeJob[] | Map<Constructor, TimeJob[]> | undefined {
     if (target) {
       return this.timeoutMap.get(target);
     }
     return this.timeoutMap;
   }
 
-  addIntervalJob(target: Constructor, job: TimeJob) {
+  addIntervalJob(target: Constructor, job: TimeJob): void {
     this.addJob(target, job, this.intervalMap);
   }
 
-  getIntervalJobs(target: Constructor) {
+  getIntervalJobs(target: Constructor): TimeJob[] | undefined {
     return this.intervalMap.get(target);
   }
 
@@ -102,4 +104,4 @@ class SchedulerRegistry {
   // }
 }
 
-export const schedulerRegistry = new SchedulerRegistry();
+export const schedulerRegistry: SchedulerRegistry = new SchedulerRegistry();

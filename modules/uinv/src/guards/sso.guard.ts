@@ -1,14 +1,18 @@
+// deno-lint-ignore-file no-explicit-any
 import { ajax } from "../tools/ajax.ts";
 import {
+  type CanActivate,
+  type Constructor,
   type Context,
   ForbiddenException,
+  Injectable,
+  type Reflector,
   type Request,
+  SetMetadata,
   UnauthorizedException,
-} from "../../deps.ts";
-import type { CanActivate } from "../../deps.ts";
+} from "@nest/core";
 import type { SSOGuardOptions, SSOUserInfo } from "../types.ts";
 import { isDist, stringify } from "../tools/utils.ts";
-import { Injectable, type Reflector, SetMetadata } from "@nest/core";
 
 const SSO_STATUS_META_KEY = "meta:sso:status";
 
@@ -17,13 +21,20 @@ const SSO_STATUS_META_KEY = "meta:sso:status";
  * 如果允许外部用户访问，则用此方法保护内部接口。
  * @param status
  */
-export const Public = (status = true) =>
-  SetMetadata(SSO_STATUS_META_KEY, status);
+export const Public = (
+  status = true,
+): (
+  target: any,
+  propertyKey?: string | symbol,
+  descriptor?: PropertyDescriptor,
+) => void => SetMetadata(SSO_STATUS_META_KEY, status);
 
 /**
  * sso守卫
  */
-export function SSOGuard(options: SSOGuardOptions = {}) {
+export function SSOGuard(
+  options: SSOGuardOptions = {},
+): Constructor<CanActivate> {
   const {
     logger = console,
     ssoApi = Deno.env.get("ssoApi"),
@@ -172,7 +183,7 @@ export function SSOGuard(options: SSOGuardOptions = {}) {
 export function getClearUserSSOCacheFunc(
   options: Pick<SSOGuardOptions, "ssoApi" | "ssoUserInfoUrl" | "cacheStore"> =
     {},
-) {
+): (headers: Headers) => Promise<void> {
   const {
     ssoApi = Deno.env.get("ssoApi"),
     ssoUserInfoUrl = "/user/userinfo",

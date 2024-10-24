@@ -42,7 +42,7 @@ export class RedisModule {
     };
   }
 
-  static getClient() {
+  static getClient(): Redis {
     return this.client;
   }
 }

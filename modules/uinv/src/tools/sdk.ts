@@ -49,7 +49,9 @@ export async function getOpenApi<T>(params: GetOpenAPIOptions): Promise<T> {
   return response.data;
 }
 
-export async function getAutoOpenApi<T>(params: GetAutoOpenAPIOptions) {
+export async function getAutoOpenApi<T>(
+  params: GetAutoOpenAPIOptions,
+): Promise<T> {
   const access_token_result = await getAccessToken(params);
   return getOpenApi<T>({
     ...params,

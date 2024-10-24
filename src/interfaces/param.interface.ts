@@ -9,6 +9,14 @@ export type ParamDecoratorCallback = (
   // deno-lint-ignore no-explicit-any
 ) => any;
 
+export type ParamDecoratorResult = () => ParamDecoratorLowerResult;
+
+export type ParamDecoratorLowerResult = (
+  target: Instance,
+  propertyKey: string | symbol,
+  parameterIndex: number,
+) => void;
+
 export interface FormDataOptions {
   maxFileSize?: number;
   /**

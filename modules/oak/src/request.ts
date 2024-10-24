@@ -6,7 +6,7 @@ import type { NestCookies } from "./cookies.ts";
 export class NestRequest implements Request {
   originalRequest: OakRequest;
   originalContext: OakContext;
-  startTime = Date.now();
+  startTime: number = Date.now();
 
   states: Record<string, any> = {};
   cookies: NestCookies;
@@ -21,7 +21,7 @@ export class NestRequest implements Request {
     return this.originalRequest as T;
   }
 
-  get url() {
+  get url(): string {
     return this.originalRequest.url.href;
   }
 

@@ -1,3 +1,3 @@
 import { Ajax } from "../../deps.ts";
 
-export const ajax = new Ajax();
+export const ajax: Ajax = new Ajax();

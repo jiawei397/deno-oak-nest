@@ -36,7 +36,7 @@ export class PostgresModule {
     };
   }
 
-  static getClient() {
+  static getClient(): Client {
     return this.client;
   }
 }

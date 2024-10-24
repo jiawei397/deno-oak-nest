@@ -5,7 +5,7 @@ import type { NestCookies } from "./cookies.ts";
 export class NestRequest implements Request {
   originalRequest: HonoRequest;
   originalContext: HonoContext;
-  startTime = Date.now();
+  startTime: number = Date.now();
   // deno-lint-ignore no-explicit-any
   states: Record<string, any> = {};
 
@@ -18,7 +18,7 @@ export class NestRequest implements Request {
     return this.originalRequest as T;
   }
 
-  get url() {
+  get url(): string {
     return this.originalRequest.url;
   }
 

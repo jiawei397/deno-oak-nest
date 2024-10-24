@@ -12,12 +12,14 @@ import type {
 export const META_FUNCTION_KEY = Symbol("meta:fn");
 export const META_GUARD_KEY = Symbol("meta:guard");
 
-export function UseGuards(...guards: NestGuards) {
-  return function (
-    target: any,
-    property?: string,
-    descriptor?: TypedPropertyDescriptor<any>,
-  ) {
+export function UseGuards(
+  ...guards: NestGuards
+): (
+  target: any,
+  property?: string,
+  descriptor?: TypedPropertyDescriptor<any>,
+) => void {
+  return function (target, property, descriptor) {
     Reflect.defineMetadata(
       META_GUARD_KEY,
       guards,
@@ -44,7 +46,7 @@ export async function checkByGuard(
   fn: ControllerMethod,
   context: Context,
   globalGuards: NestGuards,
-) {
+): Promise<boolean> {
   const guards = await getAllGuards(target, fn, globalGuards);
   if (guards.length > 0) {
     Reflect.defineMetadata(META_FUNCTION_KEY, fn, context); // record the function to context
@@ -74,11 +76,15 @@ export async function checkByGuard(
 export function SetMetadata<K = string, V = any>(
   metadataKey: K,
   metadataValue: V,
-) {
+): (
+  target: any,
+  propertyKey?: string | symbol,
+  descriptor?: PropertyDescriptor,
+) => void {
   return (
-    target: any,
-    propertyKey?: string | symbol,
-    descriptor?: PropertyDescriptor,
+    target,
+    propertyKey,
+    descriptor,
   ) => {
     if (propertyKey) {
       Reflect.defineMetadata(metadataKey, metadataValue, descriptor!.value);
@@ -115,7 +121,7 @@ export class Reflector {
    * @param metadataKey lookup key for metadata to retrieve
    * @param context context (decorated object) to retrieve metadata from
    */
-  get<T>(metadataKey: string, context: Context) {
+  get<T>(metadataKey: string, context: Context): T | undefined {
     return getMetadataForGuard<T>(metadataKey, context);
   }
 }

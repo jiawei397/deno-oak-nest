@@ -9,10 +9,12 @@ import {
   createParamDecorator,
   createParamDecoratorWithLowLevel,
 } from "../params.ts";
-import type { Constructor } from "../interfaces/type.interface.ts";
+import type { Constructor, Instance } from "../interfaces/type.interface.ts";
 import type {
   ArrayItemType,
   FormDataOptions,
+  ParamDecoratorLowerResult,
+  ParamDecoratorResult,
 } from "../interfaces/param.interface.ts";
 import type {
   Context,
@@ -65,7 +67,7 @@ export async function validateParams(Cls: Constructor, value: object) {
   }
 }
 
-export function Body(key?: string) {
+export function Body(key?: string): ParamDecoratorLowerResult {
   return createParamDecoratorWithLowLevel(
     async (ctx: Context, target: any, methodName: string, index: number) => {
       const request = ctx.request;
@@ -165,13 +167,15 @@ export function getTransNumOrBoolOrArray(
   return val;
 }
 
+type ValidDateMap = Record<
+  string,
+  string | number | boolean | File | (string | number | boolean | File)[]
+>;
+
 export async function transAndValidateByCls(
   cls: Constructor,
-  map: Record<
-    string,
-    string | number | boolean | File | (string | number | boolean | File)[]
-  >,
-) {
+  map: ValidDateMap,
+): Promise<ValidDateMap> {
   const keys = Reflect.getMetadataKeys(cls.prototype);
   keys.forEach((key) => {
     if (!key.startsWith(typePreKey)) {
@@ -197,7 +201,7 @@ export async function transAndValidateByCls(
  * get the params from the request, if has key, then return the value which is parse by it`s type
  * @example such as `http://localhost/api/users/1?name=tom`, then params is {name: tom}
  */
-export function Query(key?: string) {
+export function Query(key?: string): ParamDecoratorLowerResult {
   return createParamDecoratorWithLowLevel(
     (ctx: Context, target: any, methodName: string, index: number) => {
       if (!key) {
@@ -217,7 +221,7 @@ export function Query(key?: string) {
  * Get params by router
  * @example such as `http://localhost:1000/api/role/info/114`， then params is {id: 114}
  */
-export function Params(key?: string) {
+export function Params(key?: string): ParamDecoratorLowerResult {
   return createParamDecoratorWithLowLevel(
     (ctx: Context, target: any, methodName: string, index: number) => {
       if (!key) {
@@ -229,7 +233,7 @@ export function Params(key?: string) {
   );
 }
 
-export function Headers(key?: string) {
+export function Headers(key?: string): ParamDecoratorLowerResult {
   return createParamDecoratorWithLowLevel(
     (ctx: Context, target: any, methodName: string, index: number) => {
       if (key) {
@@ -245,25 +249,34 @@ export function Headers(key?: string) {
   );
 }
 
-export const Req = createParamDecorator((ctx: Context) => {
-  return ctx.request;
-});
+export const Req: ParamDecoratorResult = createParamDecorator(
+  (ctx: Context) => {
+    return ctx.request;
+  },
+);
 
-export const Res = createParamDecorator((ctx: Context) => {
-  return ctx.response;
-});
+export const Res: ParamDecoratorResult = createParamDecorator(
+  (ctx: Context) => {
+    return ctx.response;
+  },
+);
 
-export const Ip = createParamDecorator((ctx: Context) => {
+export const Ip: ParamDecoratorResult = createParamDecorator((ctx: Context) => {
   return (
     ctx.request.header("x-real-ip") || ctx.request.header("x-forwarded-for")
   );
 });
 
-export const Host = createParamDecorator((ctx: Context) => {
-  return ctx.request.header("host");
-});
+export const Host: ParamDecoratorResult = createParamDecorator(
+  (ctx: Context) => {
+    return ctx.request.header("host");
+  },
+);
 
-export function Cookie(key: string, options?: CookiesGetOptions) {
+export function Cookie(
+  key: string,
+  options?: CookiesGetOptions,
+): ParamDecoratorLowerResult {
   return createParamDecoratorWithLowLevel(
     async (ctx: Context, target: any, methodName: string, index: number) => {
       const val = await ctx.cookies.get(key, options);
@@ -275,7 +288,11 @@ export function Cookie(key: string, options?: CookiesGetOptions) {
   );
 }
 
-export function Cookies() {
+export function Cookies(): (
+  target: Instance,
+  propertyKey: string | symbol,
+  parameterIndex: number,
+) => void {
   return createParamDecoratorWithLowLevel(
     (ctx: Context) => {
       return ctx.cookies;
@@ -289,19 +306,21 @@ export function Cookies() {
 //   });
 // }
 
-export const MethodName = createParamDecorator(
+export const MethodName: ParamDecoratorResult = createParamDecorator(
   (_ctx: Context, _target: any, methodName: string) => {
     return methodName;
   },
 );
 
-export const ControllerName = createParamDecorator(
+export const ControllerName: ParamDecoratorResult = createParamDecorator(
   (_ctx: Context, target: any) => {
     return target.constructor.name;
   },
 );
 
-export function Form(options: FormDataOptions = {}) {
+export function Form(
+  options: FormDataOptions = {},
+): ParamDecoratorLowerResult {
   return createParamDecoratorWithLowLevel(
     async (ctx: Context, target: any, methodName: string, index: number) => {
       const result = await ctx.request.formData();

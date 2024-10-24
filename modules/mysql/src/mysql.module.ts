@@ -49,7 +49,7 @@ export class MysqlModule {
     };
   }
 
-  static getClient() {
+  static getClient(): Client {
     return this.client;
   }
 }
