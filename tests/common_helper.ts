@@ -13,11 +13,12 @@ import type {
   StatusCode,
 } from "@nest/core";
 
-export async function findUnusedPort(port: number): Promise<number> {
+export async function findUnusedPort(): Promise<number> {
+  const port = Math.floor(Math.random() * 1000) + 3000;
   try {
     const conn = await Deno.connect({ port });
     conn.close();
-    return findUnusedPort(port + 1);
+    return findUnusedPort();
   } catch {
     // console.debug(`find unused port: ${port}`);
     return port;

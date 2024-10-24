@@ -35,7 +35,7 @@ import {
   transAndValidateByCls,
 } from "./method.ts";
 import type { ICookies } from "../interfaces/context.interface.ts";
-import { Reflect } from "../../deps.ts";
+import { Reflect } from "../deps.ts";
 
 Deno.test("getTransNumOrBoolOrArray", () => {
   assertEquals(getTransNumOrBoolOrArray(Number, "1"), 1);

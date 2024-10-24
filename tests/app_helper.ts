@@ -32,11 +32,8 @@ import { BadRequestException } from "../src/exceptions.ts";
 import { APP_GUARD, APP_INTERCEPTOR } from "../src/constants.ts";
 import { assertRejects } from "@std/assert";
 
-let firstPort = 8000;
-
 async function getPort() {
-  const port = await findUnusedPort(firstPort);
-  firstPort++;
+  const port = await findUnusedPort();
   return port;
 }
 

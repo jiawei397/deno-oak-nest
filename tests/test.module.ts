@@ -240,7 +240,7 @@ export class App {
     const app = await NestFactory.create(this.rootModule, HonoRouter, {
       cache: this.factoryCaches,
     });
-    const port = await findUnusedPort(3000);
+    const port = await findUnusedPort();
     await app.listen({ port });
     this.app = app;
     this.port = port;

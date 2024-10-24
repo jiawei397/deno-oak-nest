@@ -32,7 +32,7 @@ Deno.test("hono - useOriginMiddleware", {
       });
       app.useOriginMiddleware(etag({ weak: true }));
 
-      const port = await findUnusedPort(8000);
+      const port = await findUnusedPort();
       await app.listen({ port });
 
       const res = await fetch(`http://localhost:${port}/`);
@@ -52,7 +52,7 @@ Deno.test("hono - useOriginMiddleware", {
       res.body = "Hello World!";
     });
 
-    const port = await findUnusedPort(8000);
+    const port = await findUnusedPort();
     await app.listen({ port });
 
     const res = await fetch(`http://localhost:${port}/`);
@@ -73,7 +73,7 @@ Deno.test("hono - useOriginMiddleware", {
         res.body = "Hello World!";
       });
 
-      const port = await findUnusedPort(8000);
+      const port = await findUnusedPort();
       await app.listen({ port });
 
       const res = await fetch(`http://localhost:${port}/`);
@@ -95,7 +95,7 @@ Deno.test("hono - useOriginMiddleware", {
         res.body = "Hello World!";
       });
 
-      const port = await findUnusedPort(8000);
+      const port = await findUnusedPort();
       await app.listen({ port });
 
       const res = await fetch(`http://localhost:${port}/`);
@@ -125,7 +125,7 @@ Deno.test("hono - useOriginContext", {
         return context.text("Hello World!");
       });
 
-      const port = await findUnusedPort(8000);
+      const port = await findUnusedPort();
       await app.listen({ port });
 
       const res = await fetch(`http://localhost:${port}/`);
@@ -153,7 +153,7 @@ Deno.test("hono - useOriginContext", {
 
     const app = await NestFactory.create(AppModule, HonoRouter);
 
-    const port = await findUnusedPort(8000);
+    const port = await findUnusedPort();
     await app.listen({ port });
 
     const res = await fetch(`http://localhost:${port}/`);

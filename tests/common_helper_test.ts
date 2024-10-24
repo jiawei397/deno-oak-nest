@@ -26,7 +26,7 @@ import { Res } from "../src/decorators/method.ts";
 Deno.test("findUnusedPort", async () => {
   const port1 = 4000;
   const listener1 = Deno.listen({ port: port1 });
-  const port = await findUnusedPort(port1);
+  const port = await findUnusedPort();
   assertNotEquals(port, port1);
   listener1.close();
 });

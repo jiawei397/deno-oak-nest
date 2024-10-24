@@ -33,7 +33,7 @@ Deno.test("oak - useOriginMiddleware", {
   await t.step("should success", async () => {
     app.useOriginMiddleware(CORS());
 
-    const port = await findUnusedPort(8000);
+    const port = await findUnusedPort();
     await app.listen({ port });
 
     const res = await fetch(`http://localhost:${port}/`);
@@ -67,7 +67,7 @@ Deno.test("oak - useOriginContext", {
         context.response.body = "Hello World!";
       });
 
-      const port = await findUnusedPort(8000);
+      const port = await findUnusedPort();
       await app.listen({ port });
 
       const res = await fetch(`http://localhost:${port}/`);
@@ -95,7 +95,7 @@ Deno.test("oak - useOriginContext", {
 
     const app = await NestFactory.create(AppModule, Router);
 
-    const port = await findUnusedPort(8000);
+    const port = await findUnusedPort();
     await app.listen({ port });
 
     const res = await fetch(`http://localhost:${port}/`);
