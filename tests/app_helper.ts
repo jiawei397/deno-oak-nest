@@ -41,14 +41,12 @@ export function createCommonTests(
   Router: IRouterConstructor,
   type: "oak" | "hono",
 ) {
-  let firstPort = 8000;
   async function createApp(module: ModuleType, options?: {
     apiPrefix?: string;
     keys?: string[];
   }) {
     const app = await NestFactory.create(module, Router, options);
     const port = await getPort();
-    firstPort++;
     if (options?.apiPrefix) {
       app.setGlobalPrefix(options.apiPrefix);
     }
