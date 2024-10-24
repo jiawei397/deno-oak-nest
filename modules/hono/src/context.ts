@@ -1,11 +1,10 @@
-import { Status } from "../../../src/deps.ts";
-import { Context } from "../../../src/interfaces/context.interface.ts";
-import { type HonoContext } from "../deps.ts";
+import type { Context, StatusCode } from "@nest/core";
+import type { HonoContext } from "../deps.ts";
 import { NestCookies } from "./cookies.ts";
 import { NestRequest } from "./request.ts";
 import { NestResponse } from "./response.ts";
 
-const nestContextKey = Symbol("nestContext");
+const nestContextKey = "__nest_context";
 
 export class NestContext implements Context {
   request: NestRequest;
@@ -20,7 +19,7 @@ export class NestContext implements Context {
 
   static getInstance(
     context: HonoContext,
-    defaultStatus?: Status,
+    defaultStatus?: StatusCode,
     keys?: string[],
   ): NestContext {
     const nestContext = context.get(nestContextKey);

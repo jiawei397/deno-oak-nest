@@ -10,9 +10,9 @@ import {
   Res,
   type Response,
 } from "@nest/core";
-import { AppService } from "./app.service.ts";
-import { QueryDto, QueryWithoutPropDto, SaveDto } from "./app.dto.ts";
-import { type HonoContext } from "@nest/hono";
+import type { AppService } from "./app.service.ts";
+import type { QueryDto, QueryWithoutPropDto, SaveDto } from "./app.dto.ts";
+import type { HonoContext } from "@nest/hono";
 
 @Controller("")
 export class AppController {

@@ -18,7 +18,7 @@ import {
   createMockRouter,
   findUnusedPort,
   mockCallMethod,
-  MockOptions,
+  type MockOptions,
 } from "./common_helper.ts";
 import type { Response } from "../src/interfaces/context.interface.ts";
 import { Res } from "../src/decorators/method.ts";

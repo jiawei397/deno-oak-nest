@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-unused-vars
 import { assert, assertEquals } from "../tests/test_deps.ts";
 import { Module } from "./decorators/module.ts";
-import {
+import type {
   CollectResult,
   DynamicModule,
   ModuleType,

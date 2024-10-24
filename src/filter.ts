@@ -1,13 +1,13 @@
 // deno-lint-ignore-file no-explicit-any
 import { Reflect } from "./deps.ts";
-import { ControllerMethod } from "./interfaces/guard.interface.ts";
+import type { ControllerMethod } from "./interfaces/guard.interface.ts";
 import { factory } from "./factorys/class.factory.ts";
-import {
+import type {
   ExceptionFilter,
   ExceptionFilters,
 } from "./interfaces/filter.interface.ts";
-import { Constructor, Type } from "./interfaces/type.interface.ts";
-import { Context } from "./interfaces/context.interface.ts";
+import type { Constructor, Type } from "./interfaces/type.interface.ts";
+import type { Context } from "./interfaces/context.interface.ts";
 import { HttpException, InternalServerErrorException } from "./exceptions.ts";
 
 export const META_EXCEPTION_FILTER_KEY = Symbol("meta:exception:filter");

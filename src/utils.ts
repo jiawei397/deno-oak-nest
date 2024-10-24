@@ -1,8 +1,8 @@
-import { Context } from "./interfaces/context.interface.ts";
+import type { Context } from "./interfaces/context.interface.ts";
 import { APP_CRON, APP_CRON_INSTANCE } from "./constants.ts";
 import { Reflect } from "./deps.ts";
-import { Constructor, Instance } from "./interfaces/type.interface.ts";
-import {
+import type { Constructor, Instance } from "./interfaces/type.interface.ts";
+import type {
   AliasOptions,
   SSEMessageEvent,
 } from "./interfaces/controller.interface.ts";

@@ -3,17 +3,17 @@ import { Controller, Get } from "../src/decorators/controller.ts";
 import { Injectable } from "../src/decorators/inject.ts";
 import { assert, assertEquals } from "./test_deps.ts";
 import { createTestingModule } from "./test.module.ts";
-import { CanActivate } from "../src/interfaces/guard.interface.ts";
-import { Context } from "../src/interfaces/context.interface.ts";
+import type { CanActivate } from "../src/interfaces/guard.interface.ts";
+import type { Context } from "../src/interfaces/context.interface.ts";
 import { UseGuards } from "../src/guard.ts";
-import { ExceptionFilter } from "../src/interfaces/filter.interface.ts";
+import type { ExceptionFilter } from "../src/interfaces/filter.interface.ts";
 import { Catch, UseFilters } from "../src/filter.ts";
 import { Scope } from "../src/interfaces/scope-options.interface.ts";
-import { NestInterceptor } from "../src/interfaces/interceptor.interface.ts";
-import { Next } from "../src/interfaces/middleware.interface.ts";
-import { APP_INTERCEPTOR } from "../src/constants.ts";
+import type { NestInterceptor } from "../src/interfaces/interceptor.interface.ts";
+import type { Next } from "../src/interfaces/middleware.interface.ts";
+import type { APP_INTERCEPTOR } from "../src/constants.ts";
 import { UseInterceptors } from "../src/interceptor.ts";
-import { DynamicModule } from "../src/interfaces/module.interface.ts";
+import type { DynamicModule } from "../src/interfaces/module.interface.ts";
 import { Module } from "../src/decorators/module.ts";
 
 @Injectable()

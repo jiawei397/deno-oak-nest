@@ -61,7 +61,7 @@ This method will find `views/index.hbs` and render it. Here is a hbs example:
   </head>
   <body>
     <h1>Nest</h1>
-    <p> {{ message }}</p>
+    <p>{{ message }}</p>
   </body>
 </html>
 ```

@@ -1,0 +1,10 @@
+{
+  "tasks": {
+    "dev": "deno run  -A --watch src/main.ts",
+    "start": "DENO_ENV=production deno run -A src/main.ts"
+  },
+  "imports": {
+    "nanoid": "https://deno.land/x/nanoid@v3.0.0/mod.ts",
+    "mockjs": "https://deno.land/x/deno_mock@v2.0.0/mod.ts"
+  }
+}

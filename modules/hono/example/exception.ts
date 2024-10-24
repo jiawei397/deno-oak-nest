@@ -1,5 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
-import { Catch, Context, ExceptionFilter, HttpException } from "@nest/core";
+import {
+  Catch,
+  type Context,
+  type ExceptionFilter,
+  HttpException,
+} from "@nest/core";
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {

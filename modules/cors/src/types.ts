@@ -1,3 +1,5 @@
+import type { StatusCode } from "@nest/core";
+
 export type StaticOrigin = boolean | string | RegExp | (string | RegExp)[];
 
 export type CustomOrigin = (origin: string) => StaticOrigin;
@@ -39,7 +41,7 @@ export interface CorsOptions {
   /**
    * Provides a status code to use for successful OPTIONS requests.
    */
-  optionsSuccessStatus?: number;
+  optionsSuccessStatus?: StatusCode;
 }
 
 export interface CORSHeader {

@@ -1,5 +1,4 @@
-import { createTestingModule } from "@nest/tests";
-import { assert, assertEquals } from "../../tests/test_deps.ts";
+import { assert, assertEquals, createTestingModule } from "@nest/tests";
 import { UserService } from "./user/services/user.service.ts";
 import { AppController } from "./app.controller.ts";
 

@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any ban-types ban-types no-explicit-any
-import { LoggerService } from "./log.interface.ts";
-import { RouterOptions } from "./route.interface.ts";
+import type { LoggerService } from "./log.interface.ts";
+import type { RouterOptions } from "./route.interface.ts";
 
 export interface InjectedData {
   fn: Function;

@@ -1,6 +1,6 @@
-import { Request } from "../../../src/interfaces/context.interface.ts";
+import type { Request } from "@nest/core";
 import type { HonoContext, HonoRequest } from "../deps.ts";
-import { NestCookies } from "./cookies.ts";
+import type { NestCookies } from "./cookies.ts";
 
 export class NestRequest implements Request {
   originalRequest: HonoRequest;

@@ -1,14 +1,14 @@
 // deno-lint-ignore-file no-explicit-any
-import { Status, STATUS_TEXT } from "./deps.ts";
+import { STATUS_CODE, STATUS_TEXT, type StatusCode } from "./deps.ts";
 
 const isString = (fn: any) => typeof fn === "string";
 const isObject = (fn: any) => fn && typeof fn === "object";
 
 export class HttpException extends Error {
   public response: any;
-  public status: number;
+  public status: StatusCode;
 
-  constructor(response: any, status: number, cause?: unknown) {
+  constructor(response: any, status: StatusCode, cause?: unknown) {
     super();
     this.response = response;
     this.status = status;
@@ -74,16 +74,16 @@ export class HttpException extends Error {
 export class UnauthorizedException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.Unauthorized],
+    description = STATUS_TEXT[STATUS_CODE.Unauthorized],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.Unauthorized,
+        STATUS_CODE.Unauthorized,
       ),
-      Status.Unauthorized,
+      STATUS_CODE.Unauthorized,
       cause,
     );
   }
@@ -117,16 +117,16 @@ export class UnauthorizedException extends HttpException {
 export class NotFoundException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.NotFound],
+    description = STATUS_TEXT[STATUS_CODE.NotFound],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.NotFound,
+        STATUS_CODE.NotFound,
       ),
-      Status.NotFound,
+      STATUS_CODE.NotFound,
       cause,
     );
   }
@@ -160,16 +160,16 @@ export class NotFoundException extends HttpException {
 export class ForbiddenException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.Forbidden],
+    description = STATUS_TEXT[STATUS_CODE.Forbidden],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.Forbidden,
+        STATUS_CODE.Forbidden,
       ),
-      Status.Forbidden,
+      STATUS_CODE.Forbidden,
       cause,
     );
   }
@@ -203,16 +203,16 @@ export class ForbiddenException extends HttpException {
 export class BadRequestException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.BadRequest],
+    description: string = STATUS_TEXT[STATUS_CODE.BadRequest],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.BadRequest,
+        STATUS_CODE.BadRequest,
       ),
-      Status.BadRequest,
+      STATUS_CODE.BadRequest,
       cause,
     );
   }
@@ -281,16 +281,16 @@ export class BodyParamValidationException extends BadRequestException {
 export class BadGatewayException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.BadGateway],
+    description = STATUS_TEXT[STATUS_CODE.BadGateway],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.BadGateway,
+        STATUS_CODE.BadGateway,
       ),
-      Status.BadGateway,
+      STATUS_CODE.BadGateway,
       cause,
     );
   }
@@ -324,16 +324,16 @@ export class BadGatewayException extends HttpException {
 export class NotAcceptableException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.NotAcceptable],
+    description = STATUS_TEXT[STATUS_CODE.NotAcceptable],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.NotAcceptable,
+        STATUS_CODE.NotAcceptable,
       ),
-      Status.NotAcceptable,
+      STATUS_CODE.NotAcceptable,
       cause,
     );
   }
@@ -366,16 +366,16 @@ export class NotAcceptableException extends HttpException {
 export class RequestTimeoutException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.RequestTimeout],
+    description = STATUS_TEXT[STATUS_CODE.RequestTimeout],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.RequestTimeout,
+        STATUS_CODE.RequestTimeout,
       ),
-      Status.RequestTimeout,
+      STATUS_CODE.RequestTimeout,
       cause,
     );
   }
@@ -408,16 +408,16 @@ export class RequestTimeoutException extends HttpException {
 export class ConflictException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.Conflict],
+    description = STATUS_TEXT[STATUS_CODE.Conflict],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.Conflict,
+        STATUS_CODE.Conflict,
       ),
-      Status.Conflict,
+      STATUS_CODE.Conflict,
       cause,
     );
   }
@@ -450,16 +450,16 @@ export class ConflictException extends HttpException {
 export class GoneException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.Gone],
+    description = STATUS_TEXT[STATUS_CODE.Gone],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.Gone,
+        STATUS_CODE.Gone,
       ),
-      Status.Gone,
+      STATUS_CODE.Gone,
       cause,
     );
   }
@@ -492,16 +492,16 @@ export class GoneException extends HttpException {
 export class HttpVersionNotSupportedException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.HTTPVersionNotSupported],
+    description = STATUS_TEXT[STATUS_CODE.HTTPVersionNotSupported],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.HTTPVersionNotSupported,
+        STATUS_CODE.HTTPVersionNotSupported,
       ),
-      Status.HTTPVersionNotSupported,
+      STATUS_CODE.HTTPVersionNotSupported,
       cause,
     );
   }
@@ -534,16 +534,16 @@ export class HttpVersionNotSupportedException extends HttpException {
 export class PayloadTooLargeException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.RequestEntityTooLarge],
+    description: string = STATUS_TEXT[STATUS_CODE.ContentTooLarge],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.RequestEntityTooLarge,
+        STATUS_CODE.ContentTooLarge,
       ),
-      Status.RequestEntityTooLarge,
+      STATUS_CODE.ContentTooLarge,
       cause,
     );
   }
@@ -576,16 +576,16 @@ export class PayloadTooLargeException extends HttpException {
 export class UnsupportedMediaTypeException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.UnsupportedMediaType],
+    description = STATUS_TEXT[STATUS_CODE.UnsupportedMediaType],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.UnsupportedMediaType,
+        STATUS_CODE.UnsupportedMediaType,
       ),
-      Status.UnsupportedMediaType,
+      STATUS_CODE.UnsupportedMediaType,
       cause,
     );
   }
@@ -618,16 +618,16 @@ export class UnsupportedMediaTypeException extends HttpException {
 export class UnprocessableEntityException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.UnprocessableEntity],
+    description = STATUS_TEXT[STATUS_CODE.UnprocessableEntity],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.UnprocessableEntity,
+        STATUS_CODE.UnprocessableEntity,
       ),
-      Status.UnprocessableEntity,
+      STATUS_CODE.UnprocessableEntity,
       cause,
     );
   }
@@ -661,16 +661,16 @@ export class UnprocessableEntityException extends HttpException {
 export class InternalServerErrorException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.InternalServerError],
+    description = STATUS_TEXT[STATUS_CODE.InternalServerError],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.InternalServerError,
+        STATUS_CODE.InternalServerError,
       ),
-      Status.InternalServerError,
+      STATUS_CODE.InternalServerError,
       cause,
     );
   }
@@ -704,16 +704,16 @@ export class InternalServerErrorException extends HttpException {
 export class NotImplementedException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.NotImplemented],
+    description = STATUS_TEXT[STATUS_CODE.NotImplemented],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.NotImplemented,
+        STATUS_CODE.NotImplemented,
       ),
-      Status.NotImplemented,
+      STATUS_CODE.NotImplemented,
       cause,
     );
   }
@@ -746,16 +746,16 @@ export class NotImplementedException extends HttpException {
 export class ImATeapotException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.Teapot],
+    description = STATUS_TEXT[STATUS_CODE.Teapot],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.Teapot,
+        STATUS_CODE.Teapot,
       ),
-      Status.Teapot,
+      STATUS_CODE.Teapot,
       cause,
     );
   }
@@ -789,16 +789,16 @@ export class ImATeapotException extends HttpException {
 export class MethodNotAllowedException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.MethodNotAllowed],
+    description = STATUS_TEXT[STATUS_CODE.MethodNotAllowed],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.MethodNotAllowed,
+        STATUS_CODE.MethodNotAllowed,
       ),
-      Status.MethodNotAllowed,
+      STATUS_CODE.MethodNotAllowed,
       cause,
     );
   }
@@ -832,16 +832,16 @@ export class MethodNotAllowedException extends HttpException {
 export class ServiceUnavailableException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.ServiceUnavailable],
+    description = STATUS_TEXT[STATUS_CODE.ServiceUnavailable],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.ServiceUnavailable,
+        STATUS_CODE.ServiceUnavailable,
       ),
-      Status.ServiceUnavailable,
+      STATUS_CODE.ServiceUnavailable,
       cause,
     );
   }
@@ -875,16 +875,16 @@ export class ServiceUnavailableException extends HttpException {
 export class GatewayTimeoutException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.GatewayTimeout],
+    description = STATUS_TEXT[STATUS_CODE.GatewayTimeout],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.GatewayTimeout,
+        STATUS_CODE.GatewayTimeout,
       ),
-      Status.GatewayTimeout,
+      STATUS_CODE.GatewayTimeout,
       cause,
     );
   }
@@ -918,16 +918,16 @@ export class GatewayTimeoutException extends HttpException {
 export class PreconditionFailedException extends HttpException {
   constructor(
     objectOrError: any,
-    description = STATUS_TEXT[Status.PreconditionFailed],
+    description = STATUS_TEXT[STATUS_CODE.PreconditionFailed],
     cause?: unknown,
   ) {
     super(
       HttpException.createBody(
         objectOrError,
         description!,
-        Status.PreconditionFailed,
+        STATUS_CODE.PreconditionFailed,
       ),
-      Status.PreconditionFailed,
+      STATUS_CODE.PreconditionFailed,
       cause,
     );
   }

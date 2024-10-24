@@ -1,5 +1,4 @@
-import { Module } from "../../../src/decorators/module.ts";
-import type { DynamicModule } from "@nest/core";
+import { type DynamicModule, Module } from "@nest/core";
 import { MongoFactory } from "deno_mongo_schema";
 
 @Module({})

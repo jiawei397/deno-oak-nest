@@ -1,4 +1,4 @@
-import { Module, type DynamicModule } from "@nest/core";
+import { type DynamicModule, Module } from "@nest/core";
 import { ScheduleExplorer } from "./scheduler.explorer.ts";
 
 @Module({})

@@ -1,12 +1,12 @@
 // deno-lint-ignore-file no-explicit-any
 import {
-  Context,
+  type Context,
   Inject,
   Injectable,
   isDebug,
-  NestInterceptor,
-  NestInterceptorOptions,
-  Next,
+  type NestInterceptor,
+  type NestInterceptorOptions,
+  type Next,
   Reflect,
 } from "@nest/core";
 import {
@@ -26,7 +26,7 @@ import type {
 import { KVStore, LocalStore, MemoryStore } from "./cache.store.ts";
 import { md5 } from "./cache.utils.ts";
 import { LRUCache } from "../deps.ts";
-import { OnModuleInit } from "../../../src/interfaces/module.interface.ts";
+import type { OnModuleInit } from "../../../src/interfaces/module.interface.ts";
 
 export function CacheTTL(seconds: number) {
   return (_target: any, _methodName: string, descriptor: any) => {

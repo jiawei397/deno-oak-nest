@@ -1,4 +1,11 @@
-import { BadRequestException, Body, Controller, Get, Post, Query } from "@nest/core";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+} from "@nest/core";
 import type { UserService } from "./user.service.ts";
 import type { AddUserDto, SearchUserDto, UpdateUserDto } from "./user.dto.ts";
 

@@ -1,7 +1,7 @@
 import { assert, assertEquals } from "../tests/test_deps.ts";
 import { createMockContext } from "../tests/common_helper.ts";
 import {
-  ControllerPathOptions,
+  type ControllerPathOptions,
   flagCronProvider,
   getControllerPaths,
   getCronInstance,
@@ -9,7 +9,7 @@ import {
   getReadableStream,
   getSSEStream,
   joinPath,
-  MethodPathOptions,
+  type MethodPathOptions,
   parseSearch,
   parseSearchParams,
   replaceAliasPath,

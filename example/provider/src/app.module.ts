@@ -3,7 +3,7 @@ import { Module } from "@nest/core";
 import { CatsController } from "./cats/cats.controller.ts";
 import { CatsService } from "./cats/cats.service.ts";
 import { Cat } from "./cats/cats.interface.ts";
-import { connection } from "./connection.ts";
+import { connection } from "../src/connection.ts";
 
 const mockCatsService = {
   findAll(): Cat[] {

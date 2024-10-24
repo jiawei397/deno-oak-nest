@@ -9,7 +9,7 @@ import { Inject, Injectable } from "../decorators/inject.ts";
 import { Scope } from "../interfaces/scope-options.interface.ts";
 import { factory } from "./class.factory.ts";
 import { INQUIRER } from "../constants.ts";
-import { type Constructor } from "../interfaces/type.interface.ts";
+import type { Constructor } from "../interfaces/type.interface.ts";
 import { Controller, Get, Post } from "../decorators/controller.ts";
 
 Deno.test("factory.create without providers", async (t) => {

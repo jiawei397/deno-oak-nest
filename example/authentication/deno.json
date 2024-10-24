@@ -1,19 +1,9 @@
 {
-  "lock": false,
   "tasks": {
     "dev": "deno run  -A --watch src/main.ts",
     "start": "deno run -A src/main.ts"
   },
-  "compilerOptions": {
-    "removeComments": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "strictPropertyInitialization": false
-  },
   "imports": {
-    "@nest": "../../mod.ts",
-    "@nest/hono": "../../modules/hono/mod.ts",
-    "@nest/jwt": "../../modules/jwt/mod.ts",
     "hono/": "https://deno.land/x/hono@v4.1.0/",
     "class_validator": "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts"
   }

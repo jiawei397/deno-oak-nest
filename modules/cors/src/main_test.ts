@@ -1,8 +1,8 @@
-import {
+import type {
   Request,
   Response,
 } from "../../../src/interfaces/context.interface.ts";
-import { Next } from "../../../src/interfaces/middleware.interface.ts";
+import type { Next } from "../../../src/interfaces/middleware.interface.ts";
 import {
   assertEquals,
   beforeEach,

@@ -1,4 +1,4 @@
-import { red, yellow, Module, type DynamicModule } from "@nest/core";
+import { type DynamicModule, Module, red, yellow } from "@nest/core";
 import { connect, type RedisConnectOptions } from "../deps.ts";
 import type { Redis } from "../deps.ts";
 import { REDIS_KEY } from "./redis.constant.ts";
@@ -27,7 +27,10 @@ export class RedisModule {
               this.client = client;
               return client;
             } catch (e) {
-              console.error("connect to redis error", red((e as Error).stack || e as string));
+              console.error(
+                "connect to redis error",
+                red((e as Error).stack || e as string),
+              );
             }
           },
         },

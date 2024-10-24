@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "../../tests/test_deps.ts";
-import { DynamicModule } from "../interfaces/module.interface.ts";
+import type { DynamicModule } from "../interfaces/module.interface.ts";
 import {
   defineModuleMetadata,
   getModuleMetadata,

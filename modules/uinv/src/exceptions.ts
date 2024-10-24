@@ -1,4 +1,4 @@
-import { HttpException, Catch, type ExceptionFilter } from "@nest/core";
+import { Catch, type ExceptionFilter, HttpException } from "@nest/core";
 import type { Context } from "../deps.ts";
 import type { Logger } from "./types.ts";
 

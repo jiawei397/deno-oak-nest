@@ -1,4 +1,4 @@
-import { Module, red, yellow , type DynamicModule} from "@nest/core";
+import { type DynamicModule, Module, red, yellow } from "@nest/core";
 import { Client, type ClientOptions, type ConnectionString } from "../deps.ts";
 import { POSTGRES_KEY } from "./postgres.constant.ts";
 
@@ -23,7 +23,10 @@ export class PostgresModule {
               this.client = client;
               return client;
             } catch (e) {
-              console.error("connect to postgres error", red((e as Error).stack || e as string));
+              console.error(
+                "connect to postgres error",
+                red((e as Error).stack || e as string),
+              );
             }
           },
         },

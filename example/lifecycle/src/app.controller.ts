@@ -7,7 +7,7 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from "@nest/core";
-import { AppService } from "./app.service.ts";
+import { AppService } from "../src/app.service.ts";
 
 @Controller("")
 export class AppController

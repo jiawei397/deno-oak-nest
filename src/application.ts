@@ -1,5 +1,13 @@
 // deno-lint-ignore-file no-explicit-any
-import { blue, format, green, red, Reflect, yellow } from "./deps.ts";
+import {
+  blue,
+  format,
+  green,
+  red,
+  Reflect,
+  type StatusCode,
+  yellow,
+} from "./deps.ts";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "./constants.ts";
 import {
   META_HEADER_KEY,
@@ -11,23 +19,29 @@ import { factory } from "./factorys/class.factory.ts";
 import { checkByFilters, DefaultGlobalExceptionFilter } from "./filter.ts";
 import { checkByGuard } from "./guard.ts";
 import { checkByInterceptors } from "./interceptor.ts";
-import {
+import type {
   ListenOptions,
   ShutdownSignal,
 } from "./interfaces/application.interface.ts";
-import { Context } from "./interfaces/context.interface.ts";
-import {
+import type { Context } from "./interfaces/context.interface.ts";
+import type {
   FactoryCaches,
   StaticOptions,
 } from "./interfaces/factory.interface.ts";
-import { ExceptionFilters } from "./interfaces/filter.interface.ts";
-import { ControllerMethod, NestGuards } from "./interfaces/guard.interface.ts";
-import { NestUseInterceptors } from "./interfaces/interceptor.interface.ts";
-import { LoggerService } from "./interfaces/log.interface.ts";
-import { CollectResult, ModuleType } from "./interfaces/module.interface.ts";
-import { Provider } from "./interfaces/provider.interface.ts";
-import { IRouter, RouteMap } from "./interfaces/route.interface.ts";
-import { Constructor, Type } from "./interfaces/type.interface.ts";
+import type { ExceptionFilters } from "./interfaces/filter.interface.ts";
+import type {
+  ControllerMethod,
+  NestGuards,
+} from "./interfaces/guard.interface.ts";
+import type { NestUseInterceptors } from "./interfaces/interceptor.interface.ts";
+import type { LoggerService } from "./interfaces/log.interface.ts";
+import type {
+  CollectResult,
+  ModuleType,
+} from "./interfaces/module.interface.ts";
+import type { Provider } from "./interfaces/provider.interface.ts";
+import type { IRouter, RouteMap } from "./interfaces/route.interface.ts";
+import type { Constructor, Type } from "./interfaces/type.interface.ts";
 import {
   collectModuleDeps,
   isClassProvider,
@@ -40,7 +54,7 @@ import {
   getMethodPaths,
   storeCronInstance,
 } from "./utils.ts";
-import {
+import type {
   INestMiddleware,
   NestMiddleware,
 } from "./interfaces/middleware.interface.ts";
@@ -292,7 +306,10 @@ export class Application {
     }
 
     // response http code
-    const code: number = Reflect.getMetadata(META_HTTP_CODE_KEY, options.fn);
+    const code: StatusCode = Reflect.getMetadata(
+      META_HTTP_CODE_KEY,
+      options.fn,
+    );
     if (code) {
       context.response.status = code;
     }

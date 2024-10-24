@@ -37,7 +37,10 @@ export class MysqlModule {
             this.client = client;
             return client;
           } catch (e) {
-            console.error("connect to mysql error", red((e as Error).stack || e as string));
+            console.error(
+              "connect to mysql error",
+              red((e as Error).stack || e as string),
+            );
           }
         },
       }],

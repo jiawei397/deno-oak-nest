@@ -1,6 +1,6 @@
 import { Controller, Get, UseGuards } from "@nest/core";
-import { AuthGuard } from "./auth.guard.ts";
-import { User, type UserInfo } from "./decorators.ts";
+import { AuthGuard } from "../src/auth.guard.ts";
+import { User, type UserInfo } from "../src/decorators.ts";
 
 @UseGuards(AuthGuard)
 @Controller("")

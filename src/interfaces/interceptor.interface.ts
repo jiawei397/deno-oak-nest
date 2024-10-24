@@ -1,8 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
-import { Context } from "./context.interface.ts";
-import { ControllerMethod } from "./guard.interface.ts";
-import { Next } from "./middleware.interface.ts";
-import { Constructor } from "./type.interface.ts";
+import type { Context } from "./context.interface.ts";
+import type { ControllerMethod } from "./guard.interface.ts";
+import type { Next } from "./middleware.interface.ts";
+import type { Constructor } from "./type.interface.ts";
 
 export interface NestInterceptorOptions {
   target: InstanceType<Constructor>;

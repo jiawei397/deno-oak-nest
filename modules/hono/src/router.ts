@@ -1,8 +1,8 @@
-import {
+import type {
   ListenOptions,
 } from "../../../src/interfaces/application.interface.ts";
-import { StaticOptions } from "../../../src/interfaces/factory.interface.ts";
-import {
+import type { StaticOptions } from "../../../src/interfaces/factory.interface.ts";
+import type {
   IRouter,
   MiddlewareHandler,
   NotFoundHandler,
@@ -11,8 +11,8 @@ import {
 import {
   Hono,
   type HonoContext,
-  HonoMiddlewareHandler,
-  HonoNext,
+  type HonoMiddlewareHandler,
+  type HonoNext,
   serveStatic,
 } from "../deps.ts";
 import { NestContext } from "./context.ts";

@@ -1,27 +1,27 @@
 // deno-lint-ignore-file no-explicit-any
 import { findUnusedPort, MockRouter } from "./common_helper.ts";
-import { Module } from "../src/decorators/module.ts";
+import {
+  factory,
+  META_EXCEPTION_FILTER_KEY,
+  META_GUARD_KEY,
+  META_INTERCEPTOR_KEY,
+  Module,
+  NestFactory,
+  Reflect,
+} from "@nest/core";
 import type {
+  Application,
+  Constructor,
+  ExceptionFilter,
+  Instance,
   ModuleMetadata,
   ModuleType,
-} from "../src/interfaces/module.interface.ts";
-import type { Provide } from "../src/interfaces/provider.interface.ts";
-import type {
-  Constructor,
-  Instance,
+  NestGuard,
+  NestInterceptor,
+  Provide,
   Type,
-} from "../src/interfaces/type.interface.ts";
-import { factory } from "../src/factorys/class.factory.ts";
-import { NestFactory } from "../src/factorys/nest.factory.ts";
-import { Application } from "../src/application.ts";
-import { HonoRouter } from "../modules/hono/mod.ts";
-import { NestInterceptor } from "../src/interfaces/interceptor.interface.ts";
-import { Reflect } from "../deps.ts";
-import { META_INTERCEPTOR_KEY } from "../src/interceptor.ts";
-import { ExceptionFilter } from "../src/interfaces/filter.interface.ts";
-import { META_EXCEPTION_FILTER_KEY } from "../src/filter.ts";
-import { META_GUARD_KEY } from "../src/guard.ts";
-import { NestGuard } from "../src/interfaces/guard.interface.ts";
+} from "@nest/core";
+import { HonoRouter } from "@nest/hono";
 
 export class TestModule {
   factoryCaches = new Map();

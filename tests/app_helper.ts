@@ -2,35 +2,35 @@
 import {
   APP_FILTER,
   Body,
-  CanActivate,
+  type CanActivate,
   Catch,
   type Context,
   Controller,
   Delete,
-  ExceptionFilter,
+  type ExceptionFilter,
   Form,
   Get,
   HttpException,
   Injectable,
-  IRouterConstructor,
+  type IRouterConstructor,
   Module,
-  ModuleType,
+  type ModuleType,
   NestFactory,
-  NestInterceptor,
-  Next,
+  type NestInterceptor,
+  type Next,
   Patch,
   Post,
   Put,
   REDIRECT_BACK,
   Res,
   type Response,
-} from "../src/mod.ts";
-import { Max, Min } from "class_validator";
+} from "@nest/core";
+import { Max, Min } from "@nest/core";
 import { findUnusedPort } from "./common_helper.ts";
 import { assert, assertEquals, assertNotStrictEquals } from "./test_deps.ts";
 import { BadRequestException } from "../src/exceptions.ts";
 import { APP_GUARD, APP_INTERCEPTOR } from "../src/constants.ts";
-import { assertRejects } from "std/assert/assert_rejects.ts";
+import { assertRejects } from "@std/assert";
 
 let firstPort = 8000;
 

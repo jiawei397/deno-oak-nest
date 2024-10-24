@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nest/core";
 import type { JwtServiceOptions } from "./jwt.interface.ts";
 import { optionKey } from "./jwt.constant.ts";
-import { Payload, verify } from "../deps.ts";
+import { type Payload, verify } from "../deps.ts";
 import { generateToken } from "./jwt.utils.ts";
 
 @Injectable()

@@ -1,7 +1,9 @@
 import { applyEdits, modify } from "jsonc";
 import { decompress } from "zip";
 import { join } from "std/path/mod.ts";
-import importMap from "../../.vscode/import_map.json" with { type: "json" };
+import denoConfig from "../../deno.json" with { type: "json" };
+
+const importMap = denoConfig.imports;
 
 const projectName = "deno_nest_template";
 const branchName = "main";
@@ -119,7 +121,7 @@ async function writeImportMap(name: string) {
     "oak",
   );
   const json = JSON.parse(newContent);
-  json.imports["oak"] = importMap.imports.oak;
+  json.imports["oak"] = importMap.oak;
   await Deno.writeTextFile(realPath, JSON.stringify(json, null, 2));
 }
 

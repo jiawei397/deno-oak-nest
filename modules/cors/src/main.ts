@@ -1,11 +1,11 @@
 // deno-lint-ignore-file no-explicit-any
 import { vary } from "../deps.ts";
-import { CORSHeader, CORSHeaders, CorsOptions } from "./types.ts";
+import type { CORSHeader, CORSHeaders, CorsOptions } from "./types.ts";
 import type {
   Request,
   Response,
 } from "../../../src/interfaces/context.interface.ts";
-import {
+import type {
   NestMiddleware,
   Next,
 } from "../../../src/interfaces/middleware.interface.ts";

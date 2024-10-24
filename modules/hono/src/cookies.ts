@@ -1,8 +1,8 @@
-import {
+import type {
   CookiesGetOptions,
   CookiesSetDeleteOptions,
   ICookies,
-} from "../../../src/interfaces/context.interface.ts";
+} from "@nest/core";
 import {
   deleteCookie,
   getCookie,

@@ -6,6 +6,6 @@
     "dev": "deno run --watch -A example/main.ts"
   },
   "imports": {
-    "redis": "https://deno.land/x/redis@v0.29.3/mod.ts" 
-   }
+    "redis": "https://deno.land/x/redis@v0.29.3/mod.ts"
+  }
 }

@@ -96,7 +96,9 @@ export function AuthGuard(options: AuthGuardOptions = {}) {
       } catch (e) {
         logger.error(
           "AuthGuard",
-          `调用getUserInfoByPrivateToken报错，错误信息为：${(e as Error).message}`,
+          `调用getUserInfoByPrivateToken报错，错误信息为：${
+            (e as Error).message
+          }`,
         );
       }
       return false;

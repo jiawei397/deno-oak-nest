@@ -10,14 +10,14 @@ import {
   mockCallMethod,
 } from "../tests/common_helper.ts";
 import type { Context, Response } from "./interfaces/context.interface.ts";
-import { Status } from "../deps.ts";
+import { STATUS_CODE } from "./deps.ts";
 import {
   BadRequestException,
   ForbiddenException,
   InternalServerErrorException,
   UnauthorizedException,
 } from "./exceptions.ts";
-import {
+import type {
   BeforeApplicationShutdown,
   DynamicModule,
   OnApplicationBootstrap,
@@ -27,7 +27,7 @@ import {
 } from "./interfaces/module.interface.ts";
 import { Module } from "./decorators/module.ts";
 import { Res } from "./decorators/method.ts";
-import { delay } from "std/async/delay.ts";
+import { delay } from "@std/async/delay";
 
 Deno.test("module init", async (t) => {
   const callStack: number[] = [];
@@ -343,7 +343,7 @@ Deno.test("routes with guard false", async (t) => {
     });
     await mockCallMethod(app, ctx);
 
-    assertEquals(ctx.response.status, Status.Forbidden);
+    assertEquals(ctx.response.status, STATUS_CODE.Forbidden);
     assertEquals(ctx.response.body, new ForbiddenException("").response);
     assertEquals(callStack, []);
   });
@@ -355,7 +355,7 @@ Deno.test("routes with guard false", async (t) => {
     });
     await mockCallMethod(app, ctx);
 
-    assertEquals(ctx.response.status, Status.Unauthorized);
+    assertEquals(ctx.response.status, STATUS_CODE.Unauthorized);
     assertEquals(ctx.response.body, new UnauthorizedException("").response);
     assertEquals(callStack, []);
   });
@@ -367,7 +367,7 @@ Deno.test("routes with guard false", async (t) => {
     });
     await mockCallMethod(app, ctx);
 
-    assertEquals(ctx.response.status, Status.InternalServerError);
+    assertEquals(ctx.response.status, STATUS_CODE.InternalServerError);
     assertEquals(
       ctx.response.body,
       new InternalServerErrorException("AuthGuard3 error").response,

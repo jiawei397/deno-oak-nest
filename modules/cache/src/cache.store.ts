@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { ICacheStore, LocalValue } from "./cache.interface.ts";
+import type { ICacheStore, LocalValue } from "./cache.interface.ts";
 
 export class MemoryStore implements ICacheStore {
   cache: Map<string, any>;

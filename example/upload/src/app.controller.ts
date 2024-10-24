@@ -1,5 +1,5 @@
 import { Controller, Form, Get, Post } from "@nest/core";
-import { UploadDto } from "./app.dto.ts";
+import { UploadDto } from "../src/app.dto.ts";
 
 @Controller("")
 export class AppController {

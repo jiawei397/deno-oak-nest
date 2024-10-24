@@ -1,11 +1,11 @@
 // deno-lint-ignore-file no-explicit-any ban-types
-import { ListenOptions } from "./application.interface.ts";
-import { Context } from "./context.interface.ts";
-import { AliasOptions } from "./controller.interface.ts";
-import { StaticOptions } from "./factory.interface.ts";
-import { ControllerMethod } from "./guard.interface.ts";
-import { Next } from "./middleware.interface.ts";
-import { Type } from "./type.interface.ts";
+import type { ListenOptions } from "./application.interface.ts";
+import type { Context } from "./context.interface.ts";
+import type { AliasOptions } from "./controller.interface.ts";
+import type { StaticOptions } from "./factory.interface.ts";
+import type { ControllerMethod } from "./guard.interface.ts";
+import type { Next } from "./middleware.interface.ts";
+import type { Type } from "./type.interface.ts";
 
 export type MethodType = "get" | "post" | "put" | "delete" | "patch";
 

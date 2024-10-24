@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import { Status } from "../deps.ts";
-import { REDIRECT_BACK } from "../constants.ts";
+import type { StatusCode } from "../deps.ts";
+import type { REDIRECT_BACK } from "../constants.ts";
 
 export type RedirectStatusCode = 300 | 301 | 302 | 303 | 304 | 307 | 308;
 
@@ -93,7 +93,7 @@ export interface Response {
   getOriginalContext<T>(): T;
   body: string | object | number | boolean | null;
   headers: Headers;
-  status: Status;
+  status: StatusCode;
   readonly statusText: string;
   /**
    * This method should only called in middleware.

@@ -4,7 +4,7 @@ export {
   type HonoRequest,
   type MiddlewareHandler as HonoMiddlewareHandler,
   type Next as HonoNext,
-} from "hono/mod.ts";
+} from "hono";
 
 export {
   deleteCookie,
@@ -12,9 +12,11 @@ export {
   getSignedCookie,
   setCookie,
   setSignedCookie,
-} from "hono/helper.ts";
+} from "hono/cookie";
 
-export { etag, serveStatic } from "hono/middleware.ts";
+export { serveStatic } from "hono/deno";
+
+export { etag } from "hono/etag";
 
 export const HonoResponse = Response;
 export type HonoResponse = Response;

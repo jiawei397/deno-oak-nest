@@ -1,5 +1,5 @@
 // deno-lint-ignore-file require-await no-unused-vars
-import { assert, assertEquals, assertRejects } from "../tests/test_deps.ts";
+import { assert, assertEquals } from "../tests/test_deps.ts";
 import {
   createMockApp,
   createMockContext,

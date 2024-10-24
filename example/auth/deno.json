@@ -1,19 +1,6 @@
 {
-  "lock": false,
   "tasks": {
     "dev": "deno run  -A --watch src/main.ts",
     "start": "DENO_ENV=production deno run -A src/main.ts"
-  },
-  "compilerOptions": {
-    "removeComments": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "strictPropertyInitialization": false
-  },
-  "imports": {
-    "std/": "https://deno.land/std@0.202.0/",
-    "@nest": "../../mod.ts",
-    "@nest/hono": "../../modules/hono/mod.ts",
-    "hono/": "https://deno.land/x/hono@v4.1.0/"
   }
 }

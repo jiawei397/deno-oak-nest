@@ -1,9 +1,6 @@
-export {
-  Status,
-  STATUS_TEXT,
-} from "https://deno.land/std@0.202.0/http/http_status.ts";
+export { STATUS_CODE, STATUS_TEXT, type StatusCode } from "@std/http";
 
-export { extname, resolve } from "https://deno.land/std@0.202.0/path/mod.ts";
+export { extname, resolve } from "@std/path";
 
 export {
   bgBlue,
@@ -17,15 +14,12 @@ export {
   rgb24,
   rgb8,
   yellow,
-} from "https://deno.land/std@0.202.0/fmt/colors.ts";
+} from "@std/fmt/colors";
 
-export { assert } from "https://deno.land/std@0.202.0/assert/assert.ts";
+export { assert } from "@std/assert/assert";
 
-export { format } from "https://deno.land/std@0.202.0/datetime/mod.ts";
+export { format } from "@std/datetime";
 
-export { Reflect } from "https://deno.land/x/deno_reflect@v0.2.1/mod.ts";
+export { Reflect } from "deno_reflect";
 
-export {
-  validateOrReject,
-  ValidationError,
-} from "https://deno.land/x/deno_class_validator@v1.0.0/mod.ts";
+export * from "class_validator";

@@ -1,8 +1,11 @@
 {
- "name": "@nest/mongo",
+  "name": "@nest/mongo",
   "version": "0.0.1",
   "exports": "./mod.ts",
   "tasks": {
     "dev": "deno run --watch -A example/main.ts"
+  },
+  "imports": {
+    "deno_mongo_schema": "https://deno.land/x/deno_mongo_schema@v1.0.3/mod.ts"
   }
 }

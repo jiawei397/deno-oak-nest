@@ -1,4 +1,4 @@
-import { Algorithm } from "../deps.ts";
+import type { Algorithm } from "../deps.ts";
 
 export interface JwtModuleOptions {
   secret: string;

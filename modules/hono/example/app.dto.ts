@@ -1,4 +1,3 @@
-import { Property } from "@nest/core";
 import {
   IsArray,
   IsBoolean,
@@ -7,7 +6,8 @@ import {
   Max,
   Min,
   MinLength,
-} from "class_validator";
+  Property,
+} from "@nest/core";
 
 export class SaveDto {
   @Max(2)

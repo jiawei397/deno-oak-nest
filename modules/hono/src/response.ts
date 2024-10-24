@@ -1,21 +1,22 @@
-import { Status, STATUS_TEXT } from "../../../src/deps.ts";
-import { REDIRECT_BACK } from "../../../src/constants.ts";
-import type {
-  RedirectStatusCode,
-  Response,
-} from "../../../src/interfaces/context.interface.ts";
+import {
+  REDIRECT_BACK,
+  STATUS_CODE,
+  STATUS_TEXT,
+  type StatusCode,
+} from "@nest/core";
+import type { RedirectStatusCode, Response } from "@nest/core";
 import { type HonoContext, HonoResponse } from "../deps.ts";
-import { NestCookies } from "./cookies.ts";
+import type { NestCookies } from "./cookies.ts";
 
 export class NestResponse implements Response {
   body: string | object | number | boolean | null;
   headers: Headers = new Headers();
-  status: Status;
+  status: StatusCode;
   originalContext: HonoContext;
 
   constructor(context: HonoContext, public cookies: NestCookies) {
     this.originalContext = context;
-    this.status = Status.OK;
+    this.status = STATUS_CODE.OK;
   }
 
   redirect(

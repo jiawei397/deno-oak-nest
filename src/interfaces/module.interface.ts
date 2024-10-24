@@ -1,6 +1,6 @@
-import { FactoryCaches } from "./factory.interface.ts";
-import { Provider } from "./provider.interface.ts";
-import { Constructor } from "./type.interface.ts";
+import type { FactoryCaches } from "./factory.interface.ts";
+import type { Provider } from "./provider.interface.ts";
+import type { Constructor } from "./type.interface.ts";
 
 export interface ModuleMetadata {
   /**

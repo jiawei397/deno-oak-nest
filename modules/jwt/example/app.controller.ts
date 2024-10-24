@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post } from "@nest/core";
-import { JwtService } from "@nest/jwt";
+import type { JwtService } from "@nest/jwt";
 
 @Controller("")
 export class AppController {

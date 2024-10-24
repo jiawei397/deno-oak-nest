@@ -1,7 +1,10 @@
-import { BadGatewayException, type Context, Injectable, Next } from "@nest/core";
-import type {
-  NestInterceptor,
-} from "../../../src/interfaces/interceptor.interface.ts";
+import {
+  BadGatewayException,
+  type Context,
+  Injectable,
+  type NestInterceptor,
+  Next,
+} from "@nest/core";
 import { RoleService } from "../user/services/role.service.ts";
 
 @Injectable()

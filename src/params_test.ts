@@ -5,7 +5,7 @@ import {
   mockCallMethod,
 } from "../tests/common_helper.ts";
 import { Controller, Get } from "./decorators/controller.ts";
-import { type Context } from "./interfaces/context.interface.ts";
+import type { Context } from "./interfaces/context.interface.ts";
 import {
   createParamDecorator,
   createParamDecoratorWithLowLevel,

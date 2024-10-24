@@ -1,4 +1,4 @@
-import { IsString } from "class_validator";
+import { IsString } from "@nest/core";
 
 export class AddUserDto {
   @IsString()

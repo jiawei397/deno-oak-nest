@@ -1,5 +1,5 @@
-import { create, getNumericDate, Payload } from "../deps.ts";
-import { SignOptions } from "./jwt.interface.ts";
+import { create, getNumericDate, type Payload } from "../deps.ts";
+import type { SignOptions } from "./jwt.interface.ts";
 
 /**
  * Generate a unique key for HMAC signing

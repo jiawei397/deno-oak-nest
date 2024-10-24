@@ -1,19 +1,15 @@
 // deno-lint-ignore-file no-explicit-any require-await
-import {
-  type Context,
-  ICookies,
-  type Request,
-  type Response,
-} from "../src/interfaces/context.interface.ts";
-import {
+import {  Application} from "@nest/core";
+import type {
+  Context, ICookies, Request, Response,
+  StatusCode,
   IRouter,
+  NotImplementedException,
   MethodType,
   MiddlewareHandler,
   NotFoundHandler,
-} from "../src/interfaces/route.interface.ts";
-import { Application } from "../src/application.ts";
-import { NotImplementedException } from "../src/exceptions.ts";
-import { ListenOptions } from "../src/interfaces/application.interface.ts";
+  ListenOptions
+} from "@nest/core";
 
 export async function findUnusedPort(port: number) {
   try {
@@ -123,7 +119,7 @@ export const createMockContext = (options: MockOptions): Context => {
       throw new Error("Function not implemented.");
     },
     render() {},
-    redirect(url: string, status?: number) {
+    redirect(url: string, status?: StatusCode) {
       if (status) {
         this.status = status;
       }

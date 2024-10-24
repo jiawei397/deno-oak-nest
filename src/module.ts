@@ -1,12 +1,15 @@
-import { Constructor } from "./interfaces/type.interface.ts";
+import type { Constructor } from "./interfaces/type.interface.ts";
 import {
   getModuleMetadata,
   isDynamicModule,
   isGlobalModule,
   isModule,
 } from "./decorators/module.ts";
-import { CollectResult, ModuleType } from "./interfaces/module.interface.ts";
-import {
+import type {
+  CollectResult,
+  ModuleType,
+} from "./interfaces/module.interface.ts";
+import type {
   ClassProvider,
   ExistingProvider,
   FactoryProvider,

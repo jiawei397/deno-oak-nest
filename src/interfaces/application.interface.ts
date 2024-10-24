@@ -1,17 +1,17 @@
 export type ListenOptions = {
-   /** An {@linkcode AbortSignal} to close the server and all connections. */
-   signal?: AbortSignal;
+  /** An {@linkcode AbortSignal} to close the server and all connections. */
+  signal?: AbortSignal;
 
-   /** The handler to invoke when route handlers throw an error. */
-   onError?: (error: unknown) => Response | Promise<Response>;
+  /** The handler to invoke when route handlers throw an error. */
+  onError?: (error: unknown) => Response | Promise<Response>;
 
-   /** The callback which is called when the server starts listening. */
-   onListen?: (localAddr: Deno.NetAddr) => void;
+  /** The callback which is called when the server starts listening. */
+  onListen?: (localAddr: Deno.NetAddr) => void;
 
-   hostname?: string;
+  hostname?: string;
 
-   port?: number;
-}
+  port?: number;
+};
 
 /**
  * System signals which shut down a process

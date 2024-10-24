@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import { Scope } from "./scope-options.interface.ts";
-import { Type } from "./type.interface.ts";
+import type { Scope } from "./scope-options.interface.ts";
+import type { Type } from "./type.interface.ts";
 
 export type Provide = string | symbol | Type;
 

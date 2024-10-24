@@ -34,7 +34,7 @@ import {
   Res,
   transAndValidateByCls,
 } from "./method.ts";
-import { type ICookies } from "../interfaces/context.interface.ts";
+import type { ICookies } from "../interfaces/context.interface.ts";
 import { Reflect } from "../../deps.ts";
 
 Deno.test("getTransNumOrBoolOrArray", () => {
@@ -670,7 +670,10 @@ Deno.test("transAndValidateByCls", async (t) => {
       });
       assert(false, "should not reach here");
     } catch (error) {
-      assertEquals((error as Error).message, "status must be a valid enum value");
+      assertEquals(
+        (error as Error).message,
+        "status must be a valid enum value",
+      );
     }
   });
 

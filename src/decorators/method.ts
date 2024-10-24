@@ -3,7 +3,7 @@ import {
   assert,
   Reflect,
   validateOrReject,
-  ValidationError,
+  type ValidationError,
 } from "../deps.ts";
 import {
   createParamDecorator,
@@ -14,7 +14,10 @@ import type {
   ArrayItemType,
   FormDataOptions,
 } from "../interfaces/param.interface.ts";
-import { Context, CookiesGetOptions } from "../interfaces/context.interface.ts";
+import type {
+  Context,
+  CookiesGetOptions,
+} from "../interfaces/context.interface.ts";
 import { parseSearchParams } from "../utils.ts";
 import { BodyParamValidationException } from "../exceptions.ts";
 

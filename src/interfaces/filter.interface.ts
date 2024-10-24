@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 
-import { Context } from "./context.interface.ts";
-import { Constructor } from "./type.interface.ts";
+import type { Context } from "./context.interface.ts";
+import type { Constructor } from "./type.interface.ts";
 
 /**
  * Interface describing implementation of an exception filter.

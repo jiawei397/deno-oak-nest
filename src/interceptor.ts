@@ -1,14 +1,14 @@
 // deno-lint-ignore-file no-explicit-any
 import { Reflect } from "./deps.ts";
 import { factory } from "./factorys/class.factory.ts";
-import { Context } from "./interfaces/context.interface.ts";
+import type { Context } from "./interfaces/context.interface.ts";
 import type { ControllerMethod } from "./interfaces/guard.interface.ts";
 import type {
   NestInterceptor,
   NestInterceptorOptions,
   NestUseInterceptors,
 } from "./interfaces/interceptor.interface.ts";
-import { Next } from "./interfaces/middleware.interface.ts";
+import type { Next } from "./interfaces/middleware.interface.ts";
 import type { Constructor } from "./interfaces/type.interface.ts";
 export const META_INTERCEPTOR_KEY = Symbol("meta:interceptor");
 

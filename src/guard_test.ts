@@ -12,7 +12,7 @@ import {
   getAllGuards,
   GetMetadata,
   getMetadataForGuard,
-  Reflector,
+  type Reflector,
   SetMetadata,
   UseGuards,
 } from "./guard.ts";
